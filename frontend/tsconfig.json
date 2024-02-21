@@ -9,7 +9,8 @@
     "strict": true,
     "sourceMap": true,
     "target": "esnext",
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "resolveJsonModule": true
   },
   "ts-node": {
     "compilerOptions": {
