@@ -62,9 +62,9 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           )}
           {type === "past" && (
             <Typography color="text.secondary">
-              {tournament.location},
-              {new Date(tournament.startDate).toLocaleDateString("fi")} -
-              {new Date(tournament.endDate).toLocaleDateString("fi")}
+              {`${tournament.location}, 
+              ${new Date(tournament.startDate).toLocaleDateString("fi")} -
+              ${new Date(tournament.endDate).toLocaleDateString("fi")}`}
             </Typography>
           )}
         </CardContent>
