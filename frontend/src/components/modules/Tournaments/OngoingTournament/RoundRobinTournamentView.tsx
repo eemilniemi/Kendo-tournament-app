@@ -16,6 +16,7 @@ import {
 import { type User, type Match } from "types/models";
 import { useNavigate } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
+import { useTranslation } from "react-i18next";
 
 interface TournamentPlayer {
   id: string;
@@ -26,6 +27,7 @@ interface TournamentPlayer {
 }
 
 const Scoreboard: React.FC<{ players: TournamentPlayer[] }> = ({ players }) => {
+  const { t } = useTranslation();
   const generateTableCells = (player: TournamentPlayer): React.ReactNode[] => {
     return Object.values(player).map((value, index) => {
       if (index === 0) {
@@ -44,7 +46,13 @@ const Scoreboard: React.FC<{ players: TournamentPlayer[] }> = ({ players }) => {
   const generateTable = (): React.ReactNode => {
     const sortedPlayers = [...players].sort((a, b) => b.points - a.points);
 
-    const tableHeaders = ["Name", "Wins", "Losses", "Points"];
+    const tableHeaders = [
+      t("tournament_view_labels.name"),
+      t("tournament_view_labels.wins"),
+      t("tournament_view_labels.losses"),
+      t("tournament_view_labels.points")
+    ];
+
     return (
       <TableContainer component={Paper}>
         <Table>
@@ -73,19 +81,27 @@ const Matches: React.FC<{
   upcomingMatchElements: React.ReactNode[];
   pastMatchElements: React.ReactNode[];
 }> = ({ ongoingMatchElements, upcomingMatchElements, pastMatchElements }) => {
+  const { t } = useTranslation();
+
   return (
     <div>
       <div>
-        <Typography variant="h5">Ongoing matches:</Typography>
+        <Typography variant="h5">
+          {t("tournament_view_labels.ongoing_matches")}
+        </Typography>
       </div>
       <div>{ongoingMatchElements}</div>
 
       <div>
-        <Typography variant="h5">Upcoming matches:</Typography>
+        <Typography variant="h5">
+          {t("tournament_view_labels.upcoming_matches")}
+        </Typography>
       </div>
       <div>{upcomingMatchElements}</div>
       <div>
-        <Typography variant="h5">Past matches:</Typography>
+        <Typography variant="h5">
+          {t("tournament_view_labels.past_matches")}
+        </Typography>
       </div>
       <div>{pastMatchElements}</div>
     </div>
@@ -95,6 +111,7 @@ const Matches: React.FC<{
 const RoundRobinTournamentView: React.FC = () => {
   const tournament = useTournament();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const initialRender = useRef(true);
   const [selectedTab, setSelectedTab] = useState("scoreboard");
@@ -212,6 +229,26 @@ const RoundRobinTournamentView: React.FC = () => {
     const player2 = players.find((player) => player.id === match.players[1].id)
       ?.name;
 
+    let officialsInfo = "";
+
+    if (match.elapsedTime <= 0) {
+      // Match is upcoming
+      const timerPerson = match.timeKeeper ?? undefined;
+      const pointMaker = match.pointMaker ?? undefined;
+
+      // depending on which roles are missing for the match, print them under button
+      if (timerPerson === undefined && pointMaker === undefined) {
+        officialsInfo = t("tournament_view_labels.missing_both");
+      } else {
+        if (timerPerson === undefined) {
+          officialsInfo += t("tournament_view_labels.missing_timer");
+        }
+        if (pointMaker === undefined) {
+          officialsInfo += t("tournament_view_labels.missing_point_maker");
+        }
+      }
+    }
+
     return (
       <div style={{ marginBottom: "10px" }} key={match.id}>
         <Button
@@ -222,6 +259,9 @@ const RoundRobinTournamentView: React.FC = () => {
         >
           {`${player1} - ${player2}`}
         </Button>
+        {officialsInfo !== undefined && (
+          <Typography variant="body2">{officialsInfo}</Typography>
+        )}
       </div>
     );
   };
@@ -252,8 +292,11 @@ const RoundRobinTournamentView: React.FC = () => {
           setSelectedTab(newValue);
         }}
       >
-        <Tab label="Scoreboard" value="scoreboard" />
-        <Tab label="Matches" value="matches" />
+        <Tab
+          label={t("tournament_view_labels.scoreboard")}
+          value="scoreboard"
+        />
+        <Tab label={t("tournament_view_labels.matches")} value="matches" />
       </Tabs>
       {selectedTab === "scoreboard" && <Scoreboard players={players} />}
       {selectedTab === "matches" && (

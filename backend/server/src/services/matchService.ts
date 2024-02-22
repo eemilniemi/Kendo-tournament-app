@@ -11,10 +11,11 @@ import {
   type CreateMatchRequest,
   type AddPointRequest
 } from "../models/requestModel.js";
-import { Document, type Types } from "mongoose";
+import { Document, Types } from "mongoose";
 import { Tournament, TournamentModel, TournamentType, UnsavedMatch } from "../models/tournamentModel.js";
 import { TournamentService } from "./tournamentService";
 type rankingStruct = [Types.ObjectId, number, number];
+
 
 // Note by Samuel:
 // There's something missing about mongoose validation if using update.
@@ -27,7 +28,9 @@ export class MatchService {
       type: requestBody.matchType,
       players: requestBody.players,
       comment: requestBody.comment,
-      officials: requestBody.officials
+      officials: requestBody.officials,
+      timeKeeper: requestBody.timeKeeper,
+      pointMaker: requestBody.pointMaker
     });
 
     return await newMatch.toObject();
@@ -84,6 +87,7 @@ export class MatchService {
 
     // Mark the timer as started
     match.timerStartedTimestamp = new Date();
+    match.isTimerOn = true;
 
     await match.save();
 
@@ -123,6 +127,8 @@ export class MatchService {
     // Reset the timer timestamp
     match.elapsedTime += elapsedMilliseconds;
     match.timerStartedTimestamp = null;
+    // Mark the timer to be off
+    match.isTimerOn = false;
     await match.save();
 
     return await match.toObject();
@@ -254,6 +260,104 @@ export class MatchService {
         await tournament.save();     
       }
     }
+
+    return await match.toObject();
+  }
+
+  public async addTimeKeeperToMatch(
+    matchId: string,
+    timeKeeperId: string
+  ): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set the time keeper
+    match.timeKeeper = new Types.ObjectId(timeKeeperId);
+
+    await match.save();
+
+    return await match.toObject();
+  }
+
+  public async addPointMakerToMatch(
+    matchId: string,
+    pointMakerId: string
+  ): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set the point maker
+    match.pointMaker = new Types.ObjectId(pointMakerId);
+
+    await match.save();
+
+    return await match.toObject();
+  }
+
+  public async deleteTimeKeeperFromMatch(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Remove time keeper's id
+    match.timeKeeper = undefined;
+
+    await match.save();
+
+    return await match.toObject();
+  }
+
+  public async deletePointMakerFromMatch(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Remove point maker's id
+    match.pointMaker = undefined;
+
+    await match.save();
 
     return await match.toObject();
   }
@@ -441,9 +545,6 @@ export class MatchService {
       groupTies.push(tieIds);
     }
 
-
-    console.log("GROUP RANKINGS");
-    console.log(groupRankings);
     let playerIds: Types.ObjectId[][] = [];
     
     for (let i = 0; i<groupRankings.length; i++) {
@@ -458,7 +559,6 @@ export class MatchService {
 
     let prePlayoffRankingMap : Map<string, Array<number>> = this.getAllPlayerScores(matches, "pre playoff");
     if(prePlayoffRankingMap.size > 0) {
-      console.log("PRE PLAYOFF");
       let prePlayoffRankings: Array<Array<rankingStruct>> = this.formRankings(prePlayoffRankingMap, tournament);
       let tiedPrePlayoff : Types.ObjectId[][] = []
       for (let i=0; i<prePlayoffRankings.length; i++) {
@@ -617,7 +717,6 @@ export class MatchService {
     }
     return round;
   }
-
 }
 
 
