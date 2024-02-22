@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useTournaments } from "context/TournamentsContext";
-import type { User, Match, MatchPlayer } from "types/models";
+import type { User, Match, MatchPoint, MatchPlayer } from "types/models";
 import { Grid, Typography, Paper } from "@mui/material";
 
 const PastTournamentMatches: React.FC = () => {
@@ -36,17 +36,24 @@ const PastTournamentMatches: React.FC = () => {
         let player1Points = 0;
         let player2Points = 0;
 
-        /* this is a stub, only points for wins are taken into account.
-          1 pt for ties has to be added once logic for them works */
-        if (match.winner === match.players[0].id) {
-          player1Points += 3;
-        } else if (match.winner === match.players[1].id) {
-          player2Points += 3;
-        }
-        /* insert tie here
-           player1Points += 1;
-           player2Points += 1; 
-         } */
+        match.players[0].points.forEach((point: MatchPoint) => {
+          if (point.type === "hansoku") {
+            player2Points += 0.5;
+          } else {
+            player1Points += 1;
+          }
+        });
+
+        match.players[1].points.forEach((point: MatchPoint) => {
+          if (point.type === "hansoku") {
+            player1Points += 0.5;
+          } else {
+            player2Points += 1;
+          }
+        });
+
+        player1Points = Math.floor(player1Points);
+        player2Points = Math.floor(player2Points);
 
         return (
           <Paper key={index} elevation={2} style={{ padding: "10px" }}>
