@@ -163,6 +163,10 @@ export class MatchService {
 
     await this.checkMatchOutcome(match);
 
+    if (match.isOvertime) {
+      await this.checkForTie(id);
+    }
+
     await match.save();
 
     return await match.toObject();
@@ -292,14 +296,15 @@ export class MatchService {
     });
 
     // Check if player 1 or 2 has 2 points and wins
-    if (player1Points >= MAXIMUM_POINTS) {
-      match.winner = player1.id;
+    if (player1Points >= MAXIMUM_POINTS || player2Points >= MAXIMUM_POINTS) {
+      // Determine the winner based on points
+      match.winner = player1Points > player2Points ? player1.id : player2.id;
       match.endTimestamp = new Date();
-      await this.createPlayoffSchedule(match.id, player1.id);
-    } else if (player2Points >= MAXIMUM_POINTS) {
-      match.winner = player2.id;
-      match.endTimestamp = new Date();
-      await this.createPlayoffSchedule(match.id, player2.id);
+  
+      if (match.type === "playoff") {
+        // If playoff, create next round schedule
+        await this.createPlayoffSchedule(match.id, match.winner);
+      }
     }
   }
 
@@ -334,31 +339,24 @@ export class MatchService {
 
       // When time ends, the player with more points wins
       // (rounded down because one hansoku doesn't count)
-      if (Math.floor(player1Points) > Math.floor(player2Points)) {
-        match.winner = player1.id;
+      if (Math.floor(player1Points) > Math.floor(player2Points) || Math.floor(player2Points) > Math.floor(player1Points) ) {
+        match.winner = player1Points > player2Points ? player1.id : player2.id
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, player1.id);
+          await this.createPlayoffSchedule(match.id, match.winner);
         }
-      } else if (Math.floor(player2Points) > Math.floor(player1Points)) {
-        match.winner = player2.id;
-        match.endTimestamp = new Date();
-        if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, player2.id);
+      } else {
+        if (match.type === "group") {
+          match.endTimestamp = new Date();
+          await match.save();
+        } else if(match.type === "playoff" && player1Points === player2Points) {
+          match.isOvertime = true;
+          await match.save();
         }
       }
 
-      // If the points are the same, it's a tie (in round robin)
-      else if (match.type === "group") {
-        match.endTimestamp = new Date();
-      }
-
-      // If it's a playoff, an overtime will start
-      // TODO: Handling this
-      else if (match.type === "playoff") {
-        console.log("Overtime");
-      }
       await match.save();
+      return await match.toObject();
     }
   }
 
