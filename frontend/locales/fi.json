@@ -30,6 +30,7 @@
     "player": "Pelaaja",
     "wins": "voittaa!",
     "dialog_title": "Valitse piste",
+    "overtime": "JATKOAIKA:",
     "point_types": {
       "men": "Men",
       "kote": "Kote",
