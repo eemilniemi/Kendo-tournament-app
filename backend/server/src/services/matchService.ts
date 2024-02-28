@@ -300,7 +300,7 @@ export class MatchService {
       // Determine the winner based on points
       match.winner = player1Points > player2Points ? player1.id : player2.id;
       match.endTimestamp = new Date();
-  
+
       if (match.type === "playoff") {
         // If playoff, create next round schedule
         await this.createPlayoffSchedule(match.id, match.winner);
@@ -309,8 +309,14 @@ export class MatchService {
   }
 
   // Check if there is a tie or an overtime whne time has ended
-  public async checkForTie(id: string): Promise<void> {
+  public async checkForTie(id: string): Promise<Match> {
     const match = await MatchModel.findById(id).exec();
+
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${id}`
+      });
+    }
 
     let player1Points = 0;
     let player2Points = 0;
@@ -339,8 +345,11 @@ export class MatchService {
 
       // When time ends, the player with more points wins
       // (rounded down because one hansoku doesn't count)
-      if (Math.floor(player1Points) > Math.floor(player2Points) || Math.floor(player2Points) > Math.floor(player1Points) ) {
-        match.winner = player1Points > player2Points ? player1.id : player2.id
+      if (
+        Math.floor(player1Points) > Math.floor(player2Points) ||
+        Math.floor(player2Points) > Math.floor(player1Points)
+      ) {
+        match.winner = player1Points > player2Points ? player1.id : player2.id;
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
           await this.createPlayoffSchedule(match.id, match.winner);
@@ -349,15 +358,19 @@ export class MatchService {
         if (match.type === "group") {
           match.endTimestamp = new Date();
           await match.save();
-        } else if(match.type === "playoff" && player1Points === player2Points) {
+        } else if (
+          match.type === "playoff" &&
+          player1Points === player2Points
+        ) {
           match.isOvertime = true;
           await match.save();
         }
       }
 
       await match.save();
-      return await match.toObject();
     }
+
+    return await match.toObject();
   }
 
   // Add assigned point to the correct player
