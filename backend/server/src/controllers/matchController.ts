@@ -185,6 +185,8 @@ export class MatchController extends Controller {
   public async checkForTie(@Path() matchId: ObjectIdString): Promise<void> {
     this.setStatus(204);
 
-    await this.service.checkForTie(matchId);
+    const match = await this.service.checkForTie(matchId);
+
+    io.to(matchId).emit("check-tie", match);
   }
 }

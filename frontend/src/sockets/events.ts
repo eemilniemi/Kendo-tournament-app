@@ -47,4 +47,10 @@ export const socketEvents = (
       return { ...state, matchInfo };
     });
   });
+
+  socket.on("check-tie", (matchInfo: Match) => {
+    setValue((state) => {
+      return { ...state, matchInfo };
+    });
+  });
 };
