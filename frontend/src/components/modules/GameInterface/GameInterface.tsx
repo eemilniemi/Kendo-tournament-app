@@ -17,7 +17,13 @@ import TimerButton from "./TimerButton";
 import api from "api/axios";
 import { useParams } from "react-router-dom";
 import { type AddPointRequest } from "types/requests";
-import type { PointType, PlayerColor, Match, MatchPlayer, MatchType } from "types/models";
+import type {
+  PointType,
+  PlayerColor,
+  Match,
+  MatchPlayer,
+  MatchType
+} from "types/models";
 import "./GameInterface.css";
 import { useAuth } from "context/AuthContext";
 import { joinMatch, leaveMatch } from "sockets/emit";
@@ -67,7 +73,9 @@ const GameInterface: React.FC = () => {
   const [openRoles, setOpenRoles] = useState(false);
   const [selectedButton, setSelectedButton] = useState<string>("");
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
-  const [overtimeTimer, setOvertimeTimer] = useState<number>(Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME /1000);
+  const [overtimeTimer, setOvertimeTimer] = useState<number>(
+    Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME / 1000
+  );
   const [playerColor, setPlayerColor] = useState<PlayerColor>("red");
   const [hasJoined, setHasJoined] = useState(false);
 
@@ -81,7 +89,6 @@ const GameInterface: React.FC = () => {
   // state handlers for whether or not checkbox is checked
   const [timeKeeper, setTimeKeeper] = useState<boolean>(false);
   const [pointMaker, setPointMaker] = useState<boolean>(false);
-
 
   // Listening to matches websocket
   useEffect(() => {
@@ -248,7 +255,9 @@ const GameInterface: React.FC = () => {
 
   useEffect(() => {
     if (matchInfo.isOvertime) {
-      setOvertimeTimer(Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME /1000);
+      setOvertimeTimer(
+        Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME / 1000
+      );
     } else {
       setTimer(matchInfo.timerTime);
     }
@@ -295,7 +304,7 @@ const GameInterface: React.FC = () => {
         if (
           (matchInfo.elapsedTime >= MATCH_TIME ||
             matchInfo.endTimeStamp !== undefined) &&
-            matchId !== undefined
+          matchId !== undefined
         ) {
           await api.match.checkForTie(matchId);
         }
@@ -592,20 +601,18 @@ const GameInterface: React.FC = () => {
             </Box>
             {matchInfo.isOvertime && (
               <Box display="flex" gap="20px" justifyContent="center">
-                <Typography variant="body2">{t("game_interface.overtime")}</Typography>
+                <Typography variant="body2">
+                  {t("game_interface.overtime")}
+                </Typography>
               </Box>
             )}
             <Box display="flex" gap="20px" justifyContent="center">
-              {matchInfo.isOvertime && (
-                <Timer timer={overtimeTimer} />
-              )}
-              {!matchInfo.isOvertime && (
-                <Timer timer={timer} />
-              )}
+              {matchInfo.isOvertime && <Timer timer={overtimeTimer} />}
+              {!matchInfo.isOvertime && <Timer timer={timer} />}
               {/* timer button only shown to time keeper */}
               {userId !== null &&
                 userId !== undefined &&
-                showButtons() !== false &&
+                showButtons() &&
                 matchInfo.timeKeeper === userId && (
                   <TimerButton
                     isTimerRunning={matchInfo.isTimerOn}
@@ -618,7 +625,7 @@ const GameInterface: React.FC = () => {
             {/* point buttons only shown to point maker */}
             {userId !== null &&
               userId !== undefined &&
-              showButtons() !== false &&
+              showButtons() &&
               matchInfo.pointMaker === userId && (
                 <OfficialButtons
                   open={openPoints}
@@ -642,7 +649,8 @@ const GameInterface: React.FC = () => {
             {/* If there isn't a winner, check if there is an end timestamp (it's a tie) */}
             {matchInfo.winner === undefined &&
               (matchInfo.endTimeStamp !== undefined ||
-                (matchInfo.elapsedTime >= MATCH_TIME && matchInfo.type !== "playoff")) && (
+                (matchInfo.elapsedTime >= MATCH_TIME &&
+                  matchInfo.type !== "playoff")) && (
                 <div>
                   <Typography>{t("game_interface.tie")}</Typography>
                 </div>
