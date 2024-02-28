@@ -17,7 +17,7 @@ import TimerButton from "./TimerButton";
 import api from "api/axios";
 import { useParams } from "react-router-dom";
 import { type AddPointRequest } from "types/requests";
-import type { PointType, PlayerColor, Match, MatchPlayer } from "types/models";
+import type { PointType, PlayerColor, Match, MatchPlayer, MatchType } from "types/models";
 import "./GameInterface.css";
 import { useAuth } from "context/AuthContext";
 import { joinMatch, leaveMatch } from "sockets/emit";
@@ -39,6 +39,8 @@ export interface MatchData {
   startTimestamp: Date | undefined;
   isTimerOn: boolean;
   elapsedTime: number;
+  isOvertime: boolean;
+  type: MatchType;
 }
 
 const GameInterface: React.FC = () => {
@@ -54,13 +56,18 @@ const GameInterface: React.FC = () => {
     pointMaker: undefined,
     startTimestamp: undefined,
     isTimerOn: false,
-    elapsedTime: 0
+    elapsedTime: 0,
+    isOvertime: false,
+    type: "group"
   });
 
+  // to be changed when match time is get from api
+  const MATCH_TIME = 300000;
   const [openPoints, setOpenPoints] = useState(false);
   const [openRoles, setOpenRoles] = useState(false);
   const [selectedButton, setSelectedButton] = useState<string>("");
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
+  const [overtimeTimer, setOvertimeTimer] = useState<number>(Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME /1000);
   const [playerColor, setPlayerColor] = useState<PlayerColor>("red");
   const [hasJoined, setHasJoined] = useState(false);
 
@@ -74,8 +81,7 @@ const GameInterface: React.FC = () => {
   // state handlers for whether or not checkbox is checked
   const [timeKeeper, setTimeKeeper] = useState<boolean>(false);
   const [pointMaker, setPointMaker] = useState<boolean>(false);
-  // to be changed when match time is get from api
-  const MATCH_TIME = 300000;
+
 
   // Listening to matches websocket
   useEffect(() => {
@@ -104,6 +110,8 @@ const GameInterface: React.FC = () => {
         let startTime: Date | undefined;
         let timer: boolean = false;
         let elapsedtime: number = 0;
+        let isovertime: boolean = false;
+        let matchType: MatchType = "group";
 
         // Get players' names
         const findPlayerName = (playerId: string, index: number): void => {
@@ -155,6 +163,8 @@ const GameInterface: React.FC = () => {
           timer = matchInfoFromSocket.isTimerOn;
 
           elapsedtime = matchInfoFromSocket.elapsedTime;
+          isovertime = matchInfoFromSocket.isOvertime;
+          matchType = matchInfoFromSocket.type;
 
           setTimeKeeper(matchInfoFromSocket.timeKeeper !== undefined);
           setPointMaker(matchInfoFromSocket.pointMaker !== undefined);
@@ -205,6 +215,8 @@ const GameInterface: React.FC = () => {
             timer = matchFromApi.isTimerOn;
 
             elapsedtime = matchFromApi.elapsedTime;
+            isovertime = matchFromApi.isOvertime;
+            matchType = matchFromApi.type;
 
             setTimeKeeper(matchInfo.timeKeeper !== undefined);
             setPointMaker(matchInfo.pointMaker !== undefined);
@@ -220,7 +232,9 @@ const GameInterface: React.FC = () => {
           pointMaker: pointPerson,
           startTimestamp: startTime,
           isTimerOn: timer,
-          elapsedTime: elapsedtime
+          elapsedTime: elapsedtime,
+          isOvertime: isovertime,
+          type: matchType
         });
       } catch (error) {
         setIsError(true);
@@ -233,8 +247,12 @@ const GameInterface: React.FC = () => {
   }, [isLoading, matchInfoFromSocket]);
 
   useEffect(() => {
-    setTimer(matchInfo.timerTime);
-  }, [matchInfo]);
+    if (matchInfo.isOvertime) {
+      setOvertimeTimer(Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME /1000);
+    } else {
+      setTimer(matchInfo.timerTime);
+    }
+  }, [matchInfo.isOvertime, matchInfo.elapsedTime, matchInfo.timerTime]);
 
   // Handle timer, make it run and stop
   useEffect(() => {
@@ -242,7 +260,11 @@ const GameInterface: React.FC = () => {
 
     if (matchInfo.isTimerOn) {
       intervalId = setInterval(() => {
-        setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
+        if (matchInfo.isOvertime) {
+          setOvertimeTimer((prevTime) => prevTime + 1);
+        } else {
+          setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
+        }
       }, 1000);
     } else {
       if (intervalId !== null) {
@@ -255,22 +277,25 @@ const GameInterface: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [matchInfo]);
+  }, [matchInfo.isTimerOn, matchInfo.isOvertime]);
 
   // If timer is ended, check for ties
   useEffect(() => {
     const checkForTieAndStopTimer = async (): Promise<void> => {
       try {
-        if (timer === 0 && matchId !== undefined) {
+        if (matchInfo.winner !== undefined) {
+          return; // Exit early if the winner has been determined so no endless rerendering
+        }
+
+        if (timer === 0 && matchId !== undefined && !matchInfo.isOvertime) {
           if (matchInfo.isTimerOn) {
             await apiTimerRequest(matchId);
           }
         }
-
         if (
           (matchInfo.elapsedTime >= MATCH_TIME ||
             matchInfo.endTimeStamp !== undefined) &&
-          matchId !== undefined
+            matchId !== undefined
         ) {
           await api.match.checkForTie(matchId);
         }
@@ -317,7 +342,12 @@ const GameInterface: React.FC = () => {
       if (matchInfo.isTimerOn) {
         await apiTimerRequest(matchId);
       }
-      await apiPointRequest(matchId, pointRequest);
+      if (matchInfo.isOvertime) {
+        await apiPointRequest(matchId, pointRequest);
+        await api.match.checkForTie(matchId);
+      } else {
+        await apiPointRequest(matchId, pointRequest);
+      }
     }
   };
 
@@ -434,7 +464,8 @@ const GameInterface: React.FC = () => {
       return false;
     } else if (
       matchInfo.winner === undefined &&
-      matchInfo.elapsedTime > MATCH_TIME
+      matchInfo.elapsedTime > MATCH_TIME &&
+      matchInfo.type === "group"
     ) {
       return false;
     } else {
@@ -559,12 +590,22 @@ const GameInterface: React.FC = () => {
                 <Typography variant="h3">{matchInfo.playerNames[1]}</Typography>
               </Box>
             </Box>
+            {matchInfo.isOvertime && (
+              <Box display="flex" gap="20px" justifyContent="center">
+                <Typography variant="body2">{t("game_interface.overtime")}</Typography>
+              </Box>
+            )}
             <Box display="flex" gap="20px" justifyContent="center">
-              <Timer timer={timer} />
+              {matchInfo.isOvertime && (
+                <Timer timer={overtimeTimer} />
+              )}
+              {!matchInfo.isOvertime && (
+                <Timer timer={timer} />
+              )}
               {/* timer button only shown to time keeper */}
               {userId !== null &&
                 userId !== undefined &&
-                showButtons() &&
+                showButtons() !== false &&
                 matchInfo.timeKeeper === userId && (
                   <TimerButton
                     isTimerRunning={matchInfo.isTimerOn}
@@ -577,7 +618,7 @@ const GameInterface: React.FC = () => {
             {/* point buttons only shown to point maker */}
             {userId !== null &&
               userId !== undefined &&
-              showButtons() &&
+              showButtons() !== false &&
               matchInfo.pointMaker === userId && (
                 <OfficialButtons
                   open={openPoints}
@@ -601,7 +642,7 @@ const GameInterface: React.FC = () => {
             {/* If there isn't a winner, check if there is an end timestamp (it's a tie) */}
             {matchInfo.winner === undefined &&
               (matchInfo.endTimeStamp !== undefined ||
-                matchInfo.elapsedTime >= MATCH_TIME) && (
+                (matchInfo.elapsedTime >= MATCH_TIME && matchInfo.type !== "playoff")) && (
                 <div>
                   <Typography>{t("game_interface.tie")}</Typography>
                 </div>
