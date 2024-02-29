@@ -57,6 +57,7 @@ export class MatchService {
 
   public async startTimer(id: string): Promise<Match> {
     const match = await MatchModel.findById(id).exec();
+    const MATCH_TIME = 300;
 
     if (match === null) {
       throw new NotFoundError({
@@ -64,7 +65,7 @@ export class MatchService {
       });
     }
 
-    if (match.winner !== undefined) {
+    if (match.winner !== undefined || match.elapsedTime === MATCH_TIME) {
       throw new BadRequestError({
         message: "Finished matches cannot be edited"
       });
@@ -120,8 +121,8 @@ export class MatchService {
     const elapsedMilliseconds =
       currentTime.getTime() - match.timerStartedTimestamp.getTime();
 
-    // Reset the timer timestamp
     match.elapsedTime += elapsedMilliseconds;
+    // Reset the timer timestamp
     match.timerStartedTimestamp = null;
     // Mark the timer to be off
     match.isTimerOn = false;
@@ -130,6 +131,9 @@ export class MatchService {
     return await match.toObject();
   }
 
+  // Every time adding point is done in frontend, this function handles it
+  // It adds the point to a match, adds the point to a player,
+  // checks if the match is finished and saves the match
   public async addPointToMatchById(
     id: string,
     requestBody: AddPointRequest
@@ -262,6 +266,102 @@ export class MatchService {
     return await match.toObject();
   }
 
+  // Check if there is a tie or an overtime whne time has ended
+  public async checkForTie(id: string): Promise<void> {
+    const match = await MatchModel.findById(id).exec();
+
+    if (match !== null) {
+      const player1: MatchPlayer = match.players[0] as MatchPlayer;
+      const player2: MatchPlayer = match.players[1] as MatchPlayer;
+      const { player1CalculatedScore, player2CalculatedScore } =
+        this.calculateScore(player1.points, player2.points);
+
+      // When time ends, the player with more points wins
+      // (rounded down because one hansoku doesn't count)
+      if (
+        Math.floor(player1CalculatedScore) > Math.floor(player2CalculatedScore)
+      ) {
+        match.winner = player1.id;
+        match.endTimestamp = new Date();
+        if (match.type === "playoff") {
+          await this.createPlayoffSchedule(match.id, player1.id);
+        }
+      } else if (
+        Math.floor(player2CalculatedScore) > Math.floor(player1CalculatedScore)
+      ) {
+        match.winner = player2.id;
+        match.endTimestamp = new Date();
+        if (match.type === "playoff") {
+          await this.createPlayoffSchedule(match.id, player2.id);
+        }
+      }
+
+      // If the points are the same, it's a tie (in round robin)
+      else if (match.type === "group") {
+        match.endTimestamp = new Date();
+      }
+
+      // If it's a playoff, an overtime will start
+      // TODO: Handling this
+      else if (match.type === "playoff") {
+        console.log("Overtime");
+      }
+      match.player1Score = Math.floor(player1CalculatedScore);
+      match.player2Score = Math.floor(player2CalculatedScore);
+
+      await match.save();
+    }
+  }
+
+  private async checkMatchOutcome(match: Match): Promise<void> {
+    const MAXIMUM_POINTS = 2;
+    const player1: MatchPlayer = match.players[0] as MatchPlayer;
+    const player2: MatchPlayer = match.players[1] as MatchPlayer;
+    const { player1CalculatedScore, player2CalculatedScore } =
+      this.calculateScore(player1.points, player2.points);
+
+    // Check if player 1 or 2 has 2 points and wins
+    if (player1CalculatedScore >= MAXIMUM_POINTS) {
+      match.winner = player1.id;
+      match.endTimestamp = new Date();
+      await this.createPlayoffSchedule(match.id, player1.id);
+    } else if (player2CalculatedScore >= MAXIMUM_POINTS) {
+      match.winner = player2.id;
+      match.endTimestamp = new Date();
+      await this.createPlayoffSchedule(match.id, player2.id);
+    }
+
+    match.player1Score = Math.floor(player1CalculatedScore);
+    match.player2Score = Math.floor(player2CalculatedScore);
+  }
+
+  private calculateScore(
+    player1Points: MatchPoint[],
+    player2Points: MatchPoint[]
+  ): { player1CalculatedScore: number; player2CalculatedScore: number } {
+    let player1CalculatedScore = 0;
+    let player2CalculatedScore = 0;
+
+    player1Points.forEach((point: MatchPoint) => {
+      if (point.type === "hansoku") {
+        player2CalculatedScore += 0.5;
+      } else {
+        player1CalculatedScore++;
+      }
+    });
+
+    player2Points.forEach((point: MatchPoint) => {
+      if (point.type === "hansoku") {
+        player1CalculatedScore += 0.5;
+      } else {
+        player2CalculatedScore++;
+      }
+    });
+
+    return { player1CalculatedScore, player2CalculatedScore };
+  }
+
+  // Add assigned point to the correct player
   private assignPoint(
     match: Match,
     point: MatchPoint,
@@ -271,42 +371,6 @@ export class MatchService {
     const player2: MatchPlayer = match.players[1] as MatchPlayer;
     const pointWinner = player1.color === pointColor ? player1 : player2;
     pointWinner.points.push(point);
-  }
-
-  private async checkMatchOutcome(match: Match): Promise<void> {
-    const MAXIMUM_POINTS = 2;
-    let player1Points = 0;
-    let player2Points = 0;
-    const player1: MatchPlayer = match.players[0] as MatchPlayer;
-    const player2: MatchPlayer = match.players[1] as MatchPlayer;
-
-    player1.points.forEach((point: MatchPoint) => {
-      if (point.type === "hansoku") {
-        // In case of hansoku, the opponent recieves half a point.
-        player2Points += 0.5;
-      } else {
-        // Otherwise give one point to the player.
-        player1Points++;
-      }
-    });
-
-    player2.points.forEach((point: MatchPoint) => {
-      if (point.type === "hansoku") {
-        player1Points += 0.5;
-      } else {
-        player2Points++;
-      }
-    });
-
-    if (player1Points >= MAXIMUM_POINTS) {
-      match.winner = player1.id;
-      match.endTimestamp = new Date();
-      await this.createPlayoffSchedule(match.id, player1.id);
-    } else if (player2Points >= MAXIMUM_POINTS) {
-      match.winner = player2.id;
-      match.endTimestamp = new Date();
-      await this.createPlayoffSchedule(match.id, player2.id);
-    }
   }
 
   private async createPlayoffSchedule(
