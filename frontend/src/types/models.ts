@@ -48,6 +48,8 @@ export interface Match {
   pointMaker?: string;
   isTimerOn: boolean;
   isOvertime: boolean;
+  player1Score: number;
+  player2Score: number;
 }
 
 export interface Tournament {
