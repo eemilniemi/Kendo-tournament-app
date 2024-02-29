@@ -289,11 +289,14 @@ export class MatchService {
       // When time ends, the player with more points wins
       // (rounded down because one hansoku doesn't count)
       if (
-        Math.floor(player1CalculatedScore) > Math.floor(player2CalculatedScore)
-       ||
+        Math.floor(player1CalculatedScore) >
+          Math.floor(player2CalculatedScore) ||
         Math.floor(player2CalculatedScore) > Math.floor(player1CalculatedScore)
       ) {
-        match.winner = player1CalculatedScore > player2CalculatedScore ? player1.id : player2.id;
+        match.winner =
+          player1CalculatedScore > player2CalculatedScore
+            ? player1.id
+            : player2.id;
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
           await this.createPlayoffSchedule(match.id, match.winner);
@@ -303,7 +306,7 @@ export class MatchService {
         if (match.type === "group") {
           match.endTimestamp = new Date();
           await match.save();
-        } 
+        }
         // If it's a playoff, an overtime will start
         else if (
           match.type === "playoff" &&
@@ -313,7 +316,7 @@ export class MatchService {
           await match.save();
         }
       }
-      
+
       match.player1Score = Math.floor(player1CalculatedScore);
       match.player2Score = Math.floor(player2CalculatedScore);
 
@@ -331,9 +334,15 @@ export class MatchService {
       this.calculateScore(player1.points, player2.points);
 
     // Check if player 1 or 2 has 2 points and wins
-    if (player1CalculatedScore >= MAXIMUM_POINTS || player2CalculatedScore >= MAXIMUM_POINTS) {
+    if (
+      player1CalculatedScore >= MAXIMUM_POINTS ||
+      player2CalculatedScore >= MAXIMUM_POINTS
+    ) {
       // Determine the winner based on points
-      match.winner = player1CalculatedScore > player2CalculatedScore ? player1.id : player2.id;
+      match.winner =
+        player1CalculatedScore > player2CalculatedScore
+          ? player1.id
+          : player2.id;
       match.endTimestamp = new Date();
 
       if (match.type === "playoff") {
