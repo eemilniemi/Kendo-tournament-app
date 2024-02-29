@@ -289,7 +289,6 @@ export class MatchService {
       // When time ends, the player with more points wins
       // (rounded down because one hansoku doesn't count)
       if (
-        
         Math.floor(player1CalculatedScore) > Math.floor(player2CalculatedScore)
        ||
         Math.floor(player2CalculatedScore) > Math.floor(player1CalculatedScore)
@@ -300,10 +299,13 @@ export class MatchService {
           await this.createPlayoffSchedule(match.id, match.winner);
         }
       } else {
+        // If the points are the same, it's a tie (in round robin)
         if (match.type === "group") {
           match.endTimestamp = new Date();
           await match.save();
-        } else if (
+        } 
+        // If it's a playoff, an overtime will start
+        else if (
           match.type === "playoff" &&
           player1CalculatedScore === player2CalculatedScore
         ) {
@@ -311,6 +313,9 @@ export class MatchService {
           await match.save();
         }
       }
+      
+      match.player1Score = Math.floor(player1CalculatedScore);
+      match.player2Score = Math.floor(player2CalculatedScore);
 
       await match.save();
     }
