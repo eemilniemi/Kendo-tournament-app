@@ -245,12 +245,12 @@ const RegisterForm: React.FC = () => {
             name="TermsAndConditions"
             label={
               <>
-                  {t("user_info_labels.agree")} {" "}
-                  <Link component={RouterLink} to={routePaths.termsAndConditions}>
-                      {t("user_info_labels.terms_and_conditions")}
-                  </Link>
+                {t("user_info_labels.agree")}{" "}
+                <Link component={RouterLink} to={routePaths.termsAndConditions}>
+                  {t("user_info_labels.terms_and_conditions")}
+                </Link>
               </>
-          }
+            }
           />
 
           <Box margin="auto" width="200px">
