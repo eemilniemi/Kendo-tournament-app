@@ -30,6 +30,7 @@
     "player": "Player",
     "wins": "wins!",
     "dialog_title": "Select a point",
+    "overtime": "OVERTIME:",
     "point_types": {
       "men": "Men",
       "kote": "Kote",

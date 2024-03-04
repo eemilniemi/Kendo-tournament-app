@@ -163,6 +163,10 @@ export class MatchService {
 
     await this.checkMatchOutcome(match);
 
+    if (match.isOvertime) {
+      await this.checkForTie(id);
+    }
+
     await match.save();
 
     return await match.toObject();
@@ -267,8 +271,14 @@ export class MatchService {
   }
 
   // Check if there is a tie or an overtime whne time has ended
-  public async checkForTie(id: string): Promise<void> {
+  public async checkForTie(id: string): Promise<Match> {
     const match = await MatchModel.findById(id).exec();
+
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${id}`
+      });
+    }
 
     if (match !== null) {
       const player1: MatchPlayer = match.players[0] as MatchPlayer;
@@ -279,38 +289,41 @@ export class MatchService {
       // When time ends, the player with more points wins
       // (rounded down because one hansoku doesn't count)
       if (
-        Math.floor(player1CalculatedScore) > Math.floor(player2CalculatedScore)
-      ) {
-        match.winner = player1.id;
-        match.endTimestamp = new Date();
-        if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, player1.id);
-        }
-      } else if (
+        Math.floor(player1CalculatedScore) >
+          Math.floor(player2CalculatedScore) ||
         Math.floor(player2CalculatedScore) > Math.floor(player1CalculatedScore)
       ) {
-        match.winner = player2.id;
+        match.winner =
+          player1CalculatedScore > player2CalculatedScore
+            ? player1.id
+            : player2.id;
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, player2.id);
+          await this.createPlayoffSchedule(match.id, match.winner);
+        }
+      } else {
+        // If the points are the same, it's a tie (in round robin)
+        if (match.type === "group") {
+          match.endTimestamp = new Date();
+          await match.save();
+        }
+        // If it's a playoff, an overtime will start
+        else if (
+          match.type === "playoff" &&
+          player1CalculatedScore === player2CalculatedScore
+        ) {
+          match.isOvertime = true;
+          await match.save();
         }
       }
 
-      // If the points are the same, it's a tie (in round robin)
-      else if (match.type === "group") {
-        match.endTimestamp = new Date();
-      }
-
-      // If it's a playoff, an overtime will start
-      // TODO: Handling this
-      else if (match.type === "playoff") {
-        console.log("Overtime");
-      }
       match.player1Score = Math.floor(player1CalculatedScore);
       match.player2Score = Math.floor(player2CalculatedScore);
 
       await match.save();
     }
+
+    return await match.toObject();
   }
 
   private async checkMatchOutcome(match: Match): Promise<void> {
@@ -321,14 +334,21 @@ export class MatchService {
       this.calculateScore(player1.points, player2.points);
 
     // Check if player 1 or 2 has 2 points and wins
-    if (player1CalculatedScore >= MAXIMUM_POINTS) {
-      match.winner = player1.id;
+    if (
+      player1CalculatedScore >= MAXIMUM_POINTS ||
+      player2CalculatedScore >= MAXIMUM_POINTS
+    ) {
+      // Determine the winner based on points
+      match.winner =
+        player1CalculatedScore > player2CalculatedScore
+          ? player1.id
+          : player2.id;
       match.endTimestamp = new Date();
-      await this.createPlayoffSchedule(match.id, player1.id);
-    } else if (player2CalculatedScore >= MAXIMUM_POINTS) {
-      match.winner = player2.id;
-      match.endTimestamp = new Date();
-      await this.createPlayoffSchedule(match.id, player2.id);
+
+      if (match.type === "playoff") {
+        // If playoff, create next round schedule
+        await this.createPlayoffSchedule(match.id, match.winner);
+      }
     }
 
     match.player1Score = Math.floor(player1CalculatedScore);
