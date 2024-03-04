@@ -13,7 +13,7 @@
     "unexpected_error_happened": "An unexpected error occurred!",
     "sign_up_success": "Successfully signed up for tournament: ",
     "minimum_players_error": "Minimum amount of players is ",
-  	"creations_success": "Tournament {{name}} created successfully",
+    "creations_success": "Tournament {{name}} created successfully",
     "invalid_tournament_error": "This tournament seems to be invalid. Contact {{organizerEmail}} for more information about this tournament.",
     "session_expired_message": "Session Expired: Your login session has expired for security reasons. Please log in again.",
     "tournament_info_not_found": "No data was found for this tournament. Close this to go back to the previous view.",
@@ -21,19 +21,27 @@
     "dismiss": "Dismiss",
     "unexpected_error": "Unexpected error",
     "login_successful": "Login successful!",
-    "logout_successful": "Logout successful!"
+    "logout_successful": "Logout successful!",
+    "missing_both": "Match is missing both officials!",
+    "missing_pointmaker": "Match is missing a point maker!",
+    "missing_timekeeper": "Match is missing a time keeper!"
   },
   "game_interface": {
     "player": "Player",
     "wins": "wins!",
     "dialog_title": "Select a point",
+    "overtime": "OVERTIME:",
     "point_types": {
       "men": "Men",
       "kote": "Kote",
       "do": "Do",
       "tsuki": "Tsuki",
       "hansoku": "Hansoku"
-    }
+    },
+    "select_role": "Select role as an official",
+    "time_keeper": "Time keeper",
+    "point_maker": "Point maker",
+    "tie": "It's a tie!"
   },
   "buttons": {
     "add_point_player_1": "Add point for player 1",
@@ -52,7 +60,8 @@
     "save_info_button": "Save info",
     "sign_up_button": "Sign up",
     "register_button": "Register",
-    "create_button": "Create"
+    "create_button": "Create",
+    "save_button": "Save"
   },
   "titles": {
     "login": "Sign in",
@@ -108,7 +117,13 @@
     "name": "Name",
     "wins": "Wins",
     "losses": "Losses",
-    "points": "Points"
+    "ties": "Ties",
+    "ippons": "Ippons",
+    "points": "Points",
+    "missing_both": "Missing: Time keeper and point maker",
+    "missing_timer": "Missing: Time keeper",
+    "missing_point_maker": "Missing: Point maker",
+    "missing_and": "and point maker"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",
@@ -164,5 +179,18 @@
     "openSettingsTooltip": "Open settings",
     "about": "About",
     "privacy_policy": "Privacy Policy"
+  },
+  "types": {
+    "round_robin": "Round Robin",
+    "playoff": "Playoff",
+    "preliminary_playoff": "Preliminary and playoff"
+  },
+  "sorting": {
+    "orderBy": "Order By: ",
+    "mostRecent": "Most recent",
+    "oldest": "Oldest",
+    "name": "Name A-Ö",
+    "nameDesc": "Name Ö-Ä",
+    "location": "Location"
   }
 }
