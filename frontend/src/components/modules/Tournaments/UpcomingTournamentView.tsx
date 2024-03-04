@@ -13,7 +13,7 @@ import TableRow from "@mui/material/TableRow";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import Paper from "@mui/material/Paper";
-import type { Tournament } from "types/models";
+import type { Tournament, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
 
 const generateTable = (tournament: Tournament): React.ReactNode => {
