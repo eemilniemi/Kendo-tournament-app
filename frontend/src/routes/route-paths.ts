@@ -8,7 +8,8 @@ const routePaths = {
   register: "/register",
   tournaments: "/tournaments",
   passwordReset: "/password-reset",
-  github: "https://github.com/Kendoers/Kendo-tournament-app"
+  github: "https://github.com/Kendoers/Kendo-tournament-app",
+  termsAndConditions: "/terms-and-conditions"
 } as const;
 
 export default routePaths;

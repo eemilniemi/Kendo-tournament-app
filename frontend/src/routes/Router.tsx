@@ -10,6 +10,7 @@ import Layout from "layouts/Main/Layout";
 import LoginForm from "components/modules/Login/Login";
 import Profile from "components/modules/Profile/Profile";
 import RegisterForm from "components/modules/Registeration/Registration";
+import TermsAndConditions from "components/modules/Registeration/TermsAndConditions";
 import { AuthenticationGuard } from "components/common/AuthenticationGuard";
 import CreateTournamentForm from "components/modules/Tournaments/CreateTournament";
 import Signup from "components/modules/Tournaments/Signup/Signup";
@@ -57,6 +58,13 @@ const routes = createRoutesFromElements(
 
       <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
         <Route path={routePaths.register} element={<RegisterForm />} />
+      </Route>
+
+      <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
+        <Route
+          path={routePaths.termsAndConditions}
+          element={<TermsAndConditions />}
+        />
       </Route>
 
       <Route element={<AuthenticationGuard />}>
