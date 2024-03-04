@@ -183,5 +183,13 @@
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
     "preliminary_playoff": "Alkulohkot ja pudotuspelit"
+  },
+  "sorting": {
+    "orderBy": "Järjestä: ",
+    "mostRecent": "Uusin",
+    "oldest": "Vanhin",
+    "name": "Nimi A-Ö",
+    "nameDesc": "Nimi Ö-Ä",
+    "location": "Sijainti"
   }
 }
