@@ -98,7 +98,9 @@
     "underage": "Olen alaikäinen",
     "guardians_email": "Huoltajan sähköpostiosoite",
     "profile_info": "Profiilitiedot",
-    "change_password": "Vaihda salasana"
+    "change_password": "Vaihda salasana",
+    "agree": "Hyväksyn",
+    "terms_and_conditions": "käyttöehdot"
   },
   "register_labels": {
     "sign_in": "Kirjaudu sisään",

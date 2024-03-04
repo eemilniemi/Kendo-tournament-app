@@ -98,7 +98,9 @@
     "underage": "I'm underage",
     "guardians_email": "Guardian's Email Address",
     "profile_info": "Profile info",
-    "change_password": "Change password"
+    "change_password": "Change password",
+    "agree": "I agree the",
+    "terms_and_conditions": "Terms and Conditions"
   },
   "register_labels": {
     "sign_in": "Sign In",
