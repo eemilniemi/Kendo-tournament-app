@@ -132,14 +132,14 @@
     "click_here": "Klikkaa tästä",
     "userInfo": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
-    "player_table": "Pelaaja taulu"
+    "player_table": "Pelaajataulu"
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Käynnissä olevat turnaukset",
     "upcoming_tournaments": "Tulevat turnaukset",
     "past_tournaments": "Menneet turnaukset",
     "create_tournament": "Luo turnaus",
-    "no_tournaments_found": "Ei löydetty turnauksia.",
+    "no_tournaments_found": "Turnauksia ei löytynyt.",
     "start_date": "Aloituspäivä",
     "end_date": "Päättymispäivä"
   },
@@ -196,7 +196,7 @@
   },
   "terms_and_conditions": {
     "title": "KÄYTTÖEHDOT",
-    "last_updated": "Päivitetty viimeksi maaliskuun 4. 2024",
+    "last_updated": "Päivitetty viimeksi 4. maaliskuuta 2024",
     "title2": "SUOSTUMUS OIKEUDELLISIIN EHTOIHIMME",
     "we": "Olemme Sei Shin Ken Kai ry ('Yritys', 'me', 'meitä', tai 'meidän'). Olemme tämän verkkosivun hallitsijat",
     "we2": "('Sivusto') sekä kaikki muut siihen liittyvät tuotteet ja palvelut, jotka viittaavat tai linkittävät näihin oikeudellisiin ehtoihin ('Oikeudelliset ehdot') (kokonaisuutena 'Palvelut').",
