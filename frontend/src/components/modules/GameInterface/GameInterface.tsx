@@ -53,7 +53,7 @@ const GameInterface: React.FC = () => {
   const { t } = useTranslation();
 
   const [matchInfo, setMatchInfo] = useState<MatchData>({
-    timerTime: 300,
+    timerTime: 0,
     players: [],
     playerNames: [],
     winner: undefined,
@@ -73,9 +73,6 @@ const GameInterface: React.FC = () => {
   const [openRoles, setOpenRoles] = useState(false);
   const [selectedButton, setSelectedButton] = useState<string>("");
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
-  const [overtimeTimer, setOvertimeTimer] = useState<number>(
-    Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME / 1000
-  );
   const [playerColor, setPlayerColor] = useState<PlayerColor>("red");
   const [hasJoined, setHasJoined] = useState(false);
 
@@ -166,7 +163,7 @@ const GameInterface: React.FC = () => {
             startTime = matchInfoFromSocket.startTimestamp;
           }
           // Get time
-          time = 300 - Math.round(matchInfoFromSocket.elapsedTime / 1000);
+          time = Math.floor(matchInfoFromSocket.elapsedTime / 1000);
           timer = matchInfoFromSocket.isTimerOn;
 
           elapsedtime = matchInfoFromSocket.elapsedTime;
@@ -214,11 +211,7 @@ const GameInterface: React.FC = () => {
               startTime = matchFromApi.startTimestamp;
             }
             // Get time
-            if (300 - Math.ceil(matchFromApi.elapsedTime / 1000) >= 0) {
-              time = 300 - Math.ceil(matchFromApi.elapsedTime / 1000);
-            } else {
-              time = 0;
-            }
+            time = Math.floor(matchFromApi.elapsedTime / 1000);
             timer = matchFromApi.isTimerOn;
 
             elapsedtime = matchFromApi.elapsedTime;
@@ -254,14 +247,8 @@ const GameInterface: React.FC = () => {
   }, [isLoading, matchInfoFromSocket]);
 
   useEffect(() => {
-    if (matchInfo.isOvertime) {
-      setOvertimeTimer(
-        Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME / 1000
-      );
-    } else {
-      setTimer(matchInfo.timerTime);
-    }
-  }, [matchInfo.isOvertime, matchInfo.elapsedTime, matchInfo.timerTime]);
+    setTimer(matchInfo.timerTime);
+  }, [matchInfo.elapsedTime, matchInfo.timerTime]);
 
   // Handle timer, make it run and stop
   useEffect(() => {
@@ -269,11 +256,7 @@ const GameInterface: React.FC = () => {
 
     if (matchInfo.isTimerOn) {
       intervalId = setInterval(() => {
-        if (matchInfo.isOvertime) {
-          setOvertimeTimer((prevTime) => prevTime + 1);
-        } else {
-          setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
-        }
+        setTimer((prevTime) => prevTime + 1);
       }, 1000);
     } else {
       if (intervalId !== null) {
@@ -286,7 +269,7 @@ const GameInterface: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [matchInfo.isTimerOn, matchInfo.isOvertime]);
+  }, [matchInfo.isTimerOn]);
 
   // If timer is ended, check for ties
   useEffect(() => {
@@ -296,7 +279,11 @@ const GameInterface: React.FC = () => {
           return; // Exit early if the winner has been determined so no endless rerendering
         }
 
-        if (timer === 0 && matchId !== undefined && !matchInfo.isOvertime) {
+        if (
+          timer === MATCH_TIME / 1000 &&
+          matchId !== undefined &&
+          !matchInfo.isOvertime
+        ) {
           if (matchInfo.isTimerOn) {
             await apiTimerRequest(matchId);
           }
@@ -607,8 +594,7 @@ const GameInterface: React.FC = () => {
               </Box>
             )}
             <Box display="flex" gap="20px" justifyContent="center">
-              {matchInfo.isOvertime && <Timer timer={overtimeTimer} />}
-              {!matchInfo.isOvertime && <Timer timer={timer} />}
+              <Timer timer={timer} />
               {/* timer button only shown to time keeper */}
               {userId !== null &&
                 userId !== undefined &&
