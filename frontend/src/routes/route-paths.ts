@@ -4,7 +4,7 @@ const routePaths = {
   login: "/login",
   logout: "/logout",
   profile: "/profile",
-  privacy: "https://www.kendoseinajoki.fi/tietosuoja-juttuja/",
+  privacy: "/privacy-policy",
   register: "/register",
   tournaments: "/tournaments",
   passwordReset: "/password-reset",

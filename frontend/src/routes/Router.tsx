@@ -10,7 +10,7 @@ import Layout from "layouts/Main/Layout";
 import LoginForm from "components/modules/Login/Login";
 import Profile from "components/modules/Profile/Profile";
 import RegisterForm from "components/modules/Registeration/Registration";
-import TermsAndConditions from "components/modules/Registeration/TermsAndConditions";
+import TermsAndConditions from "components/modules/Legal/TermsAndConditions";
 import { AuthenticationGuard } from "components/common/AuthenticationGuard";
 import CreateTournamentForm from "components/modules/Tournaments/CreateTournament";
 import Signup from "components/modules/Tournaments/Signup/Signup";
@@ -24,6 +24,7 @@ import routePaths from "./route-paths";
 import { SocketProvider } from "context/SocketContext";
 import GameInterface from "components/modules/GameInterface/GameInterface";
 import PasswordControl from "components/modules/PasswordControl/PasswordControl";
+import PrivacyPolicy from "components/modules/Legal/PrivacyPolicy";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
@@ -65,6 +66,10 @@ const routes = createRoutesFromElements(
           path={routePaths.termsAndConditions}
           element={<TermsAndConditions />}
         />
+      </Route>
+
+      <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
+        <Route path={routePaths.privacy} element={<PrivacyPolicy />} />
       </Route>
 
       <Route element={<AuthenticationGuard />}>
