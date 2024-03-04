@@ -1,5 +1,7 @@
 import React from "react";
 import { Typography, Link } from "@mui/material";
+import routePaths from "routes/route-paths";
+import { Link as RouterLink } from "react-router-dom";
 
 const TermsAndConditions: React.FC = () => {
   return (
@@ -15,6 +17,7 @@ const TermsAndConditions: React.FC = () => {
         that refer or link to these legal terms (the &apos;Legal Terms&apos;)
         (collectively, the &apos;Services&apos;).
       </Typography>
+      <br></br>
       <Typography variant="h4">1. OUR SERVICES</Typography>
       <Typography variant="body1">
         The information provided when using the Services is not intended for
@@ -26,6 +29,7 @@ const TermsAndConditions: React.FC = () => {
         initiative and are solely responsible for compliance with local laws, if
         and to the extent local laws are applicable.
       </Typography>
+      <br></br>
       <Typography variant="h4">2. INTELLECTUAL PROPERTY RIGHTS</Typography>
       <Typography variant="body1">
         We are the owner of the license of all intellectual property rights in
@@ -40,6 +44,7 @@ const TermsAndConditions: React.FC = () => {
         material breach of our Legal Terms and your right to use our Services
         will terminate immediately.
       </Typography>
+      <br></br>
       <Typography variant="h4">3. USER REPRESENTATIONS</Typography>
       <Typography variant="body1">
         By using the Services, you represent and warrant that:
@@ -60,6 +65,7 @@ const TermsAndConditions: React.FC = () => {
         and refuse any and all current or future use of the Services (or any
         portion thereof).
       </Typography>
+      <br></br>
       <Typography variant="h4">4. USER REGISTRATION</Typography>
       <Typography variant="body1">
         You may be required to register to use the Services. You agree to keep
@@ -68,6 +74,7 @@ const TermsAndConditions: React.FC = () => {
         a username you select if we determine, in our sole discretion, that such
         username is inappropriate, obscene, or otherwise objectionable.
       </Typography>
+      <br></br>
       <Typography variant="h4">5. PROHIBITED ACTIVITIES</Typography>
       <Typography variant="body1">
         Except as set out in this section or elsewhere in our Legal Terms, no
@@ -137,7 +144,8 @@ const TermsAndConditions: React.FC = () => {
         for the purpose of sending unsolicited email, or creating user accounts
         by automated means or under false pretences.
       </Typography>
-      <Typography variant="h4">SERVICES MANAGEMENT</Typography>
+      <br></br>
+      <Typography variant="h4">6. SERVICES MANAGEMENT</Typography>
       <Typography variant="body1">
         We reserve the right, but not the obligation, to:
         <br></br>
@@ -162,9 +170,13 @@ const TermsAndConditions: React.FC = () => {
         Services.
         <br></br>
         <br></br>
-        We care about data privacy and security. Please review our Privacy
-        Policy. By using the Services, you agree to be bound by our Privacy
-        Policy, which is incorporated into these Legal Terms.
+        We care about data privacy and security. Please review our{" "}
+        <Link component={RouterLink} to={routePaths.privacy}>
+          Privacy Policy
+        </Link>
+        . By using the Services, you agree to be bound by our Privacy Policy,
+        which is incorporated into these Legal Terms.
+        <br></br>
         <br></br>
         Please be advised the Services are hosted Finland. If you access the
         Services from any other region of the world with laws or other
@@ -174,7 +186,8 @@ const TermsAndConditions: React.FC = () => {
         expressly consent to have your data transferred to and processed in
         Finland.
       </Typography>
-      <Typography variant="h4">MODIFICATIONS AND INTERRUPTIONS</Typography>
+      <br></br>
+      <Typography variant="h4">7. MODIFICATIONS AND INTERRUPTIONS</Typography>
       <Typography variant="body1">
         We reserve the right to change, modify, or remove the contents of the
         Services at any time or for any reason at our sole discretion without
@@ -192,6 +205,25 @@ const TermsAndConditions: React.FC = () => {
         downtime or discontinuance of the Services. Nothing in these Legal Terms
         will be construed to obligate us to maintain and support the Services or
         to supply any corrections, updates, or releases in connection therewith.
+      </Typography>
+      <br></br>
+      <Typography variant="h4">8. USER DATA</Typography>
+      <Typography variant="body1">
+        We will maintain certain data that you transmit to the Services for the
+        purpose of managing the performance of the Services, as well as data
+        relating to your use of the Services. Although we perform regular
+        routine backups of data, you are solely responsible for all data that
+        you transmit or that relates to any activity you have undertaken using
+        the Services. You agree that we shall have no liability to you for any
+        loss or corruption of any such data, and you hereby waive any right of
+        action against us arising from any such loss or corruption of such data.
+      </Typography>
+      <br></br>
+      <br></br>
+      <Typography variant="subtitle1">
+        In order to resolve a complaint regarding the Services or to receive
+        further information regarding use of the Services, please contact us at:
+        info(at)kendoseinajoki.fi
       </Typography>
     </div>
   );
