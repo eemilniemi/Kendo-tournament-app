@@ -1,14 +1,10 @@
 {
   "extension": ["ts", "tsx"],
   "spec": "test/**/*.test.{ts,tsx}",
-<<<<<<< HEAD
-  "require": ["mocha.cjs", "ts-node/register"],
-=======
   "loader": "ts-node/esm",
   "require": [
     "mocha.cjs",
     "ts-node/register"
   ],
->>>>>>> development
   "recursive": true
 }
