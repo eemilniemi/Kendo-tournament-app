@@ -1,237 +1,127 @@
 import React from "react";
 import { Typography, Link, List, ListItem } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const PrivacyPolicy: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div>
-      <Typography variant="h2">Privacy Policy</Typography>
-      <Typography>Last updated: March 4, 2024</Typography>
+      <Typography variant="h2">{t("privacy.title")}</Typography>
+      <Typography>{t("terms_and_conditions.last_updated")}</Typography>
       <br></br>
-      <Typography>
-        This Privacy Policy describes Our policies and procedures on the
-        collection, use and disclosure of Your information when You use the
-        Service and tells You about Your privacy rights and how the law protects
-        You.
-      </Typography>
+      <Typography>{t("privacy.body")}</Typography>
       <br></br>
-      <Typography variant="h4">Interpretation and Definitions</Typography>
+      <Typography variant="h4">{t("privacy.title1")}</Typography>
       <br></br>
-      <Typography variant="h5">Interpretation</Typography>
-      <Typography>
-        The words of which the initial letter is capitalized have meanings
-        defined under the following conditions. The following definitions shall
-        have the same meaning regardless of whether they appear in singular or
-        in plural.
-      </Typography>
+      <Typography variant="h5">{t("privacy.title2")}</Typography>
+      <Typography>{t("privacy.body1")}</Typography>
       <br></br>
-      <Typography variant="h5">Definitions</Typography>
-      <Typography>For the purposes of this Privacy Policy:</Typography>
+      <Typography variant="h5">{t("privacy.title3")}</Typography>
+      <Typography>{t("privacy.body2")}</Typography>
       <List>
         <ListItem>
-          <Typography>
-            <strong>Account</strong> means a unique account created for You to
-            access our Service or parts of our Service.
-          </Typography>
+          <Typography>{t("privacy.body3")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body4")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body5")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body6")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body7")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body8")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body9")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body10")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body11")}</Typography>
+        </ListItem>
+        <ListItem>
+          <Typography>{t("privacy.body12")}</Typography>
         </ListItem>
         <ListItem>
           <Typography>
-            <strong>Affiliate</strong> means an entity that controls, is
-            controlled by or is under common control with a party, where
-            &quot;control&quot; means ownership of 50% or more of the shares,
-            equity interest or other securities entitled to vote for election of
-            directors or other managing authority.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Company</strong> (referred to as either &quot;the
-            Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in
-            this Agreement) refers to Sei Shin Ken Kai ry, Seinäjoki.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Cookies</strong> are small files that are placed on Your
-            computer, mobile device or any other device by a website, containing
-            the details of Your browsing history on that website among its many
-            uses.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Country</strong> refers to: Finland
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Device</strong> means any device that can access the Service
-            such as a computer, a cellphone or a digital tablet.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Personal Data</strong> is any information that relates to an
-            identified or identifiable individual.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Service</strong> refers to the Website.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Service Provider</strong> means any natural or legal person
-            who processes the data on behalf of the Company. It refers to
-            third-party companies or individuals employed by the Company to
-            facilitate the Service, to provide the Service on behalf of the
-            Company, to perform services related to the Service or to assist the
-            Company in analyzing how the Service is used.
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Usage Data</strong> refers to data collected automatically,
-            either generated by the use of the Service or from the Service
-            infrastructure itself (for example, the duration of a page visit).
-          </Typography>
-        </ListItem>
-        <ListItem>
-          <Typography>
-            <strong>Website</strong> refers to KendoApp, accessible from{" "}
+            {t("privacy.body13")}{" "}
             <Link href="app.kendoliiga.fi" target="_blank">
               app.kendoliiga.fi
             </Link>
           </Typography>
         </ListItem>
         <ListItem>
-          <Typography>
-            <strong>You</strong> means the individual accessing or using the
-            Service, or the company, or other legal entity on behalf of which
-            such individual is accessing or using the Service, as applicable.
-          </Typography>
+          <Typography>{t("privacy.body14")}</Typography>
         </ListItem>
       </List>
       <br></br>
-      <Typography variant="h4">
-        Collecting and Using Your Personal Data
-      </Typography>
+      <Typography variant="h4">{t("privacy.title4")}</Typography>
       <br></br>
-      <Typography variant="h5">Types of Data Collected</Typography>
+      <Typography variant="h5">{t("privacy.title5")}</Typography>
       <br></br>
-      <Typography variant="h6">Personal Data</Typography>
-      <Typography>
-        While using Our Service, We may ask You to provide Us with certain
-        personally identifiable information that can be used to contact or
-        identify You. Personally identifiable information may include, but is
-        not limited to:
-      </Typography>
+      <Typography variant="h6">{t("privacy.title6")}</Typography>
+      <Typography>{t("privacy.body15")}</Typography>
       <List>
         <ListItem>
-          <Typography>Email address</Typography>
+          <Typography>{t("user_info_labels.email_address")}</Typography>
         </ListItem>
         <ListItem>
-          <Typography>First name and last name</Typography>
+          <Typography>{t("privacy.body16")}</Typography>
         </ListItem>
         <ListItem>
-          <Typography>Phone number</Typography>
+          <Typography>{t("user_info_labels.phone_number")}</Typography>
         </ListItem>
         <ListItem>
-          <Typography>Nationality</Typography>
+          <Typography>{t("user_info_labels.nationality")}</Typography>
         </ListItem>
         <ListItem>
-          <Typography>Usage Data</Typography>
+          <Typography>{t("privacy.title7")}</Typography>
         </ListItem>
       </List>
       <br></br>
-      <Typography variant="h6">Usage Data</Typography>
-      <Typography>
-        Usage Data is collected automatically when using the Service. Usage Data
-        may include information such as the pages of our Service that You visit,
-        the time and date of Your visit, the time spent on those pages and other
-        diagnostic data.
-      </Typography>
+      <Typography variant="h6">{t("privacy.title7")}</Typography>
+      <Typography>{t("privacy.body17")}</Typography>
       <br></br>
-      <Typography variant="h5">Use of Your Personal Data</Typography>
-      <Typography>
-        The Company may use Personal Data for the following purposes:
-      </Typography>
+      <Typography variant="h5">{t("privacy.title8")}</Typography>
+      <Typography>{t("privacy.body18")}</Typography>
       <List>
         <ListItem>
-          <Typography>
-            <strong>To provide and maintain our Service</strong>, including to
-            monitor the usage of our Service.
-          </Typography>
+          <Typography>{t("privacy.body19")}</Typography>
         </ListItem>
         <ListItem>
-          <Typography>
-            <strong>To manage Your Account:</strong> to manage Your registration
-            as a user of the Service. The Personal Data You provide can give You
-            access to different functionalities of the Service that are
-            available to You as a registered user.
-          </Typography>
+          <Typography>{t("privacy.body20")}</Typography>
         </ListItem>
         <ListItem>
-          <Typography>
-            <strong>To contact You:</strong> To contact You by email, telephone
-            calls, SMS, or other equivalent forms of electronic communication,
-            regarding updates or possible payments related to the service,
-            including the security updates, when necessary or reasonable for
-            their implementation.
-          </Typography>
+          <Typography>{t("privacy.body21")}</Typography>
         </ListItem>
       </List>
       <br></br>
-      <Typography variant="h5">Retention of Your Personal Data</Typography>
-      <Typography>
-        The Company will retain Your Personal Data only for as long as is
-        necessary for the purposes set out in this Privacy Policy. We will
-        retain and use Your Personal Data to the extent necessary to comply with
-        our legal obligations (for example, if we are required to retain your
-        data to comply with applicable laws), resolve disputes, and enforce our
-        legal agreements and policies.
-      </Typography>
+      <Typography variant="h5">{t("privacy.title9")}</Typography>
+      <Typography>{t("privacy.body22")}</Typography>
       <br></br>
-      <Typography variant="h5">Delete Your Personal Data</Typography>
-      <Typography>
-        You have the right to delete or request that We assist in deleting the
-        Personal Data that We have collected about You. You may update, amend,
-        or delete Your information at any time by signing in to Your Account, if
-        you have one, and visiting the account settings section that allows you
-        to manage Your personal information. You may also contact Us to request
-        access to, correct, or delete any personal information that You have
-        provided to Us.
-      </Typography>
+      <Typography variant="h5">{t("privacy.title10")}</Typography>
+      <Typography>{t("privacy.body23")}</Typography>
       <br></br>
-      <Typography variant="h4">Children&apos;s Privacy</Typography>
-      <Typography>
-        {" "}
-        If We become aware that We have collected Personal Data from anyone
-        under the age of 18 without verification of parental consent, We take
-        steps to remove that information from Our servers. We need to rely on
-        consent as a legal basis for processing Your information and Your
-        country requires consent from a parent, We require Your parent&apos;s
-        consent before We collect and use that information.
-      </Typography>
+      <Typography variant="h4">{t("privacy.title11")}</Typography>
+      <Typography> {t("privacy.body24")}</Typography>
       <br></br>
-      <Typography variant="h4">Changes to this Privacy Policy</Typography>
-      <Typography>
-        We may update Our Privacy Policy from time to time. We will notify You
-        of any changes by posting the new Privacy Policy on this page. We will
-        let You know via email and/or a prominent notice on Our Service, prior
-        to the change becoming effective and update the &quot;Last updated&quot;
-        date at the top of this Privacy Policy. You are advised to review this
-        Privacy Policy periodically for any changes. Changes to this Privacy
-        Policy are effective when they are posted on this page.
-      </Typography>
+      <Typography variant="h4">{t("privacy.title12")}</Typography>
+      <Typography>{t("privacy.body25")}</Typography>
       <br></br>
-      <Typography variant="h4">Contact Us</Typography>
-      <Typography>
-        If you have any questions about this Privacy Policy, You can contact us:
-      </Typography>
+      <Typography variant="h4">{t("privacy.title13")}</Typography>
+      <Typography>{t("privacy.body26")}</Typography>
       <List>
         <ListItem>
-          <Typography>By email: info(at)kendoseinajoki.fi</Typography>
+          <Typography>
+            {t("privacy.body27")} info(at)kendoseinajoki.fi
+          </Typography>
         </ListItem>
       </List>
     </div>
