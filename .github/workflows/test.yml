@@ -1,0 +1,35 @@
+name: Test
+on:
+  pull-request:
+    branches:
+      - development
+
+jobs:
+  test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the source code of the repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run frontend unit tests
+        run: npm test
+        working-directory: frontend
+          
+      - name: Install backend dependencies
+        run: npm ci
+        workind-directory: backend/server
+
+      - name: Run backend unit tests
+        run: npm test
+        working-directory: backend/server

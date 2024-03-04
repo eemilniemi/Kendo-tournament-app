@@ -10,7 +10,8 @@
     "sourceMap": true,
     "target": "esnext",
     "baseUrl": "src",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["mocha"]
   },
   "ts-node": {
     "compilerOptions": {
