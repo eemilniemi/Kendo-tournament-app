@@ -154,11 +154,14 @@
     "select_tournament_type": "Select tournament type",
     "round_robin": "Round Robin",
     "playoff": "Playoff",
+    "preliminary_playoff": "Preliminary groups and playoffs",
     "max_players": "Maximum number of players",
     "different_organizer_info": "Organizer has different information than me",
     "organizer_email": "Organizer's email",
     "organizer_phone_number": "Organizer's phone number",
-    "confirmation_message": "Are you sure you want to create the tournament with the provided information?"
+    "confirmation_message": "Are you sure you want to create the tournament with the provided information?",
+    "players_to_playoffs_per_group": "Players proceeding to playoffs per group",
+    "groups_size_preference": "Group max size (players)"
   },
   "upcoming_tournament_view": {
     "date_header": "When",

@@ -154,11 +154,15 @@
     "select_tournament_type": "Valitse turnaustyypi",
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
+    "preliminary_playoff": "Pudotuspeli alkulohkoilla",
     "max_players": "Pelaajien enimmäismäärä",
     "different_organizer_info": "Järjestäjällä on eri tiedot kuin minulla",
     "organizer_email": "Järjestäjän sähköposti",
     "organizer_phone_number": "Järjestäjän puhelinnumero",
-    "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?"
+    "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?",
+    "players_to_playoffs_per_group": "Lohkosta pudotuspeleihin siirtyvien pelaajien määrä",
+    "groups_size_preference": "Lohkon maksimikoko (pelaajaa)"
+
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",
