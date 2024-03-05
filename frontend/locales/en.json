@@ -151,7 +151,7 @@
     "select_tournament_type": "Select tournament type",
     "round_robin": "Round Robin",
     "playoff": "Playoff",
-    "preliminary_playoff": "Group Playoff",
+    "preliminary_playoff": "Preliminary groups and playoffs",
     "max_players": "Maximum number of players",
     "different_organizer_info": "Organizer has different information than me",
     "organizer_email": "Organizer's email",

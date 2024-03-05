@@ -98,7 +98,7 @@ const CreateTournamentForm: React.FC = () => {
     await formContext.handleSubmit(onSubmit)();
   };
 
-  const renderPreliminaryPlayoffFields = () => {
+  const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
     if (type === "Preliminary Playoff") {
       return (
         <React.Fragment>
