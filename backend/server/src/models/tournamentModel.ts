@@ -15,6 +15,7 @@ export type UnsavedMatch = Pick<
   | "elapsedTime"
   | "timerStartedTimestamp"
   | "tournamentRound"
+  | "tournamentId"
 >;
 
 export interface Tournament {
@@ -29,6 +30,9 @@ export interface Tournament {
   organizerEmail?: string;
   organizerPhone?: string;
   maxPlayers: number;
+  groups: Array<Array<Types.ObjectId>>;
+  playersToPlayoffsPerGroup: number;
+  groupsSizePreference: number;
   players: Array<Types.ObjectId | User>;
   matchSchedule: Array<Types.ObjectId | Match>;
 }
@@ -47,6 +51,12 @@ const tournamentSchema = new Schema<Tournament & Document>(
     },
     players: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     matchSchedule: [{ type: Schema.Types.ObjectId, ref: "Match", default: [] }],
+    groups: {
+      type: [[{ type: Schema.Types.ObjectId, default: [] }]],
+      default: []
+    },
+    groupsSizePreference: { type: Number },
+    playersToPlayoffsPerGroup: { type: Number },
     maxPlayers: { type: Number, required: true },
     creator: {
       type: Schema.Types.ObjectId,

@@ -4,10 +4,12 @@ const routePaths = {
   login: "/login",
   logout: "/logout",
   profile: "/profile",
-  privacy: "/privacy",
+  privacy: "/privacy-policy",
   register: "/register",
   tournaments: "/tournaments",
-  passwordReset: "/password-reset"
+  passwordReset: "/password-reset",
+  github: "https://github.com/Kendoers/Kendo-tournament-app",
+  termsAndConditions: "/terms-and-conditions"
 } as const;
 
 export default routePaths;

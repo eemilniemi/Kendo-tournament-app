@@ -93,7 +93,7 @@ const RegisterForm: React.FC = () => {
             {t("titles.create_account")}
           </Typography>
           <Typography variant="body1">
-            {"Already have an account? "}
+            {t("register_labels.already_have_account")}{" "}
             <Link component={RouterLink} to={routePaths.login}>
               {t("register_labels.sign_in")}
             </Link>
@@ -238,6 +238,20 @@ const RegisterForm: React.FC = () => {
               margin="normal"
             />
           )}
+
+          <br></br>
+          <CheckboxElement
+            required
+            name="TermsAndConditions"
+            label={
+              <>
+                {t("user_info_labels.agree")}{" "}
+                <Link component={RouterLink} to={routePaths.termsAndConditions}>
+                  {t("user_info_labels.terms_and_conditions")}
+                </Link>
+              </>
+            }
+          />
 
           <Box margin="auto" width="200px">
             <Button

@@ -3,7 +3,7 @@ import type { Tournament } from "./tournamentModel";
 
 export type PlayerColor = "red" | "white";
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
-export type MatchType = "group" | "playoff";
+export type MatchType = "group" | "playoff" | "preliminary" | "pre playoff";
 
 export interface MatchPoint {
   type: PointType;
@@ -32,6 +32,7 @@ export interface Match {
   timeKeeper?: Types.ObjectId;
   pointMaker?: Types.ObjectId;
   isTimerOn: boolean;
+  isOvertime: boolean;
   player1Score: number;
   player2Score: number;
 }
@@ -93,6 +94,7 @@ const matchSchema = new Schema<Match>(
     timeKeeper: { type: Schema.Types.ObjectId, required: false },
     pointMaker: { type: Schema.Types.ObjectId, required: false },
     isTimerOn: { type: Boolean, required: true, default: false },
+    isOvertime: { type: Boolean, required: true, default: false },
     player1Score: { type: Number, required: true, default: 0 },
     player2Score: { type: Number, required: true, default: 0 }
   },

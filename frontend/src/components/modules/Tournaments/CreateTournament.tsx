@@ -46,6 +46,8 @@ export interface CreateTournamentFormData {
   differentOrganizer: boolean;
   organizerEmail?: string;
   organizerTel?: string;
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -67,7 +69,7 @@ const CreateTournamentForm: React.FC = () => {
     defaultValues,
     mode: "onBlur"
   });
-  const { differentOrganizer, startDate } =
+  const { differentOrganizer, startDate, type } =
     useWatch<CreateTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -94,6 +96,32 @@ const CreateTournamentForm: React.FC = () => {
   const handleConfirm = async (): Promise<void> => {
     setConfirmationDialogOpen(false);
     await formContext.handleSubmit(onSubmit)();
+  };
+
+  const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
+    if (type === "Preliminary Playoff") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="groupsSizePreference"
+            type="number"
+            label={t("create_tournament_form.groups_size_preference")}
+            fullWidth
+            margin="normal"
+          />
+          <TextFieldElement
+            required
+            name="playersToPlayoffsPerGroup"
+            type="number"
+            label={t("create_tournament_form.players_to_playoffs_per_group")}
+            fullWidth
+            margin="normal"
+          />
+        </React.Fragment>
+      );
+    }
+    return null;
   };
 
   return (
@@ -158,11 +186,16 @@ const CreateTournamentForm: React.FC = () => {
               id: "Round Robin",
               label: t("create_tournament_form.round_robin")
             },
-            { id: "Playoff", label: t("create_tournament_form.playoff") }
+            { id: "Playoff", label: t("create_tournament_form.playoff") },
+            { id: "Preliminary Playoff", 
+              label: t("create_tournament_form.preliminary_playoff") 
+            }
           ]}
           fullWidth
           margin="normal"
         />
+
+        {renderPreliminaryPlayoffFields()}
 
         <TextFieldElement
           required
