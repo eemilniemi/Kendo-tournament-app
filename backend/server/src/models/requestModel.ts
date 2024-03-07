@@ -111,10 +111,10 @@ export type CreateTournamentRequest = Pick<
   | "organizerEmail"
   | "organizerPhone"
   | "description"
-  | "groupsSizePreference"
-  | "playersToPlayoffsPerGroup"
 > & {
   differentOrganizer: boolean;
+  groupsSizePreference?: number;
+  playersToPlayoffsPerGroup?: number;
 };
 
 export interface SignupForTournamentRequest {
