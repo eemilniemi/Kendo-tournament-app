@@ -1,6 +1,7 @@
 import React from "react";
 import PlayoffTournamentView from "./OngoingTournament/PlayoffTournamentView";
 import RoundRobinTournamentView from "./OngoingTournament/RoundRobinTournamentView";
+import PreliminaryPlayoffView from "./OngoingTournament/PreliminaryPlayoffView";
 import UpcomingTournamentView from "./UpcomingTournamentView";
 import ErrorModal from "components/common/ErrorModal";
 import { type Tournament } from "types/models";
@@ -18,7 +19,7 @@ const getTournamentComponent = (
     case "Playoff":
       return <PlayoffTournamentView />;
     case "Preliminary Playoff":
-      return <React.Fragment>Nothing here yet?</React.Fragment>; // TODO: Replace with actual component
+      return <PreliminaryPlayoffView />;
     default:
       return undefined;
   }

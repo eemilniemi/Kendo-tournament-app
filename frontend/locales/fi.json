@@ -125,7 +125,8 @@
     "missing_both": "Puuttuu: kellokalle ja pistevastaava",
     "missing_timer": "Puuttuu: kellokalle",
     "missing_point_maker": "Puuttuu: pistevastaava",
-    "missing_and": "ja pistevastaava"
+    "missing_and": "ja pistevastaava",
+    "group": "Lohko"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",
@@ -183,12 +184,14 @@
     "appName": "KendoApp",
     "openSettingsTooltip": "Avaa asetukset",
     "about": "About-sivu",
-    "privacy_policy": "Yksityisyyskäytäntö"
+    "privacy_policy": "Yksityisyyskäytäntö",
+    "back_to_group_view": "Palaa lohkonäkymään"
   },
   "types": {
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
-    "preliminary_playoff": "Alkulohkot ja pudotuspelit"
+    "preliminary_playoff": "Alkulohkot ja pudotuspelit",
+    "preliminary": "Alkulohkot"
   },
   "sorting": {
     "orderBy": "Järjestä: ",

@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 
-interface TournamentPlayer {
+export interface TournamentPlayer {
   id: string;
   name: string;
   points: number;
@@ -135,6 +135,12 @@ export const updatePlayerStats = (
       if (processedMatches.has(match.id)) {
         continue;
       }
+
+      // Exclude playoff matches in preliminaryplayoff view scoreboard
+      if (match.type === "playoff") {
+        continue;
+      }
+
       const [player1Id, player2Id] = match.players.map((player) => player.id);
 
       // Find the TournamentPlayer objects corresponding to the player IDs
