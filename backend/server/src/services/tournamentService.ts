@@ -431,12 +431,14 @@ export class TournamentService {
     if (tournamentDetails.type === TournamentType.PreliminiaryPlayoff) {
       if (tournamentDetails.groupsSizePreference === undefined) {
         throw new BadRequestError({
-          message: "Group size preference is required for Preliminary Playoff tournaments."
+          message:
+            "Group size preference is required for Preliminary Playoff tournaments."
         });
       }
       if (tournamentDetails.playersToPlayoffsPerGroup === undefined) {
         throw new BadRequestError({
-          message: "Players to playoffs per group is required for Preliminary Playoff tournaments."
+          message:
+            "Players to playoffs per group is required for Preliminary Playoff tournaments."
         });
       }
     }
