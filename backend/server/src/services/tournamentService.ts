@@ -119,7 +119,10 @@ export class TournamentService {
 
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
-    if (tournament.type === TournamentType.PreliminiaryPlayoff && tournament.groupsSizePreference !== undefined) {
+    if (
+      tournament.type === TournamentType.PreliminiaryPlayoff &&
+      tournament.groupsSizePreference !== undefined
+    ) {
       tournament.groups = this.dividePlayersIntoGroups(
         tournament.players as Types.ObjectId[],
         tournament.groupsSizePreference
