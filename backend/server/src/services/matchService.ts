@@ -615,6 +615,10 @@ export class MatchService {
     tournament: Tournament & Document,
     matches: Match[]
   ): [Types.ObjectId[][], Types.ObjectId[][]] {
+    // ensuring amountToPlayoffsPerGroup is defined 
+    if (tournament.playersToPlayoffsPerGroup === undefined) {
+      throw new Error("Tournament configuration error: 'playersToPlayoffsPerGroup' is undefined.");
+    }
     const amountToPlayoffsPerGroup = tournament.playersToPlayoffsPerGroup;
 
     // round robin rankings

@@ -31,8 +31,8 @@ export interface Tournament {
   organizerPhone?: string;
   maxPlayers: number;
   groups: Types.ObjectId[][];
-  playersToPlayoffsPerGroup: number;
-  groupsSizePreference: number;
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
   players: Array<Types.ObjectId | User>;
   matchSchedule: Array<Types.ObjectId | Match>;
 }
