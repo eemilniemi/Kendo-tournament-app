@@ -7,7 +7,8 @@ import type {
   RegisterRequest,
   AddPointRequest,
   EditUserRequest,
-  ResetPasswordRequest
+  ResetPasswordRequest,
+  EditTournamentRequest
 } from "types/requests";
 
 export const API_BASE_URL =
@@ -127,6 +128,14 @@ const tournaments = {
       `${TOURNAMENTS_API}/${tournamentId}/sign-up`,
       body
     );
+  },
+
+  update: async (tournamentId: string, body: EditTournamentRequest) => {
+    return await request.put<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`, body);
+  },
+
+  delete: async (tournamentId: string) => {
+    return await request.delete(`${TOURNAMENTS_API}/${tournamentId}`);
   }
 };
 
