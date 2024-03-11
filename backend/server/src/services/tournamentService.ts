@@ -428,6 +428,19 @@ export class TournamentService {
       }
     }
 
+    if (tournamentDetails.type === TournamentType.PreliminiaryPlayoff) {
+      if (tournamentDetails.groupsSizePreference === undefined) {
+        throw new BadRequestError({
+          message: "Group size preference is required for Preliminary Playoff tournaments."
+        });
+      }
+      if (tournamentDetails.playersToPlayoffsPerGroup === undefined) {
+        throw new BadRequestError({
+          message: "Players to playoffs per group is required for Preliminary Playoff tournaments."
+        });
+      }
+    }
+
     // If creating a new tournament or differentOrganizer is true during an update, validate organizer details
     if (tournamentDetails.differentOrganizer === false) {
       const organizer = await UserModel.findById(creatorOrUpdaterId).exec();
