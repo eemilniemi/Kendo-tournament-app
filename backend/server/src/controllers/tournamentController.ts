@@ -95,10 +95,14 @@ export class TournamentController extends Controller {
     @Path() tournamentId: ObjectIdString,
     @Body() requestBody: EditTournamentRequest
   ): Promise<void> {
-    const updaterId = request.user.id; 
+    const updaterId = request.user.id;
 
     this.setStatus(204);
-    await this.service.updateTournamentById(tournamentId, requestBody, updaterId);
+    await this.service.updateTournamentById(
+      tournamentId,
+      requestBody,
+      updaterId
+    );
   }
 
   @Delete("{tournamentId}")
@@ -107,7 +111,7 @@ export class TournamentController extends Controller {
   public async deleteTournament(
     @Path() tournamentId: ObjectIdString
   ): Promise<void> {
-    this.setStatus(204); 
+    this.setStatus(204);
     await this.service.deleteTournamentById(tournamentId);
   }
 

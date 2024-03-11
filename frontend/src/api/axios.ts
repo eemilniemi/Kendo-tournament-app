@@ -131,7 +131,10 @@ const tournaments = {
   },
 
   update: async (tournamentId: string, body: EditTournamentRequest) => {
-    return await request.put<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`, body);
+    return await request.put<Tournament>(
+      `${TOURNAMENTS_API}/${tournamentId}`,
+      body
+    );
   },
 
   delete: async (tournamentId: string) => {

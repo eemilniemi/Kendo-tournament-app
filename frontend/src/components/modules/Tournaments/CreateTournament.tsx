@@ -187,8 +187,9 @@ const CreateTournamentForm: React.FC = () => {
               label: t("create_tournament_form.round_robin")
             },
             { id: "Playoff", label: t("create_tournament_form.playoff") },
-            { id: "Preliminary Playoff", 
-              label: t("create_tournament_form.preliminary_playoff") 
+            {
+              id: "Preliminary Playoff",
+              label: t("create_tournament_form.preliminary_playoff")
             }
           ]}
           fullWidth

@@ -30,7 +30,7 @@ export interface Tournament {
   organizerEmail?: string;
   organizerPhone?: string;
   maxPlayers: number;
-  groups: Array<Array<Types.ObjectId>>;
+  groups: Types.ObjectId[][];
   playersToPlayoffsPerGroup: number;
   groupsSizePreference: number;
   players: Array<Types.ObjectId | User>;
