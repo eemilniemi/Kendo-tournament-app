@@ -193,22 +193,23 @@ export class MatchController extends Controller {
   /*
    * Delete the most recent point from a match
    */
-  @Delete("{matchId}/points/recent")
+  @Delete("{matchId}/delete-recent")
   @Tags("Match")
   @Security("jwt")
   public async deleteRecentPoint(
     @Path() matchId: ObjectIdString
   ): Promise<void> {
     this.setStatus(204);
+    console.log("tuleeko tänne")
     const match = await this.service.deleteRecentPoint(matchId);
-
+    console.log(match)
     io.to(matchId).emit("delete-recent", match);
   }
 
   /*
    * Modify the most recent point from a match
    */
-  @Patch("{matchId}/points/recent")
+  @Patch("{matchId}/modify-recent")
   @Tags("Match")
   @Security("jwt")
   public async modifyRecentPoint(

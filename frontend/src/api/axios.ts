@@ -179,11 +179,11 @@ const match = {
     });
   },
   deleteRecentPoint: async (matchId: string) => {
-    await request.delete(`${MATCH_API}/${matchId}/points/recent`);
+    await request.delete(`${MATCH_API}/${matchId}/delete-recent`);
   },
 
   modifyRecentPoint: async (matchId: string, newPointType: PointType) => {
-    await request.patch(`${MATCH_API}/${matchId}/points/recent`, {
+    await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
       newPointType
     });
   }
