@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,12 +7,9 @@ import {
   RadioGroup,
   FormControlLabel,
   Button,
-  Box,
-  DialogActions
+  Box
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { buttonToTypeMap } from "./GameInterface";
-import { type PointType } from "types/models";
 
 interface AddPointDialogProps {
   open: boolean;
@@ -21,9 +18,6 @@ interface AddPointDialogProps {
   handlePointShowing: () => Promise<void>;
   handleOpen: (player: number) => void;
   handleClose: () => void;
-  handleDeleteRecentPoint: () => Promise<void>;
-  handleModifyRecentPoint: (newType: PointType) => Promise<void>;
-  mostRecentPointType: PointType | null;
 }
 
 const OfficialButtons: React.FC<AddPointDialogProps> = ({
@@ -32,28 +26,9 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
   handleRadioButtonClick,
   handlePointShowing,
   handleOpen,
-  handleClose,
-  handleDeleteRecentPoint,
-  handleModifyRecentPoint,
-  mostRecentPointType
+  handleClose
 }) => {
   const { t } = useTranslation();
-  const [modifyPointOpen, setModifyPointOpen] = useState(false);
-  const [newPointType, setNewPointType] = useState<PointType | null>(null);
-
-  useEffect(() => {
-    // Set the default selected radio button to the most recent point type
-    if (mostRecentPointType !== null) {
-      setNewPointType(mostRecentPointType);
-    }
-  }, [mostRecentPointType]);
-
-  const handleSaveNewPointType = async (): Promise<void> => {
-    if (newPointType !== null && newPointType !== mostRecentPointType) {
-      await handleModifyRecentPoint(newPointType);
-      setModifyPointOpen(false);
-    }
-  };
 
   return (
     <div>
@@ -100,62 +75,6 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
           </Button>
         </DialogContent>
       </Dialog>
-      <Dialog
-        open={modifyPointOpen}
-        onClose={() => {
-          setModifyPointOpen(false);
-        }}
-      >
-        <DialogTitle>{t("titles.modify_or_delete")}</DialogTitle>
-        <DialogContent>
-          <RadioGroup
-            aria-label="new-point-type"
-            name="new-point-type"
-            value={newPointType ?? ""}
-            onChange={(e) => {
-              setNewPointType(e.target.value as PointType);
-            }}
-          >
-            {Object.entries(buttonToTypeMap).map(([value, label]) => (
-              <FormControlLabel
-                value={label}
-                control={<Radio />}
-                label={t(value)}
-                key={value}
-              />
-            ))}
-          </RadioGroup>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setModifyPointOpen(false);
-            }}
-          >
-            {t("buttons.cancel_button")}
-          </Button>
-          <Button onClick={handleDeleteRecentPoint}>
-            {t("buttons.delete")}
-          </Button>
-          <Button
-            onClick={handleSaveNewPointType}
-            disabled={newPointType === mostRecentPointType}
-          >
-            {t("buttons.save_button")}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {mostRecentPointType !== null && (
-        <Button
-          variant="contained"
-          onClick={() => {
-            setModifyPointOpen(true);
-          }}
-        >
-          {t("buttons.modify_or_delete")}
-        </Button>
-      )}
     </div>
   );
 };
