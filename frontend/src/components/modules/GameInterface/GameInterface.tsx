@@ -33,6 +33,7 @@ import { useTournament } from "context/TournamentContext";
 import Loader from "components/common/Loader";
 import ErrorModal from "components/common/ErrorModal";
 import { useTranslation } from "react-i18next";
+import ModifyDeletePoints from "./ModifyDeletePoints";
 
 export interface MatchData {
   timerTime: number;
@@ -101,6 +102,14 @@ const GameInterface: React.FC = () => {
       };
     }
   }, [matchId]);
+
+  useEffect(() => {
+    // Check for a saved most recent point type in sessionStorage
+    const savedPointType = sessionStorage.getItem('mostRecentPointType');
+    if (savedPointType) {
+      setMostRecentPointType(savedPointType as PointType); 
+    }
+  }, []);
 
   // Fetching match data
   useEffect(() => {
@@ -341,6 +350,7 @@ const GameInterface: React.FC = () => {
     }
 
     setMostRecentPointType(pointRequest.pointType);
+    sessionStorage.setItem('mostRecentPointType', pointRequest.pointType);
   };
 
   // Get the selected radio button value
@@ -474,12 +484,13 @@ const GameInterface: React.FC = () => {
       }
     }
     setMostRecentPointType(null);
+    sessionStorage.removeItem('mostRecentPointType');
   };
 
   const handleModifyRecentPoint = async (newType: PointType): Promise<void> => {
     if (matchId !== undefined) {
       try {
-        await api.match.modifyRecentPoint(matchId, { newPointType: newType });
+        await api.match.modifyRecentPoint(matchId, newType);
       } catch (error) {
         showToast(error, "error");
       }
@@ -639,12 +650,18 @@ const GameInterface: React.FC = () => {
                   handlePointShowing={handlePointShowing}
                   handleOpen={handleOpen}
                   handleClose={handleClose}
+                />
+            )}
+            <br></br>
+            {userId !== null &&
+              userId !== undefined &&
+              matchInfo.pointMaker === userId && (
+                <ModifyDeletePoints
                   handleDeleteRecentPoint={handleDeleteRecentPoint}
                   handleModifyRecentPoint={handleModifyRecentPoint}
                   mostRecentPointType={mostRecentPointType}
                 />
-              )}
-
+            )}
             {/* Print the winner */}
             {matchInfo.winner !== undefined && (
               <div>
