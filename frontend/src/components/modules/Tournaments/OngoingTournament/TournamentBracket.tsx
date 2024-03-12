@@ -114,11 +114,23 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
             </Typography>
             {isWinnerDeclared && (
               <Typography textAlign="center" variant="h6">
-                <span style={{ color: player1Color }}>
+                <span
+                  style={{
+                    fontWeight: player1Font,
+                    color: player1Color,
+                    textDecoration: player1Lining
+                  }}
+                >
                   {match.player1Score}
                 </span>{" "}
                 -{" "}
-                <span style={{ color: player2Color }}>
+                <span
+                  style={{
+                    fontWeight: player2Font,
+                    color: player2Color,
+                    textDecoration: player2Lining
+                  }}
+                >
                   {match.player2Score}
                 </span>
               </Typography>
