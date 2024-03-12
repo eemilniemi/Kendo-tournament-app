@@ -131,7 +131,7 @@
     "sign_up_for": "Ilmoittaudu: ",
     "want_more_info": "Haluatko lisätietoja tästä turnauksesta?",
     "click_here": "Klikkaa tästä",
-    "userInfo": "Ilmoittautumisen yhteydessä annettavat tiedot:",
+    "user_info": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
     "player_table": "Pelaajataulu"
   },
@@ -196,7 +196,7 @@
     "mostRecent": "Uusin",
     "oldest": "Vanhin",
     "name": "Nimi A-Ö",
-    "nameDesc": "Nimi Ö-Ä",
+    "nameDesc": "Nimi Ö-A",
     "location": "Sijainti"
   },
   "terms_and_conditions": {
