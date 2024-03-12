@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -36,14 +36,21 @@ const LoginForm: React.FC = () => {
   const { homeRoute } = routePaths;
   const from = location.state?.from?.pathname ?? homeRoute;
   const { t } = useTranslation();
+  const isFirstRender = useRef(true);
 
-  /* Runs on the initial render and checks if the user
+  /* Checks if the user
    * was redirected due to being unauthenticated */
   React.useEffect(() => {
+    // Doesn't run on the initial render since it causes the toast to render twice
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     if (!isAuthenticated && from !== homeRoute) {
       showToast(t("messages.unauthenticated_warning"), "warning");
     }
-  }, [from]);
+  }, [from, isAuthenticated]);
 
   const formContext = useForm<LoginFormData>({
     defaultValues,
