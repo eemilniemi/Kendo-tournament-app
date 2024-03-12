@@ -9,13 +9,15 @@ import {
   Post,
   Put,
   Request,
-  Query
+  Query,
+  Delete
 } from "tsoa";
 import { TournamentService } from "../services/tournamentService.js";
 import { UnsavedMatch } from "../models/tournamentModel.js";
 import type { Tournament } from "../models/tournamentModel.js";
 import {
   CreateTournamentRequest,
+  EditTournamentRequest,
   ObjectIdString,
   SignupForTournamentRequest
 } from "../models/requestModel.js";
@@ -83,6 +85,34 @@ export class TournamentController extends Controller {
     );
     this.setStatus(201);
     return result;
+  }
+
+  @Put("{tournamentId}")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async updateTournament(
+    @Request() request: express.Request & { user: JwtPayload },
+    @Path() tournamentId: ObjectIdString,
+    @Body() requestBody: EditTournamentRequest
+  ): Promise<void> {
+    const updaterId = request.user.id;
+
+    this.setStatus(204);
+    await this.service.updateTournamentById(
+      tournamentId,
+      requestBody,
+      updaterId
+    );
+  }
+
+  @Delete("{tournamentId}")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async deleteTournament(
+    @Path() tournamentId: ObjectIdString
+  ): Promise<void> {
+    this.setStatus(204);
+    await this.service.deleteTournamentById(tournamentId);
   }
 
   private get service(): TournamentService {

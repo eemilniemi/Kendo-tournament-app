@@ -7,10 +7,16 @@ import {
 } from "../models/tournamentModel.js";
 import UserModel, { type User } from "../models/userModel.js";
 import BadRequestError from "../errors/BadRequestError.js";
-import { Types } from "mongoose";
-import MatchModel, { MatchType } from "../models/matchModel.js";
-import { type CreateTournamentRequest } from "../models/requestModel.js";
-import { type Match, type MatchPlayer } from "../models/matchModel.js";
+import { type HydratedDocument, Types } from "mongoose";
+import MatchModel, {
+  type MatchType,
+  type Match,
+  type MatchPlayer
+} from "../models/matchModel.js";
+import {
+  type EditTournamentRequest,
+  type CreateTournamentRequest
+} from "../models/requestModel.js";
 
 export class TournamentService {
   public async getTournamentById(id: string): Promise<Tournament> {
@@ -59,41 +65,7 @@ export class TournamentService {
     tournamentData: CreateTournamentRequest,
     creator: string
   ): Promise<Tournament> {
-    if (!tournamentData.differentOrganizer) {
-      const organizer = await UserModel.findById(creator).exec();
-
-      if (organizer === null) {
-        // This should never throw due to the endpoint requiring authentication.
-        throw new NotFoundError({
-          message: "No user data found for the organizer."
-        });
-      }
-
-      tournamentData.organizerEmail = organizer.email;
-      tournamentData.organizerPhone = organizer.phoneNumber;
-    }
-
-    if (
-      tournamentData.type === TournamentType.Playoff &&
-      !this.isPowerOfTwo(tournamentData.maxPlayers)
-    ) {
-      throw new BadRequestError({
-        message:
-          "Invalid number of players for a playoff tournament. The total number of players must be a power of 2."
-      });
-    } else if (tournamentData.type === TournamentType.RoundRobin) {
-      this.calculateRoundRobinMatches(tournamentData.maxPlayers);
-    }
-
-    const startDate = new Date(tournamentData.startDate);
-    const endDate = new Date(tournamentData.endDate);
-
-    if (startDate >= endDate) {
-      throw new BadRequestError({
-        message:
-          "Invalid tournament dates. The start date must be before the end date."
-      });
-    }
+    await this.validateTournamentDetails(tournamentData, creator);
 
     const newTournament = await TournamentModel.create({
       ...tournamentData,
@@ -147,10 +119,16 @@ export class TournamentService {
 
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
-    if(tournament.type === TournamentType.PreliminiaryPlayoff){
-      tournament.groups = this.dividePlayersIntoGroups(tournament.players as Types.ObjectId[], tournament.groupsSizePreference);
-      await MatchModel.deleteMany({tournamentId : tournament.id});
-      
+    if (
+      tournament.type === TournamentType.PreliminiaryPlayoff &&
+      tournament.groupsSizePreference !== undefined
+    ) {
+      tournament.groups = this.dividePlayersIntoGroups(
+        tournament.players as Types.ObjectId[],
+        tournament.groupsSizePreference
+      );
+      await MatchModel.deleteMany({ tournamentId: tournament.id });
+
       tournament.matchSchedule = [];
     }
     await tournament.save();
@@ -211,6 +189,36 @@ export class TournamentService {
     return await tournament.toObject();
   }
 
+  public async updateTournamentById(
+    tournamentId: string,
+    requestBody: EditTournamentRequest,
+    updaterId: string
+  ): Promise<void> {
+    const tournamentDoc = await this.getTournamentDocumentById(tournamentId);
+    await this.validateTournamentDetails(
+      requestBody,
+      updaterId,
+      true,
+      tournamentDoc
+    );
+
+    // Apply the updates from requestBody to the tournament document
+    tournamentDoc.set(requestBody);
+    await tournamentDoc.save();
+  }
+
+  public async deleteTournamentById(tournamentId: string): Promise<void> {
+    const result = await TournamentModel.deleteOne({
+      _id: tournamentId
+    }).exec();
+
+    if (result.deletedCount === 0) {
+      throw new NotFoundError({
+        message: "Tournament not found or already deleted"
+      });
+    }
+  }
+
   private async generateTournamentSchedule(
     tournament: Tournament,
     newPlayer: Types.ObjectId
@@ -232,12 +240,11 @@ export class TournamentService {
         );
         break;
       case TournamentType.PreliminiaryPlayoff:
-        
-        for (const group of tournament.groups){
-          let addedPlayers : Types.ObjectId[] = [];
-          for(const player of group){
-            let groupMatches = TournamentService.generateRoundRobinSchedule(
-              addedPlayers as Types.ObjectId[],
+        for (const group of tournament.groups) {
+          const addedPlayers: Types.ObjectId[] = [];
+          for (const player of group) {
+            const groupMatches = TournamentService.generateRoundRobinSchedule(
+              addedPlayers,
               player,
               tournament.id,
               "preliminary"
@@ -245,7 +252,6 @@ export class TournamentService {
             matches.push(...groupMatches);
             addedPlayers.push(player);
           }
-          
         }
         break;
     }
@@ -275,7 +281,7 @@ export class TournamentService {
           type: tournamentType,
           elapsedTime: 0,
           timerStartedTimestamp: null,
-          tournamentRound: tournamentRound,
+          tournamentRound,
           tournamentId: tournament
         });
       }
@@ -347,20 +353,119 @@ export class TournamentService {
     return (playerCount * (playerCount - 1)) / 2;
   }
 
-  private dividePlayersIntoGroups(players: Types.ObjectId[], preferredGroupSize: number): Types.ObjectId[][] {
+  private dividePlayersIntoGroups(
+    players: Types.ObjectId[],
+    preferredGroupSize: number
+  ): Types.ObjectId[][] {
     const totalPlayers = players.length;
     const numGroups = Math.ceil(totalPlayers / preferredGroupSize);
-  
-    const groups: Types.ObjectId[][] = Array.from({ length: numGroups }, () => []);
-  
+
+    const groups: Types.ObjectId[][] = Array.from(
+      { length: numGroups },
+      () => []
+    );
+
     for (let i = 0; i < totalPlayers; i++) {
       const currentPlayer = players[i];
       const groupIndex = i % numGroups;
-  
+
       groups[groupIndex].push(currentPlayer);
     }
-  
+
     return groups;
   }
- 
+
+  private async getTournamentDocumentById(
+    id: string
+  ): Promise<HydratedDocument<Tournament>> {
+    const tournament = await TournamentModel.findById(id).exec();
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+
+    return tournament;
+  }
+
+  private async validateTournamentDetails(
+    tournamentDetails: CreateTournamentRequest | EditTournamentRequest,
+    creatorOrUpdaterId: string,
+    isUpdate: boolean = false,
+    existingTournamentDoc?: HydratedDocument<Tournament>
+  ): Promise<void> {
+    // If the tournament is of type playoff, validate maax players
+    if (
+      tournamentDetails.type === TournamentType.Playoff &&
+      tournamentDetails.maxPlayers !== undefined &&
+      !this.isPowerOfTwo(tournamentDetails.maxPlayers)
+    ) {
+      throw new BadRequestError({
+        message:
+          "Invalid number of players for a playoff tournament. The total number of players must be a power of 2."
+      });
+    } else if (
+      tournamentDetails.type === TournamentType.RoundRobin &&
+      tournamentDetails.maxPlayers !== undefined
+    ) {
+      this.calculateRoundRobinMatches(tournamentDetails.maxPlayers);
+    }
+
+    // Validate startDate and endDate
+    if (
+      tournamentDetails.startDate !== undefined &&
+      tournamentDetails.endDate !== undefined
+    ) {
+      const startDate = new Date(tournamentDetails.startDate);
+      const endDate = new Date(tournamentDetails.endDate);
+
+      if (startDate >= endDate) {
+        throw new BadRequestError({
+          message:
+            "Invalid tournament dates. The start date must be before the end date."
+        });
+      }
+    }
+
+    if (tournamentDetails.type === TournamentType.PreliminiaryPlayoff) {
+      if (tournamentDetails.groupsSizePreference === undefined) {
+        throw new BadRequestError({
+          message:
+            "Group size preference is required for Preliminary Playoff tournaments."
+        });
+      }
+      if (tournamentDetails.playersToPlayoffsPerGroup === undefined) {
+        throw new BadRequestError({
+          message:
+            "Players to playoffs per group is required for Preliminary Playoff tournaments."
+        });
+      }
+    }
+
+    // If creating a new tournament or differentOrganizer is true during an update, validate organizer details
+    if (tournamentDetails.differentOrganizer === false) {
+      const organizer = await UserModel.findById(creatorOrUpdaterId).exec();
+
+      if (organizer === null) {
+        throw new NotFoundError({
+          message: "No user data found for the organizer."
+        });
+      }
+
+      tournamentDetails.organizerEmail = organizer.email;
+      tournamentDetails.organizerPhone = organizer.phoneNumber;
+    }
+
+    // Additional checks for updates can be added here, e.g., ensuring the tournament hasn't started
+    if (isUpdate && existingTournamentDoc !== undefined) {
+      const currentDate = new Date();
+      const tournamentStartDate = new Date(existingTournamentDoc.startDate);
+      if (currentDate >= tournamentStartDate) {
+        throw new BadRequestError({
+          message: "Cannot update the tournament after it has started."
+        });
+      }
+    }
+  }
 }

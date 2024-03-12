@@ -30,9 +30,9 @@ export interface Tournament {
   organizerEmail?: string;
   organizerPhone?: string;
   maxPlayers: number;
-  groups: Array<Array<Types.ObjectId>>;
-  playersToPlayoffsPerGroup: number;
-  groupsSizePreference: number;
+  groups: Types.ObjectId[][];
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
   players: Array<Types.ObjectId | User>;
   matchSchedule: Array<Types.ObjectId | Match>;
 }

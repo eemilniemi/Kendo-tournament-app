@@ -41,3 +41,5 @@ export type EditUserRequest = Omit<RegisterRequest, "password">;
 export type ResetPasswordRequest = Pick<RegisterRequest, "password"> & {
   token: string;
 };
+
+export type EditTournamentRequest = Partial<CreateTournamentRequest>;
