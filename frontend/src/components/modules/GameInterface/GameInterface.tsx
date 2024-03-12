@@ -75,6 +75,8 @@ const GameInterface: React.FC = () => {
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
   const [playerColor, setPlayerColor] = useState<PlayerColor>("red");
   const [hasJoined, setHasJoined] = useState(false);
+  const [mostRecentPointType, setMostRecentPointType] =
+    useState<PointType | null>(null);
 
   const { matchId } = useParams();
   const { userId } = useAuth();
@@ -303,14 +305,6 @@ const GameInterface: React.FC = () => {
     void checkForTieAndStopTimer();
   }, [matchInfo, timer]);
 
-  const buttonToTypeMap: Record<string, PointType> = {
-    M: "men",
-    K: "kote",
-    D: "do",
-    T: "tsuki",
-    "\u0394": "hansoku"
-  };
-
   const selectedPointType = buttonToTypeMap[selectedButton];
 
   const pointRequest: AddPointRequest = {
@@ -345,6 +339,8 @@ const GameInterface: React.FC = () => {
         await apiPointRequest(matchId, pointRequest);
       }
     }
+
+    setMostRecentPointType(pointRequest.pointType);
   };
 
   // Get the selected radio button value
@@ -468,6 +464,29 @@ const GameInterface: React.FC = () => {
       return true;
     }
   }
+
+  const handleDeleteRecentPoint = async (): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.deleteRecentPoint(matchId);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+    setMostRecentPointType(null);
+  };
+
+  const handleModifyRecentPoint = async (newType: PointType): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.modifyRecentPoint(matchId, { newPointType: newType });
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+
+    setMostRecentPointType(pointRequest.pointType);
+  };
 
   return (
     <div className="app-container">
@@ -620,6 +639,9 @@ const GameInterface: React.FC = () => {
                   handlePointShowing={handlePointShowing}
                   handleOpen={handleOpen}
                   handleClose={handleClose}
+                  handleDeleteRecentPoint={handleDeleteRecentPoint}
+                  handleModifyRecentPoint={handleModifyRecentPoint}
+                  mostRecentPointType={mostRecentPointType}
                 />
               )}
 
@@ -649,3 +671,11 @@ const GameInterface: React.FC = () => {
 };
 
 export default GameInterface;
+
+export const buttonToTypeMap: Record<string, PointType> = {
+  M: "men",
+  K: "kote",
+  D: "do",
+  T: "tsuki",
+  "\u0394": "hansoku"
+};
