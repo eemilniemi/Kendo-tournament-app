@@ -12,47 +12,50 @@ interface Cell {
 }
 
 const PointTable: React.FC<TableComponentProps> = ({ matchInfo }) => {
-// Initialize the table with 5 rows and 2 columns, all cells empty initially
-const initialCells: Cell[][] = Array(5).fill(null).map(() => Array(2).fill({ value: "", filled: false }));
+  // Initialize the table with 5 rows and 2 columns, all cells empty initially
+  const initialCells: Cell[][] = Array(5)
+    .fill(null)
+    .map(() => Array(2).fill({ value: "", filled: false }));
 
-const [cells, setCells] = useState<Cell[][]>(initialCells);
+  const [cells, setCells] = useState<Cell[][]>(initialCells);
 
-const typeToButtonMap: Record<PointType, string> = {
-  men: "M",
-  kote: "K",
-  do: "D",
-  tsuki: "T",
-  hansoku: "\u0394"
-};
+  const typeToButtonMap: Record<PointType, string> = {
+    men: "M",
+    kote: "K",
+    do: "D",
+    tsuki: "T",
+    hansoku: "\u0394"
+  };
 
-useEffect(() => {
-  const allPoints: Array<{ color: string; time: Date; value: string }> = [];
+  useEffect(() => {
+    const allPoints: Array<{ color: string; time: Date; value: string }> = [];
 
-  matchInfo.players.forEach(player => {
-    player.points.forEach(point => {
-      const color: string = player.color;
-      const time: Date = point.timestamp;
-      const value: string = typeToButtonMap[point.type];
-      
-      if (!allPoints.some(existingPoint => existingPoint.time === time)) {
-        allPoints.push({ color, time, value });
+    matchInfo.players.forEach((player) => {
+      player.points.forEach((point) => {
+        const color: string = player.color;
+        const time: Date = point.timestamp;
+        const value: string = typeToButtonMap[point.type];
+
+        if (!allPoints.some((existingPoint) => existingPoint.time === time)) {
+          allPoints.push({ color, time, value });
+        }
+      });
+    });
+
+    allPoints.sort((a, b) => (a.time < b.time ? -1 : 1));
+
+    // Create a new state for the cells based on the sorted points
+    const newCells = initialCells.map((row) => [...row]); // Clone the initial structure
+    allPoints.forEach((point, index) => {
+      if (index < 5) {
+        // Ensure we don't exceed the table size
+        const column = point.color === "white" ? 0 : 1;
+        newCells[index][column] = { value: point.value, filled: true };
       }
     });
-  });
 
-  allPoints.sort((a, b) => (a.time < b.time ? -1 : 1));
-
-  // Create a new state for the cells based on the sorted points
-  const newCells = initialCells.map(row => [...row]); // Clone the initial structure
-  allPoints.forEach((point, index) => {
-    if (index < 5) { // Ensure we don't exceed the table size
-      const column = point.color === "white" ? 0 : 1;
-      newCells[index][column] = { value: point.value, filled: true };
-    }
-  });
-
-  setCells(newCells);
-}, [matchInfo]);
+    setCells(newCells);
+  }, [matchInfo]);
 
   return (
     <div className="tableContainer">
@@ -62,7 +65,15 @@ useEffect(() => {
             <TableRow key={rowIndex}>
               {row.map((cell, columnIndex) => (
                 <TableCell key={columnIndex}>
-                  {cell.filled ? (rowIndex === 0 ? <CircledLetter letter={cell.value} /> : cell.value) : ""}
+                  {cell.filled ? (
+                    rowIndex === 0 ? (
+                      <CircledLetter letter={cell.value} />
+                    ) : (
+                      cell.value
+                    )
+                  ) : (
+                    ""
+                  )}
                 </TableCell>
               ))}
             </TableRow>

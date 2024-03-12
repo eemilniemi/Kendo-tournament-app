@@ -105,9 +105,9 @@ const GameInterface: React.FC = () => {
 
   useEffect(() => {
     // Check for a saved most recent point type in sessionStorage
-    const savedPointType = sessionStorage.getItem('mostRecentPointType');
-    if (savedPointType) {
-      setMostRecentPointType(savedPointType as PointType); 
+    const savedPointType = sessionStorage.getItem("mostRecentPointType");
+    if (savedPointType !== null) {
+      setMostRecentPointType(savedPointType as PointType);
     }
   }, []);
 
@@ -350,7 +350,7 @@ const GameInterface: React.FC = () => {
     }
 
     setMostRecentPointType(pointRequest.pointType);
-    sessionStorage.setItem('mostRecentPointType', pointRequest.pointType);
+    sessionStorage.setItem("mostRecentPointType", pointRequest.pointType);
   };
 
   // Get the selected radio button value
@@ -484,7 +484,7 @@ const GameInterface: React.FC = () => {
       }
     }
     setMostRecentPointType(null);
-    sessionStorage.removeItem('mostRecentPointType');
+    sessionStorage.removeItem("mostRecentPointType");
   };
 
   const handleModifyRecentPoint = async (newType: PointType): Promise<void> => {
@@ -651,7 +651,7 @@ const GameInterface: React.FC = () => {
                   handleOpen={handleOpen}
                   handleClose={handleClose}
                 />
-            )}
+              )}
             <br></br>
             {userId !== null &&
               userId !== undefined &&
@@ -661,7 +661,7 @@ const GameInterface: React.FC = () => {
                   handleModifyRecentPoint={handleModifyRecentPoint}
                   mostRecentPointType={mostRecentPointType}
                 />
-            )}
+              )}
             {/* Print the winner */}
             {matchInfo.winner !== undefined && (
               <div>

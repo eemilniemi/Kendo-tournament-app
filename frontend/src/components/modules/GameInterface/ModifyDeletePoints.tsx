@@ -82,7 +82,7 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
           <Button
             onClick={async () => {
               await handleDeleteRecentPoint();
-              setModifyPointOpen(false); 
+              setModifyPointOpen(false);
             }}
           >
             {t("buttons.delete")}

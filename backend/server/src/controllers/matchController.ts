@@ -200,9 +200,7 @@ export class MatchController extends Controller {
     @Path() matchId: ObjectIdString
   ): Promise<void> {
     this.setStatus(204);
-    console.log("tuleeko tänne")
     const match = await this.service.deleteRecentPoint(matchId);
-    console.log(match)
     io.to(matchId).emit("delete-recent", match);
   }
 
