@@ -10,7 +10,7 @@ import {
   Security,
   Tags
 } from "tsoa";
-import { PointType, type Match } from "../models/matchModel.js";
+import { type PointType, type Match } from "../models/matchModel.js";
 import { MatchService } from "../services/matchService.js";
 import {
   AddPointRequest,
@@ -154,7 +154,7 @@ export class MatchController extends Controller {
       matchId,
       request.pointMakerId
     );
- 
+
     io.to(matchId).emit("add-pointmaker", match);
   }
 
@@ -196,11 +196,13 @@ export class MatchController extends Controller {
   @Delete("{matchId}/points/recent")
   @Tags("Match")
   @Security("jwt")
-  public async deleteRecentPoint(@Path() matchId: ObjectIdString): Promise<void> {
-      this.setStatus(204); 
-      const match = await this.service.deleteRecentPoint(matchId);
+  public async deleteRecentPoint(
+    @Path() matchId: ObjectIdString
+  ): Promise<void> {
+    this.setStatus(204);
+    const match = await this.service.deleteRecentPoint(matchId);
 
-      io.to(matchId).emit("delete-recent", match);
+    io.to(matchId).emit("delete-recent", match);
   }
 
   /*
@@ -210,12 +212,15 @@ export class MatchController extends Controller {
   @Tags("Match")
   @Security("jwt")
   public async modifyRecentPoint(
-      @Path() matchId: ObjectIdString,
-      @Body() requestBody: { newPointType: PointType }
+    @Path() matchId: ObjectIdString,
+    @Body() requestBody: { newPointType: PointType }
   ): Promise<void> {
-      this.setStatus(204); 
-      const match = await this.service.modifyRecentPoint(matchId, requestBody.newPointType);
+    this.setStatus(204);
+    const match = await this.service.modifyRecentPoint(
+      matchId,
+      requestBody.newPointType
+    );
 
-      io.to(matchId).emit("modify-recent", match);
+    io.to(matchId).emit("modify-recent", match);
   }
 }

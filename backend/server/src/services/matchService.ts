@@ -4,7 +4,7 @@ import MatchModel, {
   type MatchPoint,
   type PlayerColor,
   type MatchType,
-  PointType
+  type PointType
 } from "../models/matchModel.js";
 import NotFoundError from "../errors/NotFoundError.js";
 import BadRequestError from "../errors/BadRequestError.js";
@@ -448,14 +448,16 @@ export class MatchService {
   public async deleteRecentPoint(matchId: string): Promise<Match> {
     const match = await MatchModel.findById(matchId).exec();
     if (match === null) {
-      throw new NotFoundError({ message: `Match not found for ID: ${matchId}` });
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
     }
 
-    if (match.players && match.players.length > 0) {
+    if (match.players !== null && match.players.length > 0) {
       const players = match.players as MatchPlayer[];
       const { player, pointIndex } = this.findMostRecentPoint(players);
-  
-      if (player && pointIndex !== -1) {
+
+      if (player !== null && pointIndex !== -1) {
         player.points.splice(pointIndex, 1); // Remove the most recent point
 
         // Determine if the match had ended with this point
@@ -474,22 +476,27 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
-  
-    return match.toObject();
+
+    return await match.toObject();
   }
-  
+
   // Method to modify the most recent point in a match
-  public async modifyRecentPoint(matchId: string, newPointType: PointType): Promise<Match> {
+  public async modifyRecentPoint(
+    matchId: string,
+    newPointType: PointType
+  ): Promise<Match> {
     const match = await MatchModel.findById(matchId).exec();
     if (match === null) {
-        throw new NotFoundError({ message: `Match not found for ID: ${matchId}` });
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
     }
 
-    if (match.players && match.players.length > 0) {
+    if (match.players !== null && match.players.length > 0) {
       const players = match.players as MatchPlayer[];
       const { player, pointIndex } = this.findMostRecentPoint(players);
-  
-      if (player && pointIndex !== -1) {
+
+      if (player !== null && pointIndex !== -1) {
         const originalPointType = player.points[pointIndex].type; // Store the original point type
         player.points[pointIndex].type = newPointType; // Modify the type of the most recent point
 
@@ -498,7 +505,7 @@ export class MatchService {
           // Only re-evaluate match outcome if the match had already ended
           if (match.winner !== undefined || match.endTimestamp !== undefined) {
             // Clear potentially incorrect match conclusions
-            match.winner = undefined; 
+            match.winner = undefined;
             match.endTimestamp = undefined;
 
             await this.checkMatchOutcome(match); // Re-check the match outcome with the updated point
@@ -511,25 +518,31 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
-    return match.toObject();
+    return await match.toObject();
   }
 
-  private findMostRecentPoint(players: MatchPlayer[]): {player: MatchPlayer | null, pointIndex: number} {
+  private findMostRecentPoint(players: MatchPlayer[]): {
+    player: MatchPlayer | null;
+    pointIndex: number;
+  } {
     let latestPointTimestamp = new Date(0); // Epoch time as the initial latest timestamp
     let playerWithLatestPoint: MatchPlayer | null = null;
     let pointIndexWithLatestTimestamp = -1;
 
     players.forEach((player) => {
-        player.points.forEach((point, index) => {
-            if (point.timestamp > latestPointTimestamp) {
-                latestPointTimestamp = point.timestamp;
-                playerWithLatestPoint = player;
-                pointIndexWithLatestTimestamp = index;
-            }
-        });
+      player.points.forEach((point, index) => {
+        if (point.timestamp > latestPointTimestamp) {
+          latestPointTimestamp = point.timestamp;
+          playerWithLatestPoint = player;
+          pointIndexWithLatestTimestamp = index;
+        }
+      });
     });
 
-    return { player: playerWithLatestPoint, pointIndex: pointIndexWithLatestTimestamp };
+    return {
+      player: playerWithLatestPoint,
+      pointIndex: pointIndexWithLatestTimestamp
+    };
   }
 
   private async checkMatchOutcome(match: Match): Promise<void> {
@@ -715,7 +728,7 @@ export class MatchService {
     // round robin rankings
     const rankingMap: Map<string, number[]> = this.getAllPlayerScores(
       matches,
-      "preliminary" 
+      "preliminary"
     );
     const groupRankings: rankingStruct[][] = this.formGroupRankings(
       rankingMap,

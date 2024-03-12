@@ -59,7 +59,7 @@ export const socketEvents = (
       return { ...state, matchInfo };
     });
   });
-  
+
   socket.on("modify-recent", (matchInfo: Match) => {
     setValue((state) => {
       return { ...state, matchInfo };
