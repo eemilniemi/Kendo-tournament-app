@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
-import type { Tournament, User, Match } from "types/models";
+import type { Tournament, User, Match, PointType } from "types/models";
 import type {
   SignupForTournamentRequest,
   CreateTournamentRequest,
