@@ -177,6 +177,13 @@ const match = {
     await request.patch(`${MATCH_API}/${matchId}/remove-pointmaker`, {
       pointMakerId: userId
     });
+  },
+  deleteRecentPoint: async (matchId: string) => {
+    await request.delete(`${MATCH_API}/${matchId}/points/recent`);
+  },
+  
+  modifyRecentPoint: async (matchId: string, newPointType: PointType) => {
+    await request.patch(`${MATCH_API}/${matchId}/points/recent`, { newPointType });
   }
 };
 
