@@ -112,6 +112,17 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
             >
               {player2Name}
             </Typography>
+            {isWinnerDeclared && (
+              <Typography textAlign="center" variant="h6">
+                <span style={{ color: player1Color }}>
+                  {match.player1Score}
+                </span>{" "}
+                -{" "}
+                <span style={{ color: player2Color }}>
+                  {match.player2Score}
+                </span>
+              </Typography>
+            )}
             {match.elapsedTime <= 0 &&
               officialsInfo.map((info, index) => (
                 <Typography textAlign="center" key={index} variant="body2">
