@@ -11,7 +11,8 @@ import { type HydratedDocument, Types } from "mongoose";
 import MatchModel, {
   type MatchType,
   type Match,
-  type MatchPlayer
+  type MatchPlayer,
+  MatchTime
 } from "../models/matchModel.js";
 import {
   type EditTournamentRequest,
@@ -120,7 +121,7 @@ export class TournamentService {
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
     if (
-      tournament.type === TournamentType.PreliminiaryPlayoff &&
+      tournament.type === TournamentType.PreliminaryPlayoff &&
       tournament.groupsSizePreference !== undefined
     ) {
       tournament.groups = this.dividePlayersIntoGroups(
@@ -229,17 +230,19 @@ export class TournamentService {
         matches = TournamentService.generateRoundRobinSchedule(
           tournament.players as Types.ObjectId[],
           newPlayer,
-          tournament.id
+          tournament.id,
+          tournament.matchTime
         );
         break;
       case TournamentType.Playoff:
         matches = await this.generatePlayoffSchedule(
           tournament.players as Types.ObjectId[],
           tournament.matchSchedule as Types.ObjectId[],
-          tournament.id
+          tournament.id,
+          tournament.matchTime
         );
         break;
-      case TournamentType.PreliminiaryPlayoff:
+      case TournamentType.PreliminaryPlayoff:
         for (const group of tournament.groups) {
           const addedPlayers: Types.ObjectId[] = [];
           for (const player of group) {
@@ -247,6 +250,7 @@ export class TournamentService {
               addedPlayers,
               player,
               tournament.id,
+              tournament.matchTime,
               "preliminary"
             );
             matches.push(...groupMatches);
@@ -267,6 +271,7 @@ export class TournamentService {
     playerIds: Types.ObjectId[],
     newPlayer: Types.ObjectId,
     tournament: Types.ObjectId,
+    tournamentMatchTime: MatchTime,
     tournamentType: MatchType = "group",
     tournamentRound: number = 1
   ): UnsavedMatch[] {
@@ -282,7 +287,8 @@ export class TournamentService {
           elapsedTime: 0,
           timerStartedTimestamp: null,
           tournamentRound,
-          tournamentId: tournament
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime
         });
       }
     }
@@ -292,7 +298,8 @@ export class TournamentService {
   private async generatePlayoffSchedule(
     playerIds: Types.ObjectId[],
     previousMatches: Types.ObjectId[],
-    tournament: Types.ObjectId
+    tournament: Types.ObjectId,
+    tournamentMatchTime: MatchTime
   ): Promise<UnsavedMatch[]> {
     const matches: UnsavedMatch[] = [];
     const playerSet = new Set<string>();
@@ -329,7 +336,8 @@ export class TournamentService {
         elapsedTime: 0,
         timerStartedTimestamp: null,
         tournamentRound: 1,
-        tournamentId: tournament
+        tournamentId: tournament,
+        matchTime: tournamentMatchTime
       });
     }
 
@@ -428,7 +436,7 @@ export class TournamentService {
       }
     }
 
-    if (tournamentDetails.type === TournamentType.PreliminiaryPlayoff) {
+    if (tournamentDetails.type === TournamentType.PreliminaryPlayoff) {
       if (tournamentDetails.groupsSizePreference === undefined) {
         throw new BadRequestError({
           message:

@@ -4,6 +4,7 @@ import type { Tournament } from "./tournamentModel";
 export type PlayerColor = "red" | "white";
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
 export type MatchType = "group" | "playoff" | "preliminary" | "pre playoff";
+export type MatchTime = 180000 | 240000 | 300000;
 
 export interface MatchPoint {
   type: PointType;
@@ -35,6 +36,7 @@ export interface Match {
   isOvertime: boolean;
   player1Score: number;
   player2Score: number;
+  matchTime: MatchTime;
 }
 
 const pointSchema = new Schema<MatchPoint>(
@@ -96,7 +98,8 @@ const matchSchema = new Schema<Match>(
     isTimerOn: { type: Boolean, required: true, default: false },
     isOvertime: { type: Boolean, required: true, default: false },
     player1Score: { type: Number, required: true, default: 0 },
-    player2Score: { type: Number, required: true, default: 0 }
+    player2Score: { type: Number, required: true, default: 0 },
+    matchTime: {type: Number, required: true }
   },
   {
     toObject: {
