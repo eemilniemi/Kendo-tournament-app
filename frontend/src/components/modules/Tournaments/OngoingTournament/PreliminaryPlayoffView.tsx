@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Tabs, Tab, Button, Typography } from "@mui/material";
+import {
+  Tabs,
+  Tab,
+  Button,
+  Typography,
+  Card,
+  CardActionArea,
+  CardContent
+} from "@mui/material";
 import { type Match, type Tournament } from "types/models";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -103,7 +111,7 @@ const PreliminaryPlayoffView: React.FC = () => {
       .filter((player) => player !== undefined) as TournamentPlayer[]; // Filter out undefined values and assert the type
   };
 
-  // Handler function to handle scoreboard click
+  // Handles view change when scoreboard is clicked
   const handleScoreboardClick = (groupId: number): void => {
     setSelectedGroup(groupId);
     setShowMatches(true);
@@ -231,23 +239,29 @@ const PreliminaryPlayoffView: React.FC = () => {
         <>
           {!showMatches &&
             tournament.groups?.map((groupIds, index) => (
-              <div key={index}>
-                <h2>
-                  {t("tournament_view_labels.group")} {index + 1}
-                </h2>
-                <Scoreboard
-                  players={getPlayersForGroup(groupIds)}
+              <Card key={index}>
+                <CardActionArea
                   onClick={() => {
                     handleScoreboardClick(index);
                   }}
-                />
-              </div>
+                >
+                  <CardContent>
+                    <Typography variant="h5" component="h2">
+                      {t("tournament_view_labels.group")} {index + 1}
+                    </Typography>
+                    <Scoreboard players={getPlayersForGroup(groupIds)} />
+                  </CardContent>
+                </CardActionArea>
+              </Card>
             ))}
           {showMatches && (
             <div>
               <Button onClick={handleBackToGroupView}>
                 <ArrowBackIcon /> {t("navigation.back_to_group_view")}
               </Button>
+              <Typography variant="h4">
+                {t("tournament_view_labels.group")} {selectedGroup}
+              </Typography>
               <Matches
                 ongoingMatchElements={ongoingElements}
                 upcomingMatchElements={upcomingElements}
@@ -257,7 +271,9 @@ const PreliminaryPlayoffView: React.FC = () => {
           )}
         </>
       )}
-      {currentTab === "playoff" && tournamentStage !== "playoff" && <div />}
+      {currentTab === "playoff" && tournamentStage !== "playoff" && (
+        <div>{t("tournament_view_labels.playoff_stage_not_started")}</div>
+      )}
       {currentTab === "playoff" && tournamentStage === "playoff" && (
         <div>
           <PlayoffTournamentView />

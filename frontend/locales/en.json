@@ -126,7 +126,8 @@
     "missing_timer": "Missing: Time keeper",
     "missing_point_maker": "Missing: Point maker",
     "missing_and": "and point maker",
-    "group": "Group"
+    "group": "Group",
+    "playoff_stage_not_started": "Playoff stage has not started yet."
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",

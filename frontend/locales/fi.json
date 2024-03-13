@@ -126,7 +126,8 @@
     "missing_timer": "Puuttuu: kellokalle",
     "missing_point_maker": "Puuttuu: pistevastaava",
     "missing_and": "ja pistevastaava",
-    "group": "Lohko"
+    "group": "Lohko",
+    "playoff_stage_not_started": "Pudotuspelivaihe ei ole vielä alkanut."
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",
