@@ -28,16 +28,16 @@ export class AuthService {
       .exec();
 
     if (user === null || user === undefined) {
-      throw new UnauthorizedError({
-        message: "Invalid email or password"
+      throw new BadRequestError({
+        message: "No user found with the given email"
       });
     }
 
     const isValidPassword = await user.checkPassword(password);
 
     if (!isValidPassword) {
-      throw new UnauthorizedError({
-        message: "Invalid email or password"
+      throw new BadRequestError({
+        message: "Invalid password"
       });
     }
 
