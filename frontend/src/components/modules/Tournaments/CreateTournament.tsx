@@ -5,7 +5,7 @@ import { isValidPhone } from "utils/form-validators";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import { useNavigate } from "react-router-dom";
-import { type TournamentType } from "types/models";
+import { type TournamentType, MatchTime } from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   Typography,
@@ -48,6 +48,7 @@ export interface CreateTournamentFormData {
   organizerTel?: string;
   playersToPlayoffsPerGroup?: number;
   groupsSizePreference?: number;
+  matchTime: MatchTime;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -58,7 +59,8 @@ const defaultValues: CreateTournamentFormData = {
   description: "",
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
-  differentOrganizer: false
+  differentOrganizer: false,
+  matchTime: 300000
 };
 
 const CreateTournamentForm: React.FC = () => {
@@ -75,6 +77,7 @@ const CreateTournamentForm: React.FC = () => {
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
+      console.log(data.matchTime);
       await api.tournaments.createNew({
         ...data,
         startDate: data.startDate.toString(),
@@ -190,6 +193,28 @@ const CreateTournamentForm: React.FC = () => {
             {
               id: "Preliminary Playoff",
               label: t("create_tournament_form.preliminary_playoff")
+            }
+          ]}
+          fullWidth
+          margin="normal"
+        />
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.match_time")}
+          name="matchTime"
+          options={[
+            {
+              id: "180000",
+              label: t("create_tournament_form.3_min")
+            },
+            {
+              id: "240000",
+              label: t("create_tournament_form.4_min")
+            },
+            {
+              id: "300000",
+              label: t("create_tournament_form.5_min")
             }
           ]}
           fullWidth

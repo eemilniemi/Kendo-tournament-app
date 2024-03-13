@@ -21,6 +21,8 @@ export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
 
 export type MatchType = "group" | "playoff";
 
+export type MatchTime = 180000 | 240000 | 300000;
+
 export interface MatchPoint {
   type: PointType;
   timestamp: Date;
@@ -50,6 +52,7 @@ export interface Match {
   isOvertime: boolean;
   player1Score: number;
   player2Score: number;
+  matchTime: MatchTime;
 }
 
 export interface Tournament {
@@ -66,6 +69,7 @@ export interface Tournament {
   organizerPhone?: string;
   players: User[];
   matchSchedule: Match[];
+  matchTime: MatchTime;
 }
 
 export type TournamentType = "Round Robin" | "Playoff" | "Preliminary Playoff";
