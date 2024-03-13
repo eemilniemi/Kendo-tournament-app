@@ -73,7 +73,8 @@
     "create_account": "Create an account",
     "create_tournament": "Create a new tournament",
     "confirm_tournament_creation": "Confirm tournament creation",
-    "modify_or_delete": "Modify or delete recent point"
+    "modify_or_delete": "Modify or delete recent point",
+    "select_new_type": "Select new type for the recent point:"
   },
   "login_form": {
     "forgot_password": "Forgot password?",

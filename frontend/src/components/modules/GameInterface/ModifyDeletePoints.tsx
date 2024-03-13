@@ -8,7 +8,8 @@ import {
   FormControlLabel,
   Button,
   Box,
-  DialogActions
+  DialogActions,
+  Typography
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { buttonToTypeMap } from "./GameInterface";
@@ -53,6 +54,7 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
       >
         <DialogTitle>{t("titles.modify_or_delete")}</DialogTitle>
         <DialogContent>
+          <Typography>{t("titles.select_new_type")}</Typography>
           <RadioGroup
             aria-label="new-point-type"
             name="new-point-type"
@@ -71,15 +73,9 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
             ))}
           </RadioGroup>
         </DialogContent>
-        <DialogActions>
+        <DialogActions style={{ justifyContent: 'space-between' }}>
           <Button
-            onClick={() => {
-              setModifyPointOpen(false);
-            }}
-          >
-            {t("buttons.cancel_button")}
-          </Button>
-          <Button
+            variant="contained"
             onClick={async () => {
               await handleDeleteRecentPoint();
               setModifyPointOpen(false);
@@ -87,12 +83,23 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
           >
             {t("buttons.delete")}
           </Button>
-          <Button
-            onClick={handleSaveNewPointType}
-            disabled={newPointType === mostRecentPointType}
-          >
-            {t("buttons.save_button")}
-          </Button>
+          <Box>
+            <Button
+              variant = "text"
+              onClick={() => {
+                setModifyPointOpen(false);
+              }}
+            >
+              {t("buttons.cancel_button")}
+            </Button>
+            <Button
+              variant = "text"
+              onClick={handleSaveNewPointType}
+              disabled={newPointType === mostRecentPointType}
+            >
+              {t("buttons.save_button")}
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
       <Box display="flex" gap="20px" justifyContent="center">

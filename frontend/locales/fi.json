@@ -73,7 +73,8 @@
     "create_account": "Luo tili",
     "create_tournament": "Luo uusi turnaus",
     "confirm_tournament_creation": "Vahvista turnauksen luonti",
-    "modify_or_delete": "Muokkaa tai poista viimeisin piste"
+    "modify_or_delete": "Muokkaa tai poista viimeisin piste",
+    "select_new_type": "Valitse uusi tyyppi viimeisimmälle pisteelle:"
   },
   "login_form": {
     "forgot_password": "Unohtuiko salasana?",
