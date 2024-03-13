@@ -29,7 +29,7 @@ export class AuthService {
 
     if (user === null || user === undefined) {
       throw new BadRequestError({
-        message: "Invalid email"
+        message: "No user found with the given email"
       });
     }
 
