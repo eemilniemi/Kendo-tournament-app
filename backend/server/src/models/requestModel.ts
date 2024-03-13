@@ -1,4 +1,9 @@
-import type { MatchTime, MatchType, PlayerColor, PointType } from "./matchModel.js";
+import type {
+  MatchTime,
+  MatchType,
+  PlayerColor,
+  PointType
+} from "./matchModel.js";
 import type { Tournament } from "./tournamentModel.js";
 
 /**
