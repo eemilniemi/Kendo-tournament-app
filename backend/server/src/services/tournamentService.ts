@@ -12,7 +12,7 @@ import MatchModel, {
   type MatchType,
   type Match,
   type MatchPlayer,
-  MatchTime
+  type MatchTime
 } from "../models/matchModel.js";
 import {
   type EditTournamentRequest,

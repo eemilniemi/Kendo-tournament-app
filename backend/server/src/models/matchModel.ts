@@ -99,7 +99,7 @@ const matchSchema = new Schema<Match>(
     isOvertime: { type: Boolean, required: true, default: false },
     player1Score: { type: Number, required: true, default: 0 },
     player2Score: { type: Number, required: true, default: 0 },
-    matchTime: {type: Number, required: true }
+    matchTime: { type: Number, required: true }
   },
   {
     toObject: {
