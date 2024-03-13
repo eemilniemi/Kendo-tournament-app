@@ -41,14 +41,12 @@ const LoginForm: React.FC = () => {
   /* Checks if the user
    * was redirected due to being unauthenticated */
   React.useEffect(() => {
-    // Doesn't run on the initial render since it causes the toast to render twice
+    // Only runs on the initial render since the toast renders twice otherwise
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      return;
-    }
-
-    if (!isAuthenticated && from !== homeRoute) {
-      showToast(t("messages.unauthenticated_warning"), "warning");
+      if (!isAuthenticated && from !== homeRoute) {
+        showToast(t("messages.unauthenticated_warning"), "warning");
+      }
     }
   }, [from, isAuthenticated]);
 
