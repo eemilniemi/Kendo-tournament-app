@@ -73,7 +73,7 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
             ))}
           </RadioGroup>
         </DialogContent>
-        <DialogActions style={{ justifyContent: 'space-between' }}>
+        <DialogActions style={{ justifyContent: "space-between" }}>
           <Button
             variant="contained"
             onClick={async () => {
@@ -85,7 +85,7 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
           </Button>
           <Box>
             <Button
-              variant = "text"
+              variant="text"
               onClick={() => {
                 setModifyPointOpen(false);
               }}
@@ -93,7 +93,7 @@ const ModifyDeletePoints: React.FC<ModifyDeletePointsProps> = ({
               {t("buttons.cancel_button")}
             </Button>
             <Button
-              variant = "text"
+              variant="text"
               onClick={handleSaveNewPointType}
               disabled={newPointType === mostRecentPointType}
             >
