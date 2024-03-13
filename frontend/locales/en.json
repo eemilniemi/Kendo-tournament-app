@@ -161,7 +161,11 @@
     "organizer_phone_number": "Organizer's phone number",
     "confirmation_message": "Are you sure you want to create the tournament with the provided information?",
     "players_to_playoffs_per_group": "Players proceeding to playoffs per group",
-    "groups_size_preference": "Group max size (players)"
+    "groups_size_preference": "Group max size (players)",
+    "match_time": "Select match time",
+    "3_min": "3 minutes",
+    "4_min": "4 minutes",
+    "5_min": "5 minutes"
   },
   "upcoming_tournament_view": {
     "date_header": "When",

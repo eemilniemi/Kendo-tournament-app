@@ -35,7 +35,8 @@ export class MatchService {
       comment: requestBody.comment,
       officials: requestBody.officials,
       timeKeeper: requestBody.timeKeeper,
-      pointMaker: requestBody.pointMaker
+      pointMaker: requestBody.pointMaker,
+      matchTime: requestBody.matchTime
     });
 
     return await newMatch.toObject();
@@ -66,7 +67,6 @@ export class MatchService {
 
   public async startTimer(id: string): Promise<Match> {
     const match = await MatchModel.findById(id).exec();
-    const MATCH_TIME = 300;
 
     if (match === null) {
       throw new NotFoundError({
@@ -74,7 +74,7 @@ export class MatchService {
       });
     }
 
-    if (match.winner !== undefined || match.elapsedTime === MATCH_TIME) {
+    if (match.winner !== undefined || match.elapsedTime === match.matchTime) {
       throw new BadRequestError({
         message: "Finished matches cannot be edited"
       });
@@ -218,6 +218,7 @@ export class MatchService {
                       addedPlayers,
                       player,
                       tournament.id,
+                      tournament.matchTime,
                       "preliminary",
                       nextRound
                     );
@@ -548,7 +549,7 @@ export class MatchService {
     const currentRound = currentMatch.tournamentRound;
 
     if (
-      tournament.type === TournamentType.PreliminiaryPlayoff &&
+      tournament.type === TournamentType.PreliminaryPlayoff &&
       currentRound === 1
     ) {
       return;
@@ -761,7 +762,7 @@ export class MatchService {
     }
     const playedMatches = tournament.matchSchedule;
 
-    if (tournament.type === TournamentType.PreliminiaryPlayoff) {
+    if (tournament.type === TournamentType.PreliminaryPlayoff) {
       let played = 0;
 
       for (let i = 0; i < playedMatches.length; i++) {

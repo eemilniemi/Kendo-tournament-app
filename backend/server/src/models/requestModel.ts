@@ -1,4 +1,9 @@
-import type { MatchType, PlayerColor, PointType } from "./matchModel.js";
+import type {
+  MatchTime,
+  MatchType,
+  PlayerColor,
+  PointType
+} from "./matchModel.js";
 import type { Tournament } from "./tournamentModel.js";
 
 /**
@@ -92,6 +97,7 @@ export interface CreateMatchRequest {
   comment?: string;
   timeKeeper?: ObjectIdString;
   pointMaker?: ObjectIdString;
+  matchTime: MatchTime;
 }
 
 export interface AddPointRequest {
@@ -113,6 +119,7 @@ export type CreateTournamentRequest = Pick<
   | "description"
   | "groupsSizePreference"
   | "playersToPlayoffsPerGroup"
+  | "matchTime"
 > & {
   differentOrganizer: boolean;
 };
