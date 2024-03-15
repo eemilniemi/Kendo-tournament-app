@@ -403,7 +403,9 @@ export class TournamentService {
     isUpdate: boolean = false,
     existingTournamentDoc?: HydratedDocument<Tournament>
   ): Promise<void> {
-    // If the tournament is of type playoff, validate maax players
+    const MINIMUM_GROUP_SIZE = 3;
+
+    // If the tournament is of type playoff, validate max players
     if (
       tournamentDetails.type === TournamentType.Playoff &&
       tournamentDetails.maxPlayers !== undefined &&
@@ -436,11 +438,17 @@ export class TournamentService {
       }
     }
 
+    // If tournament is type preliminary playoff, validate related fields
     if (tournamentDetails.type === TournamentType.PreliminaryPlayoff) {
       if (tournamentDetails.groupsSizePreference === undefined) {
         throw new BadRequestError({
           message:
             "Group size preference is required for Preliminary Playoff tournaments."
+        });
+      }
+      if (tournamentDetails.groupsSizePreference < MINIMUM_GROUP_SIZE) {
+        throw new BadRequestError({
+          message: `Group size needs to be ${MINIMUM_GROUP_SIZE} on minimum`
         });
       }
       if (tournamentDetails.playersToPlayoffsPerGroup === undefined) {
