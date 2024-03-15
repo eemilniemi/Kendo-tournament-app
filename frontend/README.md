@@ -10,18 +10,18 @@ These instructions will help you set up the project locally for development and 
 
 2. Install dependencies
 
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 3. Create `.env` file in the root directory by running
 
-    ```bash
-    cp `.env.example` `.env`
-    ```
+   ```bash
+   cp `.env.example` `.env`
+   ```
 
 4. Start the dev server
 
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
