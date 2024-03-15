@@ -264,7 +264,7 @@ const PreliminaryPlayoffView: React.FC = () => {
                 <ArrowBackIcon /> {t("navigation.back_to_group_view")}
               </Button>
               <Typography variant="h4">
-                {t("tournament_view_labels.group")}
+                {t("tournament_view_labels.group")}{" "}
                 {selectedGroup !== null ? selectedGroup + 1 : ""}
               </Typography>
               <Matches
