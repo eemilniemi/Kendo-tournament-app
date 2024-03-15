@@ -24,7 +24,9 @@
     "logout_successful": "Uloskirjautuminen onnistui!",
     "missing_both": "Matsilta puuttuu molemmat toimitsijat!",
     "missing_pointmaker": "Matsilta puuttuu pistevastaava!",
-    "missing_timekeeper": "Matsilta puuttuu kellokalle!"
+    "missing_timekeeper": "Matsilta puuttuu kellokalle!",
+    "minimum_groupsize_error": "Lohkon minimikoko on  ",
+    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä"
   },
   "game_interface": {
     "player": "Pelaaja",
