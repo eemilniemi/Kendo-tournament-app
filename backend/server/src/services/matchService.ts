@@ -3,7 +3,8 @@ import MatchModel, {
   type Match,
   type MatchPoint,
   type PlayerColor,
-  type MatchType
+  type MatchType,
+  type PointType
 } from "../models/matchModel.js";
 import NotFoundError from "../errors/NotFoundError.js";
 import BadRequestError from "../errors/BadRequestError.js";
@@ -442,6 +443,107 @@ export class MatchService {
     }
 
     return await match.toObject();
+  }
+
+  // Method to delete the most recent point from a match
+  public async deleteRecentPoint(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+
+    if (match.players !== null && match.players.length > 0) {
+      const players = match.players as MatchPlayer[];
+      const { player, pointIndex } = this.findMostRecentPoint(players);
+
+      if (player !== null && pointIndex !== -1) {
+        player.points.splice(pointIndex, 1); // Remove the most recent point
+
+        // Determine if the match had ended with this point
+        const wasMatchEndingPoint = match.endTimestamp !== undefined;
+
+        // If the removed point ended the match, revert match to ongoing
+        if (wasMatchEndingPoint) {
+          match.winner = undefined; // Clear the winner
+          match.endTimestamp = undefined; // Clear the end timestamp
+        }
+
+        await match.save();
+      } else {
+        throw new BadRequestError({ message: "No points to delete." });
+      }
+    } else {
+      throw new BadRequestError({ message: "No players in match." });
+    }
+
+    return await match.toObject();
+  }
+
+  // Method to modify the most recent point in a match
+  public async modifyRecentPoint(
+    matchId: string,
+    newPointType: PointType
+  ): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+
+    if (match.players !== null && match.players.length > 0) {
+      const players = match.players as MatchPlayer[];
+      const { player, pointIndex } = this.findMostRecentPoint(players);
+
+      if (player !== null && pointIndex !== -1) {
+        const originalPointType = player.points[pointIndex].type; // Store the original point type
+        player.points[pointIndex].type = newPointType; // Modify the type of the most recent point
+
+        // Check if original or new point type is "hansoku", indicating a need to re-evaluate the match outcome
+        if (originalPointType === "hansoku" || newPointType === "hansoku") {
+          // Only re-evaluate match outcome if the match had already ended
+          if (match.winner !== undefined || match.endTimestamp !== undefined) {
+            // Clear potentially incorrect match conclusions
+            match.winner = undefined;
+            match.endTimestamp = undefined;
+
+            await this.checkMatchOutcome(match); // Re-check the match outcome with the updated point
+          }
+        }
+        await match.save();
+      } else {
+        throw new BadRequestError({ message: "No points found to modify." });
+      }
+    } else {
+      throw new BadRequestError({ message: "No players in match." });
+    }
+    return await match.toObject();
+  }
+
+  private findMostRecentPoint(players: MatchPlayer[]): {
+    player: MatchPlayer | null;
+    pointIndex: number;
+  } {
+    let latestPointTimestamp = new Date(0); // Epoch time as the initial latest timestamp
+    let playerWithLatestPoint: MatchPlayer | null = null;
+    let pointIndexWithLatestTimestamp = -1;
+
+    players.forEach((player) => {
+      player.points.forEach((point, index) => {
+        if (point.timestamp > latestPointTimestamp) {
+          latestPointTimestamp = point.timestamp;
+          playerWithLatestPoint = player;
+          pointIndexWithLatestTimestamp = index;
+        }
+      });
+    });
+
+    return {
+      player: playerWithLatestPoint,
+      pointIndex: pointIndexWithLatestTimestamp
+    };
   }
 
   private async checkMatchOutcome(match: Match): Promise<void> {

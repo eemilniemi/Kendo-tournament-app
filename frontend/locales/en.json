@@ -61,7 +61,9 @@
     "sign_up_button": "Sign up",
     "register_button": "Register",
     "create_button": "Create",
-    "save_button": "Save"
+    "save_button": "Save",
+    "modify_or_delete": "Modify or delete recent point",
+    "delete": "Delete"
   },
   "titles": {
     "login": "Sign in",
@@ -70,7 +72,9 @@
     "confirm_account_deletion": "Confirm Account Deletion",
     "create_account": "Create an account",
     "create_tournament": "Create a new tournament",
-    "confirm_tournament_creation": "Confirm tournament creation"
+    "confirm_tournament_creation": "Confirm tournament creation",
+    "modify_or_delete": "Modify or delete recent point",
+    "select_new_type": "Select new type for the recent point:"
   },
   "login_form": {
     "forgot_password": "Forgot password?",

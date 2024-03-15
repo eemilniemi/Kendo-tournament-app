@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
-import type { Tournament, User, Match } from "types/models";
+import type { Tournament, User, Match, PointType } from "types/models";
 import type {
   SignupForTournamentRequest,
   CreateTournamentRequest,
@@ -176,6 +176,15 @@ const match = {
   removePointmaker: async (matchId: string, userId: string) => {
     await request.patch(`${MATCH_API}/${matchId}/remove-pointmaker`, {
       pointMakerId: userId
+    });
+  },
+  deleteRecentPoint: async (matchId: string) => {
+    await request.delete(`${MATCH_API}/${matchId}/delete-recent`);
+  },
+
+  modifyRecentPoint: async (matchId: string, newPointType: PointType) => {
+    await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
+      newPointType
     });
   }
 };

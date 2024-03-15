@@ -34,6 +34,7 @@ import { useTournament } from "context/TournamentContext";
 import Loader from "components/common/Loader";
 import ErrorModal from "components/common/ErrorModal";
 import { useTranslation } from "react-i18next";
+import ModifyDeletePoints from "./ModifyDeletePoints";
 
 export interface MatchData {
   timerTime: number;
@@ -76,6 +77,8 @@ const GameInterface: React.FC = () => {
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
   const [playerColor, setPlayerColor] = useState<PlayerColor>("red");
   const [hasJoined, setHasJoined] = useState(false);
+  const [mostRecentPointType, setMostRecentPointType] =
+    useState<PointType | null>(null);
 
   const { matchId } = useParams();
   const { userId } = useAuth();
@@ -100,6 +103,14 @@ const GameInterface: React.FC = () => {
       };
     }
   }, [matchId]);
+
+  useEffect(() => {
+    // Check for a saved most recent point type in sessionStorage
+    const savedPointType = sessionStorage.getItem("mostRecentPointType");
+    if (savedPointType !== null) {
+      setMostRecentPointType(savedPointType as PointType);
+    }
+  }, []);
 
   // Fetching match data
   useEffect(() => {
@@ -310,14 +321,6 @@ const GameInterface: React.FC = () => {
     void checkForTieAndStopTimer();
   }, [matchInfo, timer]);
 
-  const buttonToTypeMap: Record<string, PointType> = {
-    M: "men",
-    K: "kote",
-    D: "do",
-    T: "tsuki",
-    "\u0394": "hansoku"
-  };
-
   const selectedPointType = buttonToTypeMap[selectedButton];
 
   const pointRequest: AddPointRequest = {
@@ -352,6 +355,9 @@ const GameInterface: React.FC = () => {
         await apiPointRequest(matchId, pointRequest);
       }
     }
+
+    setMostRecentPointType(pointRequest.pointType);
+    sessionStorage.setItem("mostRecentPointType", pointRequest.pointType);
   };
 
   // Get the selected radio button value
@@ -475,6 +481,30 @@ const GameInterface: React.FC = () => {
       return true;
     }
   }
+
+  const handleDeleteRecentPoint = async (): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.deleteRecentPoint(matchId);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+    setMostRecentPointType(null);
+    sessionStorage.removeItem("mostRecentPointType");
+  };
+
+  const handleModifyRecentPoint = async (newType: PointType): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.modifyRecentPoint(matchId, newType);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+
+    setMostRecentPointType(pointRequest.pointType);
+  };
 
   return (
     <div className="app-container">
@@ -629,7 +659,16 @@ const GameInterface: React.FC = () => {
                   handleClose={handleClose}
                 />
               )}
-
+            <br></br>
+            {userId !== null &&
+              userId !== undefined &&
+              matchInfo.pointMaker === userId && (
+                <ModifyDeletePoints
+                  handleDeleteRecentPoint={handleDeleteRecentPoint}
+                  handleModifyRecentPoint={handleModifyRecentPoint}
+                  mostRecentPointType={mostRecentPointType}
+                />
+              )}
             {/* Print the winner */}
             {matchInfo.winner !== undefined && (
               <div>
@@ -656,3 +695,11 @@ const GameInterface: React.FC = () => {
 };
 
 export default GameInterface;
+
+export const buttonToTypeMap: Record<string, PointType> = {
+  M: "men",
+  K: "kote",
+  D: "do",
+  T: "tsuki",
+  "\u0394": "hansoku"
+};
