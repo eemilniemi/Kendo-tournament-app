@@ -11,18 +11,40 @@ import { useTranslation } from "react-i18next";
 interface Rounds extends Record<number, Match[]> {}
 
 const PlayoffTournamentView: React.FC = () => {
-  const { matchSchedule, players } = useTournament();
+  const { type, matchSchedule, players, groups, playersToPlayoffsPerGroup } =
+    useTournament();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  // Filter playoff matches from the matchSchedule
-  const playoffMatches = matchSchedule.filter(
-    (match) => match.type === "playoff"
-  );
+  let playoffMatches: Match[];
+  let totalRounds = 0;
+  let highestPreliminaryRound = 0;
 
-  // Calculate the total number of rounds, assuming it's a single-elimination tournament
-  const totalRounds = Math.ceil(Math.log2(players.length));
+  if (type === "Preliminary Playoff") {
+    // Calculate initial round number for playoff matches
+    for (const match of matchSchedule) {
+      if (match.type !== "playoff") {
+        highestPreliminaryRound = Math.max(
+          highestPreliminaryRound,
+          match.tournamentRound
+        );
+      }
+    }
+
+    // Filter playoff matches from the matchSchedule
+    playoffMatches = matchSchedule.filter((match) => match.type === "playoff");
+    // Calculate the total number of rounds, assuming it's a single-elimination tournament
+    if (groups !== undefined && playersToPlayoffsPerGroup !== undefined) {
+      totalRounds = Math.ceil(
+        Math.log2(playersToPlayoffsPerGroup * groups.length)
+      );
+    }
+  } else {
+    // Is normal playoff tournament
+    playoffMatches = matchSchedule;
+    totalRounds = Math.ceil(Math.log2(players.length));
+  }
 
   if (error !== null) {
     return (
@@ -39,7 +61,13 @@ const PlayoffTournamentView: React.FC = () => {
   try {
     // Group matches by tournamentRound
     const rounds: Rounds = playoffMatches.reduce<Rounds>((acc, match) => {
-      const round = match.tournamentRound;
+      let round = 0;
+      if (type === "Preliminary Playoff") {
+        round = match.tournamentRound - highestPreliminaryRound;
+      } else {
+        round = match.tournamentRound;
+      }
+
       if (acc[round] === undefined) {
         acc[round] = [];
       }

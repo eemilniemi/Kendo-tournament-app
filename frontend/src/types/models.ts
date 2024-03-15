@@ -19,7 +19,7 @@ export type PlayerColor = "red" | "white";
 
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
 
-export type MatchType = "group" | "playoff";
+export type MatchType = "group" | "playoff" | "pre playoff";
 
 export interface MatchPoint {
   type: PointType;
@@ -67,6 +67,7 @@ export interface Tournament {
   organizerPhone?: string;
   players: User[];
   matchSchedule: Match[];
+  playersToPlayoffsPerGroup?: number;
 }
 
 export type TournamentType = "Round Robin" | "Playoff" | "Preliminary Playoff";
