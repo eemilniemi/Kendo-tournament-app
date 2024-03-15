@@ -188,29 +188,33 @@ const PreliminaryPlayoffView: React.FC = () => {
       } => {
         const ongoingElements = Array.from(
           ongoingMatches.get(selectedGroup) ?? []
-        ).map((match) =>
-          createMatchButton(match, players, navigate, t, {
-            variant: "contained"
-          })
-        );
+        )
+          .filter((match) => match.type !== "playoff") // Filter playoff matches from this view
+          .map((match) =>
+            createMatchButton(match, players, navigate, t, {
+              variant: "contained"
+            })
+          );
 
         const upcomingElements = Array.from(
           upcomingMatches.get(selectedGroup) ?? []
-        ).map((match) =>
-          createMatchButton(match, players, navigate, t, {
-            variant: "contained",
-            color: "info"
-          })
-        );
+        )
+          .filter((match) => match.type !== "playoff") // Filter playoff matches from this view
+          .map((match) =>
+            createMatchButton(match, players, navigate, t, {
+              variant: "contained",
+              color: "info"
+            })
+          );
 
-        const pastElements = Array.from(
-          pastMatches.get(selectedGroup) ?? []
-        ).map((match) =>
-          createMatchButton(match, players, navigate, t, {
-            variant: "contained",
-            color: "secondary"
-          })
-        );
+        const pastElements = Array.from(pastMatches.get(selectedGroup) ?? [])
+          .filter((match) => match.type !== "playoff") // Filter playoff matches from this view
+          .map((match) =>
+            createMatchButton(match, players, navigate, t, {
+              variant: "contained",
+              color: "secondary"
+            })
+          );
 
         return { ongoingElements, upcomingElements, pastElements };
       };
