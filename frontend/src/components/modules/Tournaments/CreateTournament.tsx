@@ -33,6 +33,7 @@ import {
 import routePaths from "routes/route-paths";
 
 const MIN_PLAYER_AMOUNT = 3;
+const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
 export interface CreateTournamentFormData {
@@ -112,6 +113,14 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.groups_size_preference")}
             fullWidth
             margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= MIN_GROUP_SIZE ||
+                  `${t("messages.minimum_groupsize_error")}${MIN_GROUP_SIZE}`
+                );
+              }
+            }}
           />
           <TextFieldElement
             required
@@ -120,6 +129,13 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.players_to_playoffs_per_group")}
             fullWidth
             margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value > 0 || `${t("messages.minimum_player_to_playoff")}`
+                );
+              }
+            }}
           />
         </React.Fragment>
       );
@@ -182,25 +198,6 @@ const CreateTournamentForm: React.FC = () => {
 
         <SelectElement
           required
-          label={t("create_tournament_form.select_tournament_type")}
-          name="type"
-          options={[
-            {
-              id: "Round Robin",
-              label: t("create_tournament_form.round_robin")
-            },
-            { id: "Playoff", label: t("create_tournament_form.playoff") },
-            {
-              id: "Preliminary Playoff",
-              label: t("create_tournament_form.preliminary_playoff")
-            }
-          ]}
-          fullWidth
-          margin="normal"
-        />
-
-        <SelectElement
-          required
           label={t("create_tournament_form.match_time")}
           name="matchTime"
           options={[
@@ -215,6 +212,25 @@ const CreateTournamentForm: React.FC = () => {
             {
               id: "300000",
               label: t("create_tournament_form.5_min")
+            }
+          ]}
+          fullWidth
+          margin="normal"
+        />
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.select_tournament_type")}
+          name="type"
+          options={[
+            {
+              id: "Round Robin",
+              label: t("create_tournament_form.round_robin")
+            },
+            { id: "Playoff", label: t("create_tournament_form.playoff") },
+            {
+              id: "Preliminary Playoff",
+              label: t("create_tournament_form.preliminary_playoff")
             }
           ]}
           fullWidth
