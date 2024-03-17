@@ -32,8 +32,6 @@ interface ScoreboardProps {
   players: TournamentPlayer[];
   onClick?: () => void; // Make onClick prop optional
 }
-// const to be changed when match time is got from api
-const MATCH_TIME = 300000;
 
 export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
   const { t } = useTranslation();
@@ -168,7 +166,7 @@ export const updatePlayerStats = (
       // Add ties
       if (
         match.winner === undefined &&
-        (match.endTimestamp !== undefined || match.elapsedTime >= MATCH_TIME)
+        (match.endTimestamp !== undefined || match.elapsedTime >= match.matchTime)
       ) {
         // Update their stats, tie equals 1 point
         updatedPlayers[player1Index].ties += 1;
