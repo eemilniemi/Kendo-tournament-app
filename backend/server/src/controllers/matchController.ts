@@ -10,7 +10,7 @@ import {
   Security,
   Tags
 } from "tsoa";
-import { type Match } from "../models/matchModel.js";
+import { type PointType, type Match } from "../models/matchModel.js";
 import { MatchService } from "../services/matchService.js";
 import {
   AddPointRequest,
@@ -188,5 +188,38 @@ export class MatchController extends Controller {
     const match = await this.service.checkForTie(matchId);
 
     io.to(matchId).emit("check-tie", match);
+  }
+
+  /*
+   * Delete the most recent point from a match
+   */
+  @Delete("{matchId}/delete-recent")
+  @Tags("Match")
+  @Security("jwt")
+  public async deleteRecentPoint(
+    @Path() matchId: ObjectIdString
+  ): Promise<void> {
+    this.setStatus(204);
+    const match = await this.service.deleteRecentPoint(matchId);
+    io.to(matchId).emit("delete-recent", match);
+  }
+
+  /*
+   * Modify the most recent point from a match
+   */
+  @Patch("{matchId}/modify-recent")
+  @Tags("Match")
+  @Security("jwt")
+  public async modifyRecentPoint(
+    @Path() matchId: ObjectIdString,
+    @Body() requestBody: { newPointType: PointType }
+  ): Promise<void> {
+    this.setStatus(204);
+    const match = await this.service.modifyRecentPoint(
+      matchId,
+      requestBody.newPointType
+    );
+
+    io.to(matchId).emit("modify-recent", match);
   }
 }

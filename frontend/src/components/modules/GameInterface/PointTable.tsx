@@ -6,24 +6,18 @@ import { type MatchData } from "./GameInterface";
 interface TableComponentProps {
   matchInfo: MatchData;
 }
-interface Cells {
-  rows: string[][];
+interface Cell {
+  value: string;
+  filled: boolean;
 }
 
 const PointTable: React.FC<TableComponentProps> = ({ matchInfo }) => {
-  const initialCells: Cells = {
-    rows: [
-      ["", ""],
-      ["", ""],
-      ["", ""],
-      ["", ""],
-      ["", ""]
-    ]
-  };
+  // Initialize the table with 5 rows and 2 columns, all cells empty initially
+  const initialCells: Cell[][] = Array(5)
+    .fill(null)
+    .map(() => Array(2).fill({ value: "", filled: false }));
 
-  const [cells, setCells] = useState<Cells>(initialCells);
-  const rowCounter = 0;
-  const allPoints: Array<{ color: string; time: Date; value: string }> = [];
+  const [cells, setCells] = useState<Cell[][]>(initialCells);
 
   const typeToButtonMap: Record<PointType, string> = {
     men: "M",
@@ -34,57 +28,51 @@ const PointTable: React.FC<TableComponentProps> = ({ matchInfo }) => {
   };
 
   useEffect(() => {
-    goThroughAllPoints();
-  }, [matchInfo]);
+    const allPoints: Array<{ color: string; time: Date; value: string }> = [];
 
-  const goThroughAllPoints = (): void => {
-    for (const player of matchInfo.players) {
-      for (const point of player.points) {
+    matchInfo.players.forEach((player) => {
+      player.points.forEach((point) => {
         const color: string = player.color;
         const time: Date = point.timestamp;
         const value: string = typeToButtonMap[point.type];
 
-        const isTimeSeen = allPoints.some(
-          (existingPoint) => existingPoint.time === time
-        );
-
-        if (!isTimeSeen) {
+        if (!allPoints.some((existingPoint) => existingPoint.time === time)) {
           allPoints.push({ color, time, value });
         }
-      }
-    }
-    allPoints.sort((a, b) => (a.time < b.time ? -1 : 1));
-    assignCells(rowCounter);
-  };
-
-  const assignCells = (rowCounter: number): void => {
-    for (const point of allPoints) {
-      const column = point.color === "white" ? 0 : 1;
-      updateCell(rowCounter, column, point.value);
-      rowCounter++;
-    }
-  };
-
-  const updateCell = (row: number, column: number, value: string): void => {
-    setCells((prevCells) => {
-      const newRows = [...prevCells.rows];
-      newRows[row][column] = value;
-      return { rows: newRows };
+      });
     });
-  };
+
+    allPoints.sort((a, b) => (a.time < b.time ? -1 : 1));
+
+    // Create a new state for the cells based on the sorted points
+    const newCells = initialCells.map((row) => [...row]); // Clone the initial structure
+    allPoints.forEach((point, index) => {
+      if (index < 5) {
+        // Ensure we don't exceed the table size
+        const column = point.color === "white" ? 0 : 1;
+        newCells[index][column] = { value: point.value, filled: true };
+      }
+    });
+
+    setCells(newCells);
+  }, [matchInfo]);
 
   return (
     <div className="tableContainer">
       <Table>
         <TableBody>
-          {cells.rows.map((row, rowIndex) => (
+          {cells.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {row.map((cell, columnIndex) => (
                 <TableCell key={columnIndex}>
-                  {rowIndex === 0 && cell !== "" ? ( // Check if it's the first cell
-                    <CircledLetter letter={cell} />
+                  {cell.filled ? (
+                    rowIndex === 0 ? (
+                      <CircledLetter letter={cell.value} />
+                    ) : (
+                      cell.value
+                    )
                   ) : (
-                    cell
+                    ""
                   )}
                 </TableCell>
               ))}

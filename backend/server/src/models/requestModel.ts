@@ -1,4 +1,9 @@
-import type { MatchType, PlayerColor, PointType } from "./matchModel.js";
+import type {
+  MatchTime,
+  MatchType,
+  PlayerColor,
+  PointType
+} from "./matchModel.js";
 import type { Tournament } from "./tournamentModel.js";
 
 /**
@@ -92,6 +97,7 @@ export interface CreateMatchRequest {
   comment?: string;
   timeKeeper?: ObjectIdString;
   pointMaker?: ObjectIdString;
+  matchTime: MatchTime;
 }
 
 export interface AddPointRequest {
@@ -111,10 +117,11 @@ export type CreateTournamentRequest = Pick<
   | "organizerEmail"
   | "organizerPhone"
   | "description"
+  | "groupsSizePreference"
+  | "playersToPlayoffsPerGroup"
+  | "matchTime"
 > & {
   differentOrganizer: boolean;
-  groupsSizePreference?: number;
-  playersToPlayoffsPerGroup?: number;
 };
 
 export interface SignupForTournamentRequest {
@@ -127,3 +134,5 @@ export type EditUserRequest = Omit<RegisterRequest, "password">;
 export type ResetPasswordRequest = Pick<RegisterRequest, "password"> & {
   token: string;
 };
+
+export type EditTournamentRequest = Partial<CreateTournamentRequest>;

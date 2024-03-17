@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
-import type { Tournament, User, Match } from "types/models";
+import type { Tournament, User, Match, PointType } from "types/models";
 import type {
   SignupForTournamentRequest,
   CreateTournamentRequest,
@@ -7,7 +7,8 @@ import type {
   RegisterRequest,
   AddPointRequest,
   EditUserRequest,
-  ResetPasswordRequest
+  ResetPasswordRequest,
+  EditTournamentRequest
 } from "types/requests";
 
 export const API_BASE_URL =
@@ -127,6 +128,17 @@ const tournaments = {
       `${TOURNAMENTS_API}/${tournamentId}/sign-up`,
       body
     );
+  },
+
+  update: async (tournamentId: string, body: EditTournamentRequest) => {
+    return await request.put<Tournament>(
+      `${TOURNAMENTS_API}/${tournamentId}`,
+      body
+    );
+  },
+
+  delete: async (tournamentId: string) => {
+    return await request.delete(`${TOURNAMENTS_API}/${tournamentId}`);
   }
 };
 
@@ -164,6 +176,15 @@ const match = {
   removePointmaker: async (matchId: string, userId: string) => {
     await request.patch(`${MATCH_API}/${matchId}/remove-pointmaker`, {
       pointMakerId: userId
+    });
+  },
+  deleteRecentPoint: async (matchId: string) => {
+    await request.delete(`${MATCH_API}/${matchId}/delete-recent`);
+  },
+
+  modifyRecentPoint: async (matchId: string, newPointType: PointType) => {
+    await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
+      newPointType
     });
   }
 };

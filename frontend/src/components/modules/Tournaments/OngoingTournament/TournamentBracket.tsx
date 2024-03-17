@@ -33,12 +33,22 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
   const player1Name = `${player1.firstName} ${player1.lastName}`;
   const player2Name = `${player2.firstName} ${player2.lastName}`;
 
+  let player1Font = "regular";
+  let player2Font = "regular";
   let player1Color = "black";
   let player2Color = "black";
+  let player1Lining = "";
+  let player2Lining = "";
 
   if (isWinnerDeclared) {
-    player1Color = winner === player1.id ? "#f44336" : "#666666";
-    player2Color = winner === player2.id ? "#f44336" : "#666666";
+    player1Font = winner === player1.id ? "700" : "regular";
+    player2Font = winner === player2.id ? "700" : "regular";
+
+    player1Color = winner === player1.id ? "black" : "#666666";
+    player2Color = winner === player2.id ? "black" : "#666666";
+
+    player1Lining = winner === player1.id ? "underline" : "";
+    player2Lining = winner === player2.id ? "underline" : "";
   }
 
   const officialsInfo = [];
@@ -81,13 +91,50 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
           }}
         >
           <CardContent>
-            <Typography textAlign="center" style={{ color: player1Color }}>
+            <Typography
+              textAlign="center"
+              style={{
+                fontWeight: player1Font,
+                color: player1Color,
+                textDecoration: player1Lining
+              }}
+            >
               {player1Name}
             </Typography>
             <Typography textAlign="center"> vs</Typography>
-            <Typography textAlign="center" style={{ color: player2Color }}>
+            <Typography
+              textAlign="center"
+              style={{
+                fontWeight: player2Font,
+                color: player2Color,
+                textDecoration: player2Lining
+              }}
+            >
               {player2Name}
             </Typography>
+            {isWinnerDeclared && (
+              <Typography textAlign="center" variant="h6">
+                <span
+                  style={{
+                    fontWeight: player1Font,
+                    color: player1Color,
+                    textDecoration: player1Lining
+                  }}
+                >
+                  {match.player1Score}
+                </span>{" "}
+                -{" "}
+                <span
+                  style={{
+                    fontWeight: player2Font,
+                    color: player2Color,
+                    textDecoration: player2Lining
+                  }}
+                >
+                  {match.player2Score}
+                </span>
+              </Typography>
+            )}
             {match.elapsedTime <= 0 &&
               officialsInfo.map((info, index) => (
                 <Typography textAlign="center" key={index} variant="body2">

@@ -1,11 +1,11 @@
 import mongoose, { Schema, type Document, type Types } from "mongoose";
-import type { Match } from "./matchModel";
+import type { Match, MatchTime } from "./matchModel";
 import { type User } from "./userModel";
 
 export enum TournamentType {
   RoundRobin = "Round Robin",
   Playoff = "Playoff",
-  PreliminiaryPlayoff = "Preliminary Playoff"
+  PreliminaryPlayoff = "Preliminary Playoff"
 }
 
 export type UnsavedMatch = Pick<
@@ -16,6 +16,7 @@ export type UnsavedMatch = Pick<
   | "timerStartedTimestamp"
   | "tournamentRound"
   | "tournamentId"
+  | "matchTime"
 >;
 
 export interface Tournament {
@@ -30,11 +31,12 @@ export interface Tournament {
   organizerEmail?: string;
   organizerPhone?: string;
   maxPlayers: number;
-  groups: Array<Array<Types.ObjectId>>;
-  playersToPlayoffsPerGroup: number;
-  groupsSizePreference: number;
+  groups: Types.ObjectId[][];
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
   players: Array<Types.ObjectId | User>;
   matchSchedule: Array<Types.ObjectId | Match>;
+  matchTime: MatchTime;
 }
 
 const tournamentSchema = new Schema<Tournament & Document>(
@@ -64,7 +66,8 @@ const tournamentSchema = new Schema<Tournament & Document>(
       ref: "User"
     },
     organizerEmail: { type: String },
-    organizerPhone: { type: String }
+    organizerPhone: { type: String },
+    matchTime: { type: Number, required: true, default: 300000 }
   },
   {
     timestamps: true,

@@ -5,7 +5,7 @@ import { isValidPhone } from "utils/form-validators";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import { useNavigate } from "react-router-dom";
-import { type TournamentType } from "types/models";
+import { type TournamentType, type MatchTime } from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   Typography,
@@ -33,6 +33,7 @@ import {
 import routePaths from "routes/route-paths";
 
 const MIN_PLAYER_AMOUNT = 3;
+const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
 export interface CreateTournamentFormData {
@@ -48,6 +49,7 @@ export interface CreateTournamentFormData {
   organizerTel?: string;
   playersToPlayoffsPerGroup?: number;
   groupsSizePreference?: number;
+  matchTime: MatchTime;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -58,7 +60,8 @@ const defaultValues: CreateTournamentFormData = {
   description: "",
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
-  differentOrganizer: false
+  differentOrganizer: false,
+  matchTime: 300000
 };
 
 const CreateTournamentForm: React.FC = () => {
@@ -75,6 +78,7 @@ const CreateTournamentForm: React.FC = () => {
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
+      console.log(data.matchTime);
       await api.tournaments.createNew({
         ...data,
         startDate: data.startDate.toString(),
@@ -109,6 +113,14 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.groups_size_preference")}
             fullWidth
             margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= MIN_GROUP_SIZE ||
+                  `${t("messages.minimum_groupsize_error")}${MIN_GROUP_SIZE}`
+                );
+              }
+            }}
           />
           <TextFieldElement
             required
@@ -117,6 +129,13 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.players_to_playoffs_per_group")}
             fullWidth
             margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value > 0 || `${t("messages.minimum_player_to_playoff")}`
+                );
+              }
+            }}
           />
         </React.Fragment>
       );
@@ -173,6 +192,28 @@ const CreateTournamentForm: React.FC = () => {
           multiline
           name="description"
           label={t("create_tournament_form.description")}
+          fullWidth
+          margin="normal"
+        />
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.match_time")}
+          name="matchTime"
+          options={[
+            {
+              id: "180000",
+              label: t("create_tournament_form.3_min")
+            },
+            {
+              id: "240000",
+              label: t("create_tournament_form.4_min")
+            },
+            {
+              id: "300000",
+              label: t("create_tournament_form.5_min")
+            }
+          ]}
           fullWidth
           margin="normal"
         />

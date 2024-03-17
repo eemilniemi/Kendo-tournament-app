@@ -24,7 +24,9 @@
     "logout_successful": "Uloskirjautuminen onnistui!",
     "missing_both": "Matsilta puuttuu molemmat toimitsijat!",
     "missing_pointmaker": "Matsilta puuttuu pistevastaava!",
-    "missing_timekeeper": "Matsilta puuttuu kellokalle!"
+    "missing_timekeeper": "Matsilta puuttuu kellokalle!",
+    "minimum_groupsize_error": "Lohkon minimikoko on  ",
+    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä"
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -61,7 +63,9 @@
     "sign_up_button": "Ilmoittaudu",
     "register_button": "Rekisteröidy",
     "create_button": "Luo",
-    "save_button": "Tallenna"
+    "save_button": "Tallenna",
+    "modify_or_delete": "Muokkaa tai poista viimeisin piste",
+    "delete": "Poista"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -70,7 +74,9 @@
     "confirm_account_deletion": "Vahvista tilin poistaminen",
     "create_account": "Luo tili",
     "create_tournament": "Luo uusi turnaus",
-    "confirm_tournament_creation": "Vahvista turnauksen luonti"
+    "confirm_tournament_creation": "Vahvista turnauksen luonti",
+    "modify_or_delete": "Muokkaa tai poista viimeisin piste",
+    "select_new_type": "Valitse uusi tyyppi viimeisimmälle pisteelle:"
   },
   "login_form": {
     "forgot_password": "Unohtuiko salasana?",
@@ -133,7 +139,7 @@
     "sign_up_for": "Ilmoittaudu: ",
     "want_more_info": "Haluatko lisätietoja tästä turnauksesta?",
     "click_here": "Klikkaa tästä",
-    "userInfo": "Ilmoittautumisen yhteydessä annettavat tiedot:",
+    "user_info": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
     "player_table": "Pelaajataulu"
   },
@@ -163,7 +169,11 @@
     "organizer_phone_number": "Järjestäjän puhelinnumero",
     "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?",
     "players_to_playoffs_per_group": "Lohkosta pudotuspeleihin siirtyvien pelaajien määrä",
-    "groups_size_preference": "Lohkon maksimikoko (pelaajaa)"
+    "groups_size_preference": "Lohkon maksimikoko (pelaajaa)",
+    "match_time": "Valitse ottelun pituus",
+    "3_min": "3 minuuttia",
+    "4_min": "4 minuuttia",
+    "5_min": "5 minuuttia"
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",
@@ -199,7 +209,7 @@
     "mostRecent": "Uusin",
     "oldest": "Vanhin",
     "name": "Nimi A-Ö",
-    "nameDesc": "Nimi Ö-Ä",
+    "nameDesc": "Nimi Ö-A",
     "location": "Sijainti"
   },
   "terms_and_conditions": {

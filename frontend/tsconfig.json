@@ -4,27 +4,20 @@
     "jsx": "react",
     "module": "esnext",
     "moduleResolution": "node",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
+    "lib": ["dom", "esnext"],
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "sourceMap": true,
     "target": "esnext",
     "baseUrl": "src",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["mocha"]
   },
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"
     }
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "src",
-    "webpack.config.ts"
-  ]
+  "exclude": ["node_modules"],
+  "include": ["src", "webpack.config.ts"]
 }
