@@ -18,6 +18,7 @@ import {
   Stack,
   Box
 } from "@mui/material";
+import updateLocale from "dayjs/plugin/updateLocale";
 
 // Readily defined components from the react-hook-form-mui library.
 import {
@@ -63,6 +64,12 @@ const defaultValues: CreateTournamentFormData = {
   differentOrganizer: false,
   matchTime: 300000
 };
+
+// Make monday the first day of the week
+dayjs.extend(updateLocale);
+dayjs.updateLocale("en", {
+  weekStart: 1
+});
 
 const CreateTournamentForm: React.FC = () => {
   const showToast = useToast();
@@ -177,6 +184,12 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.start_date_time")}
             minDateTime={now}
             format="DD/MM/YYYY HH:mm"
+            ampm={false}
+            viewRenderers={{
+              hours: null,
+              minutes: null,
+              seconds: null
+            }}
           />
           <DateTimePickerElement
             required
@@ -184,6 +197,12 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.end_date_time")}
             minDateTime={startDate}
             format="DD/MM/YYYY HH:mm"
+            ampm={false}
+            viewRenderers={{
+              hours: null,
+              minutes: null,
+              seconds: null
+            }}
           />
         </Stack>
 
