@@ -11,8 +11,13 @@ import { useAuth } from "context/AuthContext";
 import { useTranslation } from "react-i18next";
 import api from "api/axios";
 import useToast from "hooks/useToast";
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from "@mui/material";
 
 interface TournamentCardProps {
   tournament: Tournament;
@@ -35,15 +40,15 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
   const tournamentHasNotStarted = new Date() < new Date(tournament.startDate);
   const [openDialog, setOpenDialog] = useState(false);
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = (): void => {
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = (): void => {
     setOpenDialog(false);
   };
 
-  const apiDeleteTournamentRequest = async () => {
+  const apiDeleteTournamentRequest = async (): Promise<void> => {
     handleCloseDialog();
     try {
       await api.tournaments.delete(tournament.id);
@@ -51,9 +56,9 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
     } catch (error) {
       showToast(error, "error");
     }
-  }
+  };
 
-  const deleteConfirmationDialog = () => (
+  const deleteConfirmationDialog = (): JSX.Element => (
     <Dialog
       open={openDialog}
       onClose={handleCloseDialog}
@@ -69,15 +74,15 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button 
-          onClick={handleCloseDialog}
-          variant="contained"
-          color = "error"
-          >{t("buttons.cancel_button")}</Button>
-        <Button 
+        <Button onClick={handleCloseDialog} variant="contained" color="error">
+          {t("buttons.cancel_button")}
+        </Button>
+        <Button
           color="success"
           variant="contained"
-          onClick={apiDeleteTournamentRequest} autoFocus>
+          onClick={apiDeleteTournamentRequest}
+          autoFocus
+        >
           {t("buttons.confirm_button")}
         </Button>
       </DialogActions>
