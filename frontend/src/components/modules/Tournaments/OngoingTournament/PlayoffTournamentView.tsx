@@ -11,14 +11,40 @@ import { useTranslation } from "react-i18next";
 interface Rounds extends Record<number, Match[]> {}
 
 const PlayoffTournamentView: React.FC = () => {
-  const { matchSchedule, players } = useTournament();
+  const { type, matchSchedule, players, groups, playersToPlayoffsPerGroup } =
+    useTournament();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-
   const { t } = useTranslation();
 
-  // Calculate the total number of rounds, assuming it's a single-elimination tournament
-  const totalRounds = Math.ceil(Math.log2(players.length));
+  let playoffMatches: Match[];
+  let totalRounds = 0;
+  let highestPreliminaryRound = 0;
+
+  if (type === "Preliminary Playoff") {
+    // Calculate initial round number for playoff matches
+    for (const match of matchSchedule) {
+      if (match.type !== "playoff") {
+        highestPreliminaryRound = Math.max(
+          highestPreliminaryRound,
+          match.tournamentRound
+        );
+      }
+    }
+
+    // Filter playoff matches from the matchSchedule
+    playoffMatches = matchSchedule.filter((match) => match.type === "playoff");
+    // Calculate the total number of rounds, assuming it's a single-elimination tournament
+    if (groups !== undefined && playersToPlayoffsPerGroup !== undefined) {
+      totalRounds = Math.ceil(
+        Math.log2(playersToPlayoffsPerGroup * groups.length)
+      );
+    }
+  } else {
+    // Is normal playoff tournament
+    playoffMatches = matchSchedule;
+    totalRounds = Math.ceil(Math.log2(players.length));
+  }
 
   if (error !== null) {
     return (
@@ -34,8 +60,14 @@ const PlayoffTournamentView: React.FC = () => {
 
   try {
     // Group matches by tournamentRound
-    const rounds: Rounds = matchSchedule.reduce<Rounds>((acc, match) => {
-      const round = match.tournamentRound;
+    const rounds: Rounds = playoffMatches.reduce<Rounds>((acc, match) => {
+      let round = 0;
+      if (type === "Preliminary Playoff") {
+        round = match.tournamentRound - highestPreliminaryRound;
+      } else {
+        round = match.tournamentRound;
+      }
+
       if (acc[round] === undefined) {
         acc[round] = [];
       }
@@ -56,54 +88,59 @@ const PlayoffTournamentView: React.FC = () => {
           justifyContent="flex-start"
           alignItems="flex-start"
         >
-          {Object.entries(rounds).map(([roundNumber, matches], index) => (
-            <React.Fragment key={roundNumber}>
-              {index > 0 && <Divider orientation="vertical" flexItem />}
-              <Grid item>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    minWidth: 300
-                  }}
-                >
-                  <Typography
-                    variant="h6"
+          {Object.entries(rounds).map(([roundNumber, matches], index) => {
+            const roundNrPrint = index + 1;
+            return (
+              <React.Fragment key={roundNumber}>
+                {index > 0 && <Divider orientation="vertical" flexItem />}
+                <Grid item>
+                  <Box
                     sx={{
-                      marginBottom: 2,
-                      textAlign: "center",
-                      textDecoration: "underline"
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      minWidth: 300
                     }}
                   >
-                    {parseInt(roundNumber) === totalRounds
-                      ? t("tournament_view_labels.final")
-                      : `${t("tournament_view_labels.round")} ${roundNumber}`}
-                  </Typography>
-                  {matches.map((match: Match) => {
-                    const tempPlayers: User[] = match.players.map(
-                      (matchPlayer) => {
-                        const player = players.find(
-                          (p) => p.id === matchPlayer.id
-                        );
-                        if (player === null || player === undefined) {
-                          throw new Error();
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        marginBottom: 2,
+                        textAlign: "center",
+                        textDecoration: "underline"
+                      }}
+                    >
+                      {parseInt(roundNumber) === totalRounds
+                        ? t("tournament_view_labels.final")
+                        : `${t(
+                            "tournament_view_labels.round"
+                          )} ${roundNrPrint}`}
+                    </Typography>
+                    {matches.map((match: Match) => {
+                      const tempPlayers: User[] = match.players.map(
+                        (matchPlayer) => {
+                          const player = players.find(
+                            (p) => p.id === matchPlayer.id
+                          );
+                          if (player === null || player === undefined) {
+                            throw new Error();
+                          }
+                          return player;
                         }
-                        return player;
-                      }
-                    );
-                    return (
-                      <Bracket
-                        key={match.id}
-                        players={tempPlayers}
-                        match={match}
-                      />
-                    );
-                  })}
-                </Box>
-              </Grid>
-            </React.Fragment>
-          ))}
+                      );
+                      return (
+                        <Bracket
+                          key={match.id}
+                          players={tempPlayers}
+                          match={match}
+                        />
+                      );
+                    })}
+                  </Box>
+                </Grid>
+              </React.Fragment>
+            );
+          })}
         </Grid>
       </Box>
     );

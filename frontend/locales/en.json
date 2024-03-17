@@ -131,7 +131,9 @@
     "missing_both": "Missing: Time keeper and point maker",
     "missing_timer": "Missing: Time keeper",
     "missing_point_maker": "Missing: Point maker",
-    "missing_and": "and point maker"
+    "missing_and": "and point maker",
+    "group": "Group",
+    "playoff_stage_not_started": "Playoff stage has not started yet."
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",
@@ -193,12 +195,14 @@
     "appName": "KendoApp",
     "openSettingsTooltip": "Open settings",
     "about": "About",
-    "privacy_policy": "Privacy Policy"
+    "privacy_policy": "Privacy Policy",
+    "back_to_group_view": "Back to group view"
   },
   "types": {
     "round_robin": "Round Robin",
     "playoff": "Playoff",
-    "preliminary_playoff": "Preliminary and playoff"
+    "preliminary_playoff": "Preliminary and playoff",
+    "preliminary": "Preliminary"
   },
   "sorting": {
     "orderBy": "Order By: ",

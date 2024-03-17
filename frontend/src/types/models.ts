@@ -19,7 +19,7 @@ export type PlayerColor = "red" | "white";
 
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
 
-export type MatchType = "group" | "playoff";
+export type MatchType = "group" | "playoff" | "pre playoff";
 
 export type MatchTime = 180000 | 240000 | 300000;
 
@@ -64,11 +64,13 @@ export interface Tournament {
   description: string;
   type: TournamentType;
   maxPlayers: number;
+  groups?: string[][];
   creator: string;
   organizerEmail?: string;
   organizerPhone?: string;
   players: User[];
   matchSchedule: Match[];
+  playersToPlayoffsPerGroup?: number;
   matchTime: MatchTime;
 }
 
