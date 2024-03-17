@@ -5,7 +5,11 @@ import { isValidPhone } from "utils/form-validators";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import { useNavigate } from "react-router-dom";
-import { type TournamentType, type MatchTime, type Category } from "types/models";
+import {
+  type TournamentType,
+  type MatchTime,
+  type Category
+} from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   Typography,
@@ -63,7 +67,7 @@ const defaultValues: CreateTournamentFormData = {
   maxPlayers: MIN_PLAYER_AMOUNT,
   differentOrganizer: false,
   matchTime: 300000,
-  category: "hobby",
+  category: "hobby"
 };
 
 const CreateTournamentForm: React.FC = () => {

@@ -71,7 +71,7 @@ const tournamentSchema = new Schema<Tournament & Document>(
     organizerEmail: { type: String },
     organizerPhone: { type: String },
     matchTime: { type: Number, required: true, default: 300000 },
-    category: {type: String, required: true}
+    category: { type: String, required: true }
   },
   {
     timestamps: true,
