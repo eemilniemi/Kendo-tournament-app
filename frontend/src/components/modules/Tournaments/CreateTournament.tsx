@@ -5,7 +5,7 @@ import { isValidPhone } from "utils/form-validators";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import { useNavigate } from "react-router-dom";
-import { type TournamentType, type MatchTime } from "types/models";
+import { type TournamentType, type MatchTime, type Category } from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   Typography,
@@ -50,6 +50,7 @@ export interface CreateTournamentFormData {
   playersToPlayoffsPerGroup?: number;
   groupsSizePreference?: number;
   matchTime: MatchTime;
+  category: Category;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -61,7 +62,8 @@ const defaultValues: CreateTournamentFormData = {
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
   differentOrganizer: false,
-  matchTime: 300000
+  matchTime: 300000,
+  category: "hobby",
 };
 
 const CreateTournamentForm: React.FC = () => {
@@ -78,7 +80,6 @@ const CreateTournamentForm: React.FC = () => {
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
-      console.log(data.matchTime);
       await api.tournaments.createNew({
         ...data,
         startDate: data.startDate.toString(),
@@ -231,6 +232,28 @@ const CreateTournamentForm: React.FC = () => {
             {
               id: "Preliminary Playoff",
               label: t("create_tournament_form.preliminary_playoff")
+            }
+          ]}
+          fullWidth
+          margin="normal"
+        />
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.category")}
+          name="category"
+          options={[
+            {
+              id: "hobby",
+              label: t("create_tournament_form.hobby")
+            },
+            {
+              id: "championship",
+              label: t("create_tournament_form.championship")
+            },
+            {
+              id: "league",
+              label: t("create_tournament_form.league")
             }
           ]}
           fullWidth
