@@ -65,7 +65,7 @@ export interface Tournament {
   type: TournamentType;
   maxPlayers: number;
   groups?: string[][];
-  creator: string;
+  creator: User;
   organizerEmail?: string;
   organizerPhone?: string;
   players: User[];
