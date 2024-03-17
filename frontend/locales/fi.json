@@ -300,5 +300,11 @@
     "body25": "Saatamme päivittää tietosuojakäytäntöämme aika ajoin. Ilmoitamme sinulle kaikista muutoksista julkaisemalla uuden tietosuojakäytännön tällä sivulla. Ilmoitamme siitä sinulle sähköpostitse ja/tai näkyvällä ilmoituksella palvelussamme ennen muutoksen voimaantuloa ja päivitämme tämän tietosuojakäytännön yläosassa olevan 'Viimeksi päivitetty'-päivämäärän. Sinua kehotetaan tarkistamaan tämä tietosuojakäytäntö säännöllisesti mahdollisten muutosten varalta. Tämän tietosuojakäytännön muutokset tulevat voimaan, kun ne julkaistaan tällä sivulla.",
     "body26": "Jos sinulla on kysyttävää tästä tietosuojakäytännöstä, voit ottaa meihin yhteyttä:",
     "body27": "Sähköpostilla:"
+  },
+  "profile": {
+    "match":"Ottelu",
+    "profile_info": "Omat Tiedot",
+    "my_games": "Ottelut",
+    "my_points": "Pisteet"
   }
 }
