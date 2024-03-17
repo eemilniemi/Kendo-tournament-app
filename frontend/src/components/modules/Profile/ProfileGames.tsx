@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Card, CardContent, CardActionArea } from "@mui/material";
+import {
+  Typography,
+  Card,
+  CardContent,
+  CardActionArea,
+  Box
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "context/AuthContext";
 import api from "api/axios";
@@ -58,10 +64,10 @@ const ProfileGames: React.FC = () => {
   }
 
   return (
-    <div>
+    <Box>
       {/* Map through tournaments and print info */}
       {tournaments.map((tournament, index) => (
-        <div key={index} style={{ marginBottom: "20px" }}>
+        <Box key={index} style={{ marginBottom: "20px" }}>
           <Typography variant="h5" sx={{ marginBottom: 4, marginTop: 4 }}>
             {tournament.name}
             <Typography
@@ -93,7 +99,7 @@ const ProfileGames: React.FC = () => {
             </Typography>
           </Typography>
           {/* Map through tournament matches and print each */}
-          <div
+          <Box
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
@@ -132,10 +138,10 @@ const ProfileGames: React.FC = () => {
                 </CardActionArea>
               </Card>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 };
 

@@ -304,7 +304,7 @@
   "profile": {
     "match":"Ottelu",
     "profile_info": "Omat Tiedot",
-    "my_games": "Ottelut",
-    "my_points": "Pisteet"
+    "my_games": "Omat Ottelut",
+    "my_points": "Omat Pisteet"
   }
 }
