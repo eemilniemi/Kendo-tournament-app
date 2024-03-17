@@ -166,7 +166,8 @@ export const updatePlayerStats = (
       // Add ties
       if (
         match.winner === undefined &&
-        (match.endTimestamp !== undefined || match.elapsedTime >= match.matchTime)
+        (match.endTimestamp !== undefined ||
+          match.elapsedTime >= match.matchTime)
       ) {
         // Update their stats, tie equals 1 point
         updatedPlayers[player1Index].ties += 1;
