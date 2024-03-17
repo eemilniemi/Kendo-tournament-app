@@ -174,7 +174,11 @@
     "match_time": "Valitse ottelun pituus",
     "3_min": "3 minuuttia",
     "4_min": "4 minuuttia",
-    "5_min": "5 minuuttia"
+    "5_min": "5 minuuttia",
+    "category": "Valitse kategoria",
+    "hobby": "Harraste",
+    "championship": "Arvokisa",
+    "league": "Liiga"
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",

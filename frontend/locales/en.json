@@ -174,7 +174,11 @@
     "match_time": "Select match time",
     "3_min": "3 minutes",
     "4_min": "4 minutes",
-    "5_min": "5 minutes"
+    "5_min": "5 minutes",
+    "category": "Select category",
+    "hobby": "Hobby",
+    "championship": "Championship",
+    "league": "League"
   },
   "upcoming_tournament_view": {
     "date_header": "When",
