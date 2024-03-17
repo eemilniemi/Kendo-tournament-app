@@ -120,6 +120,7 @@ export type CreateTournamentRequest = Pick<
   | "groupsSizePreference"
   | "playersToPlayoffsPerGroup"
   | "matchTime"
+  | "category"
 > & {
   differentOrganizer: boolean;
 };
