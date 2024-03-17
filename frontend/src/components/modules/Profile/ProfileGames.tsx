@@ -71,6 +71,7 @@ const ProfileGames: React.FC = () => {
           <Typography variant="h5" sx={{ marginBottom: 4, marginTop: 4 }}>
             {tournament.name}
             <Typography
+              component="span"
               variant="subtitle1"
               sx={{ display: "inline", marginLeft: 1 }}
             >

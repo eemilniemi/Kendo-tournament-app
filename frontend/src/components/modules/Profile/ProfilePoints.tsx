@@ -9,10 +9,13 @@ import {
 import api from "api/axios";
 import { useAuth } from "context/AuthContext";
 import type { Match } from "types/models";
+import { useTranslation } from "react-i18next";
+import { profile } from "console";
 
 const ProfilePoints: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const { userId } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchTournamentsAndMatches = async (): Promise<void> => {
@@ -76,8 +79,8 @@ const ProfilePoints: React.FC = () => {
       <Table style={{ width: "60%", margin: "0 auto" }}>
         <TableHead>
           <TableRow>
-            <TableCell>Point Type</TableCell>
-            <TableCell>Points</TableCell>
+            <TableCell>{t("profile.point_type")}</TableCell>
+            <TableCell>{t("profile.points")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
