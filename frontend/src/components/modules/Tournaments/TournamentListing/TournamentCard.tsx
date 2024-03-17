@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Tournament } from "types/models";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
@@ -9,6 +9,10 @@ import CardContent from "@mui/material/CardContent";
 import Card from "@mui/material/Card";
 import { useAuth } from "context/AuthContext";
 import { useTranslation } from "react-i18next";
+import api from "api/axios";
+import useToast from "hooks/useToast";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+
 
 interface TournamentCardProps {
   tournament: Tournament;
@@ -21,11 +25,64 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const showToast = useToast();
   const { userId } = useAuth();
   const userAlreadySigned = tournament.players.some(
     (player) => player.id === userId
   );
   const tournamentFull = tournament.maxPlayers <= tournament.players.length;
+  const isUserTheCreator = tournament.creator.id === userId;
+  const tournamentHasNotStarted = new Date() < new Date(tournament.startDate);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const apiDeleteTournamentRequest = async () => {
+    handleCloseDialog();
+    try {
+      await api.tournaments.delete(tournament.id);
+      navigate(0);
+    } catch (error) {
+      showToast(error, "error");
+    }
+  }
+
+  const deleteConfirmationDialog = () => (
+    <Dialog
+      open={openDialog}
+      onClose={handleCloseDialog}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">
+        {t("titles.confirm_tournament_deletion")}
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          {t("upcoming_tournament_view.delete_tournament")}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button 
+          onClick={handleCloseDialog}
+          variant="contained"
+          color = "error"
+          >{t("buttons.cancel_button")}</Button>
+        <Button 
+          color="success"
+          variant="contained"
+          onClick={apiDeleteTournamentRequest} autoFocus>
+          {t("buttons.confirm_button")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   return (
     <Card component="main" sx={{ position: "relative" }}>
@@ -70,18 +127,32 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
         </CardContent>
       </CardActionArea>
       {type === "upcoming" && (
-        <Button
-          color="primary"
-          variant="outlined"
-          disabled={userAlreadySigned || tournamentFull}
-          onClick={() => {
-            navigate(`${tournament.id}/sign-up`);
-          }}
-          sx={{ position: "absolute", bottom: 10, right: 10 }}
-        >
-          {t("buttons.sign_up_button")}
-        </Button>
+        <>
+          <br></br>
+          <Button
+            color="primary"
+            variant="contained"
+            disabled={userAlreadySigned || tournamentFull}
+            onClick={() => {
+              navigate(`${tournament.id}/sign-up`);
+            }}
+            sx={{ position: "absolute", bottom: 10, right: 10 }}
+          >
+            {t("buttons.sign_up_button")}
+          </Button>
+          {isUserTheCreator && tournamentHasNotStarted && (
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={handleOpenDialog}
+              sx={{ position: "absolute", bottom: 10, left: 10 }}
+            >
+              {t("buttons.delete")}
+            </Button>
+          )}
+        </>
       )}
+      {deleteConfirmationDialog()}
     </Card>
   );
 };
