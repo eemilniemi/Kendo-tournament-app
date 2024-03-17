@@ -123,6 +123,13 @@ const tournaments = {
     return await request.post<Tournament>(`${TOURNAMENTS_API}`, body);
   },
 
+  createSchedule: async (tournamentId: string) => {
+    return await request.post(
+      `${TOURNAMENTS_API}/${tournamentId}/create-schedule`,
+      {}
+    );
+  },
+
   signup: async (tournamentId: string, body: SignupForTournamentRequest) => {
     return await request.put(
       `${TOURNAMENTS_API}/${tournamentId}/sign-up`,

@@ -18,6 +18,7 @@ interface ITournamentsContext {
   past: Tournament[];
   ongoing: Tournament[];
   upcoming: Tournament[];
+  doRefresh: () => void;
 }
 
 const initialContextValue: ITournamentsContext = {
@@ -25,7 +26,8 @@ const initialContextValue: ITournamentsContext = {
   isError: false,
   past: [],
   ongoing: [],
-  upcoming: []
+  upcoming: [],
+  doRefresh: () => {}
 };
 
 interface SortedTournaments {
@@ -69,17 +71,22 @@ export const TournamentsProvider = (): ReactElement => {
   const { t } = useTranslation();
   const [value, setValue] = useState<ITournamentsContext>(initialContextValue);
   const location = useLocation() as LocationState;
-  const shouldRefresh: boolean = location.state?.refresh ?? false;
+  const [shouldRefresh, setShouldRefresh] = useState(
+    location.state?.refresh ?? false
+  );
   const isInitialRender = useRef(true);
 
   /* Indicates that reload should take place */
   useEffect(() => {
     if (shouldRefresh) {
-      navigate(".", { replace: true });
+      navigate(0);
     }
   }, [shouldRefresh]);
 
   useEffect(() => {
+    const doRefresh = (): void => {
+      setShouldRefresh(true);
+    };
     const getAllTournaments = async (): Promise<void> => {
       try {
         const { past, ongoing, upcoming } = await getSortedTournaments();
@@ -88,14 +95,16 @@ export const TournamentsProvider = (): ReactElement => {
           isLoading: false,
           past,
           ongoing,
-          upcoming
+          upcoming,
+          doRefresh
         }));
       } catch (error) {
         showToast(t("messages.could_not_fetch_tournaments"), "error");
         setValue((prevValue) => ({
           ...prevValue,
           isLoading: false,
-          isError: true
+          isError: true,
+          doRefresh
         }));
       }
     };

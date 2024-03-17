@@ -13,7 +13,7 @@ import {
   Delete
 } from "tsoa";
 import { TournamentService } from "../services/tournamentService.js";
-import { UnsavedMatch } from "../models/tournamentModel.js";
+import { TournamentModel, UnsavedMatch } from "../models/tournamentModel.js";
 import type { Tournament } from "../models/tournamentModel.js";
 import {
   CreateTournamentRequest,
@@ -56,6 +56,24 @@ export class TournamentController extends Controller {
     const creator = request.user.id;
 
     return await this.service.createTournament(tournamentData, creator);
+  }
+
+  @Post("{tournamentId}/create-schedule")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async createSchedule(
+    @Path() tournamentId: ObjectIdString
+  ): Promise<Tournament | undefined> {
+    const result = await this.service.getTournamentAndCreateSchedule(tournamentId);
+    if(result !== undefined)
+    {
+      this.setStatus(201);
+    }
+    else
+    {
+      this.setStatus(400);
+    }
+    return result;
   }
 
   @Put("{tournamentId}/sign-up")
