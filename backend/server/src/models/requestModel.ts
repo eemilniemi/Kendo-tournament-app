@@ -121,8 +121,11 @@ export type CreateTournamentRequest = Pick<
   | "playersToPlayoffsPerGroup"
   | "matchTime"
   | "category"
+  | "linkToPay"
+  | "linkToSite"
 > & {
   differentOrganizer: boolean;
+  paid: boolean;
 };
 
 export interface SignupForTournamentRequest {
