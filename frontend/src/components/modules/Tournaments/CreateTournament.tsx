@@ -55,6 +55,9 @@ export interface CreateTournamentFormData {
   groupsSizePreference?: number;
   matchTime: MatchTime;
   category: Category;
+  paid: boolean;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -67,7 +70,10 @@ const defaultValues: CreateTournamentFormData = {
   maxPlayers: MIN_PLAYER_AMOUNT,
   differentOrganizer: false,
   matchTime: 300000,
-  category: "hobby"
+  category: "hobby",
+  paid: false,
+  linkToPay: "",
+  linkToSite: ""
 };
 
 const CreateTournamentForm: React.FC = () => {
@@ -78,7 +84,7 @@ const CreateTournamentForm: React.FC = () => {
     defaultValues,
     mode: "onBlur"
   });
-  const { differentOrganizer, startDate, type } =
+  const { differentOrganizer, startDate, type, paid } =
     useWatch<CreateTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -200,6 +206,36 @@ const CreateTournamentForm: React.FC = () => {
           fullWidth
           margin="normal"
         />
+
+        <TextFieldElement
+          name="linkToSite"
+          type="url"
+          label={t("create_tournament_form.site_link")}
+          fullWidth
+          margin="normal"
+        />
+
+        <CheckboxElement
+          name="paid"
+          label={t("create_tournament_form.paid")}
+          onChange={(e) => {
+            formContext.resetField("linkToPay");
+            formContext.setValue("paid", e.target.checked);
+          }}
+        />
+
+        {paid !== undefined && paid && (
+          <React.Fragment>
+            <TextFieldElement
+              required
+              name="linkToPay"
+              type="url"
+              label={t("create_tournament_form.payment_link")}
+              fullWidth
+              margin="normal"
+            />
+          </React.Fragment>
+        )}
 
         <SelectElement
           required
