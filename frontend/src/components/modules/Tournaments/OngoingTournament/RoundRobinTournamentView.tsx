@@ -14,7 +14,7 @@ import {
   type ButtonProps
 } from "@mui/material";
 import { type User, type Match, type Tournament } from "types/models";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 
@@ -32,8 +32,6 @@ interface ScoreboardProps {
   players: TournamentPlayer[];
   onClick?: () => void; // Make onClick prop optional
 }
-// const to be changed when match time is got from api
-const MATCH_TIME = 300000;
 
 export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
   const { t } = useTranslation();
@@ -168,7 +166,8 @@ export const updatePlayerStats = (
       // Add ties
       if (
         match.winner === undefined &&
-        (match.endTimestamp !== undefined || match.elapsedTime >= MATCH_TIME)
+        (match.endTimestamp !== undefined ||
+          match.elapsedTime >= match.matchTime)
       ) {
         // Update their stats, tie equals 1 point
         updatedPlayers[player1Index].ties += 1;
@@ -290,11 +289,30 @@ const RoundRobinTournamentView: React.FC = () => {
   const { t } = useTranslation();
 
   const initialRender = useRef(true);
-  const [selectedTab, setSelectedTab] = useState("scoreboard");
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const [ongoingMatches, setOngoingMatches] = useState<Match[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [pastMatches, setPastMatches] = useState<Match[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabTypes = ["scoreboard", "matches"] as const;
+  const defaultTab = "scoreboard";
+  const currentTab = searchParams.get("tab") ?? defaultTab;
+
+  useEffect(() => {
+    if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
+      setSearchParams((params) => {
+        params.set("tab", defaultTab);
+        return params;
+      });
+    }
+  }, [currentTab]);
+
+  const handleTabChange = (tab: string): void => {
+    setSearchParams((params) => {
+      params.set("tab", tab);
+      return params;
+    });
+  };
 
   useEffect(() => {
     getPlayerNames(tournament, setPlayers);
@@ -332,9 +350,9 @@ const RoundRobinTournamentView: React.FC = () => {
   return (
     <>
       <Tabs
-        value={selectedTab}
+        value={currentTab}
         onChange={(_, newValue) => {
-          setSelectedTab(newValue);
+          handleTabChange(newValue);
         }}
       >
         <Tab
@@ -343,8 +361,8 @@ const RoundRobinTournamentView: React.FC = () => {
         />
         <Tab label={t("tournament_view_labels.matches")} value="matches" />
       </Tabs>
-      {selectedTab === "scoreboard" && <Scoreboard players={players} />}
-      {selectedTab === "matches" && (
+      {currentTab === "scoreboard" && <Scoreboard players={players} />}
+      {currentTab === "matches" && (
         <Matches
           ongoingMatchElements={ongoingElements}
           upcomingMatchElements={upcomingElements}

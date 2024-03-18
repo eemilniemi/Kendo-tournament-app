@@ -6,7 +6,12 @@ import {
   settings
 } from "layouts/NavigationBar/navigation-data";
 import React, { type ReactElement } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useSearchParams
+} from "react-router-dom";
 import "./Layout.css";
 import { useAuth } from "context/AuthContext";
 import Container from "@mui/material/Container";
@@ -20,6 +25,8 @@ const Layout = (): ReactElement => {
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const defaultTab = routePaths.homeRoute;
+  const [, setSearchParams] = useSearchParams();
 
   const navigationItems = isAuthenticated
     ? authenticatedNavItems
@@ -35,6 +42,26 @@ const Layout = (): ReactElement => {
     text: t(item.text)
   }));
 
+  const handleGoBackWithParams = (): void => {
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get("tab");
+
+    if (
+      // Define tabs, from which app needs to go to frontpage
+      tabParam !== null &&
+      ["scoreboard", "matches", "preliminary", "playoff"].includes(tabParam)
+    ) {
+      setSearchParams((params) => {
+        params.set("tab", defaultTab);
+        return params;
+      });
+      navigate("/");
+    } else {
+      // Otherwise navigate back to the previous page in browser history
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="app-wrapper">
       <NavigationBar
@@ -46,7 +73,7 @@ const Layout = (): ReactElement => {
           <Button
             id="back-button"
             onClick={() => {
-              navigate(-1);
+              handleGoBackWithParams();
             }}
             sx={{ display: "flex", gap: "5px", marginBottom: "6px" }}
           >
