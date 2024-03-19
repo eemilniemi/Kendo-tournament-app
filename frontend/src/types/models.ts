@@ -72,6 +72,11 @@ export interface Tournament {
   matchSchedule: Match[];
   playersToPlayoffsPerGroup?: number;
   matchTime: MatchTime;
+  category: Category;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 export type TournamentType = "Round Robin" | "Playoff" | "Preliminary Playoff";
+
+export type Category = "championship" | "league" | "hobby";

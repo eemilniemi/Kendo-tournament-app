@@ -5,7 +5,11 @@ import { isValidPhone } from "utils/form-validators";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import { useNavigate } from "react-router-dom";
-import { type TournamentType, type MatchTime } from "types/models";
+import {
+  type TournamentType,
+  type MatchTime,
+  type Category
+} from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   Typography,
@@ -51,6 +55,10 @@ export interface CreateTournamentFormData {
   playersToPlayoffsPerGroup?: number;
   groupsSizePreference?: number;
   matchTime: MatchTime;
+  category: Category;
+  paid: boolean;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -62,7 +70,11 @@ const defaultValues: CreateTournamentFormData = {
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
   differentOrganizer: false,
-  matchTime: 300000
+  matchTime: 300000,
+  category: "hobby",
+  paid: false,
+  linkToPay: "",
+  linkToSite: ""
 };
 
 // Make monday the first day of the week
@@ -79,13 +91,12 @@ const CreateTournamentForm: React.FC = () => {
     defaultValues,
     mode: "onBlur"
   });
-  const { differentOrganizer, startDate, type } =
+  const { differentOrganizer, startDate, type, paid } =
     useWatch<CreateTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
-      console.log(data.matchTime);
       await api.tournaments.createNew({
         ...data,
         startDate: data.startDate.toString(),
@@ -215,6 +226,36 @@ const CreateTournamentForm: React.FC = () => {
           margin="normal"
         />
 
+        <TextFieldElement
+          name="linkToSite"
+          type="url"
+          label={t("create_tournament_form.site_link")}
+          fullWidth
+          margin="normal"
+        />
+
+        <CheckboxElement
+          name="paid"
+          label={t("create_tournament_form.paid")}
+          onChange={(e) => {
+            formContext.resetField("linkToPay");
+            formContext.setValue("paid", e.target.checked);
+          }}
+        />
+
+        {paid !== undefined && paid && (
+          <React.Fragment>
+            <TextFieldElement
+              required
+              name="linkToPay"
+              type="url"
+              label={t("create_tournament_form.payment_link")}
+              fullWidth
+              margin="normal"
+            />
+          </React.Fragment>
+        )}
+
         <SelectElement
           required
           label={t("create_tournament_form.match_time")}
@@ -250,6 +291,28 @@ const CreateTournamentForm: React.FC = () => {
             {
               id: "Preliminary Playoff",
               label: t("create_tournament_form.preliminary_playoff")
+            }
+          ]}
+          fullWidth
+          margin="normal"
+        />
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.category")}
+          name="category"
+          options={[
+            {
+              id: "hobby",
+              label: t("create_tournament_form.hobby")
+            },
+            {
+              id: "championship",
+              label: t("create_tournament_form.championship")
+            },
+            {
+              id: "league",
+              label: t("create_tournament_form.league")
             }
           ]}
           fullWidth

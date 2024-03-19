@@ -8,6 +8,8 @@ export enum TournamentType {
   PreliminaryPlayoff = "Preliminary Playoff"
 }
 
+export type Category = "championship" | "league" | "hobby";
+
 export type UnsavedMatch = Pick<
   Match,
   | "players"
@@ -37,6 +39,9 @@ export interface Tournament {
   players: Array<Types.ObjectId | User>;
   matchSchedule: Array<Types.ObjectId | Match>;
   matchTime: MatchTime;
+  category: Category;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 const tournamentSchema = new Schema<Tournament & Document>(
@@ -67,7 +72,10 @@ const tournamentSchema = new Schema<Tournament & Document>(
     },
     organizerEmail: { type: String },
     organizerPhone: { type: String },
-    matchTime: { type: Number, required: true, default: 300000 }
+    matchTime: { type: Number, required: true, default: 300000 },
+    category: { type: String, required: true },
+    linkToPay: { type: String },
+    linkToSite: { type: String }
   },
   {
     timestamps: true,
