@@ -220,6 +220,56 @@ export class TournamentService {
     }
   }
 
+  public async markUserMatchesLost(
+    tournamentId: string,
+    userId: string,
+    creatorId: string
+  ): Promise<void> {
+    const tournament = await TournamentModel.findById(tournamentId).exec();
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+
+    // Check if the creatorId matches the tournament's creator
+    if (tournament.creator.id.toString() !== creatorId) {
+      throw new BadRequestError({
+        message: "Only the tournament creator can modify the tournament!"
+      });
+    }
+
+    // Fetch all matches for the tournament
+    const matches = await MatchModel.find({ tournamentId }).exec();
+
+    const currentTime = new Date();
+
+    for (const match of matches) {
+      // Only modify if there is no winner or end timestamp, so only the unfinished matches
+      if (match.winner === undefined && match.endTimestamp === undefined) {
+        // Check if the user is a player in the match
+        const isUserInMatch = match.players.some(
+          (player) => player.id.toString() === userId
+        );
+
+        if (isUserInMatch) {
+          // Find the opponent
+          const opponent = match.players.find(
+            (player) => player.id.toString() !== userId
+          );
+
+          if (opponent !== undefined) {
+            // Mark the opponent as the winner
+            const id = opponent.id as Types.ObjectId;
+            match.winner = id;
+            match.endTimestamp = currentTime;
+            await match.save();
+          }
+        }
+      }
+    }
+  }
+
   private async generateTournamentSchedule(
     tournament: Tournament,
     newPlayer: Types.ObjectId

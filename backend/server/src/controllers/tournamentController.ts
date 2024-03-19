@@ -130,7 +130,6 @@ export class TournamentController extends Controller {
     await this.service.markUserMatchesLost(tournamentId, userId, creatorId);
   }
 
-
   private get service(): TournamentService {
     return new TournamentService();
   }
