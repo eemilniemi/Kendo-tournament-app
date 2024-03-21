@@ -26,7 +26,8 @@
     "missing_pointmaker": "Matsilta puuttuu pistevastaava!",
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
-    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä"
+    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "cancel_success": "Ilmoittautuminen peruttiin onnistuneesti turnaukseen: "
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -65,7 +66,8 @@
     "create_button": "Luo",
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
-    "delete": "Poista"
+    "delete": "Poista",
+    "cancel_sign_up": "Peruuta ilmoittautuminen"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -142,7 +144,8 @@
     "click_here": "Klikkaa tästä",
     "user_info": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
-    "player_table": "Pelaajataulu"
+    "player_table": "Pelaajataulu",
+    "cancel": "Peruuta ilmoittautuminen: "
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Käynnissä olevat turnaukset",
