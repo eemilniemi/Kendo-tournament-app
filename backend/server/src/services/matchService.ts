@@ -246,7 +246,8 @@ export class MatchService {
                     type: "pre playoff",
                     elapsedTime: 0,
                     timerStartedTimestamp: null,
-                    tournamentRound: nextRound
+                    tournamentRound: nextRound,
+                    matchTime: tournament.matchTime
                   };
 
                   const matchDocuments = await MatchModel.create(newMatch);
@@ -275,7 +276,8 @@ export class MatchService {
                 type: "playoff",
                 elapsedTime: 0,
                 timerStartedTimestamp: null,
-                tournamentRound: playoffRound
+                tournamentRound: playoffRound,
+                matchTime: tournament.matchTime
               };
 
               const matchDocuments = await MatchModel.create(newMatch);
@@ -699,7 +701,8 @@ export class MatchService {
           type: "playoff",
           elapsedTime: 0,
           timerStartedTimestamp: null,
-          tournamentRound: nextRound
+          tournamentRound: nextRound,
+          matchTime: tournament.matchTime
         };
 
         const matchDocuments = await MatchModel.create(newMatch);
