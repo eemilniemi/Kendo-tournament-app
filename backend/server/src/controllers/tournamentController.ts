@@ -120,8 +120,8 @@ export class TournamentController extends Controller {
   }
 
   /*
-  *  Update tournament details.
-  */
+   *  Update tournament details.
+   */
   @Put("{tournamentId}")
   @Tags("Tournaments")
   @Security("jwt")
@@ -141,8 +141,8 @@ export class TournamentController extends Controller {
   }
 
   /*
-  * Delete a tournament
-  */
+   * Delete a tournament
+   */
   @Delete("{tournamentId}")
   @Tags("Tournaments")
   @Security("jwt")
