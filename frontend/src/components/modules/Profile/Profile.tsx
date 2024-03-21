@@ -5,6 +5,7 @@ import ProfilePoints from "./ProfilePoints";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { useTranslation } from "react-i18next";
+import { Box } from "@mui/material";
 
 const Profile: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState("info");
@@ -19,13 +20,13 @@ const Profile: React.FC = () => {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <Box style={{ display: "flex", alignItems: "center" }}>
         <Tabs value={selectedTab} onChange={handleTabChange}>
           <Tab label={t("profile.profile_info")} value="info" />
           <Tab label={t("profile.my_games")} value="games" />
           <Tab label={t("profile.my_points")} value="points" />
         </Tabs>
-      </div>
+      </Box>
       {selectedTab === "info" && <ProfileInfo />}
       {selectedTab === "games" && <ProfileGames />}
       {selectedTab === "points" && <ProfilePoints />}

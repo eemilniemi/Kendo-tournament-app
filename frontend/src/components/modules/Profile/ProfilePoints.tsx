@@ -4,13 +4,13 @@ import {
   TableHead,
   TableBody,
   TableCell,
-  TableRow
+  TableRow,
+  Box
 } from "@mui/material";
 import api from "api/axios";
 import { useAuth } from "context/AuthContext";
 import type { Match } from "types/models";
 import { useTranslation } from "react-i18next";
-import { profile } from "console";
 
 const ProfilePoints: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -75,7 +75,7 @@ const ProfilePoints: React.FC = () => {
   });
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <Box style={{ marginTop: "20px" }}>
       <Table style={{ width: "60%", margin: "0 auto" }}>
         <TableHead>
           <TableRow>
@@ -106,7 +106,7 @@ const ProfilePoints: React.FC = () => {
           </TableRow>
         </TableBody>
       </Table>
-    </div>
+    </Box>
   );
 };
 

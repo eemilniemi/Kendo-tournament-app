@@ -305,7 +305,10 @@
     "match":"Match",
     "profile_info": "Profile Info",
     "my_games": "My Games",
-    "my_points": "My Points"
+    "my_points": "My Points",
+    "point_type": "Point Type",
+    "points": "points"
+    
   }
 
 }
