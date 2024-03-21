@@ -159,7 +159,7 @@ const UpcomingTournamentView: React.FC = () => {
         </Typography>
       </Box>
 
-      {tournament.linkToSite !== undefined && (
+      {tournament.linkToSite !== undefined || tournament.linkToSite !== "" && (
         <Box>
           <Typography variant="subtitle1">
             <strong>
@@ -170,7 +170,7 @@ const UpcomingTournamentView: React.FC = () => {
         </Box>
       )}
 
-      {tournament.linkToPay !== undefined && (
+      {tournament.linkToPay !== undefined || tournament.linkToPay !== "" && (
         <Box>
           <Typography variant="subtitle1">
             <strong>
