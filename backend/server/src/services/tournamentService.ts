@@ -18,8 +18,16 @@ import {
   type EditTournamentRequest,
   type CreateTournamentRequest
 } from "../models/requestModel.js";
+import { MatchService } from "./matchService";
 
 export class TournamentService {
+  // This is to use matchService's functions here
+  private readonly matchService: MatchService; // Add MatchService as a member variable
+
+  constructor() {
+    this.matchService = new MatchService(); // Initialize MatchService
+  }
+
   public async getTournamentById(id: string): Promise<Tournament> {
     const tournament = await TournamentModel.findById(id)
       .populate<{ creator: User }>({ path: "creator", model: "User" })
@@ -132,6 +140,7 @@ export class TournamentService {
 
       tournament.matchSchedule = [];
     }
+
     await tournament.save();
 
     if (tournament.players.length > 1) {
@@ -178,6 +187,45 @@ export class TournamentService {
     if (tournament.players.includes(player.id)) {
       const index = tournament.players.indexOf(player.id);
       tournament.players.splice(index, 1);
+
+      // Remove player's matches from match schedule
+      const matchesToRemove: Array<Types.ObjectId | Match> = [];
+
+      for (const matchId of tournament.matchSchedule) {
+        const match = await MatchModel.findById(matchId).exec();
+        if (match === undefined || match === null) {
+          continue; // Skip if match doesn't exist
+        }
+        // Check if the match involves the removed player
+        const matchPlayerIds = match.players.map((player) =>
+          player.id.toString()
+        );
+        if (matchPlayerIds.includes(playerId)) {
+          matchesToRemove.push(matchId);
+          // Delete the match
+          const matchIdString = String(matchId);
+          await this.matchService.deleteMatchById(matchIdString);
+        }
+      }
+
+      // Remove match IDs involving the removed player from match schedule
+      tournament.matchSchedule = tournament.matchSchedule.filter(
+        (matchId) => !matchesToRemove.includes(matchId)
+      );
+    }
+
+    // Preliminary requires also removing from "groups"
+    if (tournament.type === TournamentType.PreliminaryPlayoff) {
+      if (tournament.groups.length > 0) {
+        for (const group of tournament.groups) {
+          const playerIndex = group.indexOf(player.id);
+          if (playerIndex !== -1) {
+            group.splice(playerIndex, 1);
+          }
+        }
+      }
+      // TODO: new groups and match schedule
+      // How to replace "new player id" in generateTournamentSchedule??
     }
 
     await tournament.save();
