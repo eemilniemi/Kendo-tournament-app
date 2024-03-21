@@ -202,6 +202,21 @@ const UpcomingTournamentView: React.FC = () => {
         </Box>
       )}
 
+      {userAlreadySigned && (
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              navigate("cancel-sign-up");
+            }}
+          >
+            {t("buttons.cancel_sign_up")}
+          </Button>
+          <br />
+        </Box>
+      )}
+
       {tournament.players.length > 0 ? (
         <React.Fragment>
           <Typography variant="body1" className="header" fontWeight="bold">
