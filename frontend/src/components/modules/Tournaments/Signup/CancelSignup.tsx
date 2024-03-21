@@ -1,5 +1,5 @@
 import React, { type ReactElement } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 import useToast from "hooks/useToast";
 import api from "api/axios";
@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import routePaths from "routes/route-paths";
+import { Link } from "@mui/material";
 
 const CancelSignup: React.FC = (): ReactElement => {
   const { userId } = useAuth();
@@ -56,6 +57,18 @@ const CancelSignup: React.FC = (): ReactElement => {
         <Typography variant="body1" className="dates">
           {new Date(tournament.startDate).toLocaleString("fi")} -{" "}
           {new Date(tournament.endDate).toLocaleString("fi")}
+        </Typography>
+      </Box>
+
+      <Box className="sign-up-body">
+        <Typography variant="body1" className="subtext">
+          {t("signup_labels.want_more_info")}{" "}
+          <Link
+            component={RouterLink}
+            to={`${routePaths.homeRoute}/${tournament.id}`}
+          >
+            {t("signup_labels.click_here")}
+          </Link>
         </Typography>
       </Box>
 

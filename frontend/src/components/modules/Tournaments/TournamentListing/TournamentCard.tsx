@@ -147,7 +147,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           </Button>
           {userAlreadySigned && tournamentHasNotStarted && (
             <Button
-              color="primary"
+              color="secondary"
               variant="contained"
               onClick={() => {
                 navigate(`${tournament.id}/cancel-sign-up`);

@@ -206,7 +206,7 @@ const UpcomingTournamentView: React.FC = () => {
         <Box>
           <Button
             variant="contained"
-            color="primary"
+            color="secondary"
             onClick={() => {
               navigate("cancel-sign-up");
             }}
