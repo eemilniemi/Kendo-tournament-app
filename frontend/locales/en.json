@@ -27,8 +27,8 @@
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
     "minimum_player_to_playoff": "At least one player has to proceed",
-    "copy_success": "Address copied to clipboard!",
-    "copy_failure": "Failed to copy address"
+    "copy_success": "Tournament link copied to clipboard!",
+    "copy_failure": "Failed to copy tournament link"
   },
   "game_interface": {
     "player": "Player",

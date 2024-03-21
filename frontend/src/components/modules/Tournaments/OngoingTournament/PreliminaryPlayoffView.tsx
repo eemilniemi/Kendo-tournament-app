@@ -6,7 +6,8 @@ import {
   Typography,
   Card,
   CardActionArea,
-  CardContent
+  CardContent,
+  Grid
 } from "@mui/material";
 import { type Match, type Tournament } from "types/models";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -230,7 +231,15 @@ const PreliminaryPlayoffView: React.FC = () => {
 
   return (
     <>
-      <Typography variant="h4">{tournament.name}</Typography>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography variant="h4">{tournament.name}</Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
+
       <Tabs
         value={currentTab}
         onChange={(_, newValue) => {
@@ -285,7 +294,6 @@ const PreliminaryPlayoffView: React.FC = () => {
           <PlayoffTournamentView />
         </div>
       )}
-      <CopyToClipboardButton/>
     </>
   );
 };

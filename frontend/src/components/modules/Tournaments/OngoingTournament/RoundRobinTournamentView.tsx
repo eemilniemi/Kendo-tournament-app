@@ -11,7 +11,8 @@ import {
   Paper,
   Typography,
   Button,
-  type ButtonProps
+  type ButtonProps,
+  Grid
 } from "@mui/material";
 import { type User, type Match, type Tournament } from "types/models";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -350,6 +351,15 @@ const RoundRobinTournamentView: React.FC = () => {
 
   return (
     <>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography variant="h4">{tournament.name}</Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
+
       <Tabs
         value={currentTab}
         onChange={(_, newValue) => {
@@ -370,7 +380,6 @@ const RoundRobinTournamentView: React.FC = () => {
           pastMatchElements={pastElements}
         />
       )}
-      <CopyToClipboardButton/>
     </>
   );
 };

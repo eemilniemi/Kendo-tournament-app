@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import { useTranslation } from "react-i18next";
 import useToast from "hooks/useToast";
 
-const CopyToClipboardButton = () => {
+const CopyToClipboardButton: React.FC = () => {
   const [textToCopy, setTextToCopy] = useState("");
   const { t } = useTranslation();
   const showToast = useToast();
@@ -12,7 +12,7 @@ const CopyToClipboardButton = () => {
     setTextToCopy(window.location.href); // Set the current site address as text to copy
   }, []);
 
-  const handleCopyToClipboard = async () => {
+  const handleCopyToClipboard = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       showToast(t("messages.copy_success"), "success");
@@ -22,11 +22,7 @@ const CopyToClipboardButton = () => {
   };
 
   return (
-    <Button
-      variant="contained"
-      color="error"
-      onClick={handleCopyToClipboard}
-    >
+    <Button variant="outlined" color="error" onClick={handleCopyToClipboard}>
       {t("buttons.copy_to_clipboard")}
     </Button>
   );
