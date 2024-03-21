@@ -72,6 +72,20 @@ export class TournamentController extends Controller {
     );
   }
 
+  @Delete("{tournamentId}/cancel-signup")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async cancelSignup(
+    @Path() tournamentId: ObjectIdString,
+    @Body() request: { playerId: ObjectIdString }
+  ): Promise<void> {
+    this.setStatus(204);
+    await this.service.removePlayerFromTournament(
+      tournamentId,
+      request.playerId
+    );
+  }
+
   @Put("{tournamentId}/manual-schedule")
   @Tags("Tournaments")
   @Security("jwt")
