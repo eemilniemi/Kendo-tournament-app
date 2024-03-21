@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Bracket from "./TournamentBracket";
 import { type User, type Match } from "types/models";
 import { useTournament } from "context/TournamentContext";
-import { Typography, Box, Grid, Divider } from "@mui/material";
+import { Typography, Box, Grid, Divider, Button } from "@mui/material";
 import ErrorModal from "components/common/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import routePaths from "routes/route-paths";
 import { useTranslation } from "react-i18next";
+import CopyToClipboardButton from "./CopyToClipboardButton";
 
 interface Rounds extends Record<number, Match[]> {}
 
@@ -15,6 +16,7 @@ const PlayoffTournamentView: React.FC = () => {
     useTournament();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [textToCopy, setTextToCopy] = useState("");
   const { t } = useTranslation();
 
   let playoffMatches: Match[];
@@ -82,6 +84,8 @@ const PlayoffTournamentView: React.FC = () => {
           "&::-webkit-scrollbar": { display: "none" }
         }}
       >
+        <CopyToClipboardButton/>
+
         <Grid
           container
           spacing={2}

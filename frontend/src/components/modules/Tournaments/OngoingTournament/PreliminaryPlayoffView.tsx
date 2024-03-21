@@ -23,6 +23,7 @@ import {
   createMatchButton
 } from "./RoundRobinTournamentView";
 import PlayoffTournamentView from "./PlayoffTournamentView";
+import CopyToClipboardButton from "./CopyToClipboardButton";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
@@ -284,6 +285,7 @@ const PreliminaryPlayoffView: React.FC = () => {
           <PlayoffTournamentView />
         </div>
       )}
+      <CopyToClipboardButton/>
     </>
   );
 };

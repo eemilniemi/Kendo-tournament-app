@@ -17,6 +17,7 @@ import { type User, type Match, type Tournament } from "types/models";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
+import CopyToClipboardButton from "./CopyToClipboardButton";
 
 export interface TournamentPlayer {
   id: string;
@@ -369,6 +370,7 @@ const RoundRobinTournamentView: React.FC = () => {
           pastMatchElements={pastElements}
         />
       )}
+      <CopyToClipboardButton/>
     </>
   );
 };
