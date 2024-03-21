@@ -159,27 +159,29 @@ const UpcomingTournamentView: React.FC = () => {
         </Typography>
       </Box>
 
-      {tournament.linkToSite !== undefined || tournament.linkToSite !== "" && (
-        <Box>
-          <Typography variant="subtitle1">
-            <strong>
-              {t("upcoming_tournament_view.link_to_site_header")}:
-            </strong>{" "}
-            <Link href={tournament.linkToSite}>{tournament.linkToSite}</Link>
-          </Typography>
-        </Box>
-      )}
+      {tournament.linkToSite !== undefined &&
+        tournament.linkToSite.trim() !== "" && (
+          <Box>
+            <Typography variant="subtitle1">
+              <strong>
+                {t("upcoming_tournament_view.link_to_site_header")}:
+              </strong>{" "}
+              <Link href={tournament.linkToSite}>{tournament.linkToSite}</Link>
+            </Typography>
+          </Box>
+        )}
 
-      {tournament.linkToPay !== undefined || tournament.linkToPay !== "" && (
-        <Box>
-          <Typography variant="subtitle1">
-            <strong>
-              {t("upcoming_tournament_view.link_to_payment_header")}:
-            </strong>{" "}
-            <Link href={tournament.linkToPay}>{tournament.linkToPay}</Link>
-          </Typography>
-        </Box>
-      )}
+      {tournament.linkToPay !== undefined &&
+        tournament.linkToPay.trim() !== "" && (
+          <Box>
+            <Typography variant="subtitle1">
+              <strong>
+                {t("upcoming_tournament_view.link_to_payment_header")}:
+              </strong>{" "}
+              <Link href={tournament.linkToPay}>{tournament.linkToPay}</Link>
+            </Typography>
+          </Box>
+        )}
 
       <br />
 
