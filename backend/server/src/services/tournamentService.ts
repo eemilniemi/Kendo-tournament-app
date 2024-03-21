@@ -147,6 +147,44 @@ export class TournamentService {
     return await tournament.toObject();
   }
 
+  public async removePlayerFromTournament(
+    tournamentId: string,
+    playerId: string
+  ): Promise<void> {
+    const tournament = await TournamentModel.findById(tournamentId).exec();
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+
+    const player = await UserModel.findById(playerId).exec();
+    if (player === null || player === undefined) {
+      throw new NotFoundError({
+        message: "Player not found"
+      });
+    }
+
+    const currentDate = new Date();
+    const startDate = new Date(tournament.startDate);
+    if (currentDate > startDate) {
+      throw new BadRequestError({
+        message: `Cannot cancel sign up as the tournament has already started on ${startDate.toDateString()}`
+      });
+    }
+
+    // Remove player from tournament
+    if (tournament.players.includes(player.id)) {
+      const index = tournament.players.indexOf(player.id);
+      tournament.players.splice(index, 1);
+    }
+
+    await tournament.save();
+
+    return await tournament.toObject();
+  }
+
   public async addMatchToTournament(
     tournamentId: string,
     unsavedMatch: UnsavedMatch
