@@ -388,11 +388,13 @@ export class TournamentService {
     const bracketSize = this.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
     
-    // add the byes first
+    // create the byes first to be added later
+    // this way the first registrants get the byes
     let i: number;
+    const byes = []
     for(i = 0; i < byesNeeded; i++)
     {
-      matches.push({
+      byes.push({
         players: [
           { id: playerIds[i], points: [], color: "white"}
         ],
@@ -423,6 +425,7 @@ export class TournamentService {
       });
     }
 
+    matches.push(...byes as UnsavedMatch[])
     return matches;
   }
 
