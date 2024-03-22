@@ -6,7 +6,8 @@ import {
   Typography,
   Card,
   CardActionArea,
-  CardContent
+  CardContent,
+  Grid
 } from "@mui/material";
 import { type Match, type Tournament } from "types/models";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -23,6 +24,7 @@ import {
   createMatchButton
 } from "./RoundRobinTournamentView";
 import PlayoffTournamentView from "./PlayoffTournamentView";
+import CopyToClipboardButton from "./CopyToClipboardButton";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
@@ -229,7 +231,15 @@ const PreliminaryPlayoffView: React.FC = () => {
 
   return (
     <>
-      <Typography variant="h4">{tournament.name}</Typography>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography variant="h4">{tournament.name}</Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
+
       <Tabs
         value={currentTab}
         onChange={(_, newValue) => {

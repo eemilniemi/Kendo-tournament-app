@@ -26,7 +26,9 @@
     "missing_pointmaker": "Matsilta puuttuu pistevastaava!",
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
-    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä"
+    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "copy_success": "Linkki kopioitu leikepöydälle!",
+    "copy_failure": "Linkin kopioinnissa tapahtui virhe"
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -65,7 +67,8 @@
     "create_button": "Luo",
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
-    "delete": "Poista"
+    "delete": "Poista",
+    "copy_to_clipboard": "Jaa turnaus"
   },
   "titles": {
     "login": "Kirjaudu sisään",
