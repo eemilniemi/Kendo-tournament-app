@@ -402,7 +402,7 @@ export class TournamentService {
         tournamentRound: 1,
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
-        winner: playerIds[0]
+        winner: playerIds[i]
       })
     }
 
