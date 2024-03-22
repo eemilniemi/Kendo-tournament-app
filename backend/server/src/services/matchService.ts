@@ -527,16 +527,6 @@ export class MatchService {
     return await match.toObject();
   }
 
-  public static findHighestRound(matches: Match[]): number {
-    let round = 1;
-    console.log("Matches length highest round " + matches.length);
-    for (const match of matches) {
-      if (match.tournamentRound > round) {
-        round = match.tournamentRound;
-      }
-    }
-    return round;
-  }
 
   public static async divideMatchesToCourts(
     id: Types.ObjectId
@@ -549,6 +539,10 @@ export class MatchService {
         message: "Tournament not found"
       });
     }
+    if(tournament.numberOfCourts === 1){
+      return;
+    }
+
     const matches = await MatchModel.find({ tournamentId: id });
     
     const latestRound = MatchService.findHighestRound(matches);
@@ -590,12 +584,52 @@ export class MatchService {
     }
     
     else if(tournament.type === TournamentType.RoundRobin){
-      // TODO: some way to divide to fields
+      let tournamentCourts = tournament.numberOfCourts;
+      if((tournament.players.length / 2 < tournamentCourts)){
+        tournamentCourts = Math.floor(tournament.players.length / 2);
+      }
+      let queue = latestMatches;
+      let matches : Match[][] & Document[][] = [];
+      let sorted = 0;
+      let round = -1;
+      while(queue.length > 0){
+        let match = queue.shift();
+
+        if(match=== undefined){
+          throw new NotFoundError({
+            message: "Match not found"
+          });
+        }
+
+        if(sorted % tournamentCourts === 0){
+          matches.push([]);
+          round++;
+        }
+
+        if(!this.hasPlayerAlready(matches[round], match)){
+          matches[round].push(match);
+          sorted++;
+        }
+        else{
+          queue.push(match);
+        }
+      }
+        
+
+        for(const matchRound of matches){
+          let court = 1;
+          
+          for(const match of matchRound){
+            match.courtNumber = court;
+            await match.save();
+            court++;
+          }
+        }
+      
     }
 
     else if (tournament.type === TournamentType.Playoff){
       let court = 1;
-      console.log(latestMatches.length);
       for(const match of latestMatches){
         match.courtNumber = court;
         court++;
@@ -606,25 +640,6 @@ export class MatchService {
       }
     }
     
-  }
-
-  public static matchesByGroup(
-    tournament: Tournament & Document,
-    matches: Match[] & Document[]
-  ): Match[][] & Document[][]{
-    let matchesByGroup: Match[][] & Document[][] = Array.from({length: tournament.groups.length}, () => []);
-    for(const match of matches){
-      for(let i = 0; i<tournament.groups.length; i++){
-        const player = match.players[0] as MatchPlayer;
-        const playerId = player.id;
-        if(tournament.groups[i].includes(playerId)){
-          matchesByGroup[i].push(match);
-          break;
-        }
-      }
-    }
-
-    return matchesByGroup;
   }
 
   private findMostRecentPoint(players: MatchPlayer[]): {
@@ -818,7 +833,6 @@ export class MatchService {
     // Save the tournament if new matches were added
     if (eligibleWinners.length > 0) {
       await tournament.save();
-      console.log("SAVING MATCHES");
       await MatchService.divideMatchesToCourts(tournament.id);
     }
   }
@@ -1070,6 +1084,51 @@ export class MatchService {
       });
     });
     return groupRankings;
+  }
+
+  private static findHighestRound(matches: Match[]): number {
+    let round = 1;
+    for (const match of matches) {
+      if (match.tournamentRound > round) {
+        round = match.tournamentRound;
+      }
+    }
+    return round;
+  }
+  
+  private static matchesByGroup(
+    tournament: Tournament & Document,
+    matches: Match[] & Document[]
+  ): Match[][] & Document[][]{
+    let matchesByGroup: Match[][] & Document[][] = Array.from({length: tournament.groups.length}, () => []);
+    for(const match of matches){
+      for(let i = 0; i<tournament.groups.length; i++){
+        const player = match.players[0] as MatchPlayer;
+        const playerId = player.id;
+        if(tournament.groups[i].includes(playerId)){
+          matchesByGroup[i].push(match);
+          break;
+        }
+      }
+    }
+
+    return matchesByGroup;
+  }
+
+  private static hasPlayerAlready(
+    matches: Match[] & Document[],
+    match: Match & Document
+  ): boolean {
+    const player1 = match.players[0] as MatchPlayer;
+    const player2 = match.players[1] as MatchPlayer;
+    for(const listMatch of matches){
+      const players = listMatch.players as MatchPlayer[];
+      const playerIds: Types.ObjectId[] = players.map(player => player.id);
+      if(playerIds.includes(player1.id) || playerIds.includes(player2.id)){
+        return true;
+      }
+    }
+    return false;
   }
 
 }
