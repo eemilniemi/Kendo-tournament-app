@@ -65,7 +65,8 @@
     "create_button": "Create",
     "save_button": "Save",
     "modify_or_delete": "Modify or delete recent point",
-    "delete": "Delete"
+    "delete": "Delete",
+	  "withdraw_user": "Withdraw player from tournament"
   },
   "titles": {
     "login": "Sign in",
@@ -77,7 +78,9 @@
     "confirm_tournament_creation": "Confirm tournament creation",
     "modify_or_delete": "Modify or delete recent point",
     "select_new_type": "Select new type for the recent point:",
-    "confirm_tournament_deletion": "Confirm tournament deletion"
+    "confirm_tournament_deletion": "Confirm tournament deletion",
+    "withdraw_user_from_tournament": "Withdraw player from tournament",
+    "confirm_user_withdrawal": "Confirm player withdrawal from tournament"
   },
   "login_form": {
     "forgot_password": "Forgot password?",
@@ -306,5 +309,10 @@
     "body25": "We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page. We will let You know via email and/or a prominent notice on Our Service, prior to the change becoming effective and update the &quot;Last updated&quot; date at the top of this Privacy Policy. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.",
     "body26": "If you have any questions about this Privacy Policy, You can contact us:",
     "body27": "By email:"
+  },
+  "withdrawal_from_tournament": {
+    "info": "Withdrawing a player from the tournament marks their ongoing and upcoming matches as lost.",
+    "withdrawing_user": "The player withdrawn: ",
+    "confirmation_msg": "Are you sure you want to withdraw player {{name}} from tournament? This action cannot be undone."
   }
 }
