@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import routePaths from "routes/route-paths";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
-import DeleteUserFromTournament from "../DeleteUserFromTournament";
+import DeleteUserFromTournament from "./DeleteUserFromTournament";
 
 interface Rounds extends Record<number, Match[]> {}
 
