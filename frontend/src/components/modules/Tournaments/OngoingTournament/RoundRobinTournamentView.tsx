@@ -17,6 +17,8 @@ import { type User, type Match, type Tournament } from "types/models";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "context/AuthContext";
+import DeleteUserFromTournament from "../DeleteUserFromTournament";
 
 export interface TournamentPlayer {
   id: string;
@@ -297,6 +299,8 @@ const RoundRobinTournamentView: React.FC = () => {
   const tabTypes = ["scoreboard", "matches"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+  const { userId } = useAuth();
+  const isUserTheCreator = tournament.creator.id === userId;
 
   useEffect(() => {
     if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
@@ -368,6 +372,9 @@ const RoundRobinTournamentView: React.FC = () => {
           upcomingMatchElements={upcomingElements}
           pastMatchElements={pastElements}
         />
+      )}
+      {isUserTheCreator && currentTab === "matches" && (
+        <DeleteUserFromTournament />
       )}
     </>
   );
