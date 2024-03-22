@@ -230,7 +230,9 @@ export const sortMatches = (
     (match) => match.elapsedTime <= 0 && match.endTimestamp === undefined
   );
   const pastMatches = matches.filter(
-    (match) => match.elapsedTime > 0 && match.endTimestamp !== undefined
+    (match) =>
+      (match.elapsedTime > 0 && match.endTimestamp !== undefined) ||
+      match.winner !== "undefined"
   );
 
   return { ongoingMatches, upcomingMatches, pastMatches };
@@ -302,6 +304,10 @@ const RoundRobinTournamentView: React.FC = () => {
   const { userId } = useAuth();
   const isUserTheCreator = tournament.creator.id === userId;
 
+  console.log("tulevat matsit: ", upcomingMatches);
+  console.log("meneillään olevat matsit: ", ongoingMatches);
+  console.log("menneet matsit: ", pastMatches);
+  console.log("turnauksen matsit: ", tournament.matchSchedule);
   useEffect(() => {
     if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
       setSearchParams((params) => {
