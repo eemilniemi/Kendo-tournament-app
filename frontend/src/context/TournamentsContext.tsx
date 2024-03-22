@@ -61,7 +61,6 @@ const getSortedTournaments = async (): Promise<SortedTournaments> => {
   const past = sortedTournaments.filter(
     (tournament) => new Date(tournament.endDate) <= currentDate
   );
-
   return { past, ongoing, upcoming } as const;
 };
 
@@ -79,7 +78,9 @@ export const TournamentsProvider = (): ReactElement => {
   /* Indicates that reload should take place */
   useEffect(() => {
     if (shouldRefresh) {
-      navigate(0);
+      navigate(".", {
+        replace: true
+      });
     }
   }, [shouldRefresh]);
 
