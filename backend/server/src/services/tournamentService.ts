@@ -68,6 +68,7 @@ export class TournamentService {
   ): Promise<Tournament> {
     await this.validateTournamentDetails(tournamentData, creator);
 
+    console.log("luodessa tournamentdata: ", tournamentData);
     const newTournament = await TournamentModel.create({
       ...tournamentData,
       creator
@@ -233,7 +234,7 @@ export class TournamentService {
     }
 
     // Check if the creatorId matches the tournament's creator
-    if (tournament.creator.id.toString() !== creatorId) {
+    if (tournament.creator.id.toString('hex') !== creatorId) {
       throw new BadRequestError({
         message: "Only the tournament creator can modify the tournament!"
       });
