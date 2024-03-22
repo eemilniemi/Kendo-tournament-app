@@ -26,7 +26,8 @@
     "missing_pointmaker": "Match is missing a point maker!",
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
-    "minimum_player_to_playoff": "At least one player has to proceed"
+    "minimum_player_to_playoff": "At least one player has to proceed",
+    "number_of_courts_error": "Tournament must have at least 1 court"
   },
   "game_interface": {
     "player": "Player",
@@ -171,6 +172,7 @@
     "confirmation_message": "Are you sure you want to create the tournament with the provided information?",
     "players_to_playoffs_per_group": "Players proceeding to playoffs per group",
     "groups_size_preference": "Group max size (players)",
+    "number_of_courts": "Number of courts",
     "match_time": "Select match time",
     "3_min": "3 minutes",
     "4_min": "4 minutes",

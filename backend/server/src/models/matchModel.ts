@@ -37,6 +37,7 @@ export interface Match {
   player1Score: number;
   player2Score: number;
   matchTime: MatchTime;
+  courtNumber: number;
 }
 
 const pointSchema = new Schema<MatchPoint>(
@@ -83,6 +84,7 @@ const matchSchema = new Schema<Match>(
     comment: { type: String, required: false },
     tournamentId: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: "Tournament"
     },
     officials: {
@@ -99,7 +101,8 @@ const matchSchema = new Schema<Match>(
     isOvertime: { type: Boolean, required: true, default: false },
     player1Score: { type: Number, required: true, default: 0 },
     player2Score: { type: Number, required: true, default: 0 },
-    matchTime: { type: Number, required: true }
+    matchTime: { type: Number, required: true },
+    courtNumber: {type: Number, default: 1}
   },
   {
     toObject: {
