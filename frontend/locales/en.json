@@ -177,7 +177,14 @@
     "match_time": "Select match time",
     "3_min": "3 minutes",
     "4_min": "4 minutes",
-    "5_min": "5 minutes"
+    "5_min": "5 minutes",
+    "category": "Select category",
+    "hobby": "Hobby",
+    "championship": "Championship",
+    "league": "League",
+    "site_link": "Link to organizer's site",
+    "paid": "This tournament requires payment",
+    "payment_link": "Link to payment site"
   },
   "upcoming_tournament_view": {
     "date_header": "When",
@@ -188,7 +195,10 @@
     "no_players_signed_up": "No players have signed up yet.",
     "location_header": "Where",
     "tournament_full": "This tournament is already full!",
-    "delete_tournament": "Are you sure you want to delete this tournament? This action cannot be undone."
+    "delete_tournament": "Are you sure you want to delete this tournament? This action cannot be undone.",
+    "category_header": "Tournament category",
+    "link_to_payment_header": "There is a fee for this tournament, please visit",
+    "link_to_site_header": "Organizer's website"
   },
   "navigation": {
     "back": "Back",

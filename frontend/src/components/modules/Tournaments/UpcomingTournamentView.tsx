@@ -13,8 +13,9 @@ import TableRow from "@mui/material/TableRow";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import Paper from "@mui/material/Paper";
-import type { Tournament, TournamentType } from "types/models";
+import type { Category, Tournament, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
+import { Link } from "@mui/material";
 
 const generateTable = (tournament: Tournament): React.ReactNode => {
   const { t } = useTranslation();
@@ -87,6 +88,19 @@ const UpcomingTournamentView: React.FC = () => {
     }
   };
 
+  const getCategoryTranslationKey = (type: Category): string => {
+    switch (type) {
+      case "championship":
+        return "create_tournament_form.championship";
+      case "hobby":
+        return "create_tournament_form.hobby";
+      case "league":
+        return "create_tournament_form.league";
+      default:
+        return "";
+    }
+  };
+
   return (
     <Container
       component="main"
@@ -110,41 +124,64 @@ const UpcomingTournamentView: React.FC = () => {
       )}
 
       <Box>
-        <Typography variant="subtitle1" className="header" fontWeight="bold">
-          {t("upcoming_tournament_view.location_header")}:
-        </Typography>
-        <Typography variant="body1" className="subtext">
+        <Typography variant="subtitle1">
+          <strong>{t("upcoming_tournament_view.location_header")}:</strong>{" "}
           {tournament.location}
         </Typography>
       </Box>
 
       <Box>
-        <Typography variant="subtitle1" className="header" fontWeight="bold">
-          {t("upcoming_tournament_view.date_header")}:
-        </Typography>
-        <Typography variant="body1" className="dates">
+        <Typography variant="subtitle1">
+          <strong>{t("upcoming_tournament_view.date_header")}:</strong>{" "}
           {new Date(tournament.startDate).toLocaleString("fi")} -{" "}
           {new Date(tournament.endDate).toLocaleString("fi")}
         </Typography>
       </Box>
 
       <Box>
-        <Typography variant="subtitle1" className="header" fontWeight="bold">
-          {t("upcoming_tournament_view.type_header")}:
-        </Typography>
-        <Typography variant="body1" className="subtext">
+        <Typography variant="subtitle1">
+          <strong>{t("upcoming_tournament_view.type_header")}:</strong>{" "}
           {t(getTypeTranslationKey(tournament.type))}
         </Typography>
       </Box>
 
       <Box>
-        <Typography variant="subtitle1" className="header" fontWeight="bold">
-          {t("upcoming_tournament_view.about_header")}:
-        </Typography>
-        <Typography variant="body1" className="subtext">
+        <Typography variant="subtitle1">
+          <strong>{t("upcoming_tournament_view.about_header")}:</strong>{" "}
           {tournament.description}
         </Typography>
       </Box>
+
+      <Box>
+        <Typography variant="subtitle1">
+          <strong>{t("upcoming_tournament_view.category_header")}:</strong>{" "}
+          {t(getCategoryTranslationKey(tournament.category))}
+        </Typography>
+      </Box>
+
+      {tournament.linkToSite !== undefined &&
+        tournament.linkToSite.trim() !== "" && (
+          <Box>
+            <Typography variant="subtitle1">
+              <strong>
+                {t("upcoming_tournament_view.link_to_site_header")}:
+              </strong>{" "}
+              <Link href={tournament.linkToSite}>{tournament.linkToSite}</Link>
+            </Typography>
+          </Box>
+        )}
+
+      {tournament.linkToPay !== undefined &&
+        tournament.linkToPay.trim() !== "" && (
+          <Box>
+            <Typography variant="subtitle1">
+              <strong>
+                {t("upcoming_tournament_view.link_to_payment_header")}:
+              </strong>{" "}
+              <Link href={tournament.linkToPay}>{tournament.linkToPay}</Link>
+            </Typography>
+          </Box>
+        )}
 
       <br />
 
