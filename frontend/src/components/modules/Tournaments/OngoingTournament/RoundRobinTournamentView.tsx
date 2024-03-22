@@ -18,7 +18,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
-import DeleteUserFromTournament from "../DeleteUserFromTournament";
+import DeleteUserFromTournament from "./DeleteUserFromTournament";
 
 export interface TournamentPlayer {
   id: string;
@@ -232,7 +232,7 @@ export const sortMatches = (
   const pastMatches = matches.filter(
     (match) =>
       (match.elapsedTime > 0 && match.endTimestamp !== undefined) ||
-      match.winner !== "undefined"
+      (match.endTimestamp !== undefined && match.winner !== "undefined")
   );
 
   return { ongoingMatches, upcomingMatches, pastMatches };
@@ -304,10 +304,6 @@ const RoundRobinTournamentView: React.FC = () => {
   const { userId } = useAuth();
   const isUserTheCreator = tournament.creator.id === userId;
 
-  console.log("tulevat matsit: ", upcomingMatches);
-  console.log("meneillään olevat matsit: ", ongoingMatches);
-  console.log("menneet matsit: ", pastMatches);
-  console.log("turnauksen matsit: ", tournament.matchSchedule);
   useEffect(() => {
     if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
       setSearchParams((params) => {
