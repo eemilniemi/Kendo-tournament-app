@@ -2,12 +2,7 @@ import React, { useEffect, useState, type ReactElement, useRef } from "react";
 import { type Tournament } from "types/models";
 import useToast from "hooks/useToast";
 import api from "api/axios";
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useOutletContext
-} from "react-router-dom";
+import { Outlet, useLocation, useOutletContext } from "react-router-dom";
 import Loader from "components/common/Loader";
 import { type LocationState } from "types/global";
 import { useTranslation } from "react-i18next";
@@ -65,7 +60,6 @@ const getSortedTournaments = async (): Promise<SortedTournaments> => {
 };
 
 export const TournamentsProvider = (): ReactElement => {
-  const navigate = useNavigate();
   const showToast = useToast();
   const { t } = useTranslation();
   const [value, setValue] = useState<ITournamentsContext>(initialContextValue);
@@ -78,9 +72,7 @@ export const TournamentsProvider = (): ReactElement => {
   /* Indicates that reload should take place */
   useEffect(() => {
     if (shouldRefresh) {
-      navigate(".", {
-        replace: true
-      });
+      window.location.reload();
     }
   }, [shouldRefresh]);
 
