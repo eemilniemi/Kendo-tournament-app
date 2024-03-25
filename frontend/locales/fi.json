@@ -24,7 +24,11 @@
     "logout_successful": "Uloskirjautuminen onnistui!",
     "missing_both": "Matsilta puuttuu molemmat toimitsijat!",
     "missing_pointmaker": "Matsilta puuttuu pistevastaava!",
-    "missing_timekeeper": "Matsilta puuttuu kellokalle!"
+    "missing_timekeeper": "Matsilta puuttuu kellokalle!",
+    "minimum_groupsize_error": "Lohkon minimikoko on  ",
+    "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "copy_success": "Linkki kopioitu leikepöydälle!",
+    "copy_failure": "Linkin kopioinnissa tapahtui virhe"
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -61,7 +65,10 @@
     "sign_up_button": "Ilmoittaudu",
     "register_button": "Rekisteröidy",
     "create_button": "Luo",
-    "save_button": "Tallenna"
+    "save_button": "Tallenna",
+    "modify_or_delete": "Muokkaa tai poista viimeisin piste",
+    "delete": "Poista",
+    "copy_to_clipboard": "Jaa turnaus"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -70,7 +77,10 @@
     "confirm_account_deletion": "Vahvista tilin poistaminen",
     "create_account": "Luo tili",
     "create_tournament": "Luo uusi turnaus",
-    "confirm_tournament_creation": "Vahvista turnauksen luonti"
+    "confirm_tournament_creation": "Vahvista turnauksen luonti",
+    "modify_or_delete": "Muokkaa tai poista viimeisin piste",
+    "select_new_type": "Valitse uusi tyyppi viimeisimmälle pisteelle:",
+    "confirm_tournament_deletion": "Vahvista turnauksen poistaminen"
   },
   "login_form": {
     "forgot_password": "Unohtuiko salasana?",
@@ -99,7 +109,9 @@
     "underage": "Olen alaikäinen",
     "guardians_email": "Huoltajan sähköpostiosoite",
     "profile_info": "Profiilitiedot",
-    "change_password": "Vaihda salasana"
+    "change_password": "Vaihda salasana",
+    "agree": "Hyväksyn",
+    "terms_and_conditions": "käyttöehdot"
   },
   "register_labels": {
     "sign_in": "Kirjaudu sisään",
@@ -123,22 +135,24 @@
     "missing_both": "Puuttuu: kellokalle ja pistevastaava",
     "missing_timer": "Puuttuu: kellokalle",
     "missing_point_maker": "Puuttuu: pistevastaava",
-    "missing_and": "ja pistevastaava"
+    "missing_and": "ja pistevastaava",
+    "group": "Lohko",
+    "playoff_stage_not_started": "Pudotuspelivaihe ei ole vielä alkanut."
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",
     "want_more_info": "Haluatko lisätietoja tästä turnauksesta?",
     "click_here": "Klikkaa tästä",
-    "userInfo": "Ilmoittautumisen yhteydessä annettavat tiedot:",
+    "user_info": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
-    "player_table": "Pelaaja taulu"
+    "player_table": "Pelaajataulu"
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Käynnissä olevat turnaukset",
     "upcoming_tournaments": "Tulevat turnaukset",
     "past_tournaments": "Menneet turnaukset",
     "create_tournament": "Luo turnaus",
-    "no_tournaments_found": "Ei löydetty turnauksia.",
+    "no_tournaments_found": "Turnauksia ei löytynyt.",
     "start_date": "Aloituspäivä",
     "end_date": "Päättymispäivä"
   },
@@ -152,11 +166,25 @@
     "select_tournament_type": "Valitse turnaustyypi",
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
+    "preliminary_playoff": "Pudotuspeli alkulohkoilla",
     "max_players": "Pelaajien enimmäismäärä",
     "different_organizer_info": "Järjestäjällä on eri tiedot kuin minulla",
     "organizer_email": "Järjestäjän sähköposti",
     "organizer_phone_number": "Järjestäjän puhelinnumero",
-    "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?"
+    "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?",
+    "players_to_playoffs_per_group": "Lohkosta pudotuspeleihin siirtyvien pelaajien määrä",
+    "groups_size_preference": "Lohkon maksimikoko (pelaajaa)",
+    "match_time": "Valitse ottelun pituus",
+    "3_min": "3 minuuttia",
+    "4_min": "4 minuuttia",
+    "5_min": "5 minuuttia",
+    "category": "Valitse kategoria",
+    "hobby": "Harraste",
+    "championship": "Arvokisa",
+    "league": "Liiga",
+    "site_link": "Linkki järjestäjän sivuille",
+    "paid": "Tämä turnaus on maksullinen",
+    "payment_link": "Linkki maksusivustolle"
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",
@@ -166,7 +194,11 @@
     "others_signed_up_header": "Muut ilmoittautuneet",
     "no_players_signed_up": "Muita pelaajia ei ole vielä ilmoittautunut.",
     "location_header": "Missä",
-    "tournament_full": "Tämä turnaus on jo täynnä!"
+    "tournament_full": "Tämä turnaus on jo täynnä!",
+    "delete_tournament": "Oletko varma, että haluat poistaa tämän turnauksen? Tätä valintaa ei voi perua.",
+    "category_header": "Turnauksen kategoria",
+    "link_to_payment_header": "Tämä turnaus vaatii maksun, vierailethan osoitteessa",
+    "link_to_site_header": "Järjestäjän sivut"
   },
   "navigation": {
     "back": "Takaisin",
@@ -178,19 +210,122 @@
     "appName": "KendoApp",
     "openSettingsTooltip": "Avaa asetukset",
     "about": "About-sivu",
-    "privacy_policy": "Yksityisyyskäytäntö"
+    "privacy_policy": "Yksityisyyskäytäntö",
+    "back_to_group_view": "Palaa lohkonäkymään"
   },
   "types": {
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
-    "preliminary_playoff": "Alkulohkot ja pudotuspelit"
+    "preliminary_playoff": "Alkulohkot ja pudotuspelit",
+    "preliminary": "Alkulohkot"
   },
   "sorting": {
     "orderBy": "Järjestä: ",
     "mostRecent": "Uusin",
     "oldest": "Vanhin",
     "name": "Nimi A-Ö",
-    "nameDesc": "Nimi Ö-Ä",
+    "nameDesc": "Nimi Ö-A",
     "location": "Sijainti"
+  },
+  "terms_and_conditions": {
+    "title": "KÄYTTÖEHDOT",
+    "last_updated": "Päivitetty viimeksi 4. maaliskuuta 2024",
+    "title2": "SUOSTUMUS OIKEUDELLISIIN EHTOIHIMME",
+    "we": "Olemme Sei Shin Ken Kai ry ('Yritys', 'me', 'meitä', tai 'meidän'). Olemme tämän verkkosivun hallitsijat",
+    "we2": "('Sivusto') sekä kaikki muut siihen liittyvät tuotteet ja palvelut, jotka viittaavat tai linkittävät näihin oikeudellisiin ehtoihin ('Oikeudelliset ehdot') (kokonaisuutena 'Palvelut').",
+    "title3": "PALVELUMME",
+    "title4": "IMMATERIAALIOIKEUDET",
+    "title5": "KÄYTTÄJÄN ESITTÄMÄT TIEDOT",
+    "title6": "KÄYTTÄJÄN REKISTERÖITYMINEN",
+    "title7": "KIELLETTY TOIMINTA",
+    "title8": "PALVELUJEN HALLINNOINTI",
+    "title9": "MUUTOKSET JA KESKEYTYKSET",
+    "title10": "KÄYTTÄJÄTIEDOT",
+    "body1": "Palveluiden käytön yhteydessä annettuja tietoja ei ole tarkoitettu levitettäväksi tai käytettäväksi minkään henkilön tai yhteisön toimesta missään lainkäyttöalueella tai maassa, jossa tällainen levittäminen tai käyttö olisi lain tai määräysten vastaista tai jossa meihin sovellettaisiin rekisteröintivaatimuksia tällaisessa lainkäyttöalueella tai maassa. Näin ollen henkilöt, jotka päättävät käyttää Palveluita muista paikoista, tekevät sen omasta aloitteestaan ja ovat yksin vastuussa paikallisten lakien noudattamisesta, jos ja siltä osin kuin paikalliset lait ovat sovellettavissa.",
+    "body2": "Me omistamme lisenssin kaikkiin immateriaalioikeuksiin Palveluissamme, mukaan lukien kaikki Palveluiden lähdekoodi, tietokannat, toiminnot, ohjelmistot, verkkosivujen ulkoasu, ääni, video, teksti, valokuvat ja grafiikka (yhdessä 'Sisältö') sekä niihin sisältyvät tavaramerkit, palvelumerkit ja logot (yhdessä 'Merkit').",
+    "body3": "Näiden immateriaalioikeuksien rikkominen on käyttöehtojemme rikkomista, ja oikeutesi käyttää palveluitamme päättyy välittömästi.",
+    "body4": "Käyttämällä Palveluita vakuutat ja takaat, että:",
+    "body5": "Kaikki antamasi rekisteröintitiedot ovat totuudenmukaisia, tarkkoja, ajantasaisia ja täydellisiä; ylläpidät näiden tietojen tarkkuutta ja päivität rekisteröintitiedot tarvittaessa viipymättä; olet oikeustoimikelpoinen ja sitoudut noudattamaan näitä lakisääteisiä ehtoja; et pääse Palveluihin automatisoidulla tai muulla kuin inhimillisellä keinolla, olipa kyseessä sitten botti, komentosarja tai jokin muu; et käytä Palveluita mihinkään laittomiin tai luvattomiin tarkoituksiin; etkä riko Palveluiden käyttämiselläsi mitään sovellettavia lakeja tai määräyksiä.",
+    "body6": "Jos annat tietoja, jotka eivät ole totta, ovat epätarkkoja, eivät ole ajan tasalla tai ovat epätäydellisiä, meillä on oikeus keskeyttää tai sulkea tilisi ja kieltää kaikki Palveluiden (tai niiden osien) nykyinen tai tuleva käyttö.",
+    "body7": "Sinua saatetaan vaatia rekisteröitymään, jotta voit käyttää palveluita. Sitoudut pitämään salasanasi luottamuksellisena ja olet vastuussa kaikesta tilisi ja salasanasi käytöstä. Pidätämme oikeuden poistaa, vaatia takaisin tai muuttaa valitsemasi käyttäjätunnuksen, jos päätämme oman harkintamme mukaan, että kyseinen käyttäjätunnus on sopimaton, säädytön tai muuten paheksuttava.",
+    "body8": "Lukuun ottamatta tässä osiossa tai muualla ehdoissamme mainittuja tapauksia, mitään Palveluiden osaa tai mitään Sisältöä tai merkkejä ei saa kopioida, jäljentää, koota, julkaista uudelleen, ladata, lähettää, julkaista, asettaa julkisesti näkyville, koodata, kääntää, siirtää, jakaa, myydä, lisensoida tai muutoin hyödyntää mihinkään kaupalliseen tarkoitukseen ilman nimenomaista etukäteistä kirjallista lupaamme.",
+    "body9": "On kiellettyä julkaista, lähettää, julkaista, ladata tai välittää Palveluiden kautta laittomia, häiritseviä, vihamielisiä, haitallisia, herjaavia, siveettömiä, kiusaavia, loukkaavia, syrjiviä, ketään henkilöä tai ryhmää uhkaavia, seksuaalisesti ilmeisiä, valheellisia, epätarkkoja, vilpillisiä tai harhaanjohtavia lähetyksiä; sovellettavan lain sallimissa rajoissa luopua kaikista moraalisista oikeuksista tällaisiin julkaisuihin.",
+    "body10": "Olet yksin vastuussa julkaisuistasi ja sitoudut nimenomaisesti korvaamaan meille kaikki tappiot, joita meille voi aiheutua (a) tämän kohdan, (b) kolmannen osapuolen immateriaalioikeuksien tai (c) sovellettavan lain rikkomisesta.",
+    "body11": "Palveluiden käyttäjänä sitoudut siihen, että on Palveluissa on kiellettyä:",
+    "body12": "Ladata tai lähettää (tai yrittää ladata tai lähettää) viruksia, troijalaisia hevosia tai muuta materiaalia, mukaan lukien isojen kirjainten liiallinen käyttö ja roskapostitus (toistuvan tekstin jatkuva lähettäminen), joka häiritsee kenenkään osapuolen keskeytymätöntä Palveluiden käyttöä ja niistä nauttimista tai joka muuttaa, heikentää, häiritsee, muuttaa tai häiritsee Palveluiden käyttöä, ominaisuuksia, toimintoja, toimintaa tai ylläpitoa.",
+    "body13": "Järjestelmällisesti hakea tietoja tai muuta sisältöä palveluista luodaksesi tai kootaksesi suoraan tai epäsuorasti kokoelman, koosteen, tietokannan tai hakemiston ilman meiltä saatua kirjallista lupaa.",
+    "body14": "Huijata, pettää tai johtaa meitä ja muita käyttäjiä harhaan, erityisesti yrittäessäsi saada selville arkaluonteisia tilitietoja, kuten käyttäjän salasanoja.",
+    "body15": "Kiertää, poistaa käytöstä tai muulla tavoin häiritä Palveluiden turvallisuuteen liittyviä ominaisuuksia, mukaan lukien ominaisuuksia, jotka estävät tai rajoittavat minkä tahansa Sisällön käyttöä tai kopiointia tai asettavat rajoituksia Palveluiden ja/tai niiden sisältämän Sisällön käytölle.",
+    "body16": "Halventaa, tahrata tai muuten vahingoittaa mielestämme meitä ja/tai Palveluita.",
+    "body17": "Käyttää Palveluista saatuja tietoja toisen henkilön häiritsemiseen, hyväksikäyttöön tai vahingoittamiseen.",
+    "body18": "Käyttää järjestelmää automatisoidusti, kuten käyttämällä komentosarjoja kommenttien tai viestien lähettämiseen tai käyttämällä tiedonlouhintaa, robotteja tai vastaavia tiedonkeruu- ja louhintatyökaluja.",
+    "body19": "Yrittää esiintyä toisena käyttäjänä tai henkilönä tai käyttää toisen käyttäjän käyttäjätunnusta.",
+    "body20": "Häiritä, häiritä tai aiheuttaa kohtuutonta rasitusta Palveluille tai Palveluihin liitetyille verkoille tai palveluille.",
+    "body21": "Yrittää ohittaa Palveluiden toimenpiteet, joiden tarkoituksena on estää tai rajoittaa pääsyä Palveluihin tai Palveluiden osiin.",
+    "body22": "Palveluiden luvaton käyttö, mukaan lukien käyttäjien käyttäjätunnusten ja/tai sähköpostiosoitteiden kerääminen sähköisesti tai muulla tavoin ei-toivottujen sähköpostien lähettämistä varten tai käyttäjätilien luominen automatisoidusti tai väärin perustein.",
+    "body23": "Pidätämme oikeuden, mutta emme velvollisuutta:",
+    "body24": "valvoa Palveluita näiden Säännöllisten ehtojen rikkomisen varalta;",
+    "body25": "ryhtyä asianmukaisiin oikeustoimiin ketä tahansa vastaan, joka oman harkintamme mukaan rikkoo lakia tai näitä Käyttöehtoja, mukaan lukien rajoituksetta tällaisen käyttäjän ilmoittaminen lainvalvontaviranomaisille;",
+    "body26": "oman harkintamme mukaan ja rajoituksetta evätä, rajoittaa pääsyä, rajoittaa saatavuutta tai poistaa käytöstä (siinä määrin kuin se on teknisesti mahdollista) minkä tahansa osallistumisesi tai minkä tahansa sen osan;",
+    "body27": "oman harkintamme mukaan ja ilman rajoituksia, ilmoitusta tai vastuuta poistaa Palveluista tai muuten poistaa käytöstä kaikki tiedostot ja sisältö, jotka ovat liian suuria tai jotka millään tavalla rasittavat järjestelmiämme; ja",
+    "body28": "hallinnoida Palveluita muulla tavalla, jonka tarkoituksena on suojella oikeuksiamme ja omaisuuttamme ja helpottaa Palveluiden asianmukaista toimintaa.",
+    "body29": "Välitämme tietosuojasta ja tietoturvasta. Tutustu sivuun",
+    "body30": ". Käyttämällä palveluita hyväksyt, että sinua sitoo tietosuojakäytäntömme, joka on sisällytetty näihin lakisääteisiin ehtoihin.",
+    "body31": "Huomaathan, että palvelut sijaitsevat Suomessa. Jos käytät Palveluita joltakin muulta maailman alueelta, jossa henkilötietojen keräämistä, käyttöä tai luovuttamista koskevat lait tai muut vaatimukset poikkeavat Suomessa sovellettavista laeista, siirrät tietosi Suomeen jatkamalla Palveluiden käyttöä ja annat nimenomaisen suostumuksesi siihen, että tietosi siirretään ja käsitellään Suomessa.",
+    "body32": "Pidätämme oikeuden muuttaa, muokata tai poistaa Palveluiden sisältöä milloin tahansa ja mistä tahansa syystä oman harkintamme mukaan ilman ennakkoilmoitusta. Meillä ei kuitenkaan ole velvollisuutta päivittää mitään tietoja Palveluissamme. Emme ole vastuussa sinulle tai millekään kolmannelle osapuolelle Palveluiden muuttamisesta, hinnanmuutoksesta, keskeyttämisestä tai lopettamisesta. Emme voi taata, että Palvelut ovat aina saatavilla. Meillä saattaa esiintyä laitteisto-, ohjelmisto- tai muita ongelmia tai joudumme suorittamaan Palveluihin liittyviä huoltotoimenpiteitä, jotka aiheuttavat keskeytyksiä, viivästyksiä tai virheitä. Pidätämme oikeuden muuttaa, tarkistaa, päivittää, keskeyttää, lopettaa tai muuten muokata Palveluita milloin tahansa ja mistä tahansa syystä ilman ennakkoilmoitusta sinulle. Hyväksyt, että emme ole millään tavoin vastuussa mistään menetyksistä, vahingoista tai haitoista, jotka johtuvat siitä, että et voi käyttää Palveluita Palveluiden käyttökatkosten tai keskeytysten aikana. Mikään näissä Oikeudellisissa ehdoissa ei velvoita meitä ylläpitämään ja tukemaan Palveluita tai toimittamaan niihin liittyviä korjauksia, päivityksiä tai julkaisuja.",
+    "body33": "Säilytämme tiettyjä tietoja, jotka lähetät Palveluihin Palveluiden suorituskyvyn hallintaa varten, sekä tietoja, jotka liittyvät Palveluiden käyttöösi. Vaikka teemme säännöllisesti rutiininomaisia varmuuskopioita tiedoista, olet yksin vastuussa kaikista lähettämistäsi tiedoista tai tiedoista, jotka liittyvät Palveluita käyttämääsi toimintaan. Suostut siihen, että emme ole vastuussa sinulle tällaisten tietojen menetyksestä tai turmeltumisesta, ja luovut täten kaikista meitä vastaan nostettavista kanteista, jotka johtuvat tällaisten tietojen menetyksestä tai turmeltumisesta.",
+    "body34": "Jos haluat ratkaista Palveluita koskevan valituksen tai saada lisätietoja Palveluiden käytöstä, ota meihin yhteyttä osoitteeseen:"
+  },
+  "privacy": {
+    "title": "YKSITYISYYSKÄYTÄNTÖ",
+    "title1": "Tulkinnat ja määritelmät",
+    "title2": "Tulkinnat",
+    "title3": "Määritelmät",
+    "title4": "Henkilötietojesi kerääminen ja käyttö",
+    "title5": "Kerättävien tietojen tyypit",
+    "title6": "Henkilötiedot",
+    "title7": "Käyttötiedot",
+    "title8": "Henkilötietojesi käyttö",
+    "title9": "Henkilötietojesi säilyttäminen",
+    "title10": "Henkilötietojen poistaminen",
+    "title11": "Lasten yksityisyys",
+    "title12": "Muutokset tähän yksityisyyskäytäntöön",
+    "title13": "Ota yhteyttä",
+    "body": "Tässä tietosuojakäytännössä kuvataan palvelua käyttäessäsi tietojesi keräämiseen, käyttöön ja luovuttamiseen liittyviä käytäntöjämme ja menettelyjämme sekä kerrotaan sinulle yksityisyydensuojaa koskevista oikeuksistasi ja siitä, miten laki suojaa sinua.",
+    "body1": "Sanoilla, joiden alkukirjain on kirjoitettu isolla alkukirjaimella, on seuraavin edellytyksin määritelty merkitys. Seuraavilla määritelmillä on sama merkitys riippumatta siitä, esiintyvätkö ne yksikössä vai monikossa.",
+    "body2": "Tätä tietosuojakäytäntöä sovellettaessa:",
+    "body3": "Tilillä tarkoitetaan yksilöllistä tiliä, joka on luotu Sinulle Palvelumme tai sen osien käyttämistä varten.",
+    "body4": "Sidosyrityksellä tarkoitetaan yhteisöä, jolla on määräysvalta, joka on osapuolen määräysvallassa tai joka on sen kanssa yhteisessä määräysvallassa, kun 'määräysvallalla' tarkoitetaan vähintään 50 prosentin omistusosuutta osakkeista, osuuksista tai muista arvopapereista, jotka oikeuttavat äänestämään hallituksen jäsenten valinnassa tai muussa johtavassa asemassa.",
+    "body5": "Yritys (jäljempänä tässä sopimuksessa joko 'yritys', 'me', 'meitä' tai 'meidän') tarkoittaa Sei Shin Ken Kai ry:tä, Seinäjoki.",
+    "body6": "Evästeet ovat pieniä tiedostoja, jotka verkkosivusto sijoittaa tietokoneeseesi, mobiililaitteeseesi tai muuhun laitteeseesi ja jotka sisältävät muun muassa tietoja selaushistoriastasi kyseisellä verkkosivustolla.",
+    "body7": "Maa: Suomi",
+    "body8": "Laitteella tarkoitetaan mitä tahansa laitetta, jolla palvelua voidaan käyttää, kuten tietokonetta, matkapuhelinta tai digitaalista tablettia.",
+    "body9": "Henkilötiedot ovat kaikkia tietoja, jotka liittyvät tunnistettuun tai tunnistettavissa olevaan henkilöön.",
+    "body10": "Palvelulla tarkoitetaan Verkkosivustoa.",
+    "body11": "Palveluntarjoajalla tarkoitetaan luonnollista henkilöä tai oikeushenkilöä, joka käsittelee tietoja Yrityksen puolesta.",
+    "body12": "Käyttötiedoilla tarkoitetaan automaattisesti kerättyjä tietoja, jotka syntyvät joko Palvelun käytöstä tai itse Palvelun infrastruktuurista (esimerkiksi sivuvierailun kesto).",
+    "body13": "Verkkosivusto viittaa KendoAppiin, johon pääsee osoitteesta",
+    "body14": "Sinä tarkoitat henkilöä, joka käyttää Palvelua, tai yritystä tai muuta oikeushenkilöä, jonka puolesta kyseinen henkilö käyttää Palvelua, tapauksen mukaan.",
+    "body15": "Kun käytät Palveluamme, saatamme pyytää sinua antamaan meille tiettyjä henkilökohtaisesti tunnistettavia tietoja, joita voidaan käyttää yhteydenottoon tai tunnistamiseen. Henkilökohtaisesti tunnistettavia tietoja voivat olla muun muassa seuraavat:",
+    "body16": "Etu- ja sukunimi",
+    "body17": "Käyttötietoja kerätään automaattisesti Palvelun käytön yhteydessä. Käyttötiedot voivat sisältää tietoja, kuten Palvelumme sivut, joilla vierailet, vierailusi kellonaika ja päivämäärä, kyseisillä sivuilla vietetty aika ja muita diagnostisia tietoja.",
+    "body18": "Yritys voi käyttää henkilötietoja seuraaviin tarkoituksiin:",
+    "body19": "Palvelumme tarjoaminen ja ylläpitäminen, mukaan lukien palvelumme käytön seuranta.",
+    "body20": "Tilisi hallinnoimiseksi: hallinnoidaksesi rekisteröitymistäsi Palvelun käyttäjäksi. Antamasi henkilötiedot voivat antaa sinulle pääsyn Palvelun eri toimintoihin, jotka ovat käytettävissäsi rekisteröityneenä käyttäjänä.",
+    "body21": "Ottaa yhteyttä sinuun: Ottaa sinuun yhteyttä sähköpostitse, puhelimitse, tekstiviestillä tai muilla vastaavilla sähköisillä viestintävälineillä palveluun kuuluvista mahdollisista maksuista tai liittyvistä päivityksistä, mukaan lukien tietoturvapäivitykset, kun se on tarpeen tai kohtuullista niiden toteuttamiseksi.",
+    "body22": "Yhtiö säilyttää henkilötietojasi vain niin kauan kuin se on tarpeen tässä tietosuojakäytännössä esitettyjä tarkoituksia varten. Säilytämme ja käytämme henkilötietojasi siinä määrin kuin on tarpeen lakisääteisten velvoitteidemme noudattamiseksi (esimerkiksi jos meidän on säilytettävä tietojasi sovellettavien lakien noudattamiseksi), riitojen ratkaisemiseksi ja laillisten sopimustemme ja käytäntöjemme noudattamisen valvomiseksi.",
+    "body23": "Sinulla on oikeus poistaa sinusta keräämämme henkilötiedot tai pyytää meitä avustamaan sinua niiden poistamisessa. Voit päivittää, muuttaa tai poistaa tietojasi milloin tahansa kirjautumalla sisään tilillesi, jos sinulla on sellainen, ja käymällä tiliasetukset-osiossa, jossa voit hallita henkilötietojasi. Voit myös ottaa meihin yhteyttä pyytääkseen pääsyä, korjataksesi tai poistaaksesi meille antamasi henkilötiedot.",
+    "body24": "Jos saamme tietää, että olemme keränneet henkilötietoja alle 18-vuotiailta ilman vanhempien suostumusta, ryhdymme toimiin poistaaksemme kyseiset tiedot palvelimiltamme. Jos meidän on vedottava suostumukseen tietojesi käsittelyn oikeusperustana ja maasi edellyttää vanhemman suostumusta, vaadimme vanhemman suostumuksen ennen kuin keräämme ja käytämme kyseisiä tietoja.",
+    "body25": "Saatamme päivittää tietosuojakäytäntöämme aika ajoin. Ilmoitamme sinulle kaikista muutoksista julkaisemalla uuden tietosuojakäytännön tällä sivulla. Ilmoitamme siitä sinulle sähköpostitse ja/tai näkyvällä ilmoituksella palvelussamme ennen muutoksen voimaantuloa ja päivitämme tämän tietosuojakäytännön yläosassa olevan 'Viimeksi päivitetty'-päivämäärän. Sinua kehotetaan tarkistamaan tämä tietosuojakäytäntö säännöllisesti mahdollisten muutosten varalta. Tämän tietosuojakäytännön muutokset tulevat voimaan, kun ne julkaistaan tällä sivulla.",
+    "body26": "Jos sinulla on kysyttävää tästä tietosuojakäytännöstä, voit ottaa meihin yhteyttä:",
+    "body27": "Sähköpostilla:"
+  },
+  "profile": {
+    "match":"Ottelu",
+    "profile_info": "Omat Tiedot",
+    "my_games": "Omat Ottelut",
+    "my_points": "Omat Pisteet",
+    "point_type": "Pistetyyppi",
+    "points": "Pisteet"
   }
 }

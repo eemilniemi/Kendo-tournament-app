@@ -19,7 +19,9 @@ export type PlayerColor = "red" | "white";
 
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
 
-export type MatchType = "group" | "playoff";
+export type MatchType = "group" | "playoff" | "pre playoff";
+
+export type MatchTime = 180000 | 240000 | 300000;
 
 export interface MatchPoint {
   type: PointType;
@@ -50,6 +52,7 @@ export interface Match {
   isOvertime: boolean;
   player1Score: number;
   player2Score: number;
+  matchTime: MatchTime;
 }
 
 export interface Tournament {
@@ -61,11 +64,19 @@ export interface Tournament {
   description: string;
   type: TournamentType;
   maxPlayers: number;
-  creator: string;
+  groups?: string[][];
+  creator: User;
   organizerEmail?: string;
   organizerPhone?: string;
   players: User[];
   matchSchedule: Match[];
+  playersToPlayoffsPerGroup?: number;
+  matchTime: MatchTime;
+  category: Category;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 export type TournamentType = "Round Robin" | "Playoff" | "Preliminary Playoff";
+
+export type Category = "championship" | "league" | "hobby";

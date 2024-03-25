@@ -9,13 +9,15 @@ import {
   Post,
   Put,
   Request,
-  Query
+  Query,
+  Delete
 } from "tsoa";
 import { TournamentService } from "../services/tournamentService.js";
 import { UnsavedMatch } from "../models/tournamentModel.js";
 import type { Tournament } from "../models/tournamentModel.js";
 import {
   CreateTournamentRequest,
+  EditTournamentRequest,
   ObjectIdString,
   SignupForTournamentRequest
 } from "../models/requestModel.js";
@@ -83,6 +85,49 @@ export class TournamentController extends Controller {
     );
     this.setStatus(201);
     return result;
+  }
+
+  @Put("{tournamentId}/update")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async updateTournament(
+    @Request() request: express.Request & { user: JwtPayload },
+    @Path() tournamentId: ObjectIdString,
+    @Body() requestBody: EditTournamentRequest
+  ): Promise<void> {
+    const updaterId = request.user.id;
+
+    this.setStatus(204);
+    await this.service.updateTournamentById(
+      tournamentId,
+      requestBody,
+      updaterId
+    );
+  }
+
+  @Delete("{tournamentId}/delete")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async deleteTournament(
+    @Path() tournamentId: ObjectIdString
+  ): Promise<void> {
+    this.setStatus(204);
+    await this.service.deleteTournamentById(tournamentId);
+  }
+
+  @Put("{tournamentId}/mark-user-matches-lost")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async markUserMatchesLost(
+    @Request() request: express.Request & { user: JwtPayload },
+    @Path() tournamentId: ObjectIdString,
+    @Body() requestBody: { userId: string }
+  ): Promise<void> {
+    const creatorId = request.user.id;
+    const userId = requestBody.userId;
+
+    this.setStatus(204); // No content
+    await this.service.markUserMatchesLost(tournamentId, userId, creatorId);
   }
 
   private get service(): TournamentService {

@@ -22,7 +22,8 @@ import type {
   PlayerColor,
   Match,
   MatchPlayer,
-  MatchType
+  MatchType,
+  MatchTime
 } from "types/models";
 import "./GameInterface.css";
 import { useAuth } from "context/AuthContext";
@@ -33,6 +34,7 @@ import { useTournament } from "context/TournamentContext";
 import Loader from "components/common/Loader";
 import ErrorModal from "components/common/ErrorModal";
 import { useTranslation } from "react-i18next";
+import ModifyDeletePoints from "./ModifyDeletePoints";
 
 export interface MatchData {
   timerTime: number;
@@ -47,13 +49,14 @@ export interface MatchData {
   elapsedTime: number;
   isOvertime: boolean;
   type: MatchType;
+  time: MatchTime;
 }
 
 const GameInterface: React.FC = () => {
   const { t } = useTranslation();
 
   const [matchInfo, setMatchInfo] = useState<MatchData>({
-    timerTime: 300,
+    timerTime: 0,
     players: [],
     playerNames: [],
     winner: undefined,
@@ -64,20 +67,18 @@ const GameInterface: React.FC = () => {
     isTimerOn: false,
     elapsedTime: 0,
     isOvertime: false,
-    type: "group"
+    type: "group",
+    time: 300000
   });
 
-  // to be changed when match time is get from api
-  const MATCH_TIME = 300000;
   const [openPoints, setOpenPoints] = useState(false);
   const [openRoles, setOpenRoles] = useState(false);
   const [selectedButton, setSelectedButton] = useState<string>("");
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
-  const [overtimeTimer, setOvertimeTimer] = useState<number>(
-    Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME / 1000
-  );
   const [playerColor, setPlayerColor] = useState<PlayerColor>("red");
   const [hasJoined, setHasJoined] = useState(false);
+  const [mostRecentPointType, setMostRecentPointType] =
+    useState<PointType | null>(null);
 
   const { matchId } = useParams();
   const { userId } = useAuth();
@@ -103,6 +104,14 @@ const GameInterface: React.FC = () => {
     }
   }, [matchId]);
 
+  useEffect(() => {
+    // Check for a saved most recent point type in sessionStorage
+    const savedPointType = sessionStorage.getItem("mostRecentPointType");
+    if (savedPointType !== null) {
+      setMostRecentPointType(savedPointType as PointType);
+    }
+  }, []);
+
   // Fetching match data
   useEffect(() => {
     const getMatchData = async (): Promise<void> => {
@@ -119,6 +128,7 @@ const GameInterface: React.FC = () => {
         let elapsedtime: number = 0;
         let isovertime: boolean = false;
         let matchType: MatchType = "group";
+        let matchTime: MatchTime = 300000;
 
         // Get players' names
         const findPlayerName = (playerId: string, index: number): void => {
@@ -130,6 +140,8 @@ const GameInterface: React.FC = () => {
 
         // Try to get match info from the websocket
         if (matchInfoFromSocket !== undefined) {
+          matchTime = matchInfoFromSocket.matchTime;
+
           // Get players' names in this match
           matchPlayers = matchInfoFromSocket.players;
           findPlayerName(matchPlayers[0].id, 0);
@@ -150,7 +162,7 @@ const GameInterface: React.FC = () => {
           // is over the match time (it's a tie)
           else if (
             matchInfoFromSocket.endTimestamp !== undefined ||
-            matchInfoFromSocket.elapsedTime >= MATCH_TIME
+            matchInfoFromSocket.elapsedTime >= matchTime
           ) {
             matchEndTimeStamp = matchInfoFromSocket.endTimestamp;
           }
@@ -166,7 +178,7 @@ const GameInterface: React.FC = () => {
             startTime = matchInfoFromSocket.startTimestamp;
           }
           // Get time
-          time = 300 - Math.round(matchInfoFromSocket.elapsedTime / 1000);
+          time = Math.floor(matchInfoFromSocket.elapsedTime / 1000);
           timer = matchInfoFromSocket.isTimerOn;
 
           elapsedtime = matchInfoFromSocket.elapsedTime;
@@ -182,6 +194,8 @@ const GameInterface: React.FC = () => {
           const matchFromApi: Match = await api.match.info(matchId);
 
           if (matchFromApi !== undefined) {
+            matchTime = matchFromApi.matchTime;
+
             matchPlayers = matchFromApi.players;
             findPlayerName(matchPlayers[0].id, 0);
             findPlayerName(matchPlayers[1].id, 1);
@@ -200,7 +214,7 @@ const GameInterface: React.FC = () => {
             // or if elapsed time is over match time (it's a tie)
             else if (
               matchFromApi.endTimestamp !== undefined ||
-              matchFromApi.elapsedTime >= MATCH_TIME
+              matchFromApi.elapsedTime >= matchTime
             ) {
               matchEndTimeStamp = matchFromApi.endTimestamp;
             }
@@ -214,11 +228,7 @@ const GameInterface: React.FC = () => {
               startTime = matchFromApi.startTimestamp;
             }
             // Get time
-            if (300 - Math.ceil(matchFromApi.elapsedTime / 1000) >= 0) {
-              time = 300 - Math.ceil(matchFromApi.elapsedTime / 1000);
-            } else {
-              time = 0;
-            }
+            time = Math.floor(matchFromApi.elapsedTime / 1000);
             timer = matchFromApi.isTimerOn;
 
             elapsedtime = matchFromApi.elapsedTime;
@@ -241,7 +251,8 @@ const GameInterface: React.FC = () => {
           isTimerOn: timer,
           elapsedTime: elapsedtime,
           isOvertime: isovertime,
-          type: matchType
+          type: matchType,
+          time: matchTime
         });
       } catch (error) {
         setIsError(true);
@@ -254,14 +265,8 @@ const GameInterface: React.FC = () => {
   }, [isLoading, matchInfoFromSocket]);
 
   useEffect(() => {
-    if (matchInfo.isOvertime) {
-      setOvertimeTimer(
-        Math.floor(matchInfo.elapsedTime / 1000) - MATCH_TIME / 1000
-      );
-    } else {
-      setTimer(matchInfo.timerTime);
-    }
-  }, [matchInfo.isOvertime, matchInfo.elapsedTime, matchInfo.timerTime]);
+    setTimer(matchInfo.timerTime);
+  }, [matchInfo.elapsedTime, matchInfo.timerTime]);
 
   // Handle timer, make it run and stop
   useEffect(() => {
@@ -269,11 +274,7 @@ const GameInterface: React.FC = () => {
 
     if (matchInfo.isTimerOn) {
       intervalId = setInterval(() => {
-        if (matchInfo.isOvertime) {
-          setOvertimeTimer((prevTime) => prevTime + 1);
-        } else {
-          setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
-        }
+        setTimer((prevTime) => prevTime + 1);
       }, 1000);
     } else {
       if (intervalId !== null) {
@@ -286,7 +287,7 @@ const GameInterface: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [matchInfo.isTimerOn, matchInfo.isOvertime]);
+  }, [matchInfo.isTimerOn]);
 
   // If timer is ended, check for ties
   useEffect(() => {
@@ -296,13 +297,17 @@ const GameInterface: React.FC = () => {
           return; // Exit early if the winner has been determined so no endless rerendering
         }
 
-        if (timer === 0 && matchId !== undefined && !matchInfo.isOvertime) {
+        if (
+          timer === matchInfo.time / 1000 &&
+          matchId !== undefined &&
+          !matchInfo.isOvertime
+        ) {
           if (matchInfo.isTimerOn) {
             await apiTimerRequest(matchId);
           }
         }
         if (
-          (matchInfo.elapsedTime >= MATCH_TIME ||
+          (matchInfo.elapsedTime >= matchInfo.time ||
             matchInfo.endTimeStamp !== undefined) &&
           matchId !== undefined
         ) {
@@ -315,14 +320,6 @@ const GameInterface: React.FC = () => {
 
     void checkForTieAndStopTimer();
   }, [matchInfo, timer]);
-
-  const buttonToTypeMap: Record<string, PointType> = {
-    M: "men",
-    K: "kote",
-    D: "do",
-    T: "tsuki",
-    "\u0394": "hansoku"
-  };
 
   const selectedPointType = buttonToTypeMap[selectedButton];
 
@@ -358,6 +355,9 @@ const GameInterface: React.FC = () => {
         await apiPointRequest(matchId, pointRequest);
       }
     }
+
+    setMostRecentPointType(pointRequest.pointType);
+    sessionStorage.setItem("mostRecentPointType", pointRequest.pointType);
   };
 
   // Get the selected radio button value
@@ -473,7 +473,7 @@ const GameInterface: React.FC = () => {
       return false;
     } else if (
       matchInfo.winner === undefined &&
-      matchInfo.elapsedTime > MATCH_TIME &&
+      matchInfo.elapsedTime > matchInfo.time &&
       matchInfo.type === "group"
     ) {
       return false;
@@ -481,6 +481,30 @@ const GameInterface: React.FC = () => {
       return true;
     }
   }
+
+  const handleDeleteRecentPoint = async (): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.deleteRecentPoint(matchId);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+    setMostRecentPointType(null);
+    sessionStorage.removeItem("mostRecentPointType");
+  };
+
+  const handleModifyRecentPoint = async (newType: PointType): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.modifyRecentPoint(matchId, newType);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+
+    setMostRecentPointType(pointRequest.pointType);
+  };
 
   return (
     <div className="app-container">
@@ -607,8 +631,7 @@ const GameInterface: React.FC = () => {
               </Box>
             )}
             <Box display="flex" gap="20px" justifyContent="center">
-              {matchInfo.isOvertime && <Timer timer={overtimeTimer} />}
-              {!matchInfo.isOvertime && <Timer timer={timer} />}
+              <Timer timer={timer} />
               {/* timer button only shown to time keeper */}
               {userId !== null &&
                 userId !== undefined &&
@@ -636,7 +659,16 @@ const GameInterface: React.FC = () => {
                   handleClose={handleClose}
                 />
               )}
-
+            <br></br>
+            {userId !== null &&
+              userId !== undefined &&
+              matchInfo.pointMaker === userId && (
+                <ModifyDeletePoints
+                  handleDeleteRecentPoint={handleDeleteRecentPoint}
+                  handleModifyRecentPoint={handleModifyRecentPoint}
+                  mostRecentPointType={mostRecentPointType}
+                />
+              )}
             {/* Print the winner */}
             {matchInfo.winner !== undefined && (
               <div>
@@ -649,7 +681,7 @@ const GameInterface: React.FC = () => {
             {/* If there isn't a winner, check if there is an end timestamp (it's a tie) */}
             {matchInfo.winner === undefined &&
               (matchInfo.endTimeStamp !== undefined ||
-                (matchInfo.elapsedTime >= MATCH_TIME &&
+                (matchInfo.elapsedTime >= matchInfo.time &&
                   matchInfo.type !== "playoff")) && (
                 <div>
                   <Typography>{t("game_interface.tie")}</Typography>
@@ -663,3 +695,11 @@ const GameInterface: React.FC = () => {
 };
 
 export default GameInterface;
+
+export const buttonToTypeMap: Record<string, PointType> = {
+  M: "men",
+  K: "kote",
+  D: "do",
+  T: "tsuki",
+  "\u0394": "hansoku"
+};

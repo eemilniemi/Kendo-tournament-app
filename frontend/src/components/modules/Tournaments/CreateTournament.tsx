@@ -5,7 +5,11 @@ import { isValidPhone } from "utils/form-validators";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import { useNavigate } from "react-router-dom";
-import { type TournamentType } from "types/models";
+import {
+  type TournamentType,
+  type MatchTime,
+  type Category
+} from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   Typography,
@@ -18,6 +22,7 @@ import {
   Stack,
   Box
 } from "@mui/material";
+import updateLocale from "dayjs/plugin/updateLocale";
 
 // Readily defined components from the react-hook-form-mui library.
 import {
@@ -33,6 +38,7 @@ import {
 import routePaths from "routes/route-paths";
 
 const MIN_PLAYER_AMOUNT = 3;
+const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
 export interface CreateTournamentFormData {
@@ -46,6 +52,13 @@ export interface CreateTournamentFormData {
   differentOrganizer: boolean;
   organizerEmail?: string;
   organizerTel?: string;
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
+  matchTime: MatchTime;
+  category: Category;
+  paid: boolean;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -56,8 +69,19 @@ const defaultValues: CreateTournamentFormData = {
   description: "",
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
-  differentOrganizer: false
+  differentOrganizer: false,
+  matchTime: 300000,
+  category: "hobby",
+  paid: false,
+  linkToPay: "",
+  linkToSite: ""
 };
+
+// Make monday the first day of the week
+dayjs.extend(updateLocale);
+dayjs.updateLocale("en", {
+  weekStart: 1
+});
 
 const CreateTournamentForm: React.FC = () => {
   const showToast = useToast();
@@ -67,7 +91,7 @@ const CreateTournamentForm: React.FC = () => {
     defaultValues,
     mode: "onBlur"
   });
-  const { differentOrganizer, startDate } =
+  const { differentOrganizer, startDate, type, paid } =
     useWatch<CreateTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -94,6 +118,47 @@ const CreateTournamentForm: React.FC = () => {
   const handleConfirm = async (): Promise<void> => {
     setConfirmationDialogOpen(false);
     await formContext.handleSubmit(onSubmit)();
+  };
+
+  const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
+    if (type === "Preliminary Playoff") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="groupsSizePreference"
+            type="number"
+            label={t("create_tournament_form.groups_size_preference")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= MIN_GROUP_SIZE ||
+                  `${t("messages.minimum_groupsize_error")}${MIN_GROUP_SIZE}`
+                );
+              }
+            }}
+          />
+          <TextFieldElement
+            required
+            name="playersToPlayoffsPerGroup"
+            type="number"
+            label={t("create_tournament_form.players_to_playoffs_per_group")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value > 0 || `${t("messages.minimum_player_to_playoff")}`
+                );
+              }
+            }}
+          />
+        </React.Fragment>
+      );
+    }
+    return null;
   };
 
   return (
@@ -130,6 +195,12 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.start_date_time")}
             minDateTime={now}
             format="DD/MM/YYYY HH:mm"
+            ampm={false}
+            viewRenderers={{
+              hours: null,
+              minutes: null,
+              seconds: null
+            }}
           />
           <DateTimePickerElement
             required
@@ -137,6 +208,12 @@ const CreateTournamentForm: React.FC = () => {
             label={t("create_tournament_form.end_date_time")}
             minDateTime={startDate}
             format="DD/MM/YYYY HH:mm"
+            ampm={false}
+            viewRenderers={{
+              hours: null,
+              minutes: null,
+              seconds: null
+            }}
           />
         </Stack>
 
@@ -145,6 +222,58 @@ const CreateTournamentForm: React.FC = () => {
           multiline
           name="description"
           label={t("create_tournament_form.description")}
+          fullWidth
+          margin="normal"
+        />
+
+        <TextFieldElement
+          name="linkToSite"
+          type="url"
+          label={t("create_tournament_form.site_link")}
+          fullWidth
+          margin="normal"
+        />
+
+        <CheckboxElement
+          name="paid"
+          label={t("create_tournament_form.paid")}
+          onChange={(e) => {
+            formContext.resetField("linkToPay");
+            formContext.setValue("paid", e.target.checked);
+          }}
+        />
+
+        {paid !== undefined && paid && (
+          <React.Fragment>
+            <TextFieldElement
+              required
+              name="linkToPay"
+              type="url"
+              label={t("create_tournament_form.payment_link")}
+              fullWidth
+              margin="normal"
+            />
+          </React.Fragment>
+        )}
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.match_time")}
+          name="matchTime"
+          options={[
+            {
+              id: "180000",
+              label: t("create_tournament_form.3_min")
+            },
+            {
+              id: "240000",
+              label: t("create_tournament_form.4_min")
+            },
+            {
+              id: "300000",
+              label: t("create_tournament_form.5_min")
+            }
+          ]}
           fullWidth
           margin="normal"
         />
@@ -158,11 +287,39 @@ const CreateTournamentForm: React.FC = () => {
               id: "Round Robin",
               label: t("create_tournament_form.round_robin")
             },
-            { id: "Playoff", label: t("create_tournament_form.playoff") }
+            { id: "Playoff", label: t("create_tournament_form.playoff") },
+            {
+              id: "Preliminary Playoff",
+              label: t("create_tournament_form.preliminary_playoff")
+            }
           ]}
           fullWidth
           margin="normal"
         />
+
+        <SelectElement
+          required
+          label={t("create_tournament_form.category")}
+          name="category"
+          options={[
+            {
+              id: "hobby",
+              label: t("create_tournament_form.hobby")
+            },
+            {
+              id: "championship",
+              label: t("create_tournament_form.championship")
+            },
+            {
+              id: "league",
+              label: t("create_tournament_form.league")
+            }
+          ]}
+          fullWidth
+          margin="normal"
+        />
+
+        {renderPreliminaryPlayoffFields()}
 
         <TextFieldElement
           required

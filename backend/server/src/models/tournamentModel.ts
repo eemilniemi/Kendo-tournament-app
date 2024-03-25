@@ -1,12 +1,14 @@
 import mongoose, { Schema, type Document, type Types } from "mongoose";
-import type { Match } from "./matchModel";
+import type { Match, MatchTime } from "./matchModel";
 import { type User } from "./userModel";
 
 export enum TournamentType {
   RoundRobin = "Round Robin",
   Playoff = "Playoff",
-  PreliminiaryPlayoff = "Preliminary Playoff"
+  PreliminaryPlayoff = "Preliminary Playoff"
 }
+
+export type Category = "championship" | "league" | "hobby";
 
 export type UnsavedMatch = Pick<
   Match,
@@ -15,6 +17,8 @@ export type UnsavedMatch = Pick<
   | "elapsedTime"
   | "timerStartedTimestamp"
   | "tournamentRound"
+  | "tournamentId"
+  | "matchTime"
 >;
 
 export interface Tournament {
@@ -29,8 +33,15 @@ export interface Tournament {
   organizerEmail?: string;
   organizerPhone?: string;
   maxPlayers: number;
+  groups: Types.ObjectId[][];
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
   players: Array<Types.ObjectId | User>;
   matchSchedule: Array<Types.ObjectId | Match>;
+  matchTime: MatchTime;
+  category: Category;
+  linkToPay?: string;
+  linkToSite?: string;
 }
 
 const tournamentSchema = new Schema<Tournament & Document>(
@@ -47,6 +58,12 @@ const tournamentSchema = new Schema<Tournament & Document>(
     },
     players: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     matchSchedule: [{ type: Schema.Types.ObjectId, ref: "Match", default: [] }],
+    groups: {
+      type: [[{ type: Schema.Types.ObjectId, default: [] }]],
+      default: []
+    },
+    groupsSizePreference: { type: Number },
+    playersToPlayoffsPerGroup: { type: Number },
     maxPlayers: { type: Number, required: true },
     creator: {
       type: Schema.Types.ObjectId,
@@ -54,7 +71,11 @@ const tournamentSchema = new Schema<Tournament & Document>(
       ref: "User"
     },
     organizerEmail: { type: String },
-    organizerPhone: { type: String }
+    organizerPhone: { type: String },
+    matchTime: { type: Number, required: true, default: 300000 },
+    category: { type: String, required: true },
+    linkToPay: { type: String },
+    linkToSite: { type: String }
   },
   {
     timestamps: true,

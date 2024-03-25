@@ -24,7 +24,11 @@
     "logout_successful": "Logout successful!",
     "missing_both": "Match is missing both officials!",
     "missing_pointmaker": "Match is missing a point maker!",
-    "missing_timekeeper": "Match is missing a time keeper!"
+    "missing_timekeeper": "Match is missing a time keeper!",
+    "minimum_groupsize_error": "Minimum group size is  ",
+    "minimum_player_to_playoff": "At least one player has to proceed",
+    "copy_success": "Tournament link copied to clipboard!",
+    "copy_failure": "Failed to copy tournament link"
   },
   "game_interface": {
     "player": "Player",
@@ -61,7 +65,10 @@
     "sign_up_button": "Sign up",
     "register_button": "Register",
     "create_button": "Create",
-    "save_button": "Save"
+    "save_button": "Save",
+    "modify_or_delete": "Modify or delete recent point",
+    "delete": "Delete",
+    "copy_to_clipboard": "Share tournament"
   },
   "titles": {
     "login": "Sign in",
@@ -70,7 +77,10 @@
     "confirm_account_deletion": "Confirm Account Deletion",
     "create_account": "Create an account",
     "create_tournament": "Create a new tournament",
-    "confirm_tournament_creation": "Confirm tournament creation"
+    "confirm_tournament_creation": "Confirm tournament creation",
+    "modify_or_delete": "Modify or delete recent point",
+    "select_new_type": "Select new type for the recent point:",
+    "confirm_tournament_deletion": "Confirm tournament deletion"
   },
   "login_form": {
     "forgot_password": "Forgot password?",
@@ -99,7 +109,9 @@
     "underage": "I'm underage",
     "guardians_email": "Guardian's Email Address",
     "profile_info": "Profile info",
-    "change_password": "Change password"
+    "change_password": "Change password",
+    "agree": "I agree to the",
+    "terms_and_conditions": "Terms and Conditions"
   },
   "register_labels": {
     "sign_in": "Sign In",
@@ -123,7 +135,9 @@
     "missing_both": "Missing: Time keeper and point maker",
     "missing_timer": "Missing: Time keeper",
     "missing_point_maker": "Missing: Point maker",
-    "missing_and": "and point maker"
+    "missing_and": "and point maker",
+    "group": "Group",
+    "playoff_stage_not_started": "Playoff stage has not started yet."
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",
@@ -152,11 +166,25 @@
     "select_tournament_type": "Select tournament type",
     "round_robin": "Round Robin",
     "playoff": "Playoff",
+    "preliminary_playoff": "Preliminary groups and playoffs",
     "max_players": "Maximum number of players",
     "different_organizer_info": "Organizer has different information than me",
     "organizer_email": "Organizer's email",
     "organizer_phone_number": "Organizer's phone number",
-    "confirmation_message": "Are you sure you want to create the tournament with the provided information?"
+    "confirmation_message": "Are you sure you want to create the tournament with the provided information?",
+    "players_to_playoffs_per_group": "Players proceeding to playoffs per group",
+    "groups_size_preference": "Group max size (players)",
+    "match_time": "Select match time",
+    "3_min": "3 minutes",
+    "4_min": "4 minutes",
+    "5_min": "5 minutes",
+    "category": "Select category",
+    "hobby": "Hobby",
+    "championship": "Championship",
+    "league": "League",
+    "site_link": "Link to organizer's site",
+    "paid": "This tournament requires payment",
+    "payment_link": "Link to payment site"
   },
   "upcoming_tournament_view": {
     "date_header": "When",
@@ -166,7 +194,11 @@
     "others_signed_up_header": "Others who have signed up",
     "no_players_signed_up": "No players have signed up yet.",
     "location_header": "Where",
-    "tournament_full": "This tournament is already full!"
+    "tournament_full": "This tournament is already full!",
+    "delete_tournament": "Are you sure you want to delete this tournament? This action cannot be undone.",
+    "category_header": "Tournament category",
+    "link_to_payment_header": "There is a fee for this tournament, please visit",
+    "link_to_site_header": "Organizer's website"
   },
   "navigation": {
     "back": "Back",
@@ -178,19 +210,124 @@
     "appName": "KendoApp",
     "openSettingsTooltip": "Open settings",
     "about": "About",
-    "privacy_policy": "Privacy Policy"
+    "privacy_policy": "Privacy Policy",
+    "back_to_group_view": "Back to group view"
   },
   "types": {
     "round_robin": "Round Robin",
     "playoff": "Playoff",
-    "preliminary_playoff": "Preliminary and playoff"
+    "preliminary_playoff": "Preliminary and playoff",
+    "preliminary": "Preliminary"
   },
   "sorting": {
     "orderBy": "Order By: ",
     "mostRecent": "Most recent",
     "oldest": "Oldest",
     "name": "Name A-Ö",
-    "nameDesc": "Name Ö-Ä",
+    "nameDesc": "Name Ö-A",
     "location": "Location"
+  },
+  "terms_and_conditions": {
+    "title": "TERMS AND CONDITIONS",
+    "last_updated": "Last updated March 4, 2024",
+    "title2": "AGREEMENT TO OUR LEGAL TERMS",
+    "we": "We are Sei Shin Ken Kai ry ('Company', 'we', 'us', or 'our'). We operate the website",
+    "we2": "(the 'Site'), as well as any other related products and services that refer or link to these legal terms (the 'Legal Terms') (collectively, the 'Services').",
+    "title3": "OUR SERVICES",
+    "title4": "INTELLECTUAL PROPERTY RIGHTS",
+    "title5": "USER REPRESENTATIONS",
+    "title6": "USER REGISTRATION",
+    "title7": "PROHIBITED ACTIVITIES",
+    "title8": "SERVICES MANAGEMENT",
+    "title9": "MODIFICATIONS AND INTERRUPTIONS",
+    "title10": "USER DATA",
+    "body1": "The information provided when using the Services is not intended for distribution to or use by any person or entity in any jurisdiction or country where such distribution or use would be contrary to law or regulation or which would subject us to any registration requirement within such jurisdiction or country. Accordingly, those persons who choose to access the Services from other locations do so on their own initiative and are solely responsible for compliance with local laws, if and to the extent local laws are applicable.",
+    "body2": "We are the owner of the license of all intellectual property rights in our Services, including all source code, databases, functionality, software, website designs, audio, video, text, photographs, and graphics in the Services (collectively, the 'Content'), as well as the trademarks, service marks, and logos contained (therein the 'Marks').",
+    "body3": "Any breach of these Intellectual Property Rights will constitute a material breach of our Legal Terms and your right to use our Services will terminate immediately.",
+    "body4": "By using the Services, you represent and warrant that:",
+    "body5": "All registration information you submit will be true, accurate, current, and complete; you will maintain the accuracy of such information and promptly update such registration information as necessary; you have the legal capacity and you agree to comply with these Legal Terms; you will not access the Services through automated or non-human means, whether through a bot, script or otherwise; you will not use the Services for any illegal or unauthorised purpose; and your use of the Services will not violate any applicable law or regulation.",
+    "body6": "If you provide any information that is untrue, inaccurate, not current, or incomplete, we have the right to suspend or terminate your account and refuse any and all current or future use of the Services (or any portion thereof).",
+    "body7": "You may be required to register to use the Services. You agree to keep your password confidential and will be responsible for all use of your account and password. We reserve the right to remove, reclaim, or change a username you select if we determine, in our sole discretion, that such username is inappropriate, obscene, or otherwise objectionable.",
+    "body8": "Except as set out in this section or elsewhere in our Legal Terms, no part of the Services and no Content or Marks may be copied, reproduced, aggregated, republished, uploaded, posted, publicly displayed, encoded, translated, transmitted, distributed, sold, licensed, or otherwise exploited for any commercial purpose whatsoever, without our express prior written permission.",
+    "body9": "It is prohibited to post, send, publish, upload, or transmit through the Services any Submission that is illegal, harassing, hateful, harmful, defamatory, obscene, bullying, abusive, discriminatory, threatening to any person or group, sexually explicit, false, inaccurate, deceitful, or misleading; to the extent permissible by applicable law, waive any and all moral rights to any such Submission.",
+    "body10": "You are solely responsible for your Submissions and you expressly agree to reimburse us for any and all losses that we may suffer because of your breach of (a) this section, (b) any third party’s intellectual property rights, or (c) applicable law.",
+    "body11": "As a user of the Services, you agree not to:",
+    "body12": "Upload or transmit (or attempt to upload or to transmit) viruses, Trojan horses, or other material, including excessive use of capital letters and spamming (continuous posting of repetitive text), that interferes with any party’s uninterrupted use and enjoyment of the Services or modifies, impairs, disrupts, alters, or interferes with the use, features, functions, operation, or maintenance of the Services.",
+    "body13": "Systematically retrieve data or other content from the Services to create or compile, directly or indirectly, a collection, compilation, database, or directory without written permission from us.",
+    "body14": "Trick, defraud, or mislead us and other users, especially in any attempt to learn sensitive account information such as user passwords.",
+    "body15": "Circumvent, disable, or otherwise interfere with security-related features of the Services, including features that prevent or restrict the use or copying of any Content or enforce limitations on the use of the Services and/or the Content contained therein.",
+    "body16": "Disparage, tarnish, or otherwise harm, in our opinion, us and/or the Services.",
+    "body17": "Use any information obtained from the Services in order to harass, abuse, or harm another person.",
+    "body18": "Engage in any automated use of the system, such as using scripts to send comments or messages, or using any data mining, robots, or similar data gathering and extraction tools.",
+    "body19": "Attempt to impersonate another user or person or use the username of another user.",
+    "body20": "Interfere with, disrupt, or create an undue burden on the Services or the networks or services connected to the Services.",
+    "body21": "Attempt to bypass any measures of the Services designed to prevent or restrict access to the Services, or any portion of the Services.",
+    "body22": "Make any unauthorised use of the Services, including collecting usernames and/or email addresses of users by electronic or other means for the purpose of sending unsolicited email, or creating user accounts by automated means or under false pretences.",
+    "body23": "We reserve the right, but not the obligation, to:",
+    "body24": "monitor the Services for violations of these Legal Terms;",
+    "body25": "take appropriate legal action against anyone who, in our sole discretion, violates the law or these Legal Terms, including without limitation, reporting such user to law enforcement authorities;",
+    "body26": "in our sole discretion and without limitation, refuse, restrict access to, limit the availability of, or disable (to the extent technologically feasible) any of your Contributions or any portion thereof;",
+    "body27": "in our sole discretion and without limitation, notice, or liability, to remove from the Services or otherwise disable all files and content that are excessive in size or are in any way burdensome to our systems; and",
+    "body28": "otherwise manage the Services in a manner designed to protect our rights and property and to facilitate the proper functioning of the Services.",
+    "body29": "We care about data privacy and security. Please review our",
+    "body30": ". By using the Services, you agree to be bound by our Privacy Policy, which is incorporated into these Legal Terms.",
+    "body31": "Please be advised the Services are hosted Finland. If you access the Services from any other region of the world with laws or other requirements governing personal data collection, use, or disclosure that differ from applicable laws in Finland, then through your continued use of the Services, you are transferring your data to Finland and you expressly consent to have your data transferred to and processed in Finland.",
+    "body32": "We reserve the right to change, modify, or remove the contents of the Services at any time or for any reason at our sole discretion without notice. However, we have no obligation to update any information on our Services. We will not be liable to you or any third party for any modification, price change, suspension, or discontinuance of the Services. We cannot guarantee the Services will be available at all times. We may experience hardware, software, or other problems or need to perform maintenance related to the Services, resulting in interruptions, delays, or errors. We reserve the right to change, revise, update, suspend, discontinue, or otherwise modify the Services at any time or for any reason without notice to you. You agree that we have no liability whatsoever for any loss, damage, or inconvenience caused by your inability to access or use the Services during any downtime or discontinuance of the Services. Nothing in these Legal Terms will be construed to obligate us to maintain and support the Services or to supply any corrections, updates, or releases in connection therewith.",
+    "body33": "We will maintain certain data that you transmit to the Services for the  purpose of managing the performance of the Services, as well as data relating to your use of the Services. Although we perform regular routine backups of data, you are solely responsible for all data that you transmit or that relates to any activity you have undertaken using the Services. You agree that we shall have no liability to you for any loss or corruption of any such data, and you hereby waive any right of action against us arising from any such loss or corruption of such data.",
+    "body34": "In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at:"
+  },
+  "privacy": {
+    "title": "PRIVACY POLICY",
+    "title1": "Interpretation and Definitions",
+    "title2": "Interpretation",
+    "title3": "Definitions",
+    "title4": "Collecting and Using Your Personal Data",
+    "title5": "Types of Data Collected",
+    "title6": "Personal Data",
+    "title7": "Usage Data",
+    "title8": "Use of Your Personal Data",
+    "title9": "Retention of Your Personal Data",
+    "title10": "Delete Your Personal Data",
+    "title11": "Children's Privacy",
+    "title12": "Changes to this Privacy Policy",
+    "title13": "Contact us",
+    "body": "This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.",
+    "body1": "The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.",
+    "body2": "For the purposes of this Privacy Policy:",
+    "body3": "Account means a unique account created for You to access our Service or parts of our Service.",
+    "body4": "Affiliate means an entity that controls, is controlled by or is under common control with a party, where 'control' means ownership of 50% or more of the shares, equity interest or other securities entitled to vote for election of directors or other managing authority.",
+    "body5": "Company (referred to as either 'the Company', 'We', 'Us' or 'Our' in this Agreement) refers to Sei Shin Ken Kai ry, Seinäjoki.",
+    "body6": "Cookies are small files that are placed on Your computer, mobile device or any other device by a website, containing the details of Your browsing history on that website among its many uses.",
+    "body7": "Country refers to: Finland",
+    "body8": "Device means any device that can access the Service such as a computer, a cellphone or a digital tablet.",
+    "body9": "Personal Data is any information that relates to an identified or identifiable individual.",
+    "body10": "Service refers to the Website.",
+    "body11": "Service Provider means any natural or legal person who processes the data on behalf of the Company.",
+    "body12": "Usage Data refers to data collected automatically, either generated by the use of the Service or from the Service infrastructure itself (for example, the duration of a page visit).",
+    "body13": "Website refers to KendoApp, accessible from",
+    "body14": "You means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.",
+    "body15": "While using Our Service, We may ask You to provide Us with certain personally identifiable information that can be used to contact or identify You. Personally identifiable information may include, but is not limited to:",
+    "body16": "First name and last name",
+    "body17": "Usage Data is collected automatically when using the Service. Usage Data may include information such as the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages and other diagnostic data.",
+    "body18": "The Company may use Personal Data for the following purposes:",
+    "body19": "To provide and maintain our Service, including to monitor the usage of our Service.",
+    "body20": "To manage Your Account: to manage Your registration as a user of the Service. The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user.",
+    "body21": "To contact You: To contact You by email, telephone calls, SMS, or other equivalent forms of electronic communication, regarding updates or possible payments related to the service, including the security updates, when necessary or reasonable for their implementation.",
+    "body22": "The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.",
+    "body23": "You have the right to delete or request that We assist in deleting the Personal Data that We have collected about You. You may update, amend, or delete Your information at any time by signing in to Your Account, if you have one, and visiting the account settings section that allows you to manage Your personal information. You may also contact Us to request access to, correct, or delete any personal information that You have provided to Us.",
+    "body24": "If We become aware that We have collected Personal Data from anyone under the age of 18 without verification of parental consent, We take steps to remove that information from Our servers. We need to rely on consent as a legal basis for processing Your information and Your country requires consent from a parent, We require Your parent's consent before We collect and use that information.",
+    "body25": "We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page. We will let You know via email and/or a prominent notice on Our Service, prior to the change becoming effective and update the &quot;Last updated&quot; date at the top of this Privacy Policy. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.",
+    "body26": "If you have any questions about this Privacy Policy, You can contact us:",
+    "body27": "By email:"
+  },
+  "profile": {
+    "match":"Match",
+    "profile_info": "Profile Info",
+    "my_games": "My Games",
+    "my_points": "My Points",
+    "point_type": "Point Type",
+    "points": "points"
+    
   }
+
 }
