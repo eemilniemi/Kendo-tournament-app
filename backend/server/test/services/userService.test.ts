@@ -4,19 +4,19 @@ import { UserService } from "../../src/services/userService";
 
 describe('UserService', () => {
     before(() => {
-        console.log('Before hook')
+        console.log('Before hook');
         //database configs??
     })
 
     describe('registerUser', () => {
         it('should add the user correctly in the database', () => {
-            console.log('add?')
-            UserService.registerUser
+            console.log('add?');
+            
             // lisääkö
         })
 
         it('should have correct data', () => {
-            console.log('correct?')
+            console.log('correct?');
             // täsmääkö
         })
 
@@ -26,11 +26,11 @@ describe('UserService', () => {
 
     describe('getUserById', () => {
         it('should return the correct user if in database', () => {
-            console.log('palautus')
+            console.log('palautus');
         })
 
         it('should handle errors gracefully if not found', () => {
-            console.log('ei löydy')
+            console.log('ei löydy');
         })
 
         //lisää testejä...
@@ -39,7 +39,7 @@ describe('UserService', () => {
     //lisää test suiteja...
 
     after(() => {
-        console.log()
+        console.log("testien jälkeen tietokannan siivous");
         //jos testietokanta lisätty / tietokantaan lisätty testidataa, siivoa jäljet
     })
 })

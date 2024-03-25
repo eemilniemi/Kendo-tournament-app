@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import 'mocha';
+import { describe } from 'mocha';
 
 describe('dummy test suite', () => {
   it('should always pass', () => {
