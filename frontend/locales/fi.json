@@ -27,7 +27,9 @@
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
-    "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä"
+    "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
+    "copy_success": "Linkki kopioitu leikepöydälle!",
+    "copy_failure": "Linkin kopioinnissa tapahtui virhe"
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -66,7 +68,8 @@
     "create_button": "Luo",
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
-    "delete": "Poista"
+    "delete": "Poista",
+    "copy_to_clipboard": "Jaa turnaus"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -318,5 +321,13 @@
     "body25": "Saatamme päivittää tietosuojakäytäntöämme aika ajoin. Ilmoitamme sinulle kaikista muutoksista julkaisemalla uuden tietosuojakäytännön tällä sivulla. Ilmoitamme siitä sinulle sähköpostitse ja/tai näkyvällä ilmoituksella palvelussamme ennen muutoksen voimaantuloa ja päivitämme tämän tietosuojakäytännön yläosassa olevan 'Viimeksi päivitetty'-päivämäärän. Sinua kehotetaan tarkistamaan tämä tietosuojakäytäntö säännöllisesti mahdollisten muutosten varalta. Tämän tietosuojakäytännön muutokset tulevat voimaan, kun ne julkaistaan tällä sivulla.",
     "body26": "Jos sinulla on kysyttävää tästä tietosuojakäytännöstä, voit ottaa meihin yhteyttä:",
     "body27": "Sähköpostilla:"
+  },
+  "profile": {
+    "match":"Ottelu",
+    "profile_info": "Omat Tiedot",
+    "my_games": "Omat Ottelut",
+    "my_points": "Omat Pisteet",
+    "point_type": "Pistetyyppi",
+    "points": "Pisteet"
   }
 }

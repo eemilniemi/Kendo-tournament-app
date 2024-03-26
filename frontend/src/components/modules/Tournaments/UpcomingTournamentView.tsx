@@ -15,7 +15,8 @@ import TableCell from "@mui/material/TableCell";
 import Paper from "@mui/material/Paper";
 import type { Category, Tournament, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
-import { Link } from "@mui/material";
+import { Grid, Link } from "@mui/material";
+import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
 
 const generateTable = (tournament: Tournament): React.ReactNode => {
   const { t } = useTranslation();
@@ -106,14 +107,21 @@ const UpcomingTournamentView: React.FC = () => {
       component="main"
       sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
     >
-      <Typography
-        variant="h4"
-        className="header"
-        fontWeight="bold"
-        marginBottom="12px"
-      >
-        {tournament.name}
-      </Typography>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography
+            variant="h4"
+            className="header"
+            fontWeight="bold"
+            marginBottom="12px"
+          >
+            {tournament.name}
+          </Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
 
       {tournamentFull && (
         <Box>
@@ -159,27 +167,29 @@ const UpcomingTournamentView: React.FC = () => {
         </Typography>
       </Box>
 
-      {tournament.linkToSite !== undefined && (
-        <Box>
-          <Typography variant="subtitle1">
-            <strong>
-              {t("upcoming_tournament_view.link_to_site_header")}:
-            </strong>{" "}
-            <Link href={tournament.linkToSite}>{tournament.linkToSite}</Link>
-          </Typography>
-        </Box>
-      )}
+      {tournament.linkToSite !== undefined &&
+        tournament.linkToSite.trim() !== "" && (
+          <Box>
+            <Typography variant="subtitle1">
+              <strong>
+                {t("upcoming_tournament_view.link_to_site_header")}:
+              </strong>{" "}
+              <Link href={tournament.linkToSite}>{tournament.linkToSite}</Link>
+            </Typography>
+          </Box>
+        )}
 
-      {tournament.linkToPay !== undefined && (
-        <Box>
-          <Typography variant="subtitle1">
-            <strong>
-              {t("upcoming_tournament_view.link_to_payment_header")}:
-            </strong>{" "}
-            <Link href={tournament.linkToPay}>{tournament.linkToPay}</Link>
-          </Typography>
-        </Box>
-      )}
+      {tournament.linkToPay !== undefined &&
+        tournament.linkToPay.trim() !== "" && (
+          <Box>
+            <Typography variant="subtitle1">
+              <strong>
+                {t("upcoming_tournament_view.link_to_payment_header")}:
+              </strong>{" "}
+              <Link href={tournament.linkToPay}>{tournament.linkToPay}</Link>
+            </Typography>
+          </Box>
+        )}
 
       <br />
 

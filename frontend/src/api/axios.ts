@@ -132,13 +132,20 @@ const tournaments = {
 
   update: async (tournamentId: string, body: EditTournamentRequest) => {
     return await request.put<Tournament>(
-      `${TOURNAMENTS_API}/${tournamentId}`,
+      `${TOURNAMENTS_API}/${tournamentId}/update`,
       body
     );
   },
 
   delete: async (tournamentId: string) => {
-    return await request.delete(`${TOURNAMENTS_API}/${tournamentId}`);
+    return await request.delete(`${TOURNAMENTS_API}/${tournamentId}/delete`);
+  },
+
+  markUserMatchesLost: async (tournamentId: string, userId: string) => {
+    return await request.put(
+      `${TOURNAMENTS_API}/${tournamentId}/mark-user-matches-lost`,
+      { userId }
+    );
   }
 };
 

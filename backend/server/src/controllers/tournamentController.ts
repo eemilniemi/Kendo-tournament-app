@@ -87,7 +87,7 @@ export class TournamentController extends Controller {
     return result;
   }
 
-  @Put("{tournamentId}")
+  @Put("{tournamentId}/update")
   @Tags("Tournaments")
   @Security("jwt")
   public async updateTournament(
@@ -105,7 +105,7 @@ export class TournamentController extends Controller {
     );
   }
 
-  @Delete("{tournamentId}")
+  @Delete("{tournamentId}/delete")
   @Tags("Tournaments")
   @Security("jwt")
   public async deleteTournament(
@@ -113,6 +113,21 @@ export class TournamentController extends Controller {
   ): Promise<void> {
     this.setStatus(204);
     await this.service.deleteTournamentById(tournamentId);
+  }
+
+  @Put("{tournamentId}/mark-user-matches-lost")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async markUserMatchesLost(
+    @Request() request: express.Request & { user: JwtPayload },
+    @Path() tournamentId: ObjectIdString,
+    @Body() requestBody: { userId: string }
+  ): Promise<void> {
+    const creatorId = request.user.id;
+    const userId = requestBody.userId;
+
+    this.setStatus(204); // No content
+    await this.service.markUserMatchesLost(tournamentId, userId, creatorId);
   }
 
   private get service(): TournamentService {
