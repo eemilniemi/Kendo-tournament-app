@@ -1033,17 +1033,17 @@ export class MatchService {
               0, 0
             ];
             currentPoints[1] += playerPoints;
-            if (match.winner !== null && match.winner === matchPlayer.id) {
+            if (match.winner !== undefined && match.winner.toString() === matchPlayer.id.toString()) {
               currentPoints[0] += 3;
-            } else if (match.winner === null && match.endTimestamp !== null) {
+            } else if (match.winner === undefined && match.endTimestamp !== undefined) {
               currentPoints[0] += 1;
             }
             rankingMap.set(matchPlayer.id.toString(), currentPoints);
           } else {
             const currentPoints = [0, playerPoints];
-            if (match.winner !== null && match.winner === matchPlayer.id) {
+            if (match.winner !== undefined && match.winner.toString() === matchPlayer.id.toString()) {
               currentPoints[0] += 3;
-            } else if (match.winner === null && match.endTimestamp !== null) {
+            } else if (match.winner === undefined && match.endTimestamp !== undefined) {
               currentPoints[0] += 1;
             }
             rankingMap.set(matchPlayer.id.toString(), currentPoints);
