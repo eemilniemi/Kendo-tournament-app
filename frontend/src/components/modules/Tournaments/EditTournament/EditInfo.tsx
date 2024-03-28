@@ -5,7 +5,12 @@ import api from "api/axios";
 import ErrorModal from "components/common/ErrorModal";
 import routePaths from "routes/route-paths";
 import { useAuth } from "context/AuthContext";
-import type { Tournament } from "types/models";
+import type {
+  Category,
+  MatchTime,
+  Tournament,
+  TournamentType
+} from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   CheckboxElement,
@@ -38,16 +43,34 @@ const MIN_PLAYER_AMOUNT = 3;
 const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
-const defaultValues: EditTournamentRequest = {
+export interface EditTournamentFormData {
+  name: string;
+  location: string;
+  startDate: Dayjs;
+  endDate: Dayjs;
+  description: string;
+  type: TournamentType;
+  maxPlayers: number;
+  playersToPlayoffsPerGroup?: number;
+  groupsSizePreference?: number;
+  matchTime: MatchTime;
+  category: Category;
+  paid: boolean;
+  linkToPay?: string;
+  linkToSite?: string;
+}
+
+const defaultValues: EditTournamentFormData = {
   name: "",
   location: "",
-  startDate: now.toString(), // ?
-  endDate: now.add(1, "week").toString(), // ?
+  startDate: now, // ?
+  endDate: now.add(1, "week"), // ?
   description: "",
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
   matchTime: 300000,
   category: "hobby",
+  paid: false,
   linkToPay: "",
   linkToSite: ""
 };
@@ -59,16 +82,18 @@ const EditInfo: React.FC = () => {
   const { t } = useTranslation();
   const { userId } = useAuth();
 
-  const [tournament, setTournament] = useState<Tournament | undefined>();
+  const [tournament, setTournament] = useState<
+    EditTournamentFormData | undefined
+  >();
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [editingEnabled, setEditingEnabled] = useState<boolean>(false);
-  const formContext = useForm<EditTournamentRequest>({
+  const formContext = useForm<EditTournamentFormData>({
     defaultValues,
     mode: "onBlur",
     disabled: !editingEnabled
   });
-  const {startDate, endDate} = useWatch<EditTournamentRequest>(formContext);
+  const { startDate, endDate, type, paid } = useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -83,10 +108,11 @@ const EditInfo: React.FC = () => {
           // Change Dayjs to strings on dates
           const tournamentData = {
             ...selectedTournament,
-            startDate: selectedTournament.startDate.toString(), // ?
-            endDate: selectedTournament.endDate.toString() // ?
+            startDate: dayjs(selectedTournament.startDate),
+            endDate: dayjs(selectedTournament.endDate),
+            paid: !!selectedTournament.linkToPay
           };
-          setTournament(tournamentData);
+          console.log(tournamentData);
           formContext.reset(tournamentData);
           // Check if the current user is the creator of the tournament
           const isUserTheCreator = tournamentData.creator.id === userId;
@@ -125,9 +151,10 @@ const EditInfo: React.FC = () => {
     );
   }
 
-  const onSubmit = async (data: EditTournamentRequest): Promise<void> => {
+  const onSubmit = async (data: EditTournamentFormData): Promise<void> => {
     // Submit form data to update tournament
     try {
+      console.log(data);
       await api.tournaments.update(tournamentId, {
         ...data,
         startDate: data.startDate?.toString(),
@@ -176,7 +203,7 @@ const EditInfo: React.FC = () => {
           disabled={!editingEnabled}
         />
 
-    {/*    <Stack spacing={2} marginY={2}>
+        <Stack spacing={2} marginY={2}>
           <DateTimePickerElement
             required
             name="startDate"
@@ -203,7 +230,7 @@ const EditInfo: React.FC = () => {
               seconds: null
             }}
           />
-          </Stack> */}
+        </Stack>
 
         <TextFieldElement
           required
@@ -223,6 +250,28 @@ const EditInfo: React.FC = () => {
           margin="normal"
           disabled={!editingEnabled}
         />
+
+        <CheckboxElement
+          name="paid"
+          label={t("create_tournament_form.paid")}
+          onChange={(e) => {
+            formContext.resetField("linkToPay");
+            formContext.setValue("paid", e.target.checked);
+          }}
+        />
+
+        {paid !== undefined && paid && (
+          <React.Fragment>
+            <TextFieldElement
+              required
+              name="linkToPay"
+              type="url"
+              label={t("create_tournament_form.payment_link")}
+              fullWidth
+              margin="normal"
+            />
+          </React.Fragment>
+        )}
 
         <SelectElement
           required
@@ -305,15 +354,6 @@ const EditInfo: React.FC = () => {
                 `${t("messages.minimum_players_error")}${MIN_PLAYER_AMOUNT}`
               );
             }
-          }}
-        />
-
-        <CheckboxElement
-          name="differentOrganizer"
-          label={t("create_tournament_form.different_organizer_info")}
-          disabled={!editingEnabled}
-          onChange={(e) => {
-            formContext.resetField("organizerEmail");
           }}
         />
 
