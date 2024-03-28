@@ -98,6 +98,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -137,6 +142,10 @@ export class MatchService {
     // Mark the timer to be off
     match.isTimerOn = false;
     await match.save();
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -289,6 +298,10 @@ export class MatchService {
         await tournament.save();
       }
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -316,6 +329,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -342,6 +360,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -365,6 +388,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -387,6 +415,11 @@ export class MatchService {
     match.pointMaker = undefined;
 
     await match.save();
+
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -443,6 +476,10 @@ export class MatchService {
 
       await match.save();
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -479,6 +516,10 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -521,6 +562,11 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 

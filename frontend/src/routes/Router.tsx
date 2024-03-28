@@ -41,7 +41,14 @@ const routes = createRoutesFromElements(
           <Route path="new-tournament" element={<CreateTournamentForm />} />
         </Route>
 
-        <Route path=":id" element={<TournamentProvider />}>
+        <Route
+          path=":id"
+          element={
+            <SocketProvider>
+              <TournamentProvider />
+            </SocketProvider>
+          }
+        >
           <Route index element={<TournamentDetails />} />
           <Route element={<AuthenticationGuard />}>
             <Route path="sign-up" element={<Signup />} />

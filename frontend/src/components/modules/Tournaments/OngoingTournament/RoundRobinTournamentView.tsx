@@ -19,7 +19,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "./CopyToClipboardButton";
-
+import { useSocket } from "context/SocketContext";
+import { joinTournament, leaveTournament } from "sockets/emit";
 export interface TournamentPlayer {
   id: string;
   name: string;
@@ -286,10 +287,11 @@ export const createMatchButton = (
 };
 
 const RoundRobinTournamentView: React.FC = () => {
-  const tournament = useTournament();
+  const initialTournamentData = useTournament();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const [hasJoined, setHasJoined] = useState(false);
   const initialRender = useRef(true);
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const [ongoingMatches, setOngoingMatches] = useState<Match[]>([]);
@@ -299,6 +301,35 @@ const RoundRobinTournamentView: React.FC = () => {
   const tabTypes = ["scoreboard", "matches"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+
+  const { tournamentData: socketData } = useSocket();
+
+  const [tournamentData, setTournamentData] = useState<Tournament>(
+    initialTournamentData
+  );
+
+  console.log(socketData);
+
+  // Listening to tournaments websocket
+  useEffect(() => {
+    if (initialTournamentData.id !== undefined && !hasJoined) {
+      joinTournament(initialTournamentData.id);
+      setHasJoined(true);
+
+      return () => {
+        leaveTournament(initialTournamentData.id);
+        setHasJoined(false);
+      };
+    }
+  }, [initialTournamentData.id]);
+
+  useEffect(() => {
+    if (socketData !== undefined) {
+      setTournamentData(socketData);
+    } else {
+      setTournamentData(initialTournamentData);
+    }
+  }, [socketData]);
 
   useEffect(() => {
     if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
@@ -317,19 +348,19 @@ const RoundRobinTournamentView: React.FC = () => {
   };
 
   useEffect(() => {
-    getPlayerNames(tournament, setPlayers);
-    const sortedMatches = sortMatches(tournament.matchSchedule);
+    getPlayerNames(tournamentData, setPlayers);
+    const sortedMatches = sortMatches(tournamentData.matchSchedule);
     setOngoingMatches(sortedMatches.ongoingMatches);
     setUpcomingMatches(sortedMatches.upcomingMatches);
     setPastMatches(sortedMatches.pastMatches);
-  }, [tournament]);
+  }, [tournamentData]);
 
   useEffect(() => {
     if (initialRender.current && players.length > 0) {
       initialRender.current = false;
-      updatePlayerStats(tournament, setPlayers);
+      updatePlayerStats(tournamentData, setPlayers);
     }
-  }, [players, tournament]);
+  }, [players, tournamentData]);
 
   const ongoingElements = ongoingMatches.map((match) =>
     createMatchButton(match, players, navigate, t, {
@@ -353,7 +384,7 @@ const RoundRobinTournamentView: React.FC = () => {
     <>
       <Grid container alignItems="center" spacing={4}>
         <Grid item>
-          <Typography variant="h4">{tournament.name}</Typography>
+          <Typography variant="h4">{tournamentData.name}</Typography>
         </Grid>
         <Grid item>
           <CopyToClipboardButton />
