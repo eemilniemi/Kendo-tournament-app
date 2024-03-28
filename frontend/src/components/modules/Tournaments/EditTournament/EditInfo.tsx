@@ -63,8 +63,8 @@ export interface EditTournamentFormData {
 const defaultValues: EditTournamentFormData = {
   name: "",
   location: "",
-  startDate: now, // ?
-  endDate: now.add(1, "week"), // ?
+  startDate: now,
+  endDate: now.add(1, "week"),
   description: "",
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
@@ -85,34 +85,33 @@ const EditInfo: React.FC = () => {
   const [tournament, setTournament] = useState<
     EditTournamentFormData | undefined
   >();
+
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [editingEnabled, setEditingEnabled] = useState<boolean>(false);
   const formContext = useForm<EditTournamentFormData>({
-    defaultValues,
-    mode: "onBlur",
-    disabled: !editingEnabled
+    defaultValues
   });
-  const { startDate, endDate, type, paid } = useWatch<EditTournamentFormData>(formContext);
+  const { startDate, endDate, type, paid } =
+    useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   useEffect(() => {
-    console.log("Received tournament ID:", tournamentId);
     const fetchTournaments = async (): Promise<void> => {
       try {
         const tournamentsData = await api.tournaments.getAll();
         const selectedTournament = tournamentsData.find(
           (tournament) => tournament.id === tournamentId
         );
-        if (selectedTournament) {
+        if (selectedTournament !== undefined) {
           // Change Dayjs to strings on dates
           const tournamentData = {
             ...selectedTournament,
             startDate: dayjs(selectedTournament.startDate),
             endDate: dayjs(selectedTournament.endDate),
-            paid: !!selectedTournament.linkToPay
+            paid:
+              selectedTournament.linkToPay !== null &&
+              selectedTournament.linkToPay !== undefined
           };
-          console.log(tournamentData);
           formContext.reset(tournamentData);
           // Check if the current user is the creator of the tournament
           const isUserTheCreator = tournamentData.creator.id === userId;
@@ -154,7 +153,6 @@ const EditInfo: React.FC = () => {
   const onSubmit = async (data: EditTournamentFormData): Promise<void> => {
     // Submit form data to update tournament
     try {
-      console.log(data);
       await api.tournaments.update(tournamentId, {
         ...data,
         startDate: data.startDate?.toString(),
@@ -171,13 +169,15 @@ const EditInfo: React.FC = () => {
     // Confirm tournament editing and submit form data
     setConfirmationDialogOpen(false);
     await formContext.handleSubmit(onSubmit)();
+    // Redirect user to home page after making changes
+    navigate(routePaths.homeRoute);
   };
 
   return (
     <Container component="main" maxWidth="xs">
       <Box display="flex" flexDirection="column" gap="5px" width="100%">
         <Typography variant="h5" className="header" fontWeight="bold">
-          Muokkaa Turnausta
+          {t("edit_tournament_labels.edit_tournament")}
         </Typography>
       </Box>
       <FormContainer
@@ -191,7 +191,6 @@ const EditInfo: React.FC = () => {
           label={t("create_tournament_form.tournament_name")}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <TextFieldElement
@@ -200,7 +199,6 @@ const EditInfo: React.FC = () => {
           label={t("create_tournament_form.location")}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <Stack spacing={2} marginY={2}>
@@ -239,7 +237,6 @@ const EditInfo: React.FC = () => {
           label={t("create_tournament_form.description")}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <TextFieldElement
@@ -248,7 +245,6 @@ const EditInfo: React.FC = () => {
           label={t("create_tournament_form.site_link")}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <CheckboxElement
@@ -293,7 +289,6 @@ const EditInfo: React.FC = () => {
           ]}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <SelectElement
@@ -313,7 +308,6 @@ const EditInfo: React.FC = () => {
           ]}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <SelectElement
@@ -336,7 +330,6 @@ const EditInfo: React.FC = () => {
           ]}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
         />
 
         <TextFieldElement
@@ -346,7 +339,6 @@ const EditInfo: React.FC = () => {
           label={t("create_tournament_form.max_players")}
           fullWidth
           margin="normal"
-          disabled={!editingEnabled}
           validation={{
             validate: (value: number) => {
               return (
@@ -363,41 +355,25 @@ const EditInfo: React.FC = () => {
           flexWrap="wrap"
           gap="10px"
         >
-          {!editingEnabled ? (
-            <Button
-              type="button"
-              variant="outlined"
-              color="primary"
-              sx={{ mt: 3, mb: 2 }}
-              onClick={() => {
-                setEditingEnabled(true);
-              }}
-            >
-              {t("buttons.edit_info_button")}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outlined"
-              color="primary"
-              onClick={() => {
-                setEditingEnabled(() => {
-                  formContext.reset();
-                  return false;
-                });
-              }}
-              sx={{ mt: 3, mb: 2 }}
-            >
-              {t("buttons.cancel_button")}
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              navigate(routePaths.homeRoute);
+            }}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {t("buttons.cancel_button")}
+          </Button>
+
           <Button
             variant="contained"
             color="primary"
             onClick={() => {
               setConfirmationDialogOpen(true);
             }}
-            disabled={!editingEnabled || !formContext.formState.isDirty}
+            disabled={!formContext.formState.isDirty}
             sx={{ mt: 3, mb: 2 }}
           >
             {t("buttons.save_changes_button")}

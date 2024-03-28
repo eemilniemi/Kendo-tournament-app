@@ -164,7 +164,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
               }}
               sx={{ position: "absolute", bottom: 10, left: 120 }}
             >
-              Muokkaa
+              {t("buttons.edit_button")}
             </Button>
           )}
         </>

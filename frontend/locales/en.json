@@ -69,7 +69,8 @@
     "modify_or_delete": "Modify or delete recent point",
     "delete": "Delete",
     "copy_to_clipboard": "Share tournament",
-    "save_changes_button": "Save changes"
+    "save_changes_button": "Save changes",
+    "edit_button": "Edit"
   },
   "titles": {
     "login": "Sign in",
@@ -188,11 +189,12 @@
     "paid": "This tournament requires payment",
     "payment_link": "Link to payment site"
   },
-
   "edit_tournament_form": {
     "confirmation_message": "Are you sure you want to edit the tournament with the provided information?"
   },
-
+  "edit_tournament_labels": {
+    "edit_tournament": "Edit tournament"
+  },
   "upcoming_tournament_view": {
     "date_header": "When",
     "type_header": "Type of Tournament",

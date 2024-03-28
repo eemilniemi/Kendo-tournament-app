@@ -69,7 +69,8 @@
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
     "copy_to_clipboard": "Jaa turnaus",
-    "save_changes_button": "Tallenna muutokset"
+    "save_changes_button": "Tallenna muutokset",
+    "edit_button": "Muokkaa"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -188,11 +189,12 @@
     "paid": "Tämä turnaus on maksullinen",
     "payment_link": "Linkki maksusivustolle"
   },
-
   "edit_tournament_form": {
     "confirmation_message": "Oletko varma, että haluat muokata turnausta annetuilla tiedoilla?"
   },
-
+  "edit_tournament_labels": {
+    "edit_tournament": "Muokkaa turnausta"
+  },
   "upcoming_tournament_view": {
     "date_header": "Milloin",
     "type_header": "Turnauksen tyyppi",
