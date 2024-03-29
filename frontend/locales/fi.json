@@ -198,7 +198,8 @@
     "delete_tournament": "Oletko varma, että haluat poistaa tämän turnauksen? Tätä valintaa ei voi perua.",
     "category_header": "Turnauksen kategoria",
     "link_to_payment_header": "Tämä turnaus vaatii maksun, vierailethan osoitteessa",
-    "link_to_site_header": "Järjestäjän sivut"
+    "link_to_site_header": "Järjestäjän sivut",
+    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan"
   },
   "navigation": {
     "back": "Takaisin",

@@ -212,14 +212,25 @@ const UpcomingTournamentView: React.FC = () => {
         </Box>
       )}
 
-      {tournament.players.length > 0 ? (
+      {/* There are players in the tournament, generate table if user is logged in */}
+      {tournament.players.length > 0 && userId !== undefined && (
         <React.Fragment>
           <Typography variant="body1" className="header" fontWeight="bold">
-            {t("upcoming_tournament_view.others_signed_up_header")}:
+            {t("upcoming_tournament_view.others_signed_up_header")}
           </Typography>
           {generateTable(tournament)}
         </React.Fragment>
-      ) : (
+      )}
+
+      {/* There are players in the tournament, but user is not logged in */}
+      {tournament.players.length > 0 && userId === undefined && (
+        <Typography variant="body1" className="header" fontWeight="bold">
+          {t("upcoming_tournament_view.attendee_list")}
+        </Typography>
+      )}
+
+      {/* No players in the tournament */}
+      {tournament.players.length === 0 && (
         <Typography variant="body1" className="header" fontWeight="bold">
           {t("upcoming_tournament_view.no_players_signed_up")}
         </Typography>
