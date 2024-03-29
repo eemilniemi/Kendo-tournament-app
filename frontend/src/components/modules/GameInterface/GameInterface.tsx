@@ -23,7 +23,8 @@ import type {
   Match,
   MatchPlayer,
   MatchType,
-  MatchTime
+  MatchTime,
+  User
 } from "types/models";
 import "./GameInterface.css";
 import { useAuth } from "context/AuthContext";
@@ -512,6 +513,26 @@ const GameInterface: React.FC = () => {
     setMostRecentPointType(pointRequest.pointType);
   };
 
+  const findTimekeeper = (): User => {
+    const timeKeeper = tournament.players.find(
+      (p) => p.id === matchInfo.timeKeeper
+    );
+    if (timeKeeper === undefined) {
+      throw new Error("Time keeper not found");
+    }
+    return timeKeeper;
+  };
+
+  const findPointmaker = (): User => {
+    const pointMaker = tournament.players.find(
+      (p) => p.id === matchInfo.pointMaker
+    );
+    if (pointMaker === undefined) {
+      throw new Error("Point maker not found");
+    }
+    return pointMaker;
+  };
+
   return (
     <div className="app-container">
       <main className="main-content">
@@ -604,17 +625,17 @@ const GameInterface: React.FC = () => {
                   {/* print time keeper and point maker names */}
                   <Typography variant="body2">
                     {t("game_interface.time_keeper")}:{" "}
-                    {
-                      tournament.players.find(
-                        (p) => p.id === matchInfo.timeKeeper
-                      )?.firstName
-                    }
+                    <PlayerName
+                      firstName={findTimekeeper().firstName}
+                      lastName={findTimekeeper().lastName}
+                    />
                     <br />
                     {t("game_interface.point_maker")}:{" "}
                     {
-                      tournament.players.find(
-                        (p) => p.id === matchInfo.pointMaker
-                      )?.firstName
+                      <PlayerName
+                        firstName={findPointmaker().firstName}
+                        lastName={findPointmaker().lastName}
+                      />
                     }
                   </Typography>
                   <br />
@@ -624,13 +645,19 @@ const GameInterface: React.FC = () => {
             <Box display="flex" gap="20px" justifyContent="center">
               <Box className="playerBox" bgcolor="white">
                 <Typography variant="h3">
-                  <PlayerName firstName={matchInfo.firstNames[0]} lastName={matchInfo.lastNames[0]} />
-                  </Typography>
+                  <PlayerName
+                    firstName={matchInfo.firstNames[0]}
+                    lastName={matchInfo.lastNames[0]}
+                  />
+                </Typography>
               </Box>
               <Box className="playerBox" bgcolor="#db4744">
                 <Typography variant="h3">
-                  <PlayerName firstName={matchInfo.firstNames[1]} lastName={matchInfo.lastNames[1]} />
-                  </Typography>
+                  <PlayerName
+                    firstName={matchInfo.firstNames[1]}
+                    lastName={matchInfo.lastNames[1]}
+                  />
+                </Typography>
               </Box>
             </Box>
             {matchInfo.isOvertime && (
