@@ -47,7 +47,7 @@ const generateTable = (tournament: Tournament): React.ReactNode => {
             <TableRow key={player.id} aria-label={`player-${index}`}>
               <TableCell aria-label={`cell-name-${index}`}>
                 <Typography>
-                  {`${player.firstName} - ${player.lastName}`}
+                  {`${player.firstName} ${player.lastName}`}
                 </Typography>
               </TableCell>
               <TableCell aria-label={`cell-rank-${index}`}>

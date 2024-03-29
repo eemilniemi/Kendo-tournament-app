@@ -9,6 +9,7 @@ import {
 import { type Match, type User } from "types/models";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import PlayerName from "../PlayerNames";
 
 interface BracketProps {
   match: Match;
@@ -30,8 +31,12 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
   const isWinnerDeclared = winner !== undefined;
 
   // Get the names of the players
-  const player1Name = `${player1.firstName} ${player1.lastName}`;
-  const player2Name = `${player2.firstName} ${player2.lastName}`;
+  const player1Name = (
+    <PlayerName firstName={player1.firstName} lastName={player1.lastName} />
+  );
+  const player2Name = (
+    <PlayerName firstName={player2.firstName} lastName={player2.lastName} />
+  );
 
   let player1Font = "regular";
   let player2Font = "regular";

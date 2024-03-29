@@ -35,11 +35,13 @@ import Loader from "components/common/Loader";
 import ErrorModal from "components/common/ErrorModal";
 import { useTranslation } from "react-i18next";
 import ModifyDeletePoints from "./ModifyDeletePoints";
+import PlayerName from "../Tournaments/PlayerNames";
 
 export interface MatchData {
   timerTime: number;
   players: MatchPlayer[];
-  playerNames: string[];
+  firstNames: string[];
+  lastNames: string[];
   winner: string | undefined;
   endTimeStamp: Date | undefined;
   timeKeeper: string | undefined;
@@ -58,7 +60,8 @@ const GameInterface: React.FC = () => {
   const [matchInfo, setMatchInfo] = useState<MatchData>({
     timerTime: 0,
     players: [],
-    playerNames: [],
+    firstNames: [],
+    lastNames: [],
     winner: undefined,
     endTimeStamp: undefined,
     timeKeeper: undefined,
@@ -117,7 +120,8 @@ const GameInterface: React.FC = () => {
     const getMatchData = async (): Promise<void> => {
       try {
         let matchPlayers: MatchPlayer[] = [];
-        const playersNames: string[] = [];
+        const playersFirstNames: string[] = [];
+        const playersLastNames: string[] = [];
         let matchWinner: string | undefined;
         let timerPerson: string | undefined;
         let pointPerson: string | undefined;
@@ -134,7 +138,8 @@ const GameInterface: React.FC = () => {
         const findPlayerName = (playerId: string, index: number): void => {
           const player = tournament.players.find((p) => p.id === playerId);
           if (player !== undefined) {
-            playersNames[index] = player.firstName;
+            playersFirstNames[index] = player.firstName;
+            playersLastNames[index] = player.lastName;
           }
         };
 
@@ -242,7 +247,8 @@ const GameInterface: React.FC = () => {
         setMatchInfo({
           timerTime: time,
           players: matchPlayers,
-          playerNames: playersNames,
+          firstNames: playersFirstNames,
+          lastNames: playersLastNames,
           winner: matchWinner,
           endTimeStamp: matchEndTimeStamp,
           timeKeeper: timerPerson,
@@ -617,10 +623,14 @@ const GameInterface: React.FC = () => {
               )}
             <Box display="flex" gap="20px" justifyContent="center">
               <Box className="playerBox" bgcolor="white">
-                <Typography variant="h3">{matchInfo.playerNames[0]}</Typography>
+                <Typography variant="h3">
+                  <PlayerName firstName={matchInfo.firstNames[0]} lastName={matchInfo.lastNames[0]} />
+                  </Typography>
               </Box>
               <Box className="playerBox" bgcolor="#db4744">
-                <Typography variant="h3">{matchInfo.playerNames[1]}</Typography>
+                <Typography variant="h3">
+                  <PlayerName firstName={matchInfo.firstNames[1]} lastName={matchInfo.lastNames[1]} />
+                  </Typography>
               </Box>
             </Box>
             {matchInfo.isOvertime && (
