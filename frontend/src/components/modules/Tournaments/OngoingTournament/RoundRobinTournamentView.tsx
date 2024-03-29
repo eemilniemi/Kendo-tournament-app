@@ -19,7 +19,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "./CopyToClipboardButton";
-import PlayerName from "../PlayerNames";
+import PlayerName, { checkSameNames } from "../PlayerNames";
 
 export interface TournamentPlayer {
   id: string;
@@ -35,9 +35,14 @@ export interface TournamentPlayer {
 interface ScoreboardProps {
   players: TournamentPlayer[];
   onClick?: () => void; // Make onClick prop optional
+  haveSameNames: boolean;
 }
 
-export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
+export const Scoreboard: React.FC<ScoreboardProps> = ({
+  players,
+  onClick,
+  haveSameNames
+}) => {
   const { t } = useTranslation();
 
   const generateTableCells = (player: TournamentPlayer): React.ReactNode[] => {
@@ -86,6 +91,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
                     <PlayerName
                       firstName={player.firstName}
                       lastName={player.lastName}
+                      sameNames={haveSameNames}
                     />
                   </TableCell>
                   {generateTableCells(player)}
@@ -253,6 +259,7 @@ export const createMatchButton = (
   players: TournamentPlayer[],
   navigate: (path: string) => void,
   t: (key: string) => string,
+  haveSameNames: boolean,
   props: ButtonProps
 ): React.ReactNode => {
   const player1 = players.find((player) => player.id === match.players[0].id);
@@ -290,11 +297,13 @@ export const createMatchButton = (
           <PlayerName
             firstName={player1.firstName}
             lastName={player1.lastName}
+            sameNames={haveSameNames}
           />
           {" - "}
           <PlayerName
             firstName={player2.firstName}
             lastName={player2.lastName}
+            sameNames={haveSameNames}
           />
         </Button>
       )}
@@ -316,9 +325,15 @@ const RoundRobinTournamentView: React.FC = () => {
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [pastMatches, setPastMatches] = useState<Match[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const tabTypes = ["scoreboard", "matches"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+
+  useEffect(() => {
+    const result = checkSameNames(tournament);
+    setHaveSameNames(result);
+  }, []);
 
   useEffect(() => {
     if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
@@ -352,18 +367,18 @@ const RoundRobinTournamentView: React.FC = () => {
   }, [players, tournament]);
 
   const ongoingElements = ongoingMatches.map((match) =>
-    createMatchButton(match, players, navigate, t, {
+    createMatchButton(match, players, navigate, t, haveSameNames, {
       variant: "contained"
     })
   );
   const upcomingElements = upcomingMatches.map((match) =>
-    createMatchButton(match, players, navigate, t, {
+    createMatchButton(match, players, navigate, t, haveSameNames, {
       variant: "contained",
       color: "info"
     })
   );
   const pastElements = pastMatches.map((match) =>
-    createMatchButton(match, players, navigate, t, {
+    createMatchButton(match, players, navigate, t, haveSameNames, {
       variant: "contained",
       color: "secondary"
     })
@@ -392,7 +407,9 @@ const RoundRobinTournamentView: React.FC = () => {
         />
         <Tab label={t("tournament_view_labels.matches")} value="matches" />
       </Tabs>
-      {currentTab === "scoreboard" && <Scoreboard players={players} />}
+      {currentTab === "scoreboard" && (
+        <Scoreboard players={players} haveSameNames={haveSameNames} />
+      )}
       {currentTab === "matches" && (
         <Matches
           ongoingMatchElements={ongoingElements}

@@ -36,7 +36,7 @@ import Loader from "components/common/Loader";
 import ErrorModal from "components/common/ErrorModal";
 import { useTranslation } from "react-i18next";
 import ModifyDeletePoints from "./ModifyDeletePoints";
-import PlayerName from "../Tournaments/PlayerNames";
+import PlayerName, { checkSameNames } from "../Tournaments/PlayerNames";
 
 export interface MatchData {
   timerTime: number;
@@ -57,6 +57,13 @@ export interface MatchData {
 
 const GameInterface: React.FC = () => {
   const { t } = useTranslation();
+
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
+
+  useEffect(() => {
+    const result = checkSameNames(tournament);
+    setHaveSameNames(result);
+  }, []);
 
   const [matchInfo, setMatchInfo] = useState<MatchData>({
     timerTime: 0,
@@ -628,6 +635,7 @@ const GameInterface: React.FC = () => {
                     <PlayerName
                       firstName={findTimekeeper().firstName}
                       lastName={findTimekeeper().lastName}
+                      sameNames={haveSameNames}
                     />
                     <br />
                     {t("game_interface.point_maker")}:{" "}
@@ -635,6 +643,7 @@ const GameInterface: React.FC = () => {
                       <PlayerName
                         firstName={findPointmaker().firstName}
                         lastName={findPointmaker().lastName}
+                        sameNames={haveSameNames}
                       />
                     }
                   </Typography>
@@ -648,6 +657,7 @@ const GameInterface: React.FC = () => {
                   <PlayerName
                     firstName={matchInfo.firstNames[0]}
                     lastName={matchInfo.lastNames[0]}
+                    sameNames={haveSameNames}
                   />
                 </Typography>
               </Box>
@@ -656,6 +666,7 @@ const GameInterface: React.FC = () => {
                   <PlayerName
                     firstName={matchInfo.firstNames[1]}
                     lastName={matchInfo.lastNames[1]}
+                    sameNames={haveSameNames}
                   />
                 </Typography>
               </Box>
