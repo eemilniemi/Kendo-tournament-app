@@ -19,10 +19,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "./CopyToClipboardButton";
+import PlayerName from "../PlayerNames";
 
 export interface TournamentPlayer {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   points: number;
   ippons: number;
   wins: number;
@@ -40,8 +42,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
 
   const generateTableCells = (player: TournamentPlayer): React.ReactNode[] => {
     return Object.values(player).map((value, index) => {
-      if (index === 0) {
-        // If we want to skip the ID property
+      if (index < 3) {
+        // We want to skip the ID and name properties
         return null;
       }
 
@@ -78,7 +80,16 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
             </TableHead>
             <TableBody>
               {sortedPlayers.map((player, index) => (
-                <TableRow key={index}>{generateTableCells(player)}</TableRow>
+                <TableRow key={index}>
+                  <TableCell>
+                    {/* Render PlayerName component for each player */}
+                    <PlayerName
+                      firstName={player.firstName}
+                      lastName={player.lastName}
+                    />
+                  </TableCell>
+                  {generateTableCells(player)}
+                </TableRow>
               ))}
             </TableBody>
           </Table>
@@ -202,7 +213,8 @@ export const getPlayerNames = (
         if (!playerExists) {
           updatedPlayers.push({
             id: playerObject.id,
-            name: playerObject.firstName,
+            firstName: playerObject.firstName,
+            lastName: playerObject.lastName,
             points: 0,
             ippons: 0,
             wins: 0,
@@ -243,10 +255,8 @@ export const createMatchButton = (
   t: (key: string) => string,
   props: ButtonProps
 ): React.ReactNode => {
-  const player1 = players.find((player) => player.id === match.players[0].id)
-    ?.name;
-  const player2 = players.find((player) => player.id === match.players[1].id)
-    ?.name;
+  const player1 = players.find((player) => player.id === match.players[0].id);
+  const player2 = players.find((player) => player.id === match.players[1].id);
 
   let officialsInfo = "";
 
@@ -270,14 +280,24 @@ export const createMatchButton = (
 
   return (
     <div style={{ marginBottom: "10px" }} key={match.id}>
-      <Button
-        onClick={() => {
-          navigate(`match/${match.id}`);
-        }}
-        {...props}
-      >
-        {`${player1} - ${player2}`}
-      </Button>
+      {player1 !== undefined && player2 !== undefined && (
+        <Button
+          onClick={() => {
+            navigate(`match/${match.id}`);
+          }}
+          {...props}
+        >
+          <PlayerName
+            firstName={player1.firstName}
+            lastName={player1.lastName}
+          />
+          {" - "}
+          <PlayerName
+            firstName={player2.firstName}
+            lastName={player2.lastName}
+          />
+        </Button>
+      )}
       {officialsInfo !== undefined && (
         <Typography variant="body2">{officialsInfo}</Typography>
       )}
@@ -286,9 +306,9 @@ export const createMatchButton = (
 };
 
 const RoundRobinTournamentView: React.FC = () => {
-  const tournament = useTournament();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const tournament = useTournament();
 
   const initialRender = useRef(true);
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
