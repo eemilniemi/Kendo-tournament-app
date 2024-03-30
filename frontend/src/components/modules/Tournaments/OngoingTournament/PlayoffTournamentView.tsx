@@ -20,7 +20,6 @@ const PlayoffTournamentView: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
-  const tournament = useTournament();
   const { userId } = useAuth();
   const isUserTheCreator = tournament.creator.id === userId;
 
