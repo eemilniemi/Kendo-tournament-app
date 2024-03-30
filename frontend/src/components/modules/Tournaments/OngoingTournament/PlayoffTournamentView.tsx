@@ -9,12 +9,14 @@ import routePaths from "routes/route-paths";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
 import DeleteUserFromTournament from "./DeleteUserFromTournament";
+import CopyToClipboardButton from "./CopyToClipboardButton";
 
 interface Rounds extends Record<number, Match[]> {}
 
 const PlayoffTournamentView: React.FC = () => {
   const { type, matchSchedule, players, groups, playersToPlayoffsPerGroup } =
     useTournament();
+  const tournament = useTournament();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
@@ -87,6 +89,15 @@ const PlayoffTournamentView: React.FC = () => {
           "&::-webkit-scrollbar": { display: "none" }
         }}
       >
+        <Grid container alignItems="center" spacing={4}>
+          <Grid item>
+            <Typography variant="h4">{tournament.name}</Typography>
+          </Grid>
+          <Grid item>
+            <CopyToClipboardButton />
+          </Grid>
+        </Grid>
+
         <Grid
           container
           spacing={2}
