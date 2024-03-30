@@ -15,7 +15,8 @@ import TableCell from "@mui/material/TableCell";
 import Paper from "@mui/material/Paper";
 import type { Category, Tournament, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
-import { Link } from "@mui/material";
+import { Grid, Link } from "@mui/material";
+import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
 
 const generateTable = (tournament: Tournament): React.ReactNode => {
   const { t } = useTranslation();
@@ -106,14 +107,21 @@ const UpcomingTournamentView: React.FC = () => {
       component="main"
       sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
     >
-      <Typography
-        variant="h4"
-        className="header"
-        fontWeight="bold"
-        marginBottom="12px"
-      >
-        {tournament.name}
-      </Typography>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography
+            variant="h4"
+            className="header"
+            fontWeight="bold"
+            marginBottom="12px"
+          >
+            {tournament.name}
+          </Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
 
       {tournamentFull && (
         <Box>

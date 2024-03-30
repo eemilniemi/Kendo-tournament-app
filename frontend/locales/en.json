@@ -26,7 +26,9 @@
     "missing_pointmaker": "Match is missing a point maker!",
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
-    "minimum_player_to_playoff": "At least one player has to proceed"
+    "minimum_player_to_playoff": "At least one player has to proceed",
+    "copy_success": "Tournament link copied to clipboard!",
+    "copy_failure": "Failed to copy tournament link"
   },
   "game_interface": {
     "player": "Player",
@@ -66,7 +68,8 @@
     "save_button": "Save",
     "modify_or_delete": "Modify or delete recent point",
     "delete": "Delete",
-	  "withdraw_user": "Withdraw player from tournament"
+	  "withdraw_user": "Withdraw player from tournament",
+    "copy_to_clipboard": "Share tournament"
   },
   "titles": {
     "login": "Sign in",
@@ -324,5 +327,13 @@
     "info": "Withdrawing a player from the tournament marks their ongoing and upcoming matches as lost.",
     "withdrawing_user": "The player withdrawn: ",
     "confirmation_msg": "Are you sure you want to withdraw player {{name}} from tournament? This action cannot be undone."
+  },
+  "profile": {
+    "match":"Match",
+    "profile_info": "Profile Info",
+    "my_games": "My Games",
+    "my_points": "My Points",
+    "point_type": "Point Type",
+    "points": "points"
   }
 }

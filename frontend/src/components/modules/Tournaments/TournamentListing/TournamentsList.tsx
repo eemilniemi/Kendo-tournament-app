@@ -17,6 +17,13 @@ import type { Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import {
+  sortTournamentsByMostRecent,
+  sortTournamentsByOldest,
+  sortTournamentsByName,
+  sortTournamentsByDescName,
+  sortTournamentsByLocation
+} from "utils/sorters";
 
 const TournamentList: React.FC = () => {
   const navigate = useNavigate();
@@ -70,57 +77,19 @@ const TournamentList: React.FC = () => {
     // Sort tournaments based on chosen sorting criteria
     switch (sortBy) {
       case "mostRecent":
-        tournaments.sort((a, b) => {
-          const dateA = new Date(a.startDate);
-          const dateB = new Date(b.startDate);
-          return dateB.getTime() - dateA.getTime();
-        });
+        sortTournamentsByMostRecent(tournaments);
         break;
       case "oldest":
-        tournaments.sort((a, b) => {
-          const dateA = new Date(a.startDate);
-          const dateB = new Date(b.startDate);
-          return dateA.getTime() - dateB.getTime();
-        });
+        sortTournamentsByOldest(tournaments);
         break;
       case "name":
-        tournaments.sort((a, b) => {
-          const nameA = a.name;
-          const nameB = b.name;
-          if (nameA < nameB) {
-            return -1;
-          }
-          if (nameA > nameB) {
-            return 1;
-          }
-          return 0;
-        });
+        sortTournamentsByName(tournaments);
         break;
       case "nameDesc":
-        tournaments.sort((a, b) => {
-          const nameA = a.name;
-          const nameB = b.name;
-          if (nameA < nameB) {
-            return 1;
-          }
-          if (nameA > nameB) {
-            return -1;
-          }
-          return 0;
-        });
+        sortTournamentsByDescName(tournaments);
         break;
       case "location":
-        tournaments.sort((a, b) => {
-          const locationA = a.location;
-          const locationB = b.location;
-          if (locationA < locationB) {
-            return -1;
-          }
-          if (locationA > locationB) {
-            return 1;
-          }
-          return 0;
-        });
+        sortTournamentsByLocation(tournaments);
         break;
     }
     return tournaments;
@@ -190,19 +159,19 @@ const TournamentList: React.FC = () => {
           ></Tab>
         </Tabs>
       </Box>
-      {/* Dropdown menu to choose sorting criteria on past tournaments tab */}
-      {currentTab === "past" && (
-        <div>
-          <label>{t("sorting.orderBy")}</label>
-          <Select value={sortBy} onChange={handleSortChange}>
-            <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
-            <MenuItem value="oldest">{t("sorting.oldest")}</MenuItem>
-            <MenuItem value="name">{t("sorting.name")}</MenuItem>
-            <MenuItem value="nameDesc">{t("sorting.nameDesc")}</MenuItem>
-            <MenuItem value="location">{t("sorting.location")}</MenuItem>
-          </Select>
-        </div>
-      )}
+      {/* Dropdown menu to choose sorting criteria all tournament tabs */}
+      <label>{t("sorting.orderBy")}</label>
+      <Select
+        value={sortBy}
+        onChange={handleSortChange}
+        style={{ marginBottom: "10px" }}
+      >
+        <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
+        <MenuItem value="oldest">{t("sorting.oldest")}</MenuItem>
+        <MenuItem value="name">{t("sorting.name")}</MenuItem>
+        <MenuItem value="nameDesc">{t("sorting.nameDesc")}</MenuItem>
+        <MenuItem value="location">{t("sorting.location")}</MenuItem>
+      </Select>
 
       <Grid
         container
