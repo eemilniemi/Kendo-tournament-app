@@ -68,7 +68,6 @@ export class TournamentService {
   ): Promise<Tournament> {
     await this.validateTournamentDetails(tournamentData, creator);
 
-    console.log("luodessa tournamentdata: ", tournamentData);
     const newTournament = await TournamentModel.create({
       ...tournamentData,
       creator
