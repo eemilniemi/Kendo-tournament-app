@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import TournamentCard from "./TournamentCard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournaments } from "context/TournamentsContext";
@@ -24,6 +24,7 @@ import {
   sortTournamentsByDescName,
   sortTournamentsByLocation
 } from "utils/sorters";
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const TournamentList: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const TournamentList: React.FC = () => {
   const tabTypes = ["past", "ongoing", "upcoming"] as const;
   const defaultTab = "ongoing";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+  
+  const mobile = useMediaQuery('(max-width:600px)');
 
   // State variables for sorting
   const [sortBy, setSortBy] = useState<
@@ -129,9 +132,25 @@ const TournamentList: React.FC = () => {
       </SpeedDial>
 
       {/* Tournament Listings */}
+      {/* If the device is mobile */}
+      {mobile ? (
+        <Fragment>
+          <Select
+            value={currentTab}
+            onChange={(event) => handleTabChange(event.target.value)}
+            style={{ marginBottom: "10px" }}
+          >
+            <MenuItem value="ongoing">{t("frontpage_labels.ongoing_tournaments")}</MenuItem>
+            <MenuItem value="upcoming">{t("frontpage_labels.upcoming_tournaments")}</MenuItem>
+            <MenuItem value="past">{t("frontpage_labels.past_tournaments")}</MenuItem>
+          </Select>
+          <br></br>
+        </Fragment>
+      ) : (
       <Box
         sx={{ borderBottom: 1, borderColor: "divider", marginBottom: "10px" }}
       >
+        {/* If the device is desktop */}
         <Tabs
           value={currentTab}
           onChange={(_, value) => {
@@ -159,6 +178,7 @@ const TournamentList: React.FC = () => {
           ></Tab>
         </Tabs>
       </Box>
+      )}
       {/* Dropdown menu to choose sorting criteria all tournament tabs */}
       <label>{t("sorting.orderBy")}</label>
       <Select
