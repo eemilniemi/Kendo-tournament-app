@@ -5,12 +5,7 @@ import api from "api/axios";
 import ErrorModal from "components/common/ErrorModal";
 import routePaths from "routes/route-paths";
 import { useAuth } from "context/AuthContext";
-import type {
-  Category,
-  MatchTime,
-  Tournament,
-  TournamentType
-} from "types/models";
+import type { Category, MatchTime, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
 import {
   CheckboxElement,
@@ -34,13 +29,10 @@ import {
   Box
 } from "@mui/material";
 
-import type { EditTournamentRequest } from "types/requests";
-
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import Loader from "components/common/Loader";
 const MIN_PLAYER_AMOUNT = 3;
-const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
 export interface EditTournamentFormData {
@@ -82,17 +74,12 @@ const EditInfo: React.FC = () => {
   const { t } = useTranslation();
   const { userId } = useAuth();
 
-  const [tournament, setTournament] = useState<
-    EditTournamentFormData | undefined
-  >();
-
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const formContext = useForm<EditTournamentFormData>({
     defaultValues
   });
-  const { startDate, endDate, type, paid } =
-    useWatch<EditTournamentFormData>(formContext);
+  const { startDate, paid } = useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -103,14 +90,12 @@ const EditInfo: React.FC = () => {
           (tournament) => tournament.id === tournamentId
         );
         if (selectedTournament !== undefined) {
-          // Change Dayjs to strings on dates
+          const linkToPay = selectedTournament.linkToPay ?? "";
           const tournamentData = {
             ...selectedTournament,
             startDate: dayjs(selectedTournament.startDate),
             endDate: dayjs(selectedTournament.endDate),
-            paid:
-              selectedTournament.linkToPay !== null &&
-              selectedTournament.linkToPay !== undefined
+            paid: linkToPay !== ""
           };
           formContext.reset(tournamentData);
           // Check if the current user is the creator of the tournament
@@ -119,8 +104,6 @@ const EditInfo: React.FC = () => {
             // Redirect user to home page if not the creator
             navigate(routePaths.homeRoute);
           }
-        } else {
-          setTournament(undefined);
         }
       } catch (error) {
         setIsError(true);
@@ -152,6 +135,9 @@ const EditInfo: React.FC = () => {
 
   const onSubmit = async (data: EditTournamentFormData): Promise<void> => {
     // Submit form data to update tournament
+    if (!data.paid) {
+      data.linkToPay = "";
+    }
     try {
       await api.tournaments.update(tournamentId, {
         ...data,
