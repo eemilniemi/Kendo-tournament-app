@@ -13,7 +13,7 @@ import {
   Delete
 } from "tsoa";
 import { TournamentService } from "../services/tournamentService.js";
-import { TournamentModel, UnsavedMatch } from "../models/tournamentModel.js";
+import { UnsavedMatch } from "../models/tournamentModel.js";
 import type { Tournament } from "../models/tournamentModel.js";
 import {
   CreateTournamentRequest,
@@ -64,13 +64,11 @@ export class TournamentController extends Controller {
   public async createSchedule(
     @Path() tournamentId: ObjectIdString
   ): Promise<Tournament | undefined> {
-    const result = await this.service.getTournamentAndCreateSchedule(tournamentId);
-    if(result !== undefined)
-    {
+    const result =
+      await this.service.getTournamentAndCreateSchedule(tournamentId);
+    if (result !== undefined) {
       this.setStatus(201);
-    }
-    else
-    {
+    } else {
       this.setStatus(400);
     }
     return result;

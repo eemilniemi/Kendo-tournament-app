@@ -11,7 +11,6 @@ import { type HydratedDocument, Types } from "mongoose";
 import MatchModel, {
   type MatchType,
   type Match,
-  type MatchPlayer,
   type MatchTime
 } from "../models/matchModel.js";
 import {
@@ -135,7 +134,10 @@ export class TournamentService {
     await tournament.save();
 
     // Playoff matches are calculated separately when the tournament has started
-    if (tournament.players.length > 1 && tournament.type !== TournamentType.Playoff) {
+    if (
+      tournament.players.length > 1 &&
+      tournament.type !== TournamentType.Playoff
+    ) {
       const newMatchIds = await this.generateTournamentSchedule(
         tournament,
         player.id
@@ -270,27 +272,31 @@ export class TournamentService {
       }
     }
   }
-  
+
   public async getTournamentAndCreateSchedule(
     tournamentId: string
-    ): Promise<Tournament | undefined>
-  {
+  ): Promise<Tournament | undefined> {
     // Helper function for getting tournament based on id and creating schedule
     // Used for tournament types where all matches are calculated simultaneously
     try {
-      const tournament = await TournamentModel.findById(tournamentId)
-      .exec();
-      if(tournament === null || tournament.matchSchedule.length !== 0) {return;}
+      const tournament = await TournamentModel.findById(tournamentId).exec();
+      if (tournament === null || tournament.matchSchedule.length !== 0) {
+        return;
+      }
 
-      const newMatchIds = await this.generateTournamentSchedule(tournament as Tournament);
+      const newMatchIds = await this.generateTournamentSchedule(
+        tournament as Tournament
+      );
       if (newMatchIds.length !== 0) {
         tournament.matchSchedule.push(...newMatchIds);
         await tournament.save();
       }
       return tournament;
-    }
-    catch (error) {
-      console.error("Error in fetching tournament and creating schedule:", error)
+    } catch (error) {
+      console.error(
+        "Error in fetching tournament and creating schedule:",
+        error
+      );
     }
   }
 
@@ -298,12 +304,13 @@ export class TournamentService {
     tournament: Tournament,
     newPlayer: Types.ObjectId | undefined = undefined
   ): Promise<Types.ObjectId[]> {
-    let matches: (UnsavedMatch | Match)[] = [];
+    let matches: Array<UnsavedMatch | Match> = [];
     switch (tournament.type) {
       case TournamentType.RoundRobin:
-        if(newPlayer === null)
-        {
-          throw new TypeError("newPlayer shouldn't be null for round robin tournaments!")
+        if (newPlayer === null) {
+          throw new TypeError(
+            "newPlayer shouldn't be null for round robin tournaments!"
+          );
         }
         matches = TournamentService.generateRoundRobinSchedule(
           tournament.players as Types.ObjectId[],
@@ -313,9 +320,10 @@ export class TournamentService {
         );
         break;
       case TournamentType.Playoff:
-        if(newPlayer !== undefined)
-        {
-          throw new TypeError("Playoff matches should be generated all at once")
+        if (newPlayer !== undefined) {
+          throw new TypeError(
+            "Playoff matches should be generated all at once"
+          );
         }
         matches = await this.generatePlayoffSchedule(
           tournament.players as Types.ObjectId[],
@@ -382,22 +390,19 @@ export class TournamentService {
     previousMatches: Types.ObjectId[],
     tournament: Types.ObjectId,
     tournamentMatchTime: MatchTime
-  ): Promise<(UnsavedMatch | Match)[]> {
-    const matches: (UnsavedMatch | Match)[] = [];
-    
+  ): Promise<Array<UnsavedMatch | Match>> {
+    const matches: Array<UnsavedMatch | Match> = [];
+
     const bracketSize = this.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
-    
+
     // create the byes first to be added later
     // this way the first registrants get the byes
     let i: number;
-    const byes = []
-    for(i = 0; i < byesNeeded; i++)
-    {
+    const byes = [];
+    for (i = 0; i < byesNeeded; i++) {
       byes.push({
-        players: [
-          { id: playerIds[i], points: [], color: "white"}
-        ],
+        players: [{ id: playerIds[i], points: [], color: "white" }],
         type: "playoff",
         elapsedTime: 0,
         timerStartedTimestamp: null,
@@ -405,16 +410,15 @@ export class TournamentService {
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
         winner: playerIds[i]
-      })
+      });
     }
 
     // add the rest of the matches
-    for(i; i < playerIds.length - 1; i += 2)
-    {
+    for (i; i < playerIds.length - 1; i += 2) {
       matches.push({
         players: [
-          { id: playerIds[i], points: [], color: "white"},
-          { id: playerIds[i + 1], points: [], color: "red"}
+          { id: playerIds[i], points: [], color: "white" },
+          { id: playerIds[i + 1], points: [], color: "red" }
         ],
         type: "playoff",
         elapsedTime: 0,
@@ -425,7 +429,7 @@ export class TournamentService {
       });
     }
 
-    matches.push(...byes as UnsavedMatch[])
+    matches.push(...(byes as UnsavedMatch[]));
     return matches;
   }
 
