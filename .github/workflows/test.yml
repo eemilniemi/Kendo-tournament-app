@@ -11,8 +11,7 @@ jobs:
 
     env:
         MONGODB_URL: ${{secrets.MONGODB_URL}}
-        ACCESS_JWT_SECRET: ${{secrets.JWT_SECRET}}
-        REFRESH_JWT_SECRET: ${{secrets.JWT_SECRET}}
+        JWT_SECRET: ${{secrets.JWT_SECRET}}
         EMAIL_USERNAME: ${{secrets.EMAIL_USERNAME}}
         EMAIL_PASSWORD: ${{secrets.EMAIL_PASSWORD}}
 
