@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
           >
             {t("navigation.about")}
           </Link>
-          <Link href={routePaths.privacy} target="_blank" color="inherit">
+          <Link href={routePaths.privacy} color="inherit">
             {t("navigation.privacy_policy")}
           </Link>
         </Box>
