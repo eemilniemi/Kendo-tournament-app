@@ -323,9 +323,9 @@
   },
   "profile": {
     "match":"Ottelu",
-    "profile_info": "Omat Tiedot",
-    "my_games": "Omat Ottelut",
-    "my_points": "Omat Pisteet",
+    "profile_info": "Omat tiedot",
+    "my_games": "Omat ottelut",
+    "my_points": "Omat pisteet",
     "point_type": "Pistetyyppi",
     "points": "Pisteet"
   }
