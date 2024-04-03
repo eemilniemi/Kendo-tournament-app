@@ -29,7 +29,8 @@
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
     "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
-    "copy_failure": "Linkin kopioinnissa tapahtui virhe"
+    "copy_failure": "Linkin kopioinnissa tapahtui virhe",
+    "swiss_rounds_error": "Kierrosten määrä oltava vähintään 1"
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -186,7 +187,9 @@
     "league": "Liiga",
     "site_link": "Linkki järjestäjän sivuille",
     "paid": "Tämä turnaus on maksullinen",
-    "payment_link": "Linkki maksusivustolle"
+    "payment_link": "Linkki maksusivustolle",
+    "swiss": "Sveitsiläinen",
+    "swiss_rounds": "Sveitsiläisiä kierroksia"
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",

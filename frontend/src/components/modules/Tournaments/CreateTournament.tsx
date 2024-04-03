@@ -60,6 +60,7 @@ export interface CreateTournamentFormData {
   linkToPay?: string;
   linkToSite?: string;
   numberOfCourts: number;
+  swissRounds?: number;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -122,7 +123,7 @@ const CreateTournamentForm: React.FC = () => {
     await formContext.handleSubmit(onSubmit)();
   };
 
-  const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
+  const renderTournamentTypeSpecificFields = (): JSX.Element | null => {
     if (type === "Preliminary Playoff") {
       return (
         <React.Fragment>
@@ -157,6 +158,28 @@ const CreateTournamentForm: React.FC = () => {
               }
             }}
           />
+        </React.Fragment>
+      );
+    }
+    if (type === "Swiss"){
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="swissRounds"
+            type="number"
+            label={t("create_tournament_form.swiss_rounds")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= 1 || `${t("messages.swiss_rounds_error")}`
+                );
+              }
+            }}
+          />
+          
         </React.Fragment>
       );
     }
@@ -293,6 +316,10 @@ const CreateTournamentForm: React.FC = () => {
             {
               id: "Preliminary Playoff",
               label: t("create_tournament_form.preliminary_playoff")
+            },
+            {
+              id: "Swiss",
+              label: t("create_tournament_form.swiss")
             }
           ]}
           fullWidth
@@ -321,7 +348,7 @@ const CreateTournamentForm: React.FC = () => {
           margin="normal"
         />
 
-        {renderPreliminaryPlayoffFields()}
+        {renderTournamentTypeSpecificFields()}
 
         <TextFieldElement
           required
@@ -333,8 +360,7 @@ const CreateTournamentForm: React.FC = () => {
           validation={{
             validate: (value: number) => {
               return (
-                value >= 1 ||
-                `${t("messages.number_of_courts_error")}`
+                value >= 1 || `${t("messages.number_of_courts_error")}`
               );
             }
           }}

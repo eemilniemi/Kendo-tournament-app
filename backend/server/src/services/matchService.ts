@@ -181,7 +181,7 @@ export class MatchService {
 
     if (match.type === "preliminary" || match.type === "pre playoff") {
       // check if all matches are done, if not tournament is null
-      const tournament = await this.checkPreliminary(match);
+      const tournament = await this.checkAllMatchesPlayed(match);
       if (tournament !== null) {
         // getting players that proceed to playoffs and ties that need to be solved before playoff
         const [players, ties] = this.playersToPlayoffsFromPreliminary(
@@ -290,6 +290,71 @@ export class MatchService {
 
         await tournament.save();
         await MatchService.divideMatchesToCourts(tournament.id);
+      }
+    }
+    
+    if(match.type === "swiss"){
+      
+      const tournament = await this.checkAllMatchesPlayed(match);
+      if (tournament !== null) {
+        const rankingMap = this.getAllPlayerScores(tournament.matchSchedule as Match[], "swiss");
+        let rankings = this.formRankings(rankingMap, tournament)[0];
+        const nextRound =
+            MatchService.findHighestRound(tournament.matchSchedule as Match[]) + 1;
+        
+        if(tournament.swissRounds !== undefined && nextRound <= tournament.swissRounds){
+
+          
+          let swissPairings = this.generateAvailableSwiss(tournament.matchSchedule as Match[], tournament.players as Types.ObjectId[]);
+          
+          let i = 0;
+          while(rankings.length > 0){
+            let player1 = rankings.shift() as rankingStruct;
+            let player2 = rankings[i];
+
+            if(this.hasAvailableSwiss(swissPairings, player1[0], player2[0])){
+              const newMatch = {
+                players: [
+                  { id: player1[0], points: [], color: "white" },
+                  { id: player2[0], points: [], color: "red" }
+                ],
+                type: "swiss",
+                elapsedTime: 0,
+                timerStartedTimestamp: null,
+                tournamentRound: nextRound,
+                matchTime: tournament.matchTime,
+                tournamentId: tournament.id
+              };
+              
+
+              swissPairings = this.removeFromAvailableSwiss(swissPairings, player1[0], player2[0]);
+              rankings.splice(i, 1);
+              
+
+              const matchDocuments = await MatchModel.create(newMatch);
+              tournament.matchSchedule.push(matchDocuments.id);
+              i=0;
+              
+            }
+            else{
+              
+              i++;
+              rankings.unshift(player1);
+              
+            }
+
+            if(i+1 >= rankings.length && rankings.length > 0){
+              console.log("SHIT, SOMETHING WRONG");
+              break;
+            }
+
+          }
+          
+
+          await tournament.save();
+          await MatchService.divideMatchesToCourts(tournament.id);
+        }
+        
       }
     }
 
@@ -628,7 +693,7 @@ export class MatchService {
       
     }
 
-    else if (tournament.type === TournamentType.Playoff){
+    else if (tournament.type === TournamentType.Playoff || tournament.type === TournamentType.Swiss ){
       let court = 1;
       for(const match of latestMatches){
         match.courtNumber = court;
@@ -665,6 +730,7 @@ export class MatchService {
       pointIndex: pointIndexWithLatestTimestamp
     };
   }
+
 
   private async checkMatchOutcome(match: Match): Promise<void> {
     const MAXIMUM_POINTS = 2;
@@ -855,7 +921,7 @@ export class MatchService {
       matches,
       "preliminary"
     );
-    const groupRankings: rankingStruct[][] = this.formGroupRankings(
+    const groupRankings: rankingStruct[][] = this.formRankings(
       rankingMap,
       tournament
     );
@@ -919,7 +985,7 @@ export class MatchService {
     );
     if (prePlayoffRankingMap.size > 0) {
       // get tie breaker scores
-      const prePlayoffRankings: rankingStruct[][] = this.formGroupRankings(
+      const prePlayoffRankings: rankingStruct[][] = this.formRankings(
         prePlayoffRankingMap,
         tournament
       );
@@ -967,7 +1033,7 @@ export class MatchService {
   }
 
   // just check that all preliminary matches are played, returns tournament if so
-  private async checkPreliminary(
+  private async checkAllMatchesPlayed(
     match: Match
   ): Promise<(Tournament & Document) | null> {
     const tournament = await TournamentModel.findOne({
@@ -988,11 +1054,10 @@ export class MatchService {
     }
     const playedMatches = tournament.matchSchedule;
 
-    if (tournament.type === TournamentType.PreliminaryPlayoff) {
       let played = 0;
 
       for (let i = 0; i < playedMatches.length; i++) {
-        if (playedMatches[i].endTimestamp != null) {
+        if (playedMatches[i].endTimestamp !== undefined) {
           played++;
         }
       }
@@ -1001,9 +1066,7 @@ export class MatchService {
         return tournament;
       }
       return null;
-    } else {
-      return null;
-    }
+    
   }
 
   // determine player scores of certain match type or all matches
@@ -1057,23 +1120,35 @@ export class MatchService {
 
   // arrange rankings by group and scores consisting of wins and ippons (scored points),
   // descending order (highest score first)
-  private formGroupRankings(
+  private formRankings(
     rankingMap: Map<string, number[]>,
     tournament: Tournament & Document
   ): rankingStruct[][] {
     const groupRankings: rankingStruct[][] = [];
 
-    for (let i = 0; i < tournament.groups.length; i++) {
-      const groupRankingMap: rankingStruct[] = [];
-      groupRankings.push(groupRankingMap);
-
-      for (const playerId of tournament.groups[i]) {
-        if (rankingMap.has(playerId.toString())) {
-          const score = rankingMap.get(playerId.toString()) ?? [0, 0];
-          groupRankings[i].push([playerId, score[0], score[1]]);
+    if(tournament.type === TournamentType.PreliminaryPlayoff){
+      for (let i = 0; i < tournament.groups.length; i++) {
+        const groupRankingMap: rankingStruct[] = [];
+        groupRankings.push(groupRankingMap);
+  
+        for (const playerId of tournament.groups[i]) {
+          if (rankingMap.has(playerId.toString())) {
+            const score = rankingMap.get(playerId.toString()) ?? [0, 0];
+            groupRankings[i].push([playerId, score[0], score[1]]);
+          }
         }
       }
     }
+    else{
+      groupRankings.push([]);
+      for (const playerId of tournament.players as Types.ObjectId[]) {
+        if (rankingMap.has(playerId.toString())) {
+          const score = rankingMap.get(playerId.toString()) ?? [0, 0];
+          groupRankings[0].push([playerId, score[0], score[1]]);
+        }
+      }
+    }
+    
 
     groupRankings.forEach((group) => {
       group.sort((a, b) => {
@@ -1131,4 +1206,95 @@ export class MatchService {
     return false;
   }
 
+
+  private generateAvailableSwiss(
+    matches: Match[], 
+    players: Types.ObjectId[]
+    ): Map<string, Types.ObjectId[]>{
+
+    let map = new Map<string, string[]>();
+    for(const match of matches){
+      const matchPlayer1 = match.players[0] as MatchPlayer;
+      const matchPlayer2 = match.players[1] as MatchPlayer;
+      const player1Id = matchPlayer1.id.toString();
+      const player2Id = matchPlayer2.id.toString();
+      if(map.has(player1Id)){
+        let array = map.get(player1Id) as string[];
+        array.push(matchPlayer2.id.toString());
+        map.set(player1Id, array);
+      }
+      else{
+        map.set(player1Id, [player1Id, player2Id]);
+      }
+
+      if(map.has(player2Id)){
+        let array = map.get(player2Id) as string[];
+        array.push(player1Id);
+        map.set(player2Id, array);
+      }
+      else{
+        map.set(player2Id, [player2Id, player1Id]);
+      }
+    }
+
+    let swissMap = new Map<string, Types.ObjectId[]>();
+    for(let [key, value] of map){
+      let array = players.filter(item => !value.includes(item.toString()) );
+      swissMap.set(key, array);
+    }
+
+
+    return swissMap;
+  }
+
+  private hasAvailableSwiss(
+    map: Map<string, Types.ObjectId[]>,
+    player1Id: Types.ObjectId,
+    player2Id: Types.ObjectId
+    ): boolean {
+
+      let toRemove = [player1Id.toString(), player2Id.toString()];
+      for(let [key, value] of map){
+        let array = value.filter(item => !toRemove.includes(item.toString()));
+        if(array.length === 0 && player1Id.toString() !== key && player2Id.toString() !== key ){
+            return false;
+        }
+      }
+
+      return true;
+  }
+
+  
+  private removeFromAvailableSwiss(
+    swissMap: Map<string, Types.ObjectId[]>,
+    player1Id: Types.ObjectId,
+    player2Id: Types.ObjectId
+  ): Map<string, Types.ObjectId[]>{
+
+    for(let [key, value] of swissMap){
+      if(player1Id.toString() === key){
+        swissMap.delete(key);
+      }
+      if(player2Id.toString() === key){
+        swissMap.delete(key);
+      }
+      const index1 = value.indexOf(player1Id);
+      const index2 = value.indexOf(player2Id);
+
+      if(index1 !== -1){
+        
+        value.splice(index1, 1);
+        swissMap.set(key, value);
+      }
+      if(index2 !== -1){
+        
+        value.splice(index2, 1);
+        swissMap.set(key, value);
+      }
+      
+
+    }
+
+    return swissMap;
+  }
 }

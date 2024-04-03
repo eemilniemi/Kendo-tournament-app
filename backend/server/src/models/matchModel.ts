@@ -3,7 +3,7 @@ import type { Tournament } from "./tournamentModel";
 
 export type PlayerColor = "red" | "white";
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
-export type MatchType = "group" | "playoff" | "preliminary" | "pre playoff";
+export type MatchType = "group" | "playoff" | "preliminary" | "pre playoff" | "swiss";
 export type MatchTime = 180000 | 240000 | 300000;
 
 export interface MatchPoint {

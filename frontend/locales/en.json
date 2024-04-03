@@ -29,7 +29,8 @@
     "minimum_player_to_playoff": "At least one player has to proceed",
     "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
-    "copy_failure": "Failed to copy tournament link"
+    "copy_failure": "Failed to copy tournament link",
+    "swiss_rounds_error": "Numbers of swiss rounds must be at least 1"
   },
   "game_interface": {
     "player": "Player",
@@ -186,7 +187,9 @@
     "league": "League",
     "site_link": "Link to organizer's site",
     "paid": "This tournament requires payment",
-    "payment_link": "Link to payment site"
+    "payment_link": "Link to payment site",
+    "swiss": "Swiss",
+    "swiss_rounds": "Number of swiss rounds"
   },
   "upcoming_tournament_view": {
     "date_header": "When",

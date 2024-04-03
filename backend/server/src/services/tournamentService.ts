@@ -122,17 +122,17 @@ export class TournamentService {
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
     if (
-      tournament.type === TournamentType.PreliminaryPlayoff &&
-      tournament.groupsSizePreference !== undefined
+      tournament.type === TournamentType.PreliminaryPlayoff && tournament.groupsSizePreference !== undefined
     ) {
-      tournament.groups = this.dividePlayersIntoGroups(
-        tournament.players as Types.ObjectId[],
-        tournament.groupsSizePreference
-      );
+        tournament.groups = this.dividePlayersIntoGroups(
+          tournament.players as Types.ObjectId[],
+          tournament.groupsSizePreference
+        );
       await MatchModel.deleteMany({ tournamentId: tournament.id });
 
       tournament.matchSchedule = [];
     }
+    
     await tournament.save();
 
     if (tournament.players.length > 1) {
@@ -309,6 +309,16 @@ export class TournamentService {
           }
         }
         break;
+      case TournamentType.Swiss:
+        matches = await this.generatePlayoffSchedule(
+          tournament.players as Types.ObjectId[],
+          tournament.matchSchedule as Types.ObjectId[],
+          tournament.id,
+          tournament.matchTime,
+          "swiss"
+        );
+
+        break;
     }
 
     if (matches.length === 0) {
@@ -351,7 +361,8 @@ export class TournamentService {
     playerIds: Types.ObjectId[],
     previousMatches: Types.ObjectId[],
     tournament: Types.ObjectId,
-    tournamentMatchTime: MatchTime
+    tournamentMatchTime: MatchTime,
+    tournamentMatchType: MatchType = "playoff",
   ): Promise<UnsavedMatch[]> {
     const matches: UnsavedMatch[] = [];
     const playerSet = new Set<string>();
@@ -384,7 +395,7 @@ export class TournamentService {
           { id: extraPlayers[0], points: [], color: "white" },
           { id: extraPlayers[1], points: [], color: "red" }
         ],
-        type: "playoff",
+        type: tournamentMatchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
         tournamentRound: 1,
@@ -395,6 +406,7 @@ export class TournamentService {
 
     return matches;
   }
+
 
   private isPowerOfTwo(n: number): boolean {
     if (n <= 0) {
