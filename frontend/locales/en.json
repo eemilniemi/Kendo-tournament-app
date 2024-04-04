@@ -156,6 +156,19 @@
     "start_date": "Start Date",
     "end_date": "End Date"
   },
+  "created_tournament": {
+    "signed_up": "Signed up",
+    "no_players_signed_up": "No players have signed up yet.",
+    "location_header": "Where",
+    "date_header": "When",
+    "description": "About the Tournament",
+    "category_header": "Tournament category",
+    "type_header": "Type of Tournament",
+    "link_to_site_header": "Organizer's website",
+    "link_to_payment_header": "Link to payment site",
+    "match_time": "Match time",
+    "max_players": "Maximum number of players"
+  },
   "create_tournament_form": {
     "info": "Fill information below.",
     "tournament_name": "Tournament Name",
@@ -327,8 +340,8 @@
     "my_games": "My games",
     "my_points": "My points",
     "point_type": "Point type",
-    "points": "Points"
-    
+    "points": "Points",
+    "created_tournaments": "Created tournaments"
   }
 
 }

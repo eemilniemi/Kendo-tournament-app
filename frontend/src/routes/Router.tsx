@@ -25,6 +25,7 @@ import { SocketProvider } from "context/SocketContext";
 import GameInterface from "components/modules/GameInterface/GameInterface";
 import PasswordControl from "components/modules/PasswordControl/PasswordControl";
 import PrivacyPolicy from "components/modules/Legal/PrivacyPolicy";
+import Participants from "components/modules/Tournaments/Participants";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
@@ -40,6 +41,8 @@ const routes = createRoutesFromElements(
         <Route element={<AuthenticationGuard />}>
           <Route path="new-tournament" element={<CreateTournamentForm />} />
         </Route>
+
+        <Route path="participants/:tournamentId" element={<Participants />} />
 
         <Route path=":id" element={<TournamentProvider />}>
           <Route index element={<TournamentDetails />} />
