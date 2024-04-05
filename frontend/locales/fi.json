@@ -27,6 +27,7 @@
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
     "copy_failure": "Linkin kopioinnissa tapahtui virhe"
   },
@@ -174,6 +175,7 @@
     "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?",
     "players_to_playoffs_per_group": "Lohkosta pudotuspeleihin siirtyvien pelaajien määrä",
     "groups_size_preference": "Lohkon maksimikoko (pelaajaa)",
+    "number_of_courts": "Kenttien määrä",
     "match_time": "Valitse ottelun pituus",
     "3_min": "3 minuuttia",
     "4_min": "4 minuuttia",
