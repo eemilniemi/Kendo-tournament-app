@@ -1102,14 +1102,15 @@ export class MatchService {
   ): Match[][] & Document[][]{
     let matchesByGroup: Match[][] & Document[][] = Array.from({length: tournament.groups.length}, () => []);
     for(const match of matches){
-      for(let i = 0; i<tournament.groups.length; i++){
-        const player = match.players[0] as MatchPlayer;
-        const playerId = player.id;
-        if(tournament.groups[i].includes(playerId)){
-          matchesByGroup[i].push(match);
+      const player = match.players[0] as MatchPlayer;
+      const playerId = player.id;
+      const groupIndex = tournament.groups.findIndex(group => group.includes(playerId));
+      
+        if(groupIndex !== -1){
+          matchesByGroup[groupIndex].push(match);
           break;
         }
-      }
+      
     }
 
     return matchesByGroup;
