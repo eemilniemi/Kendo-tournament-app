@@ -1,21 +1,26 @@
 import type { Tournament, TournamentType, Category } from "types/models";
+import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 
 // Filter tournaments that are happening / have happened within given dates
 export const filterByTime = (
   tournaments: Tournament[],
-  startingFrom: Date,
-  endingAt: Date
+  startingFrom: Dayjs,
+  endingAt: Dayjs
 ): Tournament[] => {
   const filtered = tournaments.filter((tournament) => {
-    const starts = new Date(tournament.startDate);
-    const ends = new Date(tournament.endDate);
+    const starts = dayjs(tournament.startDate);
+    const ends = dayjs(tournament.endDate);
 
     // Set hours and minutes to zero to ignore them in comparisons, only dates matter
-    starts.setHours(0, 0, 0, 0);
-    ends.setHours(0, 0, 0, 0);
+    starts.startOf("day");
+    ends.startOf("day");
 
     // Check that the event is ongoing during user given dates
-    return starts <= startingFrom && ends >= endingAt;
+    return (
+      (starts.isBefore(startingFrom) || starts.isSame(startingFrom)) &&
+      (ends.isAfter(endingAt) || ends.isSame(endingAt))
+    );
   });
   return filtered;
 };
