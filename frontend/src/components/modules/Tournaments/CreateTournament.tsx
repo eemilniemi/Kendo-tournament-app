@@ -20,7 +20,8 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
-  Box
+  Box,
+  useMediaQuery
 } from "@mui/material";
 import updateLocale from "dayjs/plugin/updateLocale";
 
@@ -96,6 +97,7 @@ const CreateTournamentForm: React.FC = () => {
   const { differentOrganizer, startDate, type, paid } =
     useWatch<CreateTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const mobile = useMediaQuery("(max-width:600px)");
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
@@ -198,11 +200,14 @@ const CreateTournamentForm: React.FC = () => {
             minDateTime={now}
             format="DD/MM/YYYY HH:mm"
             ampm={false}
-            viewRenderers={{
-              hours: null,
-              minutes: null,
-              seconds: null
-            }}
+            {...(!mobile && {
+              // Only text input on desktop
+              viewRenderers: {
+                hours: null,
+                minutes: null,
+                seconds: null
+              }
+            })}
           />
           <DateTimePickerElement
             required
@@ -211,11 +216,14 @@ const CreateTournamentForm: React.FC = () => {
             minDateTime={startDate}
             format="DD/MM/YYYY HH:mm"
             ampm={false}
-            viewRenderers={{
-              hours: null,
-              minutes: null,
-              seconds: null
-            }}
+            {...(!mobile && {
+              // Only text input on desktop
+              viewRenderers: {
+                hours: null,
+                minutes: null,
+                seconds: null
+              }
+            })}
           />
         </Stack>
 

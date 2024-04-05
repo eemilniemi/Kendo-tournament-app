@@ -17,6 +17,7 @@ import {
 import routePaths from "routes/route-paths";
 import Link from "@mui/material/Link";
 import { useTranslation } from "react-i18next";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface LoginFormData {
   email: string;
@@ -37,6 +38,7 @@ const LoginForm: React.FC = () => {
   const from = location.state?.from?.pathname ?? homeRoute;
   const { t } = useTranslation();
   const isFirstRender = useRef(true);
+  const mobile = useMediaQuery("(max-width:600px)");
 
   /* Checks if the user
    * was redirected due to being unauthenticated */
@@ -118,21 +120,43 @@ const LoginForm: React.FC = () => {
           </Box>
         </FormContainer>
 
+        {/* With mobile device, the items stack, 
+          with desktop they are next to each other */}
         <Grid container gap="10px">
-          <Grid item xs>
-            <Typography variant="body2">
-              <Link component={RouterLink} to={routePaths.passwordReset}>
-                {t("login_form.forgot_password")}
-              </Link>
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography variant="body2">
-              <Link component={RouterLink} to={routePaths.register}>
-                {t("login_form.sign_up")}
-              </Link>
-            </Typography>
-          </Grid>
+          {mobile ? (
+            <Grid item xs={12}>
+              <Typography variant="body2" align="center">
+                <Link component={RouterLink} to={routePaths.passwordReset}>
+                  {t("login_form.forgot_password")}
+                </Link>
+              </Typography>
+            </Grid>
+          ) : (
+            <Grid item xs>
+              <Typography variant="body2" align="center">
+                <Link component={RouterLink} to={routePaths.passwordReset}>
+                  {t("login_form.forgot_password")}
+                </Link>
+              </Typography>
+            </Grid>
+          )}
+          {mobile ? (
+            <Grid item xs={12}>
+              <Typography variant="body2" align="center">
+                <Link component={RouterLink} to={routePaths.register}>
+                  {t("login_form.sign_up")}
+                </Link>
+              </Typography>
+            </Grid>
+          ) : (
+            <Grid item>
+              <Typography variant="body2">
+                <Link component={RouterLink} to={routePaths.register}>
+                  {t("login_form.sign_up")}
+                </Link>
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </Box>
     </Grid>

@@ -200,7 +200,8 @@
     "delete_tournament": "Oletko varma, että haluat poistaa tämän turnauksen? Tätä valintaa ei voi perua.",
     "category_header": "Turnauksen kategoria",
     "link_to_payment_header": "Tämä turnaus vaatii maksun, vierailethan osoitteessa",
-    "link_to_site_header": "Järjestäjän sivut"
+    "link_to_site_header": "Järjestäjän sivut",
+    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan"
   },
   "navigation": {
     "back": "Takaisin",
@@ -324,9 +325,9 @@
   },
   "profile": {
     "match":"Ottelu",
-    "profile_info": "Omat Tiedot",
-    "my_games": "Omat Ottelut",
-    "my_points": "Omat Pisteet",
+    "profile_info": "Omat tiedot",
+    "my_games": "Omat ottelut",
+    "my_points": "Omat pisteet",
     "point_type": "Pistetyyppi",
     "points": "Pisteet"
   }
