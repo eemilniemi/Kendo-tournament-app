@@ -18,6 +18,8 @@ import { type User, type Match, type Tournament } from "types/models";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "context/AuthContext";
+import DeleteUserFromTournament from "./DeleteUserFromTournament";
 import CopyToClipboardButton from "./CopyToClipboardButton";
 import PlayerName, { checkSameNames } from "../PlayerNames";
 
@@ -248,7 +250,9 @@ export const sortMatches = (
     (match) => match.elapsedTime <= 0 && match.endTimestamp === undefined
   );
   const pastMatches = matches.filter(
-    (match) => match.elapsedTime > 0 && match.endTimestamp !== undefined
+    (match) =>
+      (match.elapsedTime > 0 && match.endTimestamp !== undefined) ||
+      (match.endTimestamp !== undefined && match.winner !== "undefined")
   );
 
   return { ongoingMatches, upcomingMatches, pastMatches };
@@ -329,6 +333,8 @@ const RoundRobinTournamentView: React.FC = () => {
   const tabTypes = ["scoreboard", "matches"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+  const { userId } = useAuth();
+  const isUserTheCreator = tournament.creator.id === userId;
 
   useEffect(() => {
     const result = checkSameNames(tournament);
@@ -416,6 +422,9 @@ const RoundRobinTournamentView: React.FC = () => {
           upcomingMatchElements={upcomingElements}
           pastMatchElements={pastElements}
         />
+      )}
+      {isUserTheCreator && currentTab === "matches" && (
+        <DeleteUserFromTournament />
       )}
     </>
   );

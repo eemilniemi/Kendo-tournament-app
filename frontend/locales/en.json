@@ -69,6 +69,7 @@
     "save_button": "Save",
     "modify_or_delete": "Modify or delete recent point",
     "delete": "Delete",
+	  "withdraw_user": "Withdraw player from tournament",
     "copy_to_clipboard": "Share tournament"
   },
   "titles": {
@@ -81,7 +82,9 @@
     "confirm_tournament_creation": "Confirm tournament creation",
     "modify_or_delete": "Modify or delete recent point",
     "select_new_type": "Select new type for the recent point:",
-    "confirm_tournament_deletion": "Confirm tournament deletion"
+    "confirm_tournament_deletion": "Confirm tournament deletion",
+    "withdraw_user_from_tournament": "Withdraw player from tournament",
+    "confirm_user_withdrawal": "Confirm player withdrawal from tournament"
   },
   "login_form": {
     "forgot_password": "Forgot password?",
@@ -323,14 +326,17 @@
     "body26": "If you have any questions about this Privacy Policy, You can contact us:",
     "body27": "By email:"
   },
+  "withdrawal_from_tournament": {
+    "info": "Withdrawing a player from the tournament marks their ongoing and upcoming matches as lost.",
+    "withdrawing_user": "The player withdrawn: ",
+    "confirmation_msg": "Are you sure you want to withdraw player {{name}} from tournament? This action cannot be undone."
+  },
   "profile": {
     "match":"Match",
-    "profile_info": "Profile info",
-    "my_games": "My games",
-    "my_points": "My points",
-    "point_type": "Point type",
-    "points": "Points"
-    
+    "profile_info": "Profile Info",
+    "my_games": "My Games",
+    "my_points": "My Points",
+    "point_type": "Point Type",
+    "points": "points"
   }
-
 }
