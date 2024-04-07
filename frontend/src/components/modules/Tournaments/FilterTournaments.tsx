@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { SelectChangeEvent } from "@mui/material";
 import { useAuth } from "context/AuthContext";
 import {
@@ -22,33 +22,35 @@ import {
   filterByCategory,
   filterByLocation
 } from "utils/filters";
-import type {
-  Tournament,
-  TournamentType,
-  Category,
-  FilterCriteria
-} from "types/models";
+import type { Tournament, TournamentType, Category } from "types/models";
 import DateRangePicker from "./TournamentListing/DateRangePicker";
 import type { Dayjs } from "dayjs";
 
 interface FilterTournamentsProps {
   tournaments: Tournament[];
-  handleFilteredTournaments: (filteredTournaments: Tournament[]) => void;
-  filtersApplied: boolean;
-  filterCriteria: FilterCriteria;
-  updateFilterCriteria: (newCriteria: FilterCriteria) => void;
+  handleFilteredTournaments: (
+    filteredTournaments: Tournament[],
+    areFiltersApplied: boolean
+  ) => void;
+}
+
+interface FilterCriteria {
+  participation: boolean;
+  tournamentTypes: TournamentType[];
+  categories: Category[];
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+  location: string;
 }
 
 const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   tournaments,
-  handleFilteredTournaments,
-  filtersApplied,
-  filterCriteria,
-  updateFilterCriteria
+  handleFilteredTournaments
 }) => {
   const { t } = useTranslation();
   const [filteringDialog, setFilteringDialog] = useState(false);
   const { userId, isAuthenticated } = useAuth();
+  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false); // keeps track if data loaded from session storage
 
   // Arrays of tuples containing the type and its localization key, for populating dialog window
   const tournamentTypeOptions: Array<[TournamentType, string]> = [
@@ -61,6 +63,22 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     ["championship", "create_tournament_form.championship"],
     ["league", "create_tournament_form.league"]
   ];
+
+  const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
+    participation: false,
+    tournamentTypes: [],
+    categories: [],
+    startDate: null,
+    endDate: null,
+    location: ""
+  });
+
+  // Function to update filter criteria
+  const updateFilterCriteria = (newCriteria: FilterCriteria): void => {
+    setFilterCriteria((prevCriteria) => {
+      return newCriteria;
+    });
+  };
 
   // State variables for keeping track of checkbox states
   const [tournamentTypeSelections, setTournamentTypeSelections] = useState<{
@@ -77,6 +95,45 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     championship: false,
     league: false
   });
+
+  // When app mounts checks if there is filters stored in sessionStorage
+  useEffect(() => {
+    const storedFilters = sessionStorage.getItem("tournamentFilters");
+    if (storedFilters !== null && storedFilters !== undefined) {
+      const parsedFilters = JSON.parse(storedFilters);
+      updateCriteria(parsedFilters);
+      // Update checkbox selections based on loaded filter criteria
+      setTournamentTypeSelections((prevSelections) => {
+        const updatedSelections: { [key in TournamentType]: boolean } = {
+          ...prevSelections
+        };
+        parsedFilters.tournamentTypes.forEach((type: TournamentType) => {
+          updatedSelections[type] = true;
+        });
+        return updatedSelections;
+      });
+
+      setCategorySelections((prevSelections) => {
+        const updatedSelections: { [key in Category]: boolean } = {
+          ...prevSelections
+        };
+        parsedFilters.categories.forEach((category: Category) => {
+          updatedSelections[category] = true;
+        });
+        return updatedSelections;
+      });
+      setIsFilterCriteriaLoaded(true);
+    }
+  }, []);
+
+  // Show previously chosen filtered tournaments
+  useEffect(() => {
+    const storedTournaments = sessionStorage.getItem("filteredTournaments");
+    if (storedTournaments !== null && storedTournaments !== undefined) {
+      const parsedTournaments = JSON.parse(storedTournaments);
+      handleFilteredTournaments(parsedTournaments, true);
+    }
+  }, [filterCriteria, isFilterCriteriaLoaded]);
 
   // Function to reset all selections from filter dialog
   const resetFilters = (): void => {
@@ -113,15 +170,16 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       }
       return resetSelections;
     });
-    // return back to original tournaments list state
-    handleFilteredTournaments(tournaments);
+
+    sessionStorage.clear();
+    handleFilteredTournaments([], false);
   };
 
   // Function to create MenuItems for locations
   const createMenuItemsForLocations = (
     tournaments: Tournament[]
   ): JSX.Element[] => {
-    // Create a Set to avoid duplicate locations
+    // Create a set to avoid duplicate locations
     const locations = new Set<string>();
 
     tournaments.forEach((tournament) => {
@@ -142,7 +200,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   const handleCloseDialog = (): void => {
     setFilteringDialog(false);
   };
-  
+
   // Function to update filter criteria state
   const updateCriteria = (newCriteria: Partial<FilterCriteria>): void => {
     // Combine the existing filter criteria with the new criteria
@@ -150,8 +208,6 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       ...filterCriteria, // Include the previous criteria
       ...newCriteria // Include the new criteria
     };
-
-    // Call the updateFilterCriteria function with the updated criteria
     updateFilterCriteria(updatedCriteria);
   };
 
@@ -211,7 +267,13 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   // Function to apply filters when the user clicks the filter button
   const handleFilterClick = (): void => {
     const filteredTournaments = applyFilters();
-    handleFilteredTournaments(filteredTournaments);
+    // Store updated filter data in session storage
+    sessionStorage.setItem("tournamentFilters", JSON.stringify(filterCriteria));
+    sessionStorage.setItem(
+      "filteredTournaments",
+      JSON.stringify(filteredTournaments)
+    );
+    handleFilteredTournaments(filteredTournaments, true);
   };
 
   const applyFilters = (): Tournament[] => {
@@ -246,7 +308,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
 
   return (
     <div>
-      <Button onClick={handleOpenDialog}>{t("filtering.options")}</Button>
+      <Button onClick={handleOpenDialog}>{t("buttons.filter")}</Button>
 
       <Dialog open={filteringDialog} onClose={handleCloseDialog}>
         <DialogTitle variant="h5">{t("filtering.options")}</DialogTitle>
@@ -327,22 +389,38 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
             ))}
           </FormGroup>
 
-          <Button
-            onClick={() => {
-              handleFilterClick();
-              handleCloseDialog();
-            }}
-          >
-            {t("buttons.filter")}
-          </Button>
+          <Box display="flex" justifyContent={"space-evenly"}>
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={() => {
+                handleCloseDialog();
+              }}
+            >
+              {t("buttons.cancel_button")}
+            </Button>
 
-          <Button
-            onClick={() => {
-              resetFilters();
-            }}
-          >
-            {t("buttons.reset")}
-          </Button>
+            <Button
+              color="secondary"
+              variant="outlined"
+              onClick={() => {
+                resetFilters();
+              }}
+            >
+              {t("buttons.reset")}
+            </Button>
+
+            <Button
+              color="success"
+              variant="outlined"
+              onClick={() => {
+                handleFilterClick();
+                handleCloseDialog();
+              }}
+            >
+              {t("buttons.filter")}
+            </Button>
+          </Box>
         </DialogContent>
       </Dialog>
     </div>

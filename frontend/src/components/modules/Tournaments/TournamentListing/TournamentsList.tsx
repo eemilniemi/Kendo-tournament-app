@@ -24,6 +24,7 @@ import {
   sortTournamentsByDescName,
   sortTournamentsByLocation
 } from "utils/sorters";
+import FilterTournaments from "../FilterTournaments";
 
 const TournamentList: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +34,12 @@ const TournamentList: React.FC = () => {
   const tabTypes = ["past", "ongoing", "upcoming"] as const;
   const defaultTab = "ongoing";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+  // State to keep track if filters have been applied
+  const [filtersApplied, setFiltersApplied] = useState(false);
+  // State for storing possible filtered tournaments
+  const [filteredTournaments, setFilteredTournaments] = useState<Tournament[]>(
+    []
+  );
 
   // State variables for sorting
   const [sortBy, setSortBy] = useState<
@@ -46,6 +53,15 @@ const TournamentList: React.FC = () => {
     >
   ): void => {
     setSortBy(event.target.value as typeof sortBy);
+  };
+
+  // Function to receive filtered tournaments from FilterTournaments
+  const handleFilteredTournaments = (
+    tournaments: Tournament[],
+    areFiltersApplied: boolean
+  ): void => {
+    setFiltersApplied(areFiltersApplied);
+    setFilteredTournaments(tournaments);
   };
 
   useEffect(() => {
@@ -74,6 +90,11 @@ const TournamentList: React.FC = () => {
         tournaments = ongoing;
     }
 
+    // Show filtered tournaments if filters are applied
+    if (filtersApplied) {
+      tournaments = filteredTournaments;
+    }
+
     // Sort tournaments based on chosen sorting criteria
     switch (sortBy) {
       case "mostRecent":
@@ -100,6 +121,13 @@ const TournamentList: React.FC = () => {
       params.set("tab", tab);
       return params;
     });
+
+    // Reset filter state when switching tabs
+    setFiltersApplied(false);
+    setFilteredTournaments([]);
+
+    // On tab change clear selections
+    sessionStorage.clear();
   };
 
   // SpeedDial actions
@@ -159,19 +187,27 @@ const TournamentList: React.FC = () => {
           ></Tab>
         </Tabs>
       </Box>
-      {/* Dropdown menu to choose sorting criteria all tournament tabs */}
-      <label>{t("sorting.orderBy")}</label>
-      <Select
-        value={sortBy}
-        onChange={handleSortChange}
-        style={{ marginBottom: "10px" }}
-      >
-        <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
-        <MenuItem value="oldest">{t("sorting.oldest")}</MenuItem>
-        <MenuItem value="name">{t("sorting.name")}</MenuItem>
-        <MenuItem value="nameDesc">{t("sorting.nameDesc")}</MenuItem>
-        <MenuItem value="location">{t("sorting.location")}</MenuItem>
-      </Select>
+
+      <Box display="flex" alignItems="center" marginBottom="10px">
+        {/* Dropdown menu to choose sorting criteria all tournament tabs */}
+        <label style={{ marginRight: "10px" }}>{t("sorting.orderBy")} </label>
+        <Select
+          value={sortBy}
+          onChange={handleSortChange}
+          style={{ marginBottom: "10px" }}
+        >
+          <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
+          <MenuItem value="oldest">{t("sorting.oldest")}</MenuItem>
+          <MenuItem value="name">{t("sorting.name")}</MenuItem>
+          <MenuItem value="nameDesc">{t("sorting.nameDesc")}</MenuItem>
+          <MenuItem value="location">{t("sorting.location")}</MenuItem>
+        </Select>
+        {/* Filtering options button */}
+        <FilterTournaments
+          tournaments={tournamentsToRender()}
+          handleFilteredTournaments={handleFilteredTournaments}
+        />
+      </Box>
 
       <Grid
         container
