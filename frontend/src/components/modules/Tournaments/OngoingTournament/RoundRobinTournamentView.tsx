@@ -21,10 +21,12 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
 import DeleteUserFromTournament from "./DeleteUserFromTournament";
 import CopyToClipboardButton from "./CopyToClipboardButton";
+import PlayerName, { checkSameNames } from "../PlayerNames";
 
 export interface TournamentPlayer {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   points: number;
   ippons: number;
   wins: number;
@@ -35,15 +37,20 @@ export interface TournamentPlayer {
 interface ScoreboardProps {
   players: TournamentPlayer[];
   onClick?: () => void; // Make onClick prop optional
+  haveSameNames: boolean;
 }
 
-export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
+export const Scoreboard: React.FC<ScoreboardProps> = ({
+  players,
+  onClick,
+  haveSameNames
+}) => {
   const { t } = useTranslation();
 
   const generateTableCells = (player: TournamentPlayer): React.ReactNode[] => {
     return Object.values(player).map((value, index) => {
-      if (index === 0) {
-        // If we want to skip the ID property
+      if (index < 3) {
+        // We want to skip the ID and name properties
         return null;
       }
 
@@ -80,7 +87,17 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ players, onClick }) => {
             </TableHead>
             <TableBody>
               {sortedPlayers.map((player, index) => (
-                <TableRow key={index}>{generateTableCells(player)}</TableRow>
+                <TableRow key={index}>
+                  <TableCell>
+                    {/* Render PlayerName component for each player */}
+                    <PlayerName
+                      firstName={player.firstName}
+                      lastName={player.lastName}
+                      sameNames={haveSameNames}
+                    />
+                  </TableCell>
+                  {generateTableCells(player)}
+                </TableRow>
               ))}
             </TableBody>
           </Table>
@@ -204,7 +221,8 @@ export const getPlayerNames = (
         if (!playerExists) {
           updatedPlayers.push({
             id: playerObject.id,
-            name: playerObject.firstName,
+            firstName: playerObject.firstName,
+            lastName: playerObject.lastName,
             points: 0,
             ippons: 0,
             wins: 0,
@@ -245,12 +263,11 @@ export const createMatchButton = (
   players: TournamentPlayer[],
   navigate: (path: string) => void,
   t: (key: string) => string,
+  haveSameNames: boolean,
   props: ButtonProps
 ): React.ReactNode => {
-  const player1 = players.find((player) => player.id === match.players[0].id)
-    ?.name;
-  const player2 = players.find((player) => player.id === match.players[1].id)
-    ?.name;
+  const player1 = players.find((player) => player.id === match.players[0].id);
+  const player2 = players.find((player) => player.id === match.players[1].id);
 
   let officialsInfo = "";
 
@@ -274,14 +291,26 @@ export const createMatchButton = (
 
   return (
     <div style={{ marginBottom: "10px" }} key={match.id}>
-      <Button
-        onClick={() => {
-          navigate(`match/${match.id}`);
-        }}
-        {...props}
-      >
-        {`${player1} - ${player2}`}
-      </Button>
+      {player1 !== undefined && player2 !== undefined && (
+        <Button
+          onClick={() => {
+            navigate(`match/${match.id}`);
+          }}
+          {...props}
+        >
+          <PlayerName
+            firstName={player1.firstName}
+            lastName={player1.lastName}
+            sameNames={haveSameNames}
+          />
+          {" - "}
+          <PlayerName
+            firstName={player2.firstName}
+            lastName={player2.lastName}
+            sameNames={haveSameNames}
+          />
+        </Button>
+      )}
       {officialsInfo !== undefined && (
         <Typography variant="body2">{officialsInfo}</Typography>
       )}
@@ -290,9 +319,9 @@ export const createMatchButton = (
 };
 
 const RoundRobinTournamentView: React.FC = () => {
-  const tournament = useTournament();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const tournament = useTournament();
 
   const initialRender = useRef(true);
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
@@ -300,11 +329,17 @@ const RoundRobinTournamentView: React.FC = () => {
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [pastMatches, setPastMatches] = useState<Match[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const tabTypes = ["scoreboard", "matches"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const { userId } = useAuth();
   const isUserTheCreator = tournament.creator.id === userId;
+
+  useEffect(() => {
+    const result = checkSameNames(tournament);
+    setHaveSameNames(result);
+  }, []);
 
   useEffect(() => {
     if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
@@ -338,18 +373,18 @@ const RoundRobinTournamentView: React.FC = () => {
   }, [players, tournament]);
 
   const ongoingElements = ongoingMatches.map((match) =>
-    createMatchButton(match, players, navigate, t, {
+    createMatchButton(match, players, navigate, t, haveSameNames, {
       variant: "contained"
     })
   );
   const upcomingElements = upcomingMatches.map((match) =>
-    createMatchButton(match, players, navigate, t, {
+    createMatchButton(match, players, navigate, t, haveSameNames, {
       variant: "contained",
       color: "info"
     })
   );
   const pastElements = pastMatches.map((match) =>
-    createMatchButton(match, players, navigate, t, {
+    createMatchButton(match, players, navigate, t, haveSameNames, {
       variant: "contained",
       color: "secondary"
     })
@@ -378,7 +413,9 @@ const RoundRobinTournamentView: React.FC = () => {
         />
         <Tab label={t("tournament_view_labels.matches")} value="matches" />
       </Tabs>
-      {currentTab === "scoreboard" && <Scoreboard players={players} />}
+      {currentTab === "scoreboard" && (
+        <Scoreboard players={players} haveSameNames={haveSameNames} />
+      )}
       {currentTab === "matches" && (
         <Matches
           ongoingMatchElements={ongoingElements}
