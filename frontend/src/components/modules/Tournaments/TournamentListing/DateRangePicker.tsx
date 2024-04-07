@@ -35,14 +35,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
       <Box display="flex" alignItems="center" marginBottom="10px">
         <DatePicker
-          label="From"
           value={startDate}
           onChange={handleStartDateChange}
           format="DD/MM/YYYY"
         />
         <Typography sx={{ marginX: 1 }}>-</Typography>
         <DatePicker
-          label="To"
           value={endDate}
           onChange={handleEndDateChange}
           format="DD/MM/YYYY"
