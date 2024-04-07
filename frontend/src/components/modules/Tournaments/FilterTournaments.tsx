@@ -24,6 +24,7 @@ import {
 } from "utils/filters";
 import type { Tournament, TournamentType, Category } from "types/models";
 import DateRangePicker from "./TournamentListing/DateRangePicker";
+import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 
 interface FilterTournamentsProps {
@@ -50,7 +51,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   const { t } = useTranslation();
   const [filteringDialog, setFilteringDialog] = useState(false);
   const { userId, isAuthenticated } = useAuth();
-  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false); // keeps track if data loaded from session storage
+  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false);
 
   // Arrays of tuples containing the type and its localization key, for populating dialog window
   const tournamentTypeOptions: Array<[TournamentType, string]> = [
@@ -73,13 +74,6 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     location: ""
   });
 
-  // Function to update filter criteria
-  const updateFilterCriteria = (newCriteria: FilterCriteria): void => {
-    setFilterCriteria((prevCriteria) => {
-      return newCriteria;
-    });
-  };
-
   // State variables for keeping track of checkbox states
   const [tournamentTypeSelections, setTournamentTypeSelections] = useState<{
     [key in TournamentType]: boolean;
@@ -101,7 +95,19 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     const storedFilters = sessionStorage.getItem("tournamentFilters");
     if (storedFilters !== null && storedFilters !== undefined) {
       const parsedFilters = JSON.parse(storedFilters);
-      updateCriteria(parsedFilters);
+      // Check if startDate and endDate exist in parsedFilters
+      if (parsedFilters.startDate !== null && parsedFilters.endDate !== null) {
+        // Convert dates to Day.js objects
+        const startDate = dayjs(parsedFilters.startDate);
+        const endDate = dayjs(parsedFilters.endDate);
+        updateCriteria({
+          ...parsedFilters,
+          startDate,
+          endDate
+        });
+      } else {
+        updateCriteria(parsedFilters);
+      }
       // Update checkbox selections based on loaded filter criteria
       setTournamentTypeSelections((prevSelections) => {
         const updatedSelections: { [key in TournamentType]: boolean } = {
@@ -138,7 +144,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   // Function to reset all selections from filter dialog
   const resetFilters = (): void => {
     // Filter criteria state back to original
-    updateFilterCriteria({
+    setFilterCriteria({
       participation: false,
       tournamentTypes: [],
       categories: [],
@@ -208,7 +214,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       ...filterCriteria, // Include the previous criteria
       ...newCriteria // Include the new criteria
     };
-    updateFilterCriteria(updatedCriteria);
+    setFilterCriteria(updatedCriteria);
   };
 
   const handleParticipationChange = (): void => {
