@@ -68,7 +68,9 @@
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
-    "copy_to_clipboard": "Jaa turnaus"
+    "copy_to_clipboard": "Jaa turnaus",
+    "filter": "Suodata",
+    "reset": "Tyhjennä"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -327,5 +329,14 @@
     "my_points": "Omat Pisteet",
     "point_type": "Pistetyyppi",
     "points": "Pisteet"
+  },
+  "filtering": {
+    "options": "Suodatusvalinnat",
+    "participation": "Osallistuminen",
+    "user_participates": "Turnaukset joihin osallistun",
+    "by_time": "Ajankohta",
+    "by_location": "Sijainti",
+    "by_tournament_type": "Turnaustyyppi",
+    "by_tournament_category": "Kategoria"
   }
 }
