@@ -27,6 +27,7 @@
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
     "copy_failure": "Linkin kopioinnissa tapahtui virhe"
   },
@@ -68,6 +69,7 @@
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
+	  "withdraw_user": "Keskeytä pelaajan turnaus",
     "copy_to_clipboard": "Jaa turnaus",
     "filter": "Suodata",
     "reset": "Tyhjennä"
@@ -82,7 +84,9 @@
     "confirm_tournament_creation": "Vahvista turnauksen luonti",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "select_new_type": "Valitse uusi tyyppi viimeisimmälle pisteelle:",
-    "confirm_tournament_deletion": "Vahvista turnauksen poistaminen"
+    "confirm_tournament_deletion": "Vahvista turnauksen poistaminen",
+    "withdraw_user_from_tournament": "Keskeytä pelaajan turnaus",
+    "confirm_user_withdrawal": "Vahvista pelaajan turnauksen keskeyttäminen"
   },
   "login_form": {
     "forgot_password": "Unohtuiko salasana?",
@@ -176,6 +180,7 @@
     "confirmation_message": "Oletko varma, että haluat luoda turnauksen annetuilla tiedoilla?",
     "players_to_playoffs_per_group": "Lohkosta pudotuspeleihin siirtyvien pelaajien määrä",
     "groups_size_preference": "Lohkon maksimikoko (pelaajaa)",
+    "number_of_courts": "Kenttien määrä",
     "match_time": "Valitse ottelun pituus",
     "3_min": "3 minuuttia",
     "4_min": "4 minuuttia",
@@ -200,7 +205,8 @@
     "delete_tournament": "Oletko varma, että haluat poistaa tämän turnauksen? Tätä valintaa ei voi perua.",
     "category_header": "Turnauksen kategoria",
     "link_to_payment_header": "Tämä turnaus vaatii maksun, vierailethan osoitteessa",
-    "link_to_site_header": "Järjestäjän sivut"
+    "link_to_site_header": "Järjestäjän sivut",
+    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan"
   },
   "navigation": {
     "back": "Takaisin",
@@ -322,11 +328,16 @@
     "body26": "Jos sinulla on kysyttävää tästä tietosuojakäytännöstä, voit ottaa meihin yhteyttä:",
     "body27": "Sähköpostilla:"
   },
+  "withdrawal_from_tournament": {
+    "info": "Pelaajan turnauksen keskeyttäminen merkitsee hänen meneillään olevat ja tulevat ottelunsa hävityksi.",
+    "withdrawing_user": "Keskeyttävä pelaaja: ",
+    "confirmation_msg": "Oletko varma, että haluat keskeyttää pelaajan {{name}} turnauksen? Tätä valintaa ei voi perua."
+  },
   "profile": {
     "match":"Ottelu",
-    "profile_info": "Omat Tiedot",
-    "my_games": "Omat Ottelut",
-    "my_points": "Omat Pisteet",
+    "profile_info": "Omat tiedot",
+    "my_games": "Omat ottelut",
+    "my_points": "Omat pisteet",
     "point_type": "Pistetyyppi",
     "points": "Pisteet"
   },
