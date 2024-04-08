@@ -119,6 +119,10 @@ const tournaments = {
     });
   },
 
+  getTournament: async (tournamentId: string) => {
+    return await request.get<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`);
+  },
+
   createNew: async (body: CreateTournamentRequest) => {
     return await request.post<Tournament>(`${TOURNAMENTS_API}`, body);
   },
