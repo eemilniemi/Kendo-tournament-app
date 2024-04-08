@@ -24,6 +24,8 @@ import CopyToClipboardButton from "./CopyToClipboardButton";
 import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
 import PlayerName, { checkSameNames } from "../PlayerNames";
+import api from "api/axios";
+import useToast from "hooks/useToast";
 
 export interface TournamentPlayer {
   id: string;
@@ -147,18 +149,22 @@ export const updatePlayerStats = (
   tournament: Tournament,
   setPlayers: React.Dispatch<React.SetStateAction<TournamentPlayer[]>>
 ): void => {
-  const processedMatches = new Set<string>();
-
   setPlayers((prevPlayers: TournamentPlayer[]) => {
-    const updatedPlayers = [...prevPlayers];
+    const players = [...prevPlayers];
+
+    // reset the players points before recalculation, resolves matches being counted multiple times
+    const updatedPlayers: TournamentPlayer[] = players.map((player) => ({
+      ...player,
+      points: 0,
+      ippons: 0,
+      wins: 0,
+      losses: 0,
+      ties: 0
+    }));
 
     for (const match of tournament.matchSchedule) {
-      if (processedMatches.has(match.id)) {
-        continue;
-      }
-
-      // Exclude playoff matches in preliminaryplayoff view scoreboard
-      if (match.type === "playoff") {
+      // Exclude unfinished and playoff matches in preliminaryplayoff view scoreboard
+      if (match.type === "playoff" || match.endTimestamp === undefined) {
         continue;
       }
 
@@ -202,7 +208,6 @@ export const updatePlayerStats = (
       // Add ippons
       updatedPlayers[player1Index].ippons += match.player1Score;
       updatedPlayers[player2Index].ippons += match.player2Score;
-      processedMatches.add(match.id);
     }
     return updatedPlayers;
   });
@@ -339,6 +344,7 @@ const RoundRobinTournamentView: React.FC = () => {
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const { userId } = useAuth();
   const isUserTheCreator = tournament.creator.id === userId;
+  const showToast = useToast();
 
   useEffect(() => {
     const result = checkSameNames(tournament);
@@ -365,11 +371,22 @@ const RoundRobinTournamentView: React.FC = () => {
   }, [initialTournamentData.id]);
 
   useEffect(() => {
-    if (socketData !== undefined) {
-      setTournamentData(socketData);
-    } else {
-      setTournamentData(initialTournamentData);
-    }
+    const fetchData = async (): Promise<void> => {
+      try {
+        if (socketData !== undefined) {
+          setTournamentData(socketData);
+        } else {
+          const data: Tournament = await api.tournaments.getTournament(
+            initialTournamentData.id
+          );
+          setTournamentData(data);
+        }
+      } catch (error) {
+        showToast(error, "error");
+      }
+    };
+
+    void fetchData();
   }, [socketData]);
 
   useEffect(() => {
@@ -395,6 +412,41 @@ const RoundRobinTournamentView: React.FC = () => {
     setUpcomingMatches(sortedMatches.upcomingMatches);
     setPastMatches(sortedMatches.pastMatches);
   }, [tournamentData]);
+
+  const prevMatchScheduleRef = useRef(tournamentData.matchSchedule);
+
+  useEffect(() => {
+    // Function to check if there are any recently finished matches
+    const hasFinishedMatches = (
+      currentMatches: Match[],
+      previousMatches: Match[]
+    ): boolean => {
+      return currentMatches.some((match) => {
+        if (match.endTimestamp === undefined) return false; // Skip if match hasn't ended
+        // Search for a match with the same ID in previousMatches to compare its state to the current one
+        const prevMatch = previousMatches.find((m) => m.id === match.id);
+        // Returns true if either the match was not present in previousMatches (meaning
+        // it's a new match that has ended since the last check) or if the endTimestamp has changed
+        // (indicating the match has recently concluded)
+        return (
+          prevMatch === undefined ||
+          prevMatch.endTimestamp !== match.endTimestamp
+        );
+      });
+    };
+
+    if (
+      hasFinishedMatches(
+        tournamentData.matchSchedule,
+        prevMatchScheduleRef.current
+      )
+    ) {
+      updatePlayerStats(tournamentData, setPlayers);
+    }
+
+    // Update the ref with the current matchSchedule after running checks
+    prevMatchScheduleRef.current = tournamentData.matchSchedule;
+  }, [tournamentData.matchSchedule]);
 
   useEffect(() => {
     if (initialRender.current && players.length > 0) {
