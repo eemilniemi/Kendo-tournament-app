@@ -6,7 +6,8 @@ import {
   Typography,
   Card,
   CardActionArea,
-  CardContent
+  CardContent,
+  Grid
 } from "@mui/material";
 import { type Match, type Tournament } from "types/models";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -23,6 +24,8 @@ import {
   createMatchButton
 } from "./RoundRobinTournamentView";
 import PlayoffTournamentView from "./PlayoffTournamentView";
+import CopyToClipboardButton from "./CopyToClipboardButton";
+import { checkSameNames } from "../PlayerNames";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
@@ -83,8 +86,14 @@ const PreliminaryPlayoffView: React.FC = () => {
   const defaultTab = "preliminary";
   const [previousTab, setPreviousTab] = useState(defaultTab); // Keep track of the previous tab
   const [searchParams, setSearchParams] = useSearchParams();
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const tabTypes = ["preliminary", "playoff"] as const;
   const currentTab = searchParams.get("tab") ?? defaultTab;
+
+  useEffect(() => {
+    const result = checkSameNames(tournament);
+    setHaveSameNames(result);
+  }, []);
 
   const handleTabChange = (tab: string): void => {
     setSearchParams((params) => {
@@ -191,7 +200,7 @@ const PreliminaryPlayoffView: React.FC = () => {
         )
           .filter((match) => match.type !== "playoff") // Filter playoff matches from this view
           .map((match) =>
-            createMatchButton(match, players, navigate, t, {
+            createMatchButton(match, players, navigate, t, haveSameNames, {
               variant: "contained"
             })
           );
@@ -201,7 +210,7 @@ const PreliminaryPlayoffView: React.FC = () => {
         )
           .filter((match) => match.type !== "playoff") // Filter playoff matches from this view
           .map((match) =>
-            createMatchButton(match, players, navigate, t, {
+            createMatchButton(match, players, navigate, t, haveSameNames, {
               variant: "contained",
               color: "info"
             })
@@ -210,7 +219,7 @@ const PreliminaryPlayoffView: React.FC = () => {
         const pastElements = Array.from(pastMatches.get(selectedGroup) ?? [])
           .filter((match) => match.type !== "playoff") // Filter playoff matches from this view
           .map((match) =>
-            createMatchButton(match, players, navigate, t, {
+            createMatchButton(match, players, navigate, t, haveSameNames, {
               variant: "contained",
               color: "secondary"
             })
@@ -229,7 +238,15 @@ const PreliminaryPlayoffView: React.FC = () => {
 
   return (
     <>
-      <Typography variant="h4">{tournament.name}</Typography>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography variant="h4">{tournament.name}</Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
+
       <Tabs
         value={currentTab}
         onChange={(_, newValue) => {
@@ -253,7 +270,10 @@ const PreliminaryPlayoffView: React.FC = () => {
                     <Typography variant="h5" component="h2">
                       {t("tournament_view_labels.group")} {index + 1}
                     </Typography>
-                    <Scoreboard players={getPlayersForGroup(groupIds)} />
+                    <Scoreboard
+                      players={getPlayersForGroup(groupIds)}
+                      haveSameNames={haveSameNames}
+                    />
                   </CardContent>
                 </CardActionArea>
               </Card>

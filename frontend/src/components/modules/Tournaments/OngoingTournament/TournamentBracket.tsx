@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,6 +9,8 @@ import {
 import { type Match, type User } from "types/models";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import PlayerName, { checkSameNames } from "../PlayerNames";
+import { useTournament } from "context/TournamentContext";
 
 interface BracketProps {
   match: Match;
@@ -18,6 +20,15 @@ interface BracketProps {
 const Bracket: React.FC<BracketProps> = ({ match, players }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const tournament = useTournament();
+
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
+
+  useEffect(() => {
+    const result = checkSameNames(tournament);
+    setHaveSameNames(result);
+  }, []);
+
   // Find the players in the players array using their IDs
   const player1 = players.find(
     (player) => player.id === match.players[0].id
@@ -30,9 +41,23 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
   const isWinnerDeclared = winner !== undefined;
 
   // Get the names of the players
-  const player1Name = `${player1.firstName} ${player1.lastName}`;
+  const player1Name = (
+    <PlayerName
+      firstName={player1.firstName}
+      lastName={player1.lastName}
+      sameNames={haveSameNames}
+    />
+  );
   const player2Name =
-    player2 !== undefined ? `${player2.firstName} ${player2.lastName}` : "BYE";
+    player2 !== undefined ? (
+      <PlayerName
+        firstName={player2.firstName}
+        lastName={player2.lastName}
+        sameNames={haveSameNames}
+      />
+    ) : (
+      <PlayerName firstName="BYE" lastName="" sameNames={haveSameNames} />
+    );
 
   let player1Font = "regular";
   let player2Font = "regular";

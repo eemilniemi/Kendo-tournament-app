@@ -15,7 +15,8 @@ import TableCell from "@mui/material/TableCell";
 import Paper from "@mui/material/Paper";
 import type { Category, Tournament, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
-import { Link } from "@mui/material";
+import { Grid, Link } from "@mui/material";
+import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
 
 const generateTable = (tournament: Tournament): React.ReactNode => {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ const generateTable = (tournament: Tournament): React.ReactNode => {
             <TableRow key={player.id} aria-label={`player-${index}`}>
               <TableCell aria-label={`cell-name-${index}`}>
                 <Typography>
-                  {`${player.firstName} - ${player.lastName}`}
+                  {`${player.firstName} ${player.lastName}`}
                 </Typography>
               </TableCell>
               <TableCell aria-label={`cell-rank-${index}`}>
@@ -106,14 +107,21 @@ const UpcomingTournamentView: React.FC = () => {
       component="main"
       sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
     >
-      <Typography
-        variant="h4"
-        className="header"
-        fontWeight="bold"
-        marginBottom="12px"
-      >
-        {tournament.name}
-      </Typography>
+      <Grid container alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography
+            variant="h4"
+            className="header"
+            fontWeight="bold"
+            marginBottom="12px"
+          >
+            {tournament.name}
+          </Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
 
       {tournamentFull && (
         <Box>
@@ -204,14 +212,25 @@ const UpcomingTournamentView: React.FC = () => {
         </Box>
       )}
 
-      {tournament.players.length > 0 ? (
+      {/* There are players in the tournament, generate table if user is logged in */}
+      {tournament.players.length > 0 && userId !== undefined && (
         <React.Fragment>
           <Typography variant="body1" className="header" fontWeight="bold">
-            {t("upcoming_tournament_view.others_signed_up_header")}:
+            {t("upcoming_tournament_view.others_signed_up_header")}
           </Typography>
           {generateTable(tournament)}
         </React.Fragment>
-      ) : (
+      )}
+
+      {/* There are players in the tournament, but user is not logged in */}
+      {tournament.players.length > 0 && userId === undefined && (
+        <Typography variant="body1" className="header" fontWeight="bold">
+          {t("upcoming_tournament_view.attendee_list")}
+        </Typography>
+      )}
+
+      {/* No players in the tournament */}
+      {tournament.players.length === 0 && (
         <Typography variant="body1" className="header" fontWeight="bold">
           {t("upcoming_tournament_view.no_players_signed_up")}
         </Typography>

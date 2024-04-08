@@ -61,16 +61,12 @@ const routes = createRoutesFromElements(
         <Route path={routePaths.register} element={<RegisterForm />} />
       </Route>
 
-      <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
-        <Route
-          path={routePaths.termsAndConditions}
-          element={<TermsAndConditions />}
-        />
-      </Route>
+      <Route
+        path={routePaths.termsAndConditions}
+        element={<TermsAndConditions />}
+      />
 
-      <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
-        <Route path={routePaths.privacy} element={<PrivacyPolicy />} />
-      </Route>
+      <Route path={routePaths.privacy} element={<PrivacyPolicy />} />
 
       <Route element={<AuthenticationGuard />}>
         <Route path={routePaths.profile} element={<Profile />} />
