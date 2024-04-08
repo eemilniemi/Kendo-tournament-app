@@ -308,8 +308,6 @@ const RoundRobinTournamentView: React.FC = () => {
     initialTournamentData
   );
 
-  console.log(socketData);
-
   // Listening to tournaments websocket
   useEffect(() => {
     if (initialTournamentData.id !== undefined && !hasJoined) {
