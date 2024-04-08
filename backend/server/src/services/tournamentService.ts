@@ -19,6 +19,7 @@ import {
   type CreateTournamentRequest
 } from "../models/requestModel.js";
 import { io } from "../socket.js";
+import { MatchService } from "./matchService.js";
 
 export class TournamentService {
   public async emitTournamentUpdate(tournamentId: string): Promise<void> {
@@ -239,7 +240,7 @@ export class TournamentService {
     }
 
     // Check if the creatorId matches the tournament's creator
-    if (tournament.creator.id.toString() !== creatorId) {
+    if (tournament.creator.id.toString("hex") !== creatorId) {
       throw new BadRequestError({
         message: "Only the tournament creator can modify the tournament!"
       });
@@ -320,6 +321,7 @@ export class TournamentService {
       return [];
     }
     const matchDocuments = await MatchModel.insertMany(matches);
+    await MatchService.divideMatchesToCourts(tournament.id);
     return matchDocuments.map((doc) => doc._id);
   }
 

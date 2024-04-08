@@ -27,6 +27,7 @@
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
     "minimum_player_to_playoff": "At least one player has to proceed",
+    "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
     "copy_failure": "Failed to copy tournament link"
   },
@@ -68,6 +69,7 @@
     "save_button": "Save",
     "modify_or_delete": "Modify or delete recent point",
     "delete": "Delete",
+	  "withdraw_user": "Withdraw player from tournament",
     "copy_to_clipboard": "Share tournament"
   },
   "titles": {
@@ -80,7 +82,9 @@
     "confirm_tournament_creation": "Confirm tournament creation",
     "modify_or_delete": "Modify or delete recent point",
     "select_new_type": "Select new type for the recent point:",
-    "confirm_tournament_deletion": "Confirm tournament deletion"
+    "confirm_tournament_deletion": "Confirm tournament deletion",
+    "withdraw_user_from_tournament": "Withdraw player from tournament",
+    "confirm_user_withdrawal": "Confirm player withdrawal from tournament"
   },
   "login_form": {
     "forgot_password": "Forgot password?",
@@ -174,6 +178,7 @@
     "confirmation_message": "Are you sure you want to create the tournament with the provided information?",
     "players_to_playoffs_per_group": "Players proceeding to playoffs per group",
     "groups_size_preference": "Group max size (players)",
+    "number_of_courts": "Number of courts",
     "match_time": "Select match time",
     "3_min": "3 minutes",
     "4_min": "4 minutes",
@@ -198,7 +203,8 @@
     "delete_tournament": "Are you sure you want to delete this tournament? This action cannot be undone.",
     "category_header": "Tournament category",
     "link_to_payment_header": "There is a fee for this tournament, please visit",
-    "link_to_site_header": "Organizer's website"
+    "link_to_site_header": "Organizer's website",
+    "attendee_list": "Log in to see the list of attendees"
   },
   "navigation": {
     "back": "Back",
@@ -320,6 +326,11 @@
     "body26": "If you have any questions about this Privacy Policy, You can contact us:",
     "body27": "By email:"
   },
+  "withdrawal_from_tournament": {
+    "info": "Withdrawing a player from the tournament marks their ongoing and upcoming matches as lost.",
+    "withdrawing_user": "The player withdrawn: ",
+    "confirmation_msg": "Are you sure you want to withdraw player {{name}} from tournament? This action cannot be undone."
+  },
   "profile": {
     "match":"Match",
     "profile_info": "Profile Info",
@@ -327,7 +338,5 @@
     "my_points": "My Points",
     "point_type": "Point Type",
     "points": "points"
-    
   }
-
 }

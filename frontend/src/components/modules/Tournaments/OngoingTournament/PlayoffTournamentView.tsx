@@ -7,6 +7,8 @@ import ErrorModal from "components/common/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import routePaths from "routes/route-paths";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "context/AuthContext";
+import DeleteUserFromTournament from "./DeleteUserFromTournament";
 import CopyToClipboardButton from "./CopyToClipboardButton";
 
 interface Rounds extends Record<number, Match[]> {}
@@ -18,6 +20,8 @@ const PlayoffTournamentView: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { userId } = useAuth();
+  const isUserTheCreator = tournament.creator.id === userId;
 
   let playoffMatches: Match[];
   let totalRounds = 0;
@@ -153,6 +157,7 @@ const PlayoffTournamentView: React.FC = () => {
             );
           })}
         </Grid>
+        {isUserTheCreator && <DeleteUserFromTournament />}
       </Box>
     );
   } catch (e) {
