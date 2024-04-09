@@ -47,10 +47,15 @@ export const TournamentProvider = (): ReactElement => {
         tournament.matchSchedule.length === 0 &&
         tournament.players.length > 0
       ) {
-        await api.tournaments.createSchedule(tournament.id).catch((e) => {
-          console.error(e);
-        });
-        doRefresh();
+        api.tournaments
+          .createSchedule(tournament.id)
+          .then((tournamentWithSchedule) => {
+            setValue(tournamentWithSchedule);
+            doRefresh();
+          })
+          .catch((e) => {
+            console.error(e);
+          });
       }
     };
 
@@ -60,7 +65,7 @@ export const TournamentProvider = (): ReactElement => {
       });
     }
     setIsInitialRender(false);
-  }, [upcoming, ongoing, past, id]);
+  }, []);
 
   if (isLoading || isInitialRender || !isSet.current) {
     return <Loader />;

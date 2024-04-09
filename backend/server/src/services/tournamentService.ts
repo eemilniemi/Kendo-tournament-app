@@ -102,6 +102,7 @@ export class TournamentService {
       });
     }
 
+    /*
     const currentDate = new Date();
     const startDate = new Date(tournament.startDate);
     if (currentDate > startDate) {
@@ -109,6 +110,7 @@ export class TournamentService {
         message: `Cannot add new players as the tournament has already started on ${startDate.toDateString()}`
       });
     }
+    */
 
     if (tournament.players.length >= tournament.maxPlayers) {
       throw new BadRequestError({
@@ -281,8 +283,16 @@ export class TournamentService {
     // Used for tournament types where all matches are calculated simultaneously
     try {
       const tournament = await TournamentModel.findById(tournamentId).exec();
-      if (tournament === null || tournament.matchSchedule.length !== 0) {
+      if (tournament === null) {
         return;
+      }
+      else if(tournament.matchSchedule.length !== 0) {
+        await tournament
+        .populate([
+          { path: "matchSchedule", model: "Match" },
+          { path: "players", model: "User" }
+      ])
+      return await tournament.toObject();
       }
 
       const newMatchIds = await this.generateTournamentSchedule(
@@ -292,7 +302,12 @@ export class TournamentService {
         tournament.matchSchedule.push(...newMatchIds);
         await tournament.save();
       }
-      return tournament;
+      await tournament
+      .populate([
+        { path: "matchSchedule", model: "Match" },
+        { path: "players", model: "User" }
+      ])
+      return await tournament.toObject();
     } catch (error) {
       console.error(
         "Error in fetching tournament and creating schedule:",

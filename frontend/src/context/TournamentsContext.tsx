@@ -69,13 +69,6 @@ export const TournamentsProvider = (): ReactElement => {
   );
   const isInitialRender = useRef(true);
 
-  /* Indicates that reload should take place */
-  useEffect(() => {
-    if (shouldRefresh) {
-      window.location.reload();
-    }
-  }, [shouldRefresh]);
-
   useEffect(() => {
     const doRefresh = (): void => {
       setShouldRefresh(true);
@@ -91,6 +84,7 @@ export const TournamentsProvider = (): ReactElement => {
           upcoming,
           doRefresh
         }));
+        setShouldRefresh(false);
       } catch (error) {
         showToast(t("messages.could_not_fetch_tournaments"), "error");
         setValue((prevValue) => ({
@@ -99,6 +93,7 @@ export const TournamentsProvider = (): ReactElement => {
           isError: true,
           doRefresh
         }));
+        setShouldRefresh(false);
       }
     };
 

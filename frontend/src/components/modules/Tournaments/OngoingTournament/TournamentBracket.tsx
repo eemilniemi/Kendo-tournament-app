@@ -56,7 +56,7 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
         sameNames={haveSameNames}
       />
     ) : (
-      <PlayerName firstName="BYE" lastName="" sameNames={haveSameNames} />
+      <PlayerName firstName="BYE" lastName="" sameNames={false} />
     );
 
   let player1Font = "regular";
