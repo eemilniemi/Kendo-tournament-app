@@ -459,7 +459,7 @@ export class MatchService {
             : player2.id;
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, match.winner);
+          await this.updatePlayoffSchedule(match.id, match.winner);
         }
       } else {
         // If the points are the same, it's a tie (in round robin)
@@ -725,8 +725,8 @@ export class MatchService {
       match.endTimestamp = new Date();
 
       if (match.type === "playoff") {
-        // If playoff, create next round schedule
-        await this.createPlayoffSchedule(match.id, match.winner);
+        // If playoff, add match to next round schedule
+        await this.updatePlayoffSchedule(match.id, match.winner);
       }
     }
 
@@ -772,7 +772,7 @@ export class MatchService {
     pointWinner.points.push(point);
   }
 
-  private async createPlayoffSchedule(
+  private async updatePlayoffSchedule(
     matchId: Types.ObjectId,
     winnerId: Types.ObjectId
   ): Promise<void> {
@@ -865,6 +865,7 @@ export class MatchService {
 
         const matchDocuments = await MatchModel.create(newMatch);
         tournament.matchSchedule.push(matchDocuments.id);
+        break;
       }
     }
 

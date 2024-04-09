@@ -127,6 +127,14 @@ const tournaments = {
     return await request.post<Tournament>(`${TOURNAMENTS_API}`, body);
   },
 
+  createSchedule: async (tournamentId: string): Promise<Tournament> => {
+    const res = await request.post(
+      `${TOURNAMENTS_API}/${tournamentId}/create-schedule`,
+      {}
+    );
+    return res as Tournament;
+  },
+
   signup: async (tournamentId: string, body: SignupForTournamentRequest) => {
     return await request.put(
       `${TOURNAMENTS_API}/${tournamentId}/sign-up`,
