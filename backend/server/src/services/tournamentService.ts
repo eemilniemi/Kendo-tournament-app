@@ -285,14 +285,12 @@ export class TournamentService {
       const tournament = await TournamentModel.findById(tournamentId).exec();
       if (tournament === null) {
         return;
-      }
-      else if(tournament.matchSchedule.length !== 0) {
-        await tournament
-        .populate([
+      } else if (tournament.matchSchedule.length !== 0) {
+        await tournament.populate([
           { path: "matchSchedule", model: "Match" },
           { path: "players", model: "User" }
-      ])
-      return await tournament.toObject();
+        ]);
+        return await tournament.toObject();
       }
 
       const newMatchIds = await this.generateTournamentSchedule(
@@ -302,11 +300,10 @@ export class TournamentService {
         tournament.matchSchedule.push(...newMatchIds);
         await tournament.save();
       }
-      await tournament
-      .populate([
+      await tournament.populate([
         { path: "matchSchedule", model: "Match" },
         { path: "players", model: "User" }
-      ])
+      ]);
       return await tournament.toObject();
     } catch (error) {
       console.error(

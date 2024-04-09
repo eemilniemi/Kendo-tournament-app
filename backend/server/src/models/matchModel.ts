@@ -102,7 +102,7 @@ const matchSchema = new Schema<Match>(
     player1Score: { type: Number, required: true, default: 0 },
     player2Score: { type: Number, required: true, default: 0 },
     matchTime: { type: Number, required: true },
-    courtNumber: {type: Number, default: 1}
+    courtNumber: { type: Number, default: 1 }
   },
   {
     toObject: {
