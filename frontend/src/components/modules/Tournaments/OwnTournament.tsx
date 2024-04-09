@@ -67,7 +67,7 @@ const generateTable = (
   );
 };
 
-const Participants: React.FC = () => {
+const OwnTournament: React.FC = () => {
   const { tournamentId } = useParams<{ tournamentId: string }>();
   const [tournament, setTournament] = useState<Tournament | undefined>();
   const { t } = useTranslation();
@@ -235,4 +235,4 @@ const Participants: React.FC = () => {
     );
 };
 
-export default Participants;
+export default OwnTournament;

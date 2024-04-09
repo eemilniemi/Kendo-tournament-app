@@ -47,9 +47,7 @@ const CreatedTournaments: React.FC = () => {
         <Card key={index} style={{ marginBottom: "20px" }}>
           <CardActionArea
             onClick={() => {
-              navigate(`/tournaments/participants/${tournament.id}`);
-              console.log("Painoit turnauksen painiketta:", tournament.name);
-              console.log("id:", tournament.id);
+              navigate(`/tournaments/own-tournament/${tournament.id}`);
             }}
           >
             <CardContent>
