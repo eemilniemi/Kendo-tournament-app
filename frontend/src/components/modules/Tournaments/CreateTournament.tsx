@@ -340,10 +340,7 @@ const CreateTournamentForm: React.FC = () => {
           margin="normal"
           validation={{
             validate: (value: number) => {
-              return (
-                value >= 1 ||
-                `${t("messages.number_of_courts_error")}`
-              );
+              return value >= 1 || `${t("messages.number_of_courts_error")}`;
             }
           }}
         />
