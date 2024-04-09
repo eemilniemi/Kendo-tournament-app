@@ -1,4 +1,4 @@
-import React, { type ReactElement, useEffect, useState } from "react";
+import React, { type ReactElement, useEffect, useState, useRef } from "react";
 import { type Tournament } from "types/models";
 import {
   Outlet,
@@ -11,6 +11,7 @@ import Loader from "components/common/Loader";
 import ErrorModal from "components/common/ErrorModal";
 import routePaths from "routes/route-paths";
 import { useTranslation } from "react-i18next";
+import api from "api/axios";
 
 /*
  * Child provider for singular tournament components.
@@ -21,20 +22,52 @@ export const TournamentProvider = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { upcoming, ongoing, past, isLoading, isError } = useTournaments();
+  const { upcoming, ongoing, past, isLoading, isError, doRefresh } =
+    useTournaments();
   const [value, setValue] = useState<Tournament | undefined>();
   const [isInitialRender, setIsInitialRender] = useState(true);
+  const isSet = useRef(false);
 
   useEffect(() => {
-    setValue(
-      upcoming.find((x) => x.id === id) ??
+    const setTournament: () => Promise<void> = async () => {
+      if (isSet.current) {
+        return;
+      }
+      isSet.current = true;
+      const tournament =
+        upcoming.find((x) => x.id === id) ??
         ongoing.find((x) => x.id === id) ??
-        past.find((x) => x.id === id)
-    );
-    setIsInitialRender(false);
-  }, [isLoading, upcoming, ongoing, past, id]);
+        past.find((x) => x.id === id);
 
-  if (isLoading || isInitialRender) {
+      setValue(tournament);
+      // if playoff tournament has begun and doesn't have a schedule yet, make the schedule and refresh the page
+      if (
+        tournament?.type === "Playoff" &&
+        new Date(tournament.startDate) < new Date() &&
+        tournament.matchSchedule.length === 0 &&
+        tournament.players.length > 0
+      ) {
+        api.tournaments
+          .createSchedule(tournament.id)
+          .then((tournamentWithSchedule) => {
+            setValue(tournamentWithSchedule);
+            doRefresh();
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+      }
+    };
+
+    if (!isSet.current) {
+      setTournament().catch((e) => {
+        console.error(e);
+      });
+    }
+    setIsInitialRender(false);
+  }, []);
+
+  if (isLoading || isInitialRender || !isSet.current) {
     return <Loader />;
   }
 
@@ -53,7 +86,6 @@ export const TournamentProvider = (): ReactElement => {
       />
     );
   }
-
   return <Outlet context={value} />;
 };
 
