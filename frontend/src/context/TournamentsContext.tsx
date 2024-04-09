@@ -2,12 +2,7 @@ import React, { useEffect, useState, type ReactElement, useRef } from "react";
 import { type Tournament } from "types/models";
 import useToast from "hooks/useToast";
 import api from "api/axios";
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useOutletContext
-} from "react-router-dom";
+import { Outlet, useLocation, useOutletContext } from "react-router-dom";
 import Loader from "components/common/Loader";
 import { type LocationState } from "types/global";
 import { useTranslation } from "react-i18next";
@@ -18,6 +13,7 @@ interface ITournamentsContext {
   past: Tournament[];
   ongoing: Tournament[];
   upcoming: Tournament[];
+  doRefresh: () => void;
 }
 
 const initialContextValue: ITournamentsContext = {
@@ -25,7 +21,8 @@ const initialContextValue: ITournamentsContext = {
   isError: false,
   past: [],
   ongoing: [],
-  upcoming: []
+  upcoming: [],
+  doRefresh: () => {}
 };
 
 interface SortedTournaments {
@@ -59,27 +56,23 @@ const getSortedTournaments = async (): Promise<SortedTournaments> => {
   const past = sortedTournaments.filter(
     (tournament) => new Date(tournament.endDate) <= currentDate
   );
-
   return { past, ongoing, upcoming } as const;
 };
 
 export const TournamentsProvider = (): ReactElement => {
-  const navigate = useNavigate();
   const showToast = useToast();
   const { t } = useTranslation();
   const [value, setValue] = useState<ITournamentsContext>(initialContextValue);
   const location = useLocation() as LocationState;
-  const shouldRefresh: boolean = location.state?.refresh ?? false;
+  const [shouldRefresh, setShouldRefresh] = useState(
+    location.state?.refresh ?? false
+  );
   const isInitialRender = useRef(true);
 
-  /* Indicates that reload should take place */
   useEffect(() => {
-    if (shouldRefresh) {
-      navigate(".", { replace: true });
-    }
-  }, [shouldRefresh]);
-
-  useEffect(() => {
+    const doRefresh = (): void => {
+      setShouldRefresh(true);
+    };
     const getAllTournaments = async (): Promise<void> => {
       try {
         const { past, ongoing, upcoming } = await getSortedTournaments();
@@ -88,15 +81,19 @@ export const TournamentsProvider = (): ReactElement => {
           isLoading: false,
           past,
           ongoing,
-          upcoming
+          upcoming,
+          doRefresh
         }));
+        setShouldRefresh(false);
       } catch (error) {
         showToast(t("messages.could_not_fetch_tournaments"), "error");
         setValue((prevValue) => ({
           ...prevValue,
           isLoading: false,
-          isError: true
+          isError: true,
+          doRefresh
         }));
+        setShouldRefresh(false);
       }
     };
 

@@ -60,6 +60,7 @@ export interface CreateTournamentFormData {
   paid: boolean;
   linkToPay?: string;
   linkToSite?: string;
+  numberOfCourts: number;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -75,7 +76,8 @@ const defaultValues: CreateTournamentFormData = {
   category: "hobby",
   paid: false,
   linkToPay: "",
-  linkToSite: ""
+  linkToSite: "",
+  numberOfCourts: 1
 };
 
 // Make monday the first day of the week
@@ -328,6 +330,20 @@ const CreateTournamentForm: React.FC = () => {
         />
 
         {renderPreliminaryPlayoffFields()}
+
+        <TextFieldElement
+          required
+          name="numberOfCourts"
+          type="number"
+          label={t("create_tournament_form.number_of_courts")}
+          fullWidth
+          margin="normal"
+          validation={{
+            validate: (value: number) => {
+              return value >= 1 || `${t("messages.number_of_courts_error")}`;
+            }
+          }}
+        />
 
         <TextFieldElement
           required
