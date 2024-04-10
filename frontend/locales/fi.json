@@ -157,8 +157,12 @@
     "past_tournaments": "Menneet turnaukset",
     "create_tournament": "Luo turnaus",
     "no_tournaments_found": "Turnauksia ei löytynyt.",
+    "no_upcoming": "Ei tulevia turnauksia.",
+    "no_ongoing": "Ei käynnissä olevia turnauksia.",
+    "no_past": "Ei menneitä turnauksia.",
     "start_date": "Aloituspäivä",
-    "end_date": "Päättymispäivä"
+    "end_date": "Päättymispäivä",
+    "welcome": "Tervetuloa KendoAppiin! Voit osallistua, luoda tai seurata turnauksia sivustollamme!"
   },
   "create_tournament_form": {
     "info": "Täytä alla olevat kentät",

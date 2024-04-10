@@ -157,8 +157,12 @@
     "past_tournaments": "Past Tournaments",
     "create_tournament": "Create Tournament",
     "no_tournaments_found": "No tournaments found.",
+    "no_upcoming": "No upcoming tournaments.",
+    "no_ongoing": "No ongoing tournaments.",
+    "no_past": "No past tournaments.",
     "start_date": "Start Date",
-    "end_date": "End Date"
+    "end_date": "End Date",
+    "welcome": "Welcome to KendoApp! Here you can participate, host or follow tournaments!"
   },
   "create_tournament_form": {
     "info": "Fill information below.",
