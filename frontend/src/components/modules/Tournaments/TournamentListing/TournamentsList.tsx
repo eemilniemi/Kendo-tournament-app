@@ -32,7 +32,11 @@ const TournamentList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   const tabTypes = ["past", "ongoing", "upcoming"] as const;
-  const defaultTab = "ongoing";
+
+  // Set the initial tab based on whether there are ongoing tournaments
+  const initialTab = ongoing.length > 0 ? "ongoing" : "upcoming";
+
+  const defaultTab = initialTab;
   const currentTab = searchParams.get("tab") ?? defaultTab;
 
   const mobile = useMediaQuery("(max-width:600px)");
@@ -105,6 +109,19 @@ const TournamentList: React.FC = () => {
     });
   };
 
+  const getNoTournamentsMessage = (): string => {
+    switch (currentTab) {
+      case "ongoing":
+        return t("frontpage_labels.no_ongoing");
+      case "upcoming":
+        return t("frontpage_labels.no_upcoming");
+      case "past":
+        return t("frontpage_labels.no_past");
+      default:
+        return t("frontpage_labels.no_tournaments_found");
+    }
+  };
+
   // SpeedDial actions
   const actions = [
     { icon: <EventIcon />, name: t("frontpage_labels.create_tournament") }
@@ -112,6 +129,13 @@ const TournamentList: React.FC = () => {
 
   return (
     <Container sx={{ position: "relative", paddingBottom: "30px" }}>
+      {/* Welcome Message */}
+      <Box sx={{ paddingBottom: "30px" }}>
+        <Typography sx={{ fontSize: "20px" }}>
+          {t("frontpage_labels.welcome")}
+        </Typography>
+      </Box>
+
       {/* Floating Create Tournament Button */}
       <SpeedDial
         ariaLabel={t("frontpage_labels.create_tournament")}
@@ -221,7 +245,7 @@ const TournamentList: React.FC = () => {
         ) : (
           <Container>
             <Typography variant="h6" marginTop="32px" textAlign="center">
-              {t("frontpage_labels.no_tournaments_found")}
+              {getNoTournamentsMessage()}
             </Typography>
           </Container>
         )}
