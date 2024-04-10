@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Bracket from "./TournamentBracket";
-import { type User, type Match } from "types/models";
+import { type User, type Match, Tournament } from "types/models";
 import { useTournament } from "context/TournamentContext";
 import { Typography, Box, Grid, Divider } from "@mui/material";
 import ErrorModal from "components/common/ErrorModal";
@@ -10,22 +10,73 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
 import DeleteUserFromTournament from "./DeleteUserFromTournament";
 import CopyToClipboardButton from "./CopyToClipboardButton";
+import { useSocket } from "context/SocketContext";
+import { joinTournament, leaveTournament } from "sockets/emit";
+import api from "api/axios";
+import useToast from "hooks/useToast";
 
 interface Rounds extends Record<number, Match[]> {}
 
 const PlayoffTournamentView: React.FC = () => {
-  const { type, matchSchedule, players, groups, playersToPlayoffsPerGroup } =
-    useTournament();
+  const initialTournamentData = useTournament();
   const tournament = useTournament();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
   const { userId } = useAuth();
+  const showToast = useToast();
   const isUserTheCreator = tournament.creator.id === userId;
+  const [hasJoined, setHasJoined] = useState(false);
+
+  const { tournamentData: socketData } = useSocket();
+
+  const [tournamentData, setTournamentData] = useState<Tournament>(
+    initialTournamentData
+  );
+
+  // Listening to tournaments websocket
+  useEffect(() => {
+    if (initialTournamentData.id !== undefined && !hasJoined) {
+      joinTournament(initialTournamentData.id);
+      setHasJoined(true);
+
+      return () => {
+        leaveTournament(initialTournamentData.id);
+        setHasJoined(false);
+      };
+    }
+  }, [initialTournamentData.id]);
+
+  useEffect(() => {
+    const fetchData = async (): Promise<void> => {
+      try {
+        if (socketData !== undefined) {
+          setTournamentData(socketData);
+        } else {
+          const data: Tournament = await api.tournaments.getTournament(
+            initialTournamentData.id
+          );
+          setTournamentData(data);
+        }
+      } catch (error) {
+        showToast(error, "error");
+      }
+    };
+
+    void fetchData();
+  }, [socketData]);
 
   let playoffMatches: Match[];
   let totalRounds = 0;
   let highestPreliminaryRound = 0;
+
+  const {
+    type,
+    matchSchedule,
+    players,
+    groups,
+    playersToPlayoffsPerGroup
+  } = tournamentData;
 
   if (type === "Preliminary Playoff") {
     // Calculate initial round number for playoff matches
