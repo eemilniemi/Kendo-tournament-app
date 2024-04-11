@@ -347,6 +347,7 @@
     "user_participates": "Turnaukset joihin osallistun",
     "by_time": "Ajankohta",
     "by_location": "Sijainti",
+    "no_location": "Ei valintaa",
     "by_tournament_type": "Turnaustyyppi",
     "by_tournament_category": "Kategoria"
   }

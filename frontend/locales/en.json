@@ -347,6 +347,7 @@
     "user_participates": "Tournaments I am participant in",
     "by_time": "Time",
     "by_location": "Location",
+    "no_location": "None",
     "by_tournament_type": "Tournament type",
     "by_tournament_category": "Tournament category"
   }
