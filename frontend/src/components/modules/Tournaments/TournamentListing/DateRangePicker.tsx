@@ -31,6 +31,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     onEndDateChange(date);
   };
 
+  const handleClearStartDate = (): void => {
+    onStartDateChange(null);
+  };
+
+  const handleClearEndDate = (): void => {
+    onEndDateChange(null);
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
       <Box display="flex" alignItems="center" marginBottom="10px">
@@ -38,12 +46,28 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           value={startDate}
           onChange={handleStartDateChange}
           format="DD/MM/YYYY"
+          slotProps={{
+            field: {
+              clearable: true,
+              onClear: () => {
+                handleClearStartDate();
+              }
+            }
+          }}
         />
         <Typography sx={{ marginX: 1 }}>-</Typography>
         <DatePicker
           value={endDate}
           onChange={handleEndDateChange}
           format="DD/MM/YYYY"
+          slotProps={{
+            field: {
+              clearable: true,
+              onClear: () => {
+                handleClearEndDate();
+              }
+            }
+          }}
         />
       </Box>
     </LocalizationProvider>
