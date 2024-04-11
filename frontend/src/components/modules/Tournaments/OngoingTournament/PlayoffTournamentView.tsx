@@ -84,16 +84,16 @@ const PlayoffTournamentView: React.FC = () => {
           "&::-webkit-scrollbar": { display: "none" }
         }}
       >
-      {tournament.type === "Playoff" && (
-      <Grid container alignItems="center" spacing={4}>
-        <Grid item>
-          <Typography variant="h4">{tournament.name}</Typography>
-        </Grid>
-        <Grid item>
-          <CopyToClipboardButton />
-        </Grid>
-      </Grid>
-    )}
+        {tournament.type === "Playoff" && (
+          <Grid container alignItems="center" spacing={4}>
+            <Grid item>
+              <Typography variant="h4">{tournament.name}</Typography>
+            </Grid>
+            <Grid item>
+              <CopyToClipboardButton />
+            </Grid>
+          </Grid>
+        )}
 
         <Grid
           container
@@ -123,7 +123,8 @@ const PlayoffTournamentView: React.FC = () => {
                         textDecoration: "underline"
                       }}
                     >
-                      {tournament.type === "Playoff" && parseInt(roundNumber) === totalRounds
+                      {tournament.type === "Playoff" &&
+                      parseInt(roundNumber) === totalRounds
                         ? t("tournament_view_labels.final")
                         : `${t(
                             "tournament_view_labels.round"

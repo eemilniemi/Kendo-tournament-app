@@ -4,9 +4,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "./CopyToClipboardButton";
-import { getPlayerNames, Scoreboard, sortMatches, TournamentPlayer, updatePlayerStats } from "./RoundRobinTournamentView"; 
-import PlayoffTournamentView from "./PlayoffTournamentView"; 
-import { Match } from "../../../../types/models";
+import {
+  getPlayerNames,
+  Scoreboard,
+  sortMatches,
+  type TournamentPlayer,
+  updatePlayerStats
+} from "./RoundRobinTournamentView";
+import PlayoffTournamentView from "./PlayoffTournamentView";
+import { type Match } from "../../../../types/models";
 
 const SwissTournamentView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +29,6 @@ const SwissTournamentView: React.FC = () => {
   const [pastMatches, setPastMatches] = useState<Match[]>([]);
 
   try {
- 
     useEffect(() => {
       if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
         setSearchParams((params) => {
@@ -79,11 +84,11 @@ const SwissTournamentView: React.FC = () => {
           <Tab label={t("tournament_view_labels.matches")} value="playoff" />
         </Tabs>
 
-        {currentTab === "scoreboard" && <Scoreboard players={players} />} 
-        
-        {currentTab === "playoff" && <PlayoffTournamentView/>} 
+        {currentTab === "scoreboard" && <Scoreboard players={players} />}
+
+        {currentTab === "playoff" && <PlayoffTournamentView />}
       </>
-  );
+    );
   } catch (e) {
     if (e instanceof Error) {
       setError(e.message);
@@ -91,10 +96,6 @@ const SwissTournamentView: React.FC = () => {
       setError(t("messages.unexpected_error_happened"));
     }
   }
-
-  
 };
 
 export default SwissTournamentView;
-
-

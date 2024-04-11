@@ -161,7 +161,7 @@ const CreateTournamentForm: React.FC = () => {
         </React.Fragment>
       );
     }
-    if (type === "Swiss"){
+    if (type === "Swiss") {
       return (
         <React.Fragment>
           <TextFieldElement
@@ -173,13 +173,10 @@ const CreateTournamentForm: React.FC = () => {
             margin="normal"
             validation={{
               validate: (value: number) => {
-                return (
-                  value >= 1 || `${t("messages.swiss_rounds_error")}`
-                );
+                return value >= 1 || `${t("messages.swiss_rounds_error")}`;
               }
             }}
           />
-          
         </React.Fragment>
       );
     }
@@ -359,9 +356,7 @@ const CreateTournamentForm: React.FC = () => {
           margin="normal"
           validation={{
             validate: (value: number) => {
-              return (
-                value >= 1 || `${t("messages.number_of_courts_error")}`
-              );
+              return value >= 1 || `${t("messages.number_of_courts_error")}`;
             }
           }}
         />

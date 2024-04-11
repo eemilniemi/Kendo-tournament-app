@@ -79,6 +79,10 @@ export interface Tournament {
   swissRounds?: number;
 }
 
-export type TournamentType = "Round Robin" | "Playoff" | "Preliminary Playoff" | "Swiss";
+export type TournamentType =
+  | "Round Robin"
+  | "Playoff"
+  | "Preliminary Playoff"
+  | "Swiss";
 
 export type Category = "championship" | "league" | "hobby";

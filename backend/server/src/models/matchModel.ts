@@ -3,7 +3,12 @@ import type { Tournament } from "./tournamentModel";
 
 export type PlayerColor = "red" | "white";
 export type PointType = "men" | "kote" | "do" | "tsuki" | "hansoku";
-export type MatchType = "group" | "playoff" | "preliminary" | "pre playoff" | "swiss";
+export type MatchType =
+  | "group"
+  | "playoff"
+  | "preliminary"
+  | "pre playoff"
+  | "swiss";
 export type MatchTime = 180000 | 240000 | 300000;
 
 export interface MatchPoint {
@@ -102,7 +107,7 @@ const matchSchema = new Schema<Match>(
     player1Score: { type: Number, required: true, default: 0 },
     player2Score: { type: Number, required: true, default: 0 },
     matchTime: { type: Number, required: true },
-    courtNumber: {type: Number, default: 1}
+    courtNumber: { type: Number, default: 1 }
   },
   {
     toObject: {
