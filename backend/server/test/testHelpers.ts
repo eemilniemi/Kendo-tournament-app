@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import UserModel from "../src/models/userModel.ts"
+import UserModel, { type User } from "../src/models/userModel.ts"
+import config from "../src/utility/config.ts";
 
-let mongo: any;
+let mongo: MongoMemoryServer;
 
 /*const schema = new Schema<User, UserMethods>(
   {
@@ -40,7 +41,8 @@ let mongo: any;
 );*/
 
 // Valid test user 1
-const testUser = {
+const testUser: User = {
+  id: new mongoose.Types.ObjectId('123123123123'),
   email: 'test-user@gmail.com',
   userName: 'testUser',
   firstName: 'Test',
@@ -52,19 +54,21 @@ const testUser = {
 };
 
 // Valid test user 2
-const testUser2 = {
-email: 'test-user2@gmail.com',
-userName: 'testUser2',
-firstName: 'Other',
-lastName: 'User',
-phoneNumber: '045987654321',
-password: 'FooBar123',
-inNationalTeam: false,
-underage: false
+const testUser2: User = {
+  id: new mongoose.Types.ObjectId('456456456456'),
+  email: 'test-user2@gmail.com',
+  userName: 'testUser2',
+  firstName: 'Other',
+  lastName: 'User',
+  phoneNumber: '045987654321',
+  password: 'FooBar123',
+  inNationalTeam: false,
+  underage: false
 };
 
 // Valid underage user
-const underageUser = {
+const underageUser: User = {
+  id: new mongoose.Types.ObjectId('789789789789'),
   email: 'underage@gmail.com',
   userName: 'underage1',
   firstName: 'Another',
@@ -77,7 +81,8 @@ const underageUser = {
 };
 
 // Underage user without guardian email provided
-const faultyUnderage = {
+const faultyUnderage: User = {
+  id: new mongoose.Types.ObjectId('789789789789'),
   email: 'underage@gmail.com',
   userName: 'testUser3',
   firstName: 'Another',
@@ -89,13 +94,16 @@ const faultyUnderage = {
 };
 
 // User with bad password
-const badPassword = {
+const badPassword: User = {
+  id: new mongoose.Types.ObjectId('123123123123'),
   email: 'test-user@gmail.com',
   userName: 'testUser',
   firstName: 'Test',
   lastName: 'User',
   phoneNumber: '045123456789',
-  password: 'paska_salasana'
+  password: 'paska_salasana',
+  inNationalTeam: false,
+  underage: false
 };
 
 
@@ -123,8 +131,39 @@ async function getTestUserByEmail(email: string) {
   return await UserModel.findOne({email: email});
 };
 
-function createTestJwtToken() {
-  // TODO
+/*
+authService.ts
+const tokenPayload: TokenPayload = {
+      id: user.id,
+      adminTournaments: adminTournaments.map((tournament) => tournament.id),
+      officialTournaments: officialTournaments.map(
+        (tournament) => tournament.id
+      )
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+
+jwtHelper.ts
+export interface TokenPayload {
+  id: string;
+  adminTournaments: string[];
+  officialTournaments: string[];
+}
+
+export const generateAccessToken = (
+  payload: TokenPayload,
+  expiresIn: string = "1h"
+): string => {
+  return jwt.sign(payload, config.ACCESS_JWT_SECRET, { expiresIn });
+};
+*/
+
+function createTestJwtToken(email: string): string {
+  /*const user = UserModel.findOne({email: email});
+  const admin: string[] = [];
+  const official: string[] = [];
+  return jwt.sign({user.id, admin, official}, config.ACCESS_JWT_SECRET, '1h')*/
+  return '';
 };
 
 export { 
