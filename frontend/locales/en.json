@@ -159,8 +159,25 @@
     "past_tournaments": "Past Tournaments",
     "create_tournament": "Create Tournament",
     "no_tournaments_found": "No tournaments found.",
+    "no_upcoming": "No upcoming tournaments.",
+    "no_ongoing": "No ongoing tournaments.",
+    "no_past": "No past tournaments.",
     "start_date": "Start Date",
-    "end_date": "End Date"
+    "end_date": "End Date",
+    "welcome": "Welcome to KendoApp! Here you can participate, host or follow tournaments!"
+  },
+  "created_tournament": {
+    "signed_up": "Signed up",
+    "no_players_signed_up": "No players have signed up yet.",
+    "location_header": "Where",
+    "date_header": "When",
+    "description": "About the Tournament",
+    "category_header": "Tournament category",
+    "type_header": "Type of Tournament",
+    "link_to_site_header": "Organizer's website",
+    "link_to_payment_header": "Link to payment site",
+    "match_time": "Match time",
+    "max_players": "Maximum number of players"
   },
   "create_tournament_form": {
     "info": "Fill information below.",
@@ -334,12 +351,13 @@
     "confirmation_msg": "Are you sure you want to withdraw player {{name}} from tournament? This action cannot be undone."
   },
   "profile": {
-    "match":"Match",
+    "match": "Match",
     "profile_info": "Profile Info",
-    "my_games": "My Games",
+    "my_games": "My Fames",
     "my_points": "My Points",
     "point_type": "Point Type",
-    "points": "points" 
+    "points": "Points",
+    "created_tournaments": "Created tournaments" 
   },
   "filtering": {
     "options": "Filtering options",

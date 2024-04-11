@@ -159,8 +159,25 @@
     "past_tournaments": "Menneet turnaukset",
     "create_tournament": "Luo turnaus",
     "no_tournaments_found": "Turnauksia ei löytynyt.",
+    "no_upcoming": "Ei tulevia turnauksia.",
+    "no_ongoing": "Ei käynnissä olevia turnauksia.",
+    "no_past": "Ei menneitä turnauksia.",
     "start_date": "Aloituspäivä",
-    "end_date": "Päättymispäivä"
+    "end_date": "Päättymispäivä",
+    "welcome": "Tervetuloa KendoAppiin! Voit osallistua, luoda tai seurata turnauksia sivustollamme!"
+  },
+  "created_tournament": {
+    "signed_up": "Ilmottautuneet",
+    "no_players_signed_up": "Pelaajia ei ole vielä ilmottautunut.",
+    "location_header": "Missä",
+    "date_header": "Milloin",
+    "description": "Turnauksesta",
+    "category_header": "Turnauksen kategoria",
+    "type_header": "Turnauksen tyyppi",
+    "link_to_site_header": "Järjestäjän sivut",
+    "link_to_payment_header": "Linkki maksusivustolle",
+    "match_time": "Ottelun pituus",
+    "max_players": "Pelaajien enimmäismäärä"
   },
   "create_tournament_form": {
     "info": "Täytä alla olevat kentät",
@@ -339,7 +356,8 @@
     "my_games": "Omat ottelut",
     "my_points": "Omat pisteet",
     "point_type": "Pistetyyppi",
-    "points": "Pisteet"
+    "points": "Pisteet",
+    "created_tournaments": "Luodut turnaukset"
   },
   "filtering": {
     "options": "Suodatusvalinnat",
