@@ -26,6 +26,7 @@ import GameInterface from "components/modules/GameInterface/GameInterface";
 import PasswordControl from "components/modules/PasswordControl/PasswordControl";
 import PrivacyPolicy from "components/modules/Legal/PrivacyPolicy";
 import EditTournametInfo from "components/modules/Tournaments/EditTournament/EditInfo";
+import OwnTournament from "components/modules/Tournaments/OwnTournament";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
@@ -45,6 +46,10 @@ const routes = createRoutesFromElements(
         <Route
           path="edit-tournament-info/:tournamentId"
           element={<EditTournametInfo />}
+        />
+        <Route
+          path="own-tournament/:tournamentId"
+          element={<OwnTournament />}
         />
 
         <Route path=":id" element={<TournamentProvider />}>
