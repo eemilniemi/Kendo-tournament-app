@@ -7,6 +7,8 @@ import i18n from "../i18n";
 import { I18nextProvider } from "react-i18next";
 
 const container = document.getElementById("app-root");
+const languageStorageKey = "selectedLanguage";
+const persistedLanguage = localStorage.getItem(languageStorageKey);
 
 if (container !== null) {
   createRoot(container).render(
@@ -17,3 +19,15 @@ if (container !== null) {
     </React.StrictMode>
   );
 }
+
+// Initialize i18next with the language saved in browser storage
+if (persistedLanguage !== null) {
+  void i18n.changeLanguage(persistedLanguage).catch((error) => {
+    console.error("Failed to change language:", error);
+  });
+}
+
+// Listen for language changes and update storage
+i18n.on("languageChanged", (lang) => {
+  localStorage.setItem(languageStorageKey, lang);
+});

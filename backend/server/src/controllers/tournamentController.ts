@@ -58,6 +58,22 @@ export class TournamentController extends Controller {
     return await this.service.createTournament(tournamentData, creator);
   }
 
+  @Post("{tournamentId}/create-schedule")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async createSchedule(
+    @Path() tournamentId: ObjectIdString
+  ): Promise<Tournament | undefined> {
+    const result =
+      await this.service.getTournamentAndCreateSchedule(tournamentId);
+    if (result !== undefined) {
+      this.setStatus(201);
+    } else {
+      this.setStatus(400);
+    }
+    return result;
+  }
+
   @Put("{tournamentId}/sign-up")
   @Tags("Tournaments")
   @Security("jwt")

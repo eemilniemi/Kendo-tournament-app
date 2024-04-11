@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import TournamentCard from "./TournamentCard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournaments } from "context/TournamentsContext";
@@ -17,6 +17,14 @@ import type { Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import {
+  sortTournamentsByMostRecent,
+  sortTournamentsByOldest,
+  sortTournamentsByName,
+  sortTournamentsByDescName,
+  sortTournamentsByLocation
+} from "utils/sorters";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 const TournamentList: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +34,8 @@ const TournamentList: React.FC = () => {
   const tabTypes = ["past", "ongoing", "upcoming"] as const;
   const defaultTab = "ongoing";
   const currentTab = searchParams.get("tab") ?? defaultTab;
+
+  const mobile = useMediaQuery("(max-width:600px)");
 
   // State variables for sorting
   const [sortBy, setSortBy] = useState<
@@ -70,57 +80,19 @@ const TournamentList: React.FC = () => {
     // Sort tournaments based on chosen sorting criteria
     switch (sortBy) {
       case "mostRecent":
-        tournaments.sort((a, b) => {
-          const dateA = new Date(a.startDate);
-          const dateB = new Date(b.startDate);
-          return dateB.getTime() - dateA.getTime();
-        });
+        sortTournamentsByMostRecent(tournaments);
         break;
       case "oldest":
-        tournaments.sort((a, b) => {
-          const dateA = new Date(a.startDate);
-          const dateB = new Date(b.startDate);
-          return dateA.getTime() - dateB.getTime();
-        });
+        sortTournamentsByOldest(tournaments);
         break;
       case "name":
-        tournaments.sort((a, b) => {
-          const nameA = a.name;
-          const nameB = b.name;
-          if (nameA < nameB) {
-            return -1;
-          }
-          if (nameA > nameB) {
-            return 1;
-          }
-          return 0;
-        });
+        sortTournamentsByName(tournaments);
         break;
       case "nameDesc":
-        tournaments.sort((a, b) => {
-          const nameA = a.name;
-          const nameB = b.name;
-          if (nameA < nameB) {
-            return 1;
-          }
-          if (nameA > nameB) {
-            return -1;
-          }
-          return 0;
-        });
+        sortTournamentsByDescName(tournaments);
         break;
       case "location":
-        tournaments.sort((a, b) => {
-          const locationA = a.location;
-          const locationB = b.location;
-          if (locationA < locationB) {
-            return -1;
-          }
-          if (locationA > locationB) {
-            return 1;
-          }
-          return 0;
-        });
+        sortTournamentsByLocation(tournaments);
         break;
     }
     return tournaments;
@@ -160,49 +132,79 @@ const TournamentList: React.FC = () => {
       </SpeedDial>
 
       {/* Tournament Listings */}
-      <Box
-        sx={{ borderBottom: 1, borderColor: "divider", marginBottom: "10px" }}
-      >
-        <Tabs
-          value={currentTab}
-          onChange={(_, value) => {
-            handleTabChange(value);
-          }}
-          variant="scrollable"
-          sx={{
-            position: "sticky",
-            top: 0,
-            bottom: 0,
-            backgroundColor: "white"
-          }}
-        >
-          <Tab
-            label={t("frontpage_labels.ongoing_tournaments")}
-            value={"ongoing"}
-          ></Tab>
-          <Tab
-            label={t("frontpage_labels.upcoming_tournaments")}
-            value={"upcoming"}
-          ></Tab>
-          <Tab
-            label={t("frontpage_labels.past_tournaments")}
-            value={"past"}
-          ></Tab>
-        </Tabs>
-      </Box>
-      {/* Dropdown menu to choose sorting criteria on past tournaments tab */}
-      {currentTab === "past" && (
-        <div>
-          <label>{t("sorting.orderBy")}</label>
-          <Select value={sortBy} onChange={handleSortChange}>
-            <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
-            <MenuItem value="oldest">{t("sorting.oldest")}</MenuItem>
-            <MenuItem value="name">{t("sorting.name")}</MenuItem>
-            <MenuItem value="nameDesc">{t("sorting.nameDesc")}</MenuItem>
-            <MenuItem value="location">{t("sorting.location")}</MenuItem>
+      {/* If the device is mobile */}
+      {mobile ? (
+        <Fragment>
+          <Select
+            value={currentTab}
+            onChange={(event) => {
+              handleTabChange(event.target.value);
+            }}
+            style={{ marginBottom: "10px" }}
+            sx={{
+              border: "2px solid #db4744",
+              fontSize: "20px",
+              color: "#db4744"
+            }}
+          >
+            <MenuItem value="ongoing">
+              {t("frontpage_labels.ongoing_tournaments")}
+            </MenuItem>
+            <MenuItem value="upcoming">
+              {t("frontpage_labels.upcoming_tournaments")}
+            </MenuItem>
+            <MenuItem value="past">
+              {t("frontpage_labels.past_tournaments")}
+            </MenuItem>
           </Select>
-        </div>
+          <br></br>
+        </Fragment>
+      ) : (
+        <Box
+          sx={{ borderBottom: 1, borderColor: "divider", marginBottom: "10px" }}
+        >
+          {/* If the device is desktop */}
+          <Tabs
+            value={currentTab}
+            onChange={(_, value) => {
+              handleTabChange(value);
+            }}
+            variant="scrollable"
+            sx={{
+              position: "sticky",
+              top: 0,
+              bottom: 0,
+              backgroundColor: "white"
+            }}
+          >
+            <Tab
+              label={t("frontpage_labels.ongoing_tournaments")}
+              value={"ongoing"}
+            ></Tab>
+            <Tab
+              label={t("frontpage_labels.upcoming_tournaments")}
+              value={"upcoming"}
+            ></Tab>
+            <Tab
+              label={t("frontpage_labels.past_tournaments")}
+              value={"past"}
+            ></Tab>
+          </Tabs>
+        </Box>
       )}
+      {/* Dropdown menu to choose sorting criteria all tournament tabs */}
+      <label>{t("sorting.orderBy")}</label>
+      <Select
+        value={sortBy}
+        onChange={handleSortChange}
+        style={{ marginBottom: "10px" }}
+      >
+        <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
+        <MenuItem value="oldest">{t("sorting.oldest")}</MenuItem>
+        <MenuItem value="name">{t("sorting.name")}</MenuItem>
+        <MenuItem value="nameDesc">{t("sorting.nameDesc")}</MenuItem>
+        <MenuItem value="location">{t("sorting.location")}</MenuItem>
+      </Select>
 
       <Grid
         container

@@ -20,7 +20,8 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
-  Box
+  Box,
+  useMediaQuery
 } from "@mui/material";
 import updateLocale from "dayjs/plugin/updateLocale";
 
@@ -59,6 +60,7 @@ export interface CreateTournamentFormData {
   paid: boolean;
   linkToPay?: string;
   linkToSite?: string;
+  numberOfCourts: number;
 }
 
 const defaultValues: CreateTournamentFormData = {
@@ -74,7 +76,8 @@ const defaultValues: CreateTournamentFormData = {
   category: "hobby",
   paid: false,
   linkToPay: "",
-  linkToSite: ""
+  linkToSite: "",
+  numberOfCourts: 1
 };
 
 // Make monday the first day of the week
@@ -94,6 +97,7 @@ const CreateTournamentForm: React.FC = () => {
   const { differentOrganizer, startDate, type, paid } =
     useWatch<CreateTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const mobile = useMediaQuery("(max-width:600px)");
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
@@ -196,11 +200,14 @@ const CreateTournamentForm: React.FC = () => {
             minDateTime={now}
             format="DD/MM/YYYY HH:mm"
             ampm={false}
-            viewRenderers={{
-              hours: null,
-              minutes: null,
-              seconds: null
-            }}
+            {...(!mobile && {
+              // Only text input on desktop
+              viewRenderers: {
+                hours: null,
+                minutes: null,
+                seconds: null
+              }
+            })}
           />
           <DateTimePickerElement
             required
@@ -209,11 +216,14 @@ const CreateTournamentForm: React.FC = () => {
             minDateTime={startDate}
             format="DD/MM/YYYY HH:mm"
             ampm={false}
-            viewRenderers={{
-              hours: null,
-              minutes: null,
-              seconds: null
-            }}
+            {...(!mobile && {
+              // Only text input on desktop
+              viewRenderers: {
+                hours: null,
+                minutes: null,
+                seconds: null
+              }
+            })}
           />
         </Stack>
 
@@ -320,6 +330,20 @@ const CreateTournamentForm: React.FC = () => {
         />
 
         {renderPreliminaryPlayoffFields()}
+
+        <TextFieldElement
+          required
+          name="numberOfCourts"
+          type="number"
+          label={t("create_tournament_form.number_of_courts")}
+          fullWidth
+          margin="normal"
+          validation={{
+            validate: (value: number) => {
+              return value >= 1 || `${t("messages.number_of_courts_error")}`;
+            }
+          }}
+        />
 
         <TextFieldElement
           required

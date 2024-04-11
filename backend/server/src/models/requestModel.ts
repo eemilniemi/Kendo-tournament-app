@@ -123,6 +123,7 @@ export type CreateTournamentRequest = Pick<
   | "category"
   | "linkToPay"
   | "linkToSite"
+  | "numberOfCourts"
 > & {
   differentOrganizer: boolean;
   paid: boolean;

@@ -33,6 +33,7 @@ import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import Loader from "components/common/Loader";
 const MIN_PLAYER_AMOUNT = 3;
+const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
 export interface EditTournamentFormData {
@@ -50,6 +51,7 @@ export interface EditTournamentFormData {
   paid: boolean;
   linkToPay?: string;
   linkToSite?: string;
+  numberOfCourts: number;
 }
 
 const defaultValues: EditTournamentFormData = {
@@ -64,7 +66,8 @@ const defaultValues: EditTournamentFormData = {
   category: "hobby",
   paid: false,
   linkToPay: "",
-  linkToSite: ""
+  linkToSite: "",
+  numberOfCourts: 1
 };
 
 const EditInfo: React.FC = () => {
@@ -79,7 +82,8 @@ const EditInfo: React.FC = () => {
   const formContext = useForm<EditTournamentFormData>({
     defaultValues
   });
-  const { startDate, paid } = useWatch<EditTournamentFormData>(formContext);
+  const { startDate, type, paid } =
+    useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -157,6 +161,47 @@ const EditInfo: React.FC = () => {
     await formContext.handleSubmit(onSubmit)();
     // Redirect user to home page after making changes
     navigate(routePaths.homeRoute);
+  };
+
+  const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
+    if (type === "Preliminary Playoff") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="groupsSizePreference"
+            type="number"
+            label={t("create_tournament_form.groups_size_preference")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= MIN_GROUP_SIZE ||
+                  `${t("messages.minimum_groupsize_error")}${MIN_GROUP_SIZE}`
+                );
+              }
+            }}
+          />
+          <TextFieldElement
+            required
+            name="playersToPlayoffsPerGroup"
+            type="number"
+            label={t("create_tournament_form.players_to_playoffs_per_group")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value > 0 || `${t("messages.minimum_player_to_playoff")}`
+                );
+              }
+            }}
+          />
+        </React.Fragment>
+      );
+    }
+    return null;
   };
 
   return (
@@ -279,25 +324,6 @@ const EditInfo: React.FC = () => {
 
         <SelectElement
           required
-          label={t("create_tournament_form.select_tournament_type")}
-          name="type"
-          options={[
-            {
-              id: "Round Robin",
-              label: t("create_tournament_form.round_robin")
-            },
-            { id: "Playoff", label: t("create_tournament_form.playoff") },
-            {
-              id: "Preliminary Playoff",
-              label: t("create_tournament_form.preliminary_playoff")
-            }
-          ]}
-          fullWidth
-          margin="normal"
-        />
-
-        <SelectElement
-          required
           label={t("create_tournament_form.category")}
           name="category"
           options={[
@@ -316,6 +342,22 @@ const EditInfo: React.FC = () => {
           ]}
           fullWidth
           margin="normal"
+        />
+
+        {renderPreliminaryPlayoffFields()}
+
+        <TextFieldElement
+          required
+          name="numberOfCourts"
+          type="number"
+          label={t("create_tournament_form.number_of_courts")}
+          fullWidth
+          margin="normal"
+          validation={{
+            validate: (value: number) => {
+              return value >= 1 || `${t("messages.number_of_courts_error")}`;
+            }
+          }}
         />
 
         <TextFieldElement

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,6 +9,8 @@ import {
 import { type Match, type User } from "types/models";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import PlayerName, { checkSameNames } from "../PlayerNames";
+import { useTournament } from "context/TournamentContext";
 
 interface BracketProps {
   match: Match;
@@ -18,20 +20,44 @@ interface BracketProps {
 const Bracket: React.FC<BracketProps> = ({ match, players }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const tournament = useTournament();
+
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
+
+  useEffect(() => {
+    const result = checkSameNames(tournament);
+    setHaveSameNames(result);
+  }, []);
+
   // Find the players in the players array using their IDs
   const player1 = players.find(
     (player) => player.id === match.players[0].id
   ) as User;
   const player2 = players.find(
-    (player) => player.id === match.players[1].id
+    (player) => player.id === match.players[1]?.id
   ) as User;
 
   const winner = match.winner;
   const isWinnerDeclared = winner !== undefined;
 
   // Get the names of the players
-  const player1Name = `${player1.firstName} ${player1.lastName}`;
-  const player2Name = `${player2.firstName} ${player2.lastName}`;
+  const player1Name = (
+    <PlayerName
+      firstName={player1.firstName}
+      lastName={player1.lastName}
+      sameNames={haveSameNames}
+    />
+  );
+  const player2Name =
+    player2 !== undefined ? (
+      <PlayerName
+        firstName={player2.firstName}
+        lastName={player2.lastName}
+        sameNames={haveSameNames}
+      />
+    ) : (
+      <PlayerName firstName="BYE" lastName="" sameNames={false} />
+    );
 
   let player1Font = "regular";
   let player2Font = "regular";
@@ -42,19 +68,19 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
 
   if (isWinnerDeclared) {
     player1Font = winner === player1.id ? "700" : "regular";
-    player2Font = winner === player2.id ? "700" : "regular";
+    player2Font = winner === player2?.id ? "700" : "regular";
 
     player1Color = winner === player1.id ? "black" : "#666666";
-    player2Color = winner === player2.id ? "black" : "#666666";
+    player2Color = winner === player2?.id ? "black" : "#666666";
 
     player1Lining = winner === player1.id ? "underline" : "";
-    player2Lining = winner === player2.id ? "underline" : "";
+    player2Lining = winner === player2?.id ? "underline" : "";
   }
 
   const officialsInfo = [];
 
-  if (match.elapsedTime <= 0) {
-    // Match is upcoming
+  if (match.elapsedTime <= 0 && match.winner === undefined) {
+    // Match is upcoming and is not a bye
     const timerPerson = match.timeKeeper ?? undefined;
     const pointMaker = match.pointMaker ?? undefined;
 
@@ -87,7 +113,11 @@ const Bracket: React.FC<BracketProps> = ({ match, players }) => {
       <Card variant="outlined" sx={{ mb: 1 }}>
         <CardActionArea
           onClick={() => {
-            navigate(`match/${match.id}`);
+            if (players.length === 2) {
+              navigate(`match/${match.id}`);
+            } else {
+              // No match details to display for a bye
+            }
           }}
         >
           <CardContent>
