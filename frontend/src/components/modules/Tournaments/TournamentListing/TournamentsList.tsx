@@ -149,7 +149,7 @@ const TournamentList: React.FC = () => {
     if (filtersApplied) {
       return t("frontpage_labels.no_tournaments_found");
     }
-    
+
     switch (currentTab) {
       case "ongoing":
         return t("frontpage_labels.no_ongoing");
