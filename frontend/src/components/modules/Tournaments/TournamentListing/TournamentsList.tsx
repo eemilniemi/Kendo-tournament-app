@@ -44,6 +44,13 @@ const TournamentList: React.FC = () => {
     []
   );
 
+  // If nothing filtered, get right tournaments again
+  useEffect(() => {
+    if (filteredTournaments.length === 0) {
+      tournamentsToRender();
+    }
+  }, [filtersApplied]);
+
   // State variables for sorting
   const [sortBy, setSortBy] = useState<
     "mostRecent" | "oldest" | "name" | "nameDesc" | "location"
@@ -84,18 +91,13 @@ const TournamentList: React.FC = () => {
         tournaments = [...past]; // a copy not to mutate original data
         break;
       case "ongoing":
-        tournaments = ongoing;
+        tournaments = [...ongoing];
         break;
       case "upcoming":
-        tournaments = upcoming;
+        tournaments = [...upcoming];
         break;
       default:
-        tournaments = ongoing;
-    }
-
-    // Show filtered tournaments if filters are applied
-    if (filtersApplied) {
-      tournaments = filteredTournaments;
+        tournaments = [...ongoing];
     }
 
     // Sort tournaments based on chosen sorting criteria
@@ -116,7 +118,13 @@ const TournamentList: React.FC = () => {
         sortTournamentsByLocation(tournaments);
         break;
     }
-    return tournaments;
+
+    // Show filtered tournaments if filters are applied
+    if (filtersApplied) {
+      return filteredTournaments;
+    } else {
+      return tournaments;
+    }
   };
 
   const handleTabChange = (tab: string): void => {
@@ -237,6 +245,7 @@ const TournamentList: React.FC = () => {
         {/* Filtering options button */}
         <FilterTournaments
           tournaments={tournamentsToRender()}
+          tab={currentTab}
           handleFilteredTournaments={handleFilteredTournaments}
         />
       </Box>

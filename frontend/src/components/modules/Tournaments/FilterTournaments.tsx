@@ -26,9 +26,12 @@ import type { Tournament, TournamentType, Category } from "types/models";
 import DateRangePicker from "./TournamentListing/DateRangePicker";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
+import { useTournaments } from "context/TournamentsContext";
+import { sortTournamentsByLocation } from "utils/sorters";
 
 interface FilterTournamentsProps {
   tournaments: Tournament[];
+  tab: string;
   handleFilteredTournaments: (
     filteredTournaments: Tournament[],
     areFiltersApplied: boolean
@@ -46,12 +49,24 @@ interface FilterCriteria {
 
 const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   tournaments,
+  tab,
   handleFilteredTournaments
 }) => {
   const { t } = useTranslation();
   const [filteringDialog, setFilteringDialog] = useState(false);
   const { userId, isAuthenticated } = useAuth();
   const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false);
+  const { upcoming, ongoing, past } = useTournaments();
+
+  const getOriginalTournamentData = (): Tournament[] => {
+    if (tab === "upcoming") {
+      return upcoming;
+    } else if (tab === "ongoing") {
+      return ongoing;
+    } else {
+      return past;
+    }
+  };
 
   // Arrays of tuples containing the type and its localization key, for populating dialog window
   const tournamentTypeOptions: Array<[TournamentType, string]> = [
@@ -74,6 +89,11 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     location: ""
   });
 
+  // Reset filter criteria when tab changes
+  useEffect(() => {
+    resetFilters();
+  }, [tab]);
+
   // State variables for keeping track of checkbox states
   const [tournamentTypeSelections, setTournamentTypeSelections] = useState<{
     [key in TournamentType]: boolean;
@@ -90,7 +110,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     league: false
   });
 
-  // When app mounts checks if there is filters stored in sessionStorage
+  // When app mounts check if there is filters stored in sessionStorage
   useEffect(() => {
     const storedFilters = sessionStorage.getItem("tournamentFilters");
     if (storedFilters !== null && storedFilters !== undefined) {
@@ -181,22 +201,42 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     handleFilteredTournaments([], false);
   };
 
-  // Function to create MenuItems for locations
-  const createMenuItemsForLocations = (
-    tournaments: Tournament[]
-  ): JSX.Element[] => {
-    // Create a set to avoid duplicate locations
-    const locations = new Set<string>();
+  const getLocations = (): string[] => {
+    let currentTournaments: Tournament[];
+    if (tab === "upcoming") {
+      currentTournaments = sortTournamentsByLocation(upcoming);
+    } else if (tab === "ongoing") {
+      currentTournaments = sortTournamentsByLocation(ongoing);
+    } else {
+      currentTournaments = sortTournamentsByLocation(past);
+    }
 
-    tournaments.forEach((tournament) => {
+    const locations = new Set<string>();
+    currentTournaments.forEach((tournament) => {
       locations.add(tournament.location);
     });
+    return Array.from(locations);
+  };
 
-    return Array.from(locations).map((location, index) => (
-      <MenuItem key={index} value={location}>
-        {location}
+  // Function to create MenuItems for locations
+  const createMenuItemsForLocations = (): JSX.Element[] => {
+    const locations = getLocations();
+    const menuItems: JSX.Element[] = [];
+    // Include empty selection as first value
+    menuItems.push(
+      <MenuItem key="empty" value="">
+        <em>{t("filtering.no_location")}</em>
       </MenuItem>
-    ));
+    );
+
+    Array.from(locations).map((location, index) =>
+      menuItems.push(
+        <MenuItem key={index} value={location}>
+          {location}
+        </MenuItem>
+      )
+    );
+    return menuItems;
   };
 
   const handleOpenDialog = (): void => {
@@ -283,7 +323,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   };
 
   const applyFilters = (): Tournament[] => {
-    let filtered: Tournament[] = [...tournaments];
+    let filtered: Tournament[] = getOriginalTournamentData();
 
     if (filterCriteria.participation) {
       if (userId !== undefined) {
@@ -292,23 +332,22 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     }
     if (filterCriteria.tournamentTypes.length > 0) {
       filtered = filterByTournamentType(
-        tournaments,
+        filtered,
         filterCriteria.tournamentTypes
       );
     }
     if (filterCriteria.categories.length > 0) {
       filtered = filterByCategory(filtered, filterCriteria.categories);
     }
-    if (filterCriteria.startDate !== null && filterCriteria.endDate !== null) {
-      filtered = filterByTime(
-        filtered,
-        filterCriteria.startDate,
-        filterCriteria.endDate
-      );
-    }
     if (filterCriteria.location !== "") {
       filtered = filterByLocation(filtered, filterCriteria.location);
     }
+    // Apply filter by time in any case, nulls are also handled by filterByTime
+    filtered = filterByTime(
+      filtered,
+      filterCriteria.startDate,
+      filterCriteria.endDate
+    );
     return filtered;
   };
 
@@ -353,7 +392,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
               onChange={handleLocationChange}
               style={{ marginBottom: "10px" }}
             >
-              {createMenuItemsForLocations(tournaments)}
+              {createMenuItemsForLocations()}
             </Select>
           </Box>
 
