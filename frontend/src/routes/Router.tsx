@@ -42,7 +42,10 @@ const routes = createRoutesFromElements(
           <Route path="new-tournament" element={<CreateTournamentForm />} />
         </Route>
 
-        <Route path="own-tournament/:tournamentId" element={<OwnTournament />} />
+        <Route
+          path="own-tournament/:tournamentId"
+          element={<OwnTournament />}
+        />
 
         <Route path=":id" element={<TournamentProvider />}>
           <Route index element={<TournamentDetails />} />
