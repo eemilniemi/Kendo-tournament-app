@@ -5,24 +5,31 @@ import type { Dayjs } from "dayjs";
 // Filter tournaments that are happening / have happened within given dates
 export const filterByTime = (
   tournaments: Tournament[],
-  startingFrom: Dayjs,
-  endingAt: Dayjs
+  startingFrom: Dayjs | null,
+  endingAt: Dayjs | null
 ): Tournament[] => {
-  const filtered = tournaments.filter((tournament) => {
-    const starts = dayjs(tournament.startDate);
-    const ends = dayjs(tournament.endDate);
+  return tournaments.filter((tournament) => {
+    const starts = dayjs(tournament.startDate).startOf("day");
+    const ends = dayjs(tournament.endDate).startOf("day");
 
-    // Set hours and minutes to zero to ignore them in comparisons, only dates matter
-    starts.startOf("day");
-    ends.startOf("day");
+    if (startingFrom === null && endingAt === null) {
+      return true; // Include all tournaments when both criteria are null
+    }
 
-    // Check that the event is ongoing during user given dates
-    return (
-      (starts.isBefore(startingFrom) || starts.isSame(startingFrom)) &&
-      (ends.isAfter(endingAt) || ends.isSame(endingAt))
-    );
+    if (startingFrom !== null && endingAt !== null) {
+      return starts.isBefore(endingAt) && ends.isAfter(startingFrom);
+    }
+
+    if (startingFrom !== null && endingAt === null) {
+      return starts.isBefore(startingFrom) && ends.isAfter(startingFrom);
+    }
+
+    if (startingFrom === null && endingAt !== null) {
+      return starts.isBefore(endingAt) && ends.isAfter(endingAt);
+    }
+
+    return false; // Exclude the tournament if none of the conditions match
   });
-  return filtered;
 };
 
 // Filter tournaments the user participates/has participated in
