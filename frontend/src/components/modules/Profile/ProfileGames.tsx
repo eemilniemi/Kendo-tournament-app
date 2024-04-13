@@ -11,12 +11,39 @@ import { useAuth } from "context/AuthContext";
 import api from "api/axios";
 import type { Tournament, Match, User } from "types/models";
 import { useTranslation } from "react-i18next";
+import FilterTournaments from "../Tournaments/FilterTournaments";
 
 const ProfileGames: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const navigate = useNavigate();
   const { userId } = useAuth();
   const { t } = useTranslation();
+  // State to keep track if filters have been applied
+  const [filtersApplied, setFiltersApplied] = useState(false);
+  // State for storing possible filtered tournaments
+  const [filteredTournaments, setFilteredTournaments] = useState<Tournament[]>(
+    []
+  );
+
+  // If nothing filtered, get right tournaments again
+  useEffect(() => {
+    if (filteredTournaments.length === 0) {
+      // tournaments; not sure what here
+    }
+  }, [filtersApplied]);
+
+  // Function to receive filtered tournaments from FilterTournaments
+  const handleFilteredTournaments = (
+    filteredTournaments: Tournament[],
+    areFiltersApplied: boolean
+  ): void => {
+    setFiltersApplied(areFiltersApplied);
+    if (filteredTournaments !== null) {
+      setFilteredTournaments(filteredTournaments);
+    } else {
+      // is undefined, sort somehow?
+    }
+  };
 
   useEffect(() => {
     const fetchTournaments = async (): Promise<void> => {
@@ -65,6 +92,11 @@ const ProfileGames: React.FC = () => {
 
   return (
     <Box>
+      <FilterTournaments
+        parentComponent="ProfileGames"
+        tournaments={tournaments}
+        handleFilteredTournaments={handleFilteredTournaments}
+      />
       {/* Map through tournaments and print info */}
       {tournaments.map((tournament, index) => (
         <Box key={index} style={{ marginBottom: "20px" }}>

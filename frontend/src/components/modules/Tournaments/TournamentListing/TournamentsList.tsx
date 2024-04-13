@@ -272,9 +272,9 @@ const TournamentList: React.FC = () => {
         </Select>
         {/* Filtering options button */}
         <FilterTournaments
-          tournaments={tournamentsToRender()}
-          tab={currentTab}
+          parentComponent="TournamentsList"
           handleFilteredTournaments={handleFilteredTournaments}
+          tab={currentTab}
         />
       </Box>
 
