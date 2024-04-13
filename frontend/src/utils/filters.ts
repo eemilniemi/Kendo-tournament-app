@@ -2,7 +2,6 @@ import type { Tournament, TournamentType, Category } from "types/models";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 
-// Filter tournaments that are happening / have happened within given dates
 export const filterByTime = (
   tournaments: Tournament[],
   startingFrom: Dayjs | null,
@@ -15,17 +14,30 @@ export const filterByTime = (
     if (startingFrom === null && endingAt === null) {
       return true; // Include all tournaments when both criteria are null
     }
-
+    // Filter tournaments that are happening / have happened within given dates
     if (startingFrom !== null && endingAt !== null) {
-      return starts.isBefore(endingAt) && ends.isAfter(startingFrom);
+      return (
+        (starts.isBefore(endingAt) || starts.isSame(endingAt)) &&
+        (ends.isAfter(startingFrom) || ends.isSame(startingFrom))
+      );
     }
-
+    // If only one date is given, find tournaments that happen on or after/on or before the given date
     if (startingFrom !== null && endingAt === null) {
-      return starts.isBefore(startingFrom) && ends.isAfter(startingFrom);
+      return (
+        (starts.isBefore(startingFrom) ||
+          starts.isAfter(startingFrom) ||
+          starts.isSame(startingFrom)) &&
+        (ends.isSame(startingFrom) || ends.isAfter(startingFrom))
+      );
     }
 
     if (startingFrom === null && endingAt !== null) {
-      return starts.isBefore(endingAt) && ends.isAfter(endingAt);
+      return (
+        (starts.isBefore(endingAt) || starts.isSame(endingAt)) &&
+        (ends.isBefore(endingAt) ||
+          ends.isAfter(endingAt) ||
+          ends.isSame(endingAt))
+      );
     }
 
     return false; // Exclude the tournament if none of the conditions match
