@@ -19,7 +19,7 @@ import {
   TournamentType,
   type UnsavedMatch
 } from "../models/tournamentModel.js";
-import { TournamentService } from "./tournamentService";
+import { TournamentService } from "./tournamentService.js";
 import { shuffle } from "../utility/utils.js";
 type rankingStruct = [Types.ObjectId, number, number];
 
@@ -235,7 +235,17 @@ export class MatchService {
             // case: some players tied for spot/spots, generate playoff elimination matches
             else if (ties[i].length > 0) {
               if (ties[i].length % 2 !== 0) {
-                console.log("UNEVEN TIES PLAYOFF, NOT IMPLEMENTED YET");
+                console.log("UNEVEN TIES PLAYOFF, CHECK IMPLEMENTATION");
+                const matches = await TournamentService.generatePlayoffSchedule(
+                  ties[i],
+                  tournament.id,
+                  tournament.matchTime,
+                  nextRound
+                );
+                const matchDocs = await MatchModel.insertMany(matches);
+                for (const match of matchDocs) {
+                  tournament.matchSchedule.push(match.id);
+                }
               } else {
                 const tiedPlayers = ties[i];
                 for (let j = 0; j < tiedPlayers.length; j += 2) {
@@ -263,31 +273,19 @@ export class MatchService {
         // no ties, proceeding to playoffs
         if (ties.flat().length === 0) {
           const playerIds = players.flat();
-          if (playerIds.length % 2 !== 0) {
-            console.log("UNEVEN PLAYOFF, NOT IMPLEMENTED YET");
-          } else {
-            const shuffledPlayerIds = playerIds;
-            const playoffRound =
-              MatchService.findHighestRound(
-                tournament.matchSchedule as Match[]
-              ) + 1;
-            for (let i = 0; i < shuffledPlayerIds.length; i += 2) {
-              const newMatch = {
-                players: [
-                  { id: shuffledPlayerIds[i], points: [], color: "white" },
-                  { id: shuffledPlayerIds[i + 1], points: [], color: "red" }
-                ],
-                type: "playoff",
-                elapsedTime: 0,
-                timerStartedTimestamp: null,
-                tournamentRound: playoffRound,
-                matchTime: tournament.matchTime,
-                tournamentId: tournament.id
-              };
+          const playoffRound =
+            MatchService.findHighestRound(tournament.matchSchedule as Match[]) +
+            1;
 
-              const matchDocuments = await MatchModel.create(newMatch);
-              tournament.matchSchedule.push(matchDocuments.id);
-            }
+          const matches = await TournamentService.generatePlayoffSchedule(
+            playerIds,
+            tournament.id,
+            tournament.matchTime,
+            playoffRound
+          );
+          const matchDocs = await MatchModel.insertMany(matches);
+          for (const match of matchDocs) {
+            tournament.matchSchedule.push(match.id);
           }
         }
 
