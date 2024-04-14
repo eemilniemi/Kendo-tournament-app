@@ -225,6 +225,41 @@ const PreliminaryPlayoffView: React.FC = () => {
     }
   }, [tournamentData.matchSchedule]);
 
+  const prevMatchScheduleRef = useRef(tournamentData.matchSchedule);
+
+  useEffect(() => {
+    // Function to check if there are any recently finished matches
+    const hasFinishedMatches = (
+      currentMatches: Match[],
+      previousMatches: Match[]
+    ): boolean => {
+      return currentMatches.some((match) => {
+        if (match.endTimestamp === undefined) return false; // Skip if match hasn't ended
+        // Search for a match with the same ID in previousMatches to compare its state to the current one
+        const prevMatch = previousMatches.find((m) => m.id === match.id);
+        // Returns true if either the match was not present in previousMatches (meaning
+        // it's a new match that has ended since the last check) or if the endTimestamp has changed
+        // (indicating the match has recently concluded)
+        return (
+          prevMatch === undefined ||
+          prevMatch.endTimestamp !== match.endTimestamp
+        );
+      });
+    };
+
+    if (
+      hasFinishedMatches(
+        tournamentData.matchSchedule,
+        prevMatchScheduleRef.current
+      )
+    ) {
+      updatePlayerStats(tournamentData, setPlayers);
+    }
+
+    // Update the ref with the current matchSchedule after running checks
+    prevMatchScheduleRef.current = tournamentData.matchSchedule;
+  }, [tournamentData.matchSchedule]);
+
   useEffect(() => {
     if (initialRender.current && players.length > 0) {
       initialRender.current = false;
