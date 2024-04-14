@@ -9,7 +9,7 @@ import {
 import { type Match, type User } from "types/models";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import PlayerName, { checkSameNames } from "../PlayerNames";
+import PlayerName, { checkSameNames } from "../../PlayerNames";
 import { useTournament } from "context/TournamentContext";
 
 interface BracketProps {

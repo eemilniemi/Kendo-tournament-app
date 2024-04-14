@@ -19,11 +19,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
-import DeleteUserFromTournament from "./DeleteUserFromTournament";
-import CopyToClipboardButton from "./CopyToClipboardButton";
+import DeleteUserFromTournament from "../DeleteUserFromTournament";
+import CopyToClipboardButton from "../CopyToClipboardButton";
 import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
-import PlayerName, { checkSameNames } from "../PlayerNames";
+import PlayerName, { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 
