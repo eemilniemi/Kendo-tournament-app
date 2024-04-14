@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Bracket from "./TournamentBracket";
-import { type User, type Match, Tournament } from "types/models";
+import { type User, type Match, type Tournament } from "types/models";
 import { useTournament } from "context/TournamentContext";
 import { Typography, Box, Grid, Divider } from "@mui/material";
 import ErrorModal from "components/common/ErrorModal";
@@ -70,13 +70,8 @@ const PlayoffTournamentView: React.FC = () => {
   let totalRounds = 0;
   let highestPreliminaryRound = 0;
 
-  const {
-    type,
-    matchSchedule,
-    players,
-    groups,
-    playersToPlayoffsPerGroup
-  } = tournamentData;
+  const { type, matchSchedule, players, groups, playersToPlayoffsPerGroup } =
+    tournamentData;
 
   if (type === "Preliminary Playoff") {
     // Calculate initial round number for playoff matches
