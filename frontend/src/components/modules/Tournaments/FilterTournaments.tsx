@@ -53,21 +53,22 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   handleFilteredTournaments
 }) => {
   const { t } = useTranslation();
-  const [filteringDialog, setFilteringDialog] = useState(false);
   const { userId, isAuthenticated } = useAuth();
-  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false);
   const { upcoming, ongoing, past } = useTournaments();
 
-  const getOriginalTournamentData = (): Tournament[] => {
-    if (tab === "upcoming") {
-      return upcoming;
-    } else if (tab === "ongoing") {
-      return ongoing;
-    } else {
-      return past;
-    }
-  };
+  const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
+    participation: false,
+    tournamentTypes: [],
+    categories: [],
+    startDate: null,
+    endDate: null,
+    location: ""
+  });
 
+  const [filteringDialog, setFilteringDialog] = useState(false);
+  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false);
+  const [previousTab, setPreviousTab] = useState<string | undefined>(undefined);
+  const [shouldResetFilters, setShouldResetFilters] = useState(false);
   // Arrays of tuples containing the type and its localization key, for populating dialog window
   const tournamentTypeOptions: Array<[TournamentType, string]> = [
     ["Round Robin", "types.round_robin"],
@@ -80,19 +81,27 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     ["league", "create_tournament_form.league"]
   ];
 
-  const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
-    participation: false,
-    tournamentTypes: [],
-    categories: [],
-    startDate: null,
-    endDate: null,
-    location: ""
-  });
+  const getOriginalTournamentData = (): Tournament[] => {
+    if (tab === "upcoming") {
+      return upcoming;
+    } else if (tab === "ongoing") {
+      return ongoing;
+    } else {
+      return past;
+    }
+  };
 
-  // Reset filter criteria when tab changes
+  // Reset filter criteria only when tab changes
   useEffect(() => {
-    resetFilters();
-  }, [tab]);
+    if (
+      (previousTab !== undefined && previousTab !== tab) ||
+      shouldResetFilters
+    ) {
+      resetFilters();
+      setShouldResetFilters(false);
+    }
+    setPreviousTab(tab);
+  }, [tab, previousTab, shouldResetFilters]);
 
   // State variables for keeping track of checkbox states
   const [tournamentTypeSelections, setTournamentTypeSelections] = useState<{
@@ -310,6 +319,12 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     });
   };
 
+  // Function to handle reset button click
+  const handleResetButtonClick = (): void => {
+    // Set shouldResetFilters to true to trigger resetting
+    setShouldResetFilters(true);
+  };
+
   // Function to apply filters when the user clicks the filter button
   const handleFilterClick = (): void => {
     const filteredTournaments = applyFilters();
@@ -449,7 +464,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
               color="secondary"
               variant="outlined"
               onClick={() => {
-                resetFilters();
+                handleResetButtonClick();
               }}
             >
               {t("buttons.reset")}
