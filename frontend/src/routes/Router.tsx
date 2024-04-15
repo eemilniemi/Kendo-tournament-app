@@ -51,11 +51,11 @@ const routes = createRoutesFromElements(
           <Route index element={<TournamentDetails />} />
           <Route element={<AuthenticationGuard />}>
             <Route path="sign-up" element={<Signup />} />
-            <Route
-              path="match/:matchId"
-              element={<SocketProvider>{<GameInterface />}</SocketProvider>}
-            ></Route>
           </Route>
+          <Route
+            path="match/:matchId"
+            element={<SocketProvider>{<GameInterface />}</SocketProvider>}
+          />
         </Route>
       </Route>
 
