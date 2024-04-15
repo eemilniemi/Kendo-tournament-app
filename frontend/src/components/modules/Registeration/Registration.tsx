@@ -184,9 +184,9 @@ const RegisterForm: React.FC = () => {
             margin="normal"
             parseError={(error) => {
               // Return a custom error message based on the error type or message
-              if (error.type === 'required') {
+              if (error.type === "required") {
                 return t("register_labels.required_text");
-              } else if (error.message === 'Password should match') {
+              } else if (error.message === "Password should match") {
                 return t("register_labels.password_match");
               }
               return error.message; // Default to using the error message as is
