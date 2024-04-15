@@ -141,7 +141,8 @@
     "missing_point_maker": "Puuttuu: pistevastaava",
     "missing_and": "ja pistevastaava",
     "group": "Lohko",
-    "playoff_stage_not_started": "Pudotuspelivaihe ei ole vielä alkanut."
+    "playoff_stage_not_started": "Pudotuspelivaihe ei ole vielä alkanut.",
+    "court_number": "Kenttä"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",

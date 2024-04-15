@@ -141,7 +141,8 @@
     "missing_point_maker": "Missing: Point maker",
     "missing_and": "and point maker",
     "group": "Group",
-    "playoff_stage_not_started": "Playoff stage has not started yet."
+    "playoff_stage_not_started": "Playoff stage has not started yet.",
+    "court_number": "Court"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",
