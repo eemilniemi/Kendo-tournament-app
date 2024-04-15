@@ -540,6 +540,11 @@ const GameInterface: React.FC = () => {
     return pointMaker;
   };
 
+  // Function to check if the user is a player in the tournament
+  const isUserInTournament = (userId: string, players: User[]): Boolean => {
+    return players.some(player => player.id === userId);
+  };
+
   return (
     <div className="app-container">
       <main className="main-content">
@@ -558,7 +563,8 @@ const GameInterface: React.FC = () => {
             {/* button is shown until the match is started */}
             {userId !== null &&
               userId !== undefined &&
-              matchInfo.startTimestamp === undefined && (
+              matchInfo.startTimestamp === undefined && 
+              isUserInTournament(userId, tournament.players) && (
                 <>
                   {/* button is disabled if both roles are checked and user is not one of them */}
                   <Button
