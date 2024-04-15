@@ -65,4 +65,10 @@ export const socketEvents = (
       return { ...state, matchInfo };
     });
   });
+
+  socket.on("reset", (matchInfo: Match) => {
+    setValue((state) => {
+      return { ...state, matchInfo };
+    });
+  });
 };

@@ -201,6 +201,9 @@ const match = {
     await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
       newPointType
     });
+  },
+  resetMatch: async (matchId: string) => {
+    await request.patch(`${MATCH_API}/${matchId}/reset`);
   }
 };
 

@@ -8,7 +8,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Grid
 } from "@mui/material";
 import PointTable from "./PointTable";
 import Timer from "./Timer";
@@ -545,6 +546,18 @@ const GameInterface: React.FC = () => {
     return players.some((player) => player.id === userId);
   };
 
+  const handleReset = async (): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.resetMatch(matchId);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+  };
+
+  const isUserTheCreator = tournament.creator.id === userId;
+
   return (
     <div className="app-container">
       <main className="main-content">
@@ -560,103 +573,134 @@ const GameInterface: React.FC = () => {
         )}
         {!isLoading && !isError && (
           <>
-            {/* button is shown until the match is started */}
-            {userId !== null &&
-              userId !== undefined &&
-              matchInfo.startTimestamp === undefined &&
-              isUserInTournament(userId, tournament.players) && (
-                <>
-                  {/* button is disabled if both roles are checked and user is not one of them */}
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      setOpenRoles(true);
-                    }}
-                    disabled={
-                      matchInfo.timeKeeper !== undefined &&
-                      matchInfo.pointMaker !== undefined &&
-                      matchInfo.timeKeeper !== userId &&
-                      matchInfo.pointMaker !== userId
-                    }
-                  >
-                    {t("game_interface.select_role")}
-                  </Button>
-                  <br />
-                  <br />
-                </>
-              )}
-            <Dialog open={openRoles} onClose={handleCloseRoles}>
-              <DialogTitle>{t("game_interface.select_role")}</DialogTitle>
-              <DialogContent>
-                {/* checkbox is shown if there is no time keeper yet
-                  or if user is the time keeper */}
-                {(matchInfo.timeKeeper === undefined ||
-                  matchInfo.timeKeeper === userId) && (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={timeKeeper}
-                        onChange={() => {
-                          setTimeKeeper(!timeKeeper);
+            <Grid container justifyContent="space-between">
+              {/* button is shown until the match is started */}
+              {userId !== null &&
+                userId !== undefined &&
+                matchInfo.startTimestamp === undefined &&
+                isUserInTournament(userId, tournament.players) && (
+                  <>
+                    <Grid item>
+                      {/* button is disabled if both roles are checked and user is not one of them */}
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setOpenRoles(true);
                         }}
-                      />
-                    }
-                    label={t("game_interface.time_keeper")}
-                  />
-                )}
-                {/* checkbox is shown if there is no point maker yet
-                  or if user is the point maker */}
-                {(matchInfo.pointMaker === undefined ||
-                  matchInfo.pointMaker === userId) && (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={pointMaker}
-                        onChange={() => {
-                          setPointMaker(!pointMaker);
-                        }}
-                      />
-                    }
-                    label={t("game_interface.point_maker")}
-                  />
-                )}
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseRoles}>
-                  {t("buttons.cancel_button")}
-                </Button>
-                <Button onClick={handleRoleSave}>
-                  {t("buttons.save_button")}
-                </Button>
-              </DialogActions>
-            </Dialog>
-            {/* elements shown only after match has started */}
-            {userId !== null &&
-              userId !== undefined &&
-              matchInfo.startTimestamp !== undefined && (
-                <>
-                  {/* print time keeper and point maker names */}
-                  <Typography variant="body2">
-                    {t("game_interface.time_keeper")}:{" "}
-                    <PlayerName
-                      firstName={findTimekeeper().firstName}
-                      lastName={findTimekeeper().lastName}
-                      sameNames={haveSameNames}
-                    />
+                        disabled={
+                          matchInfo.timeKeeper !== undefined &&
+                          matchInfo.pointMaker !== undefined &&
+                          matchInfo.timeKeeper !== userId &&
+                          matchInfo.pointMaker !== userId
+                        }
+                      >
+                        {t("game_interface.select_role")}
+                      </Button>
+                    </Grid>
                     <br />
-                    {t("game_interface.point_maker")}:{" "}
-                    {
-                      <PlayerName
-                        firstName={findPointmaker().firstName}
-                        lastName={findPointmaker().lastName}
-                        sameNames={haveSameNames}
-                      />
-                    }
-                  </Typography>
-                  <br />
-                  <br />
-                </>
-              )}
+                    <br />
+                  </>
+                )}
+              <Dialog open={openRoles} onClose={handleCloseRoles}>
+                <DialogTitle>{t("game_interface.select_role")}</DialogTitle>
+                <DialogContent>
+                  {/* checkbox is shown if there is no time keeper yet
+                  or if user is the time keeper */}
+                  {(matchInfo.timeKeeper === undefined ||
+                    matchInfo.timeKeeper === userId) && (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={timeKeeper}
+                          onChange={() => {
+                            setTimeKeeper(!timeKeeper);
+                          }}
+                        />
+                      }
+                      label={t("game_interface.time_keeper")}
+                    />
+                  )}
+                  {/* checkbox is shown if there is no point maker yet
+                  or if user is the point maker */}
+                  {(matchInfo.pointMaker === undefined ||
+                    matchInfo.pointMaker === userId) && (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={pointMaker}
+                          onChange={() => {
+                            setPointMaker(!pointMaker);
+                          }}
+                        />
+                      }
+                      label={t("game_interface.point_maker")}
+                    />
+                  )}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseRoles}>
+                    {t("buttons.cancel_button")}
+                  </Button>
+                  <Button onClick={handleRoleSave}>
+                    {t("buttons.save_button")}
+                  </Button>
+                </DialogActions>
+              </Dialog>
+              {/* elements shown only after match has started */}
+              {userId !== null &&
+                userId !== undefined &&
+                matchInfo.startTimestamp !== undefined && (
+                  <>
+                    <Grid item>
+                      {/* print time keeper and point maker names */}
+                      <Typography variant="body2">
+                        {t("game_interface.time_keeper")}:{" "}
+                        <PlayerName
+                          firstName={findTimekeeper().firstName}
+                          lastName={findTimekeeper().lastName}
+                          sameNames={haveSameNames}
+                        />
+                        <br />
+                        {t("game_interface.point_maker")}:{" "}
+                        {
+                          <PlayerName
+                            firstName={findPointmaker().firstName}
+                            lastName={findPointmaker().lastName}
+                            sameNames={haveSameNames}
+                          />
+                        }
+                      </Typography>
+                    </Grid>
+                    <br />
+                    <br />
+                  </>
+                )}
+              <Grid item xs={6} />
+              {/* Reset button 
+              Only shown for the tournament creator before the match ends */}
+              {userId !== null &&
+                userId !== undefined &&
+                matchInfo.startTimestamp !== undefined &&
+                matchInfo.endTimeStamp === undefined &&
+                isUserTheCreator && (
+                  <>
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        onClick={async () => {
+                          await handleReset();
+                        }}
+                      >
+                        {t("game_interface.reset")}
+                      </Button>
+                    </Grid>
+                    <br />
+                    <br />
+                  </>
+                )}
+            </Grid>
+            <br />
+            <br />
             <Box display="flex" gap="20px" justifyContent="center">
               <Box className="playerBox" bgcolor="white">
                 <Typography variant="h3">
