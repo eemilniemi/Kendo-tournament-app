@@ -182,6 +182,9 @@ const CreateTournamentForm: React.FC = () => {
           label={t("create_tournament_form.tournament_name")}
           fullWidth
           margin="normal"
+          validation={{
+            required: t("create_tournament_form.required_text")
+          }}
         />
 
         <TextFieldElement
@@ -190,6 +193,9 @@ const CreateTournamentForm: React.FC = () => {
           label={t("create_tournament_form.location")}
           fullWidth
           margin="normal"
+          validation={{
+            required: t("create_tournament_form.required_text")
+          }}
         />
 
         <Stack spacing={2} marginY={2}>
@@ -234,6 +240,9 @@ const CreateTournamentForm: React.FC = () => {
           label={t("create_tournament_form.description")}
           fullWidth
           margin="normal"
+          validation={{
+            required: t("create_tournament_form.required_text")
+          }}
         />
 
         <TextFieldElement
@@ -262,6 +271,9 @@ const CreateTournamentForm: React.FC = () => {
               label={t("create_tournament_form.payment_link")}
               fullWidth
               margin="normal"
+              validation={{
+                required: t("create_tournament_form.required_text")
+              }}
             />
           </React.Fragment>
         )}
@@ -381,6 +393,9 @@ const CreateTournamentForm: React.FC = () => {
               label={t("create_tournament_form.organizer_email")}
               fullWidth
               margin="normal"
+              validation={{
+                required: t("create_tournament_form.required_text")
+              }}
             />
 
             <TextFieldElement
