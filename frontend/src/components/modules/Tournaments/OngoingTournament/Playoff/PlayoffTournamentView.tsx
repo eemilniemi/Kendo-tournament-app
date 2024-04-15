@@ -28,6 +28,8 @@ const PlayoffTournamentView: React.FC = () => {
   const isUserTheCreator = tournament.creator.id === userId;
   const [hasJoined, setHasJoined] = useState(false);
 
+  const isPlayoff = tournament.type === "Playoff";
+
   const { tournamentData: socketData } = useSocket();
 
   const [tournamentData, setTournamentData] = useState<Tournament>(
@@ -134,14 +136,16 @@ const PlayoffTournamentView: React.FC = () => {
           "&::-webkit-scrollbar": { display: "none" }
         }}
       >
-        <Grid container alignItems="center" spacing={4}>
-          <Grid item>
-            <Typography variant="h4">{tournament.name}</Typography>
+        {isPlayoff && (
+          <Grid container alignItems="center" spacing={4}>
+            <Grid item>
+              <Typography variant="h4">{tournament.name}</Typography>
+            </Grid>
+            <Grid item>
+              <CopyToClipboardButton />
+            </Grid>
           </Grid>
-          <Grid item>
-            <CopyToClipboardButton />
-          </Grid>
-        </Grid>
+        )}
 
         <Grid
           container
