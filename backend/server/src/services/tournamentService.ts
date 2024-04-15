@@ -17,9 +17,15 @@ import {
   type EditTournamentRequest,
   type CreateTournamentRequest
 } from "../models/requestModel.js";
+import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
 
 export class TournamentService {
+  public async emitTournamentUpdate(tournamentId: string): Promise<void> {
+    const updatedTournament = await this.getTournamentById(tournamentId);
+    io.to(tournamentId).emit("tournament-updated", updatedTournament);
+  }
+
   public async getTournamentById(id: string): Promise<Tournament> {
     const tournament = await TournamentModel.findById(id)
       .populate<{ creator: User }>({ path: "creator", model: "User" })
