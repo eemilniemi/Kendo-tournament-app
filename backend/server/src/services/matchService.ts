@@ -635,6 +635,38 @@ export class MatchService {
     }
   }
 
+  public async resetMatch(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set time to zero
+    match.elapsedTime = 0;
+    match.startTimestamp = undefined;
+    match.timerStartedTimestamp = null;
+    match.isTimerOn = false;
+
+    // Set points to zero
+    if (match.players !== null && match.players.length > 0) {
+      const players = match.players as MatchPlayer[];
+      players.forEach((player) => {
+        player.points = [];
+      });
+    }
+
+    await match.save();
+
+    return await match.toObject();
+  }
+
   private findMostRecentPoint(players: MatchPlayer[]): {
     player: MatchPlayer | null;
     pointIndex: number;
