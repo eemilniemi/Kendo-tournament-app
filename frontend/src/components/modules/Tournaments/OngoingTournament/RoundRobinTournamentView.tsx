@@ -23,7 +23,6 @@ import { useAuth } from "context/AuthContext";
 import DeleteUserFromTournament from "./DeleteUserFromTournament";
 import CopyToClipboardButton from "./CopyToClipboardButton";
 import PlayerName, { checkSameNames } from "../PlayerNames";
-import { match } from "assert";
 
 export interface TournamentPlayer {
   id: string;
@@ -314,7 +313,11 @@ export const createMatchButton = (
             />
           </Button>
         )}
-        <Typography variant="body1" marginLeft="10px">{t("tournament_view_labels.court_number")}{": "}{match.courtNumber}</Typography>
+        <Typography variant="body1" marginLeft="10px">
+          {t("tournament_view_labels.court_number")}
+          {": "}
+          {match.courtNumber}
+        </Typography>
       </Box>
       {officialsInfo !== undefined && (
         <Typography variant="body2">{officialsInfo}</Typography>

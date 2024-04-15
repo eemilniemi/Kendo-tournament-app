@@ -274,7 +274,7 @@ const GameInterface: React.FC = () => {
           isOvertime: isovertime,
           type: matchType,
           time: matchTime,
-          courtNumber: court 
+          courtNumber: court
         });
       } catch (error) {
         setIsError(true);
@@ -659,9 +659,16 @@ const GameInterface: React.FC = () => {
                   <br />
                 </>
               )}
-            <Box display="flex" gap="20px" justifyContent="center" marginBottom="20px">
+            <Box
+              display="flex"
+              gap="20px"
+              justifyContent="center"
+              marginBottom="20px"
+            >
               <Typography variant="h5">
-                {t("tournament_view_labels.court_number")}{": "}{matchInfo.courtNumber}
+                {t("tournament_view_labels.court_number")}
+                {": "}
+                {matchInfo.courtNumber}
               </Typography>
             </Box>
             <Box display="flex" gap="20px" justifyContent="center">
