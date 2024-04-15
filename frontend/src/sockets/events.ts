@@ -1,7 +1,7 @@
 import { type Dispatch, type SetStateAction } from "react";
 import { socket } from "./index";
 import { type ISocketContext } from "context/SocketContext";
-import { type Match } from "types/models";
+import { type Tournament, type Match } from "types/models";
 
 export const socketEvents = (
   setValue: Dispatch<SetStateAction<ISocketContext>>
@@ -63,6 +63,13 @@ export const socketEvents = (
   socket.on("modify-recent", (matchInfo: Match) => {
     setValue((state) => {
       return { ...state, matchInfo };
+    });
+  });
+
+  socket.on("tournament-updated", (tournamentData: Tournament) => {
+    console.log("misu");
+    setValue((state) => {
+      return { ...state, tournamentData };
     });
   });
 };
