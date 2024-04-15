@@ -72,4 +72,10 @@ export const socketEvents = (
       return { ...state, tournamentData };
     });
   });
+
+  socket.on("reset", (matchInfo: Match) => {
+    setValue((state) => {
+      return { ...state, matchInfo };
+    });
+  });
 };
