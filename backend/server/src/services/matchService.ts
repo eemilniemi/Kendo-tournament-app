@@ -98,6 +98,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -137,6 +142,10 @@ export class MatchService {
     // Mark the timer to be off
     match.isTimerOn = false;
     await match.save();
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -295,6 +304,10 @@ export class MatchService {
         await MatchService.divideMatchesToCourts(tournament.id);
       }
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -322,6 +335,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -348,6 +366,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -371,6 +394,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -393,6 +421,11 @@ export class MatchService {
     match.pointMaker = undefined;
 
     await match.save();
+
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -449,6 +482,10 @@ export class MatchService {
 
       await match.save();
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -485,6 +522,10 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -527,6 +568,11 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -633,6 +679,38 @@ export class MatchService {
         await match.save();
       }
     }
+  }
+
+  public async resetMatch(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set time to zero
+    match.elapsedTime = 0;
+    match.startTimestamp = undefined;
+    match.timerStartedTimestamp = null;
+    match.isTimerOn = false;
+
+    // Set points to zero
+    if (match.players !== null && match.players.length > 0) {
+      const players = match.players as MatchPlayer[];
+      players.forEach((player) => {
+        player.points = [];
+      });
+    }
+
+    await match.save();
+
+    return await match.toObject();
   }
 
   private findMostRecentPoint(players: MatchPlayer[]): {

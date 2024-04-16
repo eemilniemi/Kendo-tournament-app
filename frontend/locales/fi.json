@@ -46,7 +46,8 @@
     "select_role": "Valitse toimitsijarooli",
     "time_keeper": "Kellokalle",
     "point_maker": "Pistevastaava",
-    "tie": "Tasapeli!"
+    "tie": "Tasapeli!",
+    "reset": "Nollaa ottelu"
   },
   "buttons": {
     "add_point_player_1": "Lisää piste pelaajalle 1",
@@ -88,7 +89,8 @@
   },
   "login_form": {
     "forgot_password": "Unohtuiko salasana?",
-    "sign_up": "Ei vielä käyttäjätiliä? Rekisteröidy"
+    "sign_up": "Ei vielä käyttäjätiliä? Rekisteröidy",
+    "required_text": "Tämä kenttä on pakollinen"
   },
   "password_recovery_form": {
     "email_helper_text": "Kirjoita sähköpostiosoitteesi, ja lähetämme sinulle linkin salasanan palauttamiseen"
@@ -120,7 +122,9 @@
   "register_labels": {
     "sign_in": "Kirjaudu sisään",
     "field_required_notice": "Täytä alla olevat kentät. Kentät, jotka on merkitty *, ovat pakollisia.",
-    "already_have_account": "Onko sinulla jo tili?"
+    "already_have_account": "Onko sinulla jo tili?",
+    "required_text": "Tämä kenttä on pakollinen",
+    "password_match": "Salasanojen tulisi täsmätä"
   },
   "tournament_view_labels": {
     "final": "Finaali",
@@ -207,7 +211,8 @@
     "league": "Liiga",
     "site_link": "Linkki järjestäjän sivuille",
     "paid": "Tämä turnaus on maksullinen",
-    "payment_link": "Linkki maksusivustolle"
+    "payment_link": "Linkki maksusivustolle",
+    "required_text": "Tämä kenttä on pakollinen"
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",

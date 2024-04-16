@@ -119,6 +119,10 @@ const tournaments = {
     });
   },
 
+  getTournament: async (tournamentId: string) => {
+    return await request.get<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`);
+  },
+
   createNew: async (body: CreateTournamentRequest) => {
     return await request.post<Tournament>(`${TOURNAMENTS_API}`, body);
   },
@@ -201,6 +205,9 @@ const match = {
     await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
       newPointType
     });
+  },
+  resetMatch: async (matchId: string) => {
+    await request.patch(`${MATCH_API}/${matchId}/reset`);
   }
 };
 

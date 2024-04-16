@@ -46,7 +46,8 @@
     "select_role": "Select role as an official",
     "time_keeper": "Time keeper",
     "point_maker": "Point maker",
-    "tie": "It's a tie!"
+    "tie": "It's a tie!",
+    "reset": "Reset match"
   },
   "buttons": {
     "add_point_player_1": "Add point for player 1",
@@ -88,7 +89,8 @@
   },
   "login_form": {
     "forgot_password": "Forgot password?",
-    "sign_up": "Don't have an account? Sign Up"
+    "sign_up": "Don't have an account? Sign Up",
+    "required_text": "This field is required"
   },
   "password_recovery_form": {
     "email_helper_text": "Enter your email and we’ll send you a link to reset your password"
@@ -120,7 +122,9 @@
   "register_labels": {
     "sign_in": "Sign In",
     "field_required_notice": "Fill in the fields below. Fields marked with * are required.",
-    "already_have_account": "Already have an account?"
+    "already_have_account": "Already have an account?",
+    "required_text": "This field is required",
+    "password_match": "Passwords should match"
   },
   "tournament_view_labels": {
     "final": "Final",
@@ -207,7 +211,8 @@
     "league": "League",
     "site_link": "Link to organizer's site",
     "paid": "This tournament requires payment",
-    "payment_link": "Link to payment site"
+    "payment_link": "Link to payment site",
+    "required_text": "This field is required"
   },
   "upcoming_tournament_view": {
     "date_header": "When",

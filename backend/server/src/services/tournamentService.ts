@@ -17,9 +17,15 @@ import {
   type EditTournamentRequest,
   type CreateTournamentRequest
 } from "../models/requestModel.js";
+import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
 
 export class TournamentService {
+  public async emitTournamentUpdate(tournamentId: string): Promise<void> {
+    const updatedTournament = await this.getTournamentById(tournamentId);
+    io.to(tournamentId).emit("tournament-updated", updatedTournament);
+  }
+
   public async getTournamentById(id: string): Promise<Tournament> {
     const tournament = await TournamentModel.findById(id)
       .populate<{ creator: User }>({ path: "creator", model: "User" })
@@ -102,7 +108,6 @@ export class TournamentService {
       });
     }
 
-    /*
     const currentDate = new Date();
     const startDate = new Date(tournament.startDate);
     if (currentDate > startDate) {
@@ -110,7 +115,6 @@ export class TournamentService {
         message: `Cannot add new players as the tournament has already started on ${startDate.toDateString()}`
       });
     }
-    */
 
     if (tournament.players.length >= tournament.maxPlayers) {
       throw new BadRequestError({
