@@ -54,6 +54,7 @@ export interface MatchData {
   isOvertime: boolean;
   type: MatchType;
   time: MatchTime;
+  courtNumber: number;
 }
 
 const GameInterface: React.FC = () => {
@@ -80,7 +81,8 @@ const GameInterface: React.FC = () => {
     elapsedTime: 0,
     isOvertime: false,
     type: "group",
-    time: 300000
+    time: 300000,
+    courtNumber: 1
   });
 
   const [openPoints, setOpenPoints] = useState(false);
@@ -142,6 +144,7 @@ const GameInterface: React.FC = () => {
         let isovertime: boolean = false;
         let matchType: MatchType = "group";
         let matchTime: MatchTime = 300000;
+        let court: number = 1;
 
         // Get players' names
         const findPlayerName = (playerId: string, index: number): void => {
@@ -199,6 +202,8 @@ const GameInterface: React.FC = () => {
           isovertime = matchInfoFromSocket.isOvertime;
           matchType = matchInfoFromSocket.type;
 
+          court = matchInfoFromSocket.courtNumber;
+
           setTimeKeeper(matchInfoFromSocket.timeKeeper !== undefined);
           setPointMaker(matchInfoFromSocket.pointMaker !== undefined);
         }
@@ -249,6 +254,8 @@ const GameInterface: React.FC = () => {
             isovertime = matchFromApi.isOvertime;
             matchType = matchFromApi.type;
 
+            court = matchFromApi.courtNumber;
+
             setTimeKeeper(matchInfo.timeKeeper !== undefined);
             setPointMaker(matchInfo.pointMaker !== undefined);
           }
@@ -267,7 +274,8 @@ const GameInterface: React.FC = () => {
           elapsedTime: elapsedtime,
           isOvertime: isovertime,
           type: matchType,
-          time: matchTime
+          time: matchTime,
+          courtNumber: court
         });
       } catch (error) {
         setIsError(true);
@@ -701,6 +709,18 @@ const GameInterface: React.FC = () => {
             </Grid>
             <br />
             <br />
+            <Box
+              display="flex"
+              gap="20px"
+              justifyContent="center"
+              marginBottom="20px"
+            >
+              <Typography variant="h5">
+                {t("tournament_view_labels.court_number")}
+                {": "}
+                {matchInfo.courtNumber}
+              </Typography>
+            </Box>
             <Box display="flex" gap="20px" justifyContent="center">
               <Box className="playerBox" bgcolor="white">
                 <Typography variant="h3">

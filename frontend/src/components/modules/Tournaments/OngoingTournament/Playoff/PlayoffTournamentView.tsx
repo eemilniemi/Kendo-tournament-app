@@ -194,11 +194,21 @@ const PlayoffTournamentView: React.FC = () => {
                         }
                       );
                       return (
-                        <Bracket
-                          key={match.id}
-                          players={tempPlayers}
-                          match={match}
-                        />
+                        <Grid item key={match.id}>
+                          <Typography
+                            variant="body2"
+                            style={{ textAlign: "center" }}
+                          >
+                            {t("tournament_view_labels.court_number")}
+                            {": "}
+                            {match.courtNumber}
+                          </Typography>
+                          <Bracket
+                            key={match.id}
+                            players={tempPlayers}
+                            match={match}
+                          />
+                        </Grid>
                       );
                     })}
                   </Box>

@@ -12,7 +12,8 @@ import {
   Typography,
   Button,
   type ButtonProps,
-  Grid
+  Grid,
+  Box
 } from "@mui/material";
 import { type User, type Match, type Tournament } from "types/models";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -298,26 +299,33 @@ export const createMatchButton = (
 
   return (
     <div style={{ marginBottom: "10px" }} key={match.id}>
-      {player1 !== undefined && player2 !== undefined && (
-        <Button
-          onClick={() => {
-            navigate(`match/${match.id}`);
-          }}
-          {...props}
-        >
-          <PlayerName
-            firstName={player1.firstName}
-            lastName={player1.lastName}
-            sameNames={haveSameNames}
-          />
-          {" - "}
-          <PlayerName
-            firstName={player2.firstName}
-            lastName={player2.lastName}
-            sameNames={haveSameNames}
-          />
-        </Button>
-      )}
+      <Box display="flex" alignItems="center">
+        {player1 !== undefined && player2 !== undefined && (
+          <Button
+            onClick={() => {
+              navigate(`match/${match.id}`);
+            }}
+            {...props}
+          >
+            <PlayerName
+              firstName={player1.firstName}
+              lastName={player1.lastName}
+              sameNames={haveSameNames}
+            />
+            {" - "}
+            <PlayerName
+              firstName={player2.firstName}
+              lastName={player2.lastName}
+              sameNames={haveSameNames}
+            />
+          </Button>
+        )}
+        <Typography variant="body1" marginLeft="10px">
+          {t("tournament_view_labels.court_number")}
+          {": "}
+          {match.courtNumber}
+        </Typography>
+      </Box>
       {officialsInfo !== undefined && (
         <Typography variant="body2">{officialsInfo}</Typography>
       )}
