@@ -71,7 +71,9 @@
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
 	  "withdraw_user": "Keskeytä pelaajan turnaus",
-    "copy_to_clipboard": "Jaa turnaus"
+    "copy_to_clipboard": "Jaa turnaus",
+    "filter": "Suodata",
+    "reset": "Tyhjennä"
   },
   "titles": {
     "login": "Kirjaudu sisään",
@@ -361,5 +363,15 @@
     "point_type": "Pistetyyppi",
     "points": "Pisteet",
     "created_tournaments": "Luodut turnaukset"
+  },
+  "filtering": {
+    "options": "Suodatusvalinnat",
+    "participation": "Osallistuminen",
+    "user_participates": "Turnaukset joihin osallistun",
+    "by_time": "Ajankohta",
+    "by_location": "Sijainti",
+    "no_location": "Ei valintaa",
+    "by_tournament_type": "Turnaustyyppi",
+    "by_tournament_category": "Kategoria"
   }
 }
