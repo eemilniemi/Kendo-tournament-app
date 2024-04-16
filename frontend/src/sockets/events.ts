@@ -73,7 +73,13 @@ export const socketEvents = (
     });
   });
 
-  socket.on("reset", (matchInfo: Match) => {
+  socket.on("reset-match", (matchInfo: Match) => {
+    setValue((state) => {
+      return { ...state, matchInfo };
+    });
+  });
+
+  socket.on("reset-roles", (matchInfo: Match) => {
     setValue((state) => {
       return { ...state, matchInfo };
     });

@@ -713,6 +713,34 @@ export class MatchService {
     return await match.toObject();
   }
 
+  public async resetRoles(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set the roles to zero
+    match.timeKeeper = undefined;
+    match.pointMaker = undefined;
+
+    await match.save();
+
+    // Websocket
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
+    return await match.toObject();
+  }
+
   private findMostRecentPoint(players: MatchPlayer[]): {
     player: MatchPlayer | null;
     pointIndex: number;
