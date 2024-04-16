@@ -564,6 +564,16 @@ const GameInterface: React.FC = () => {
     }
   };
 
+  const handleResetRoles = async (): Promise<void> => {
+    if (matchId !== undefined) {
+      try {
+        await api.match.resetRoles(matchId);
+      } catch (error) {
+        showToast(error, "error");
+      }
+    }
+  };
+
   const isUserTheCreator = tournament.creator.id === userId;
 
   return (
@@ -683,29 +693,38 @@ const GameInterface: React.FC = () => {
                     <br />
                   </>
                 )}
-              <Grid item xs={6} />
-              {/* Reset button 
-              Only shown for the tournament creator before the match ends */}
-              {userId !== null &&
-                userId !== undefined &&
-                matchInfo.startTimestamp !== undefined &&
-                matchInfo.endTimeStamp === undefined &&
-                isUserTheCreator && (
+              <Grid item xs={4}>
+                {isUserTheCreator && (
                   <>
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        onClick={async () => {
-                          await handleReset();
-                        }}
-                      >
-                        {t("game_interface.reset")}
-                      </Button>
-                    </Grid>
-                    <br />
-                    <br />
+                    {/* Reset button 
+                        Only shown for the tournament creator before the match ends */}
+                    {(userId !== null &&
+                      userId !== undefined &&
+                      matchInfo.startTimestamp !== undefined &&
+                      matchInfo.endTimeStamp === undefined) ? (
+                        <Button
+                          variant="contained"
+                          onClick={async () => {
+                            await handleReset();
+                          }}
+                        >
+                          {t("game_interface.reset")}
+                        </Button>
+                      ) : (
+                        // Reset roles button 
+                        // Only shown for the tournament creator before the match starts
+                        <Button
+                          variant="contained"
+                          onClick={async () => {
+                            await handleResetRoles();
+                          }}
+                        >
+                          {t("game_interface.reset_roles")}
+                        </Button>
+                      )}
                   </>
                 )}
+              </Grid>
             </Grid>
             <br />
             <br />
