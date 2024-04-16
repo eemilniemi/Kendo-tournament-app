@@ -48,13 +48,13 @@ describe('UserController', () => {
         it('should add valid user in the database', async () => {
             const allUsersBefore = await Helper.getTestUsers();
 
-            const res = await chai.request(app).post(endpoint).send(Helper.testUser2);
+            const res = await chai.request(app).post(endpoint).send(Helper.underageUser);
             expect(res).to.have.status(201);
 
             const allUsersAfter = await Helper.getTestUsers();
 
             expect(allUsersAfter.length).to.equal(allUsersBefore.length + 1);
-            expect(allUsersAfter.map(user => user.email)).to.contain('test-user2@gmail.com')
+            expect(allUsersAfter.map(user => user.email)).to.contain('underage@gmail.com')
         });
 
         it('should notify if user is already registered', async () => {
@@ -98,7 +98,7 @@ describe('UserController', () => {
         //lisää testejä...
     });
 
-    describe('EditUser', () => {
+    /*describe('EditUser', () => {
         // endpoint /api/user/:id
         // put
         it('should return the correct user if in database', () => {
@@ -118,7 +118,7 @@ describe('UserController', () => {
         it('should return the correct user if in database', () => {
             expect('TO').to.equal('DO');
         });
-    });
+    });*/
 
     //lisää test suiteja...
 

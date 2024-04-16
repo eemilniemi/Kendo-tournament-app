@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import UserModel, { type User } from "../src/models/userModel.ts"
+import UserModel, { type User as any } from "../src/models/userModel.ts"
 import config from "../src/utility/config.ts";
 
 let mongo: MongoMemoryServer;
@@ -41,8 +41,7 @@ let mongo: MongoMemoryServer;
 );*/
 
 // Valid test user 1
-const testUser: User = {
-  id: new mongoose.Types.ObjectId('123123123123'),
+const testUser: any = {
   email: 'test-user@gmail.com',
   userName: 'testUser',
   firstName: 'Test',
@@ -54,8 +53,7 @@ const testUser: User = {
 };
 
 // Valid test user 2
-const testUser2: User = {
-  id: new mongoose.Types.ObjectId('456456456456'),
+const testUser2: any = {
   email: 'test-user2@gmail.com',
   userName: 'testUser2',
   firstName: 'Other',
@@ -66,9 +64,20 @@ const testUser2: User = {
   underage: false
 };
 
+// Valid test user 3
+const testUser3: any = {
+  email: 'test-user3@gmail.com',
+  userName: 'testUser3',
+  firstName: 'Another',
+  lastName: 'User',
+  phoneNumber: '045987789987',
+  password: 'FooBar123',
+  inNationalTeam: false,
+  underage: false
+};
+
 // Valid underage user
-const underageUser: User = {
-  id: new mongoose.Types.ObjectId('789789789789'),
+const underageUser: any = {
   email: 'underage@gmail.com',
   userName: 'underage1',
   firstName: 'Another',
@@ -81,8 +90,7 @@ const underageUser: User = {
 };
 
 // Underage user without guardian email provided
-const faultyUnderage: User = {
-  id: new mongoose.Types.ObjectId('789789789789'),
+const faultyUnderage: any = {
   email: 'underage@gmail.com',
   userName: 'testUser3',
   firstName: 'Another',
@@ -94,8 +102,7 @@ const faultyUnderage: User = {
 };
 
 // User with bad password
-const badPassword: User = {
-  id: new mongoose.Types.ObjectId('123123123123'),
+const badPassword: any = {
   email: 'test-user@gmail.com',
   userName: 'testUser',
   firstName: 'Test',
@@ -114,6 +121,7 @@ async function initializeTestDb() {
   await mongoose.connect(mongoUri);
   console.log(`Connected to test database ${mongoUri}`);
   await UserModel.create(testUser);
+  await UserModel.create(testUser2);
   return mongo;
 };
 
@@ -170,6 +178,7 @@ export {
   badPassword, 
   testUser,
   testUser2,
+  testUser3,
   underageUser,
   faultyUnderage,
   getTestUsers, 
