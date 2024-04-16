@@ -1,23 +1,26 @@
 # Kendo Tournament App
 
-This document provides instructions for setting up the app, our development workflow, and deployment guidelines.
+This document provides instructions for setting up the app, our development workflow, deployment guidelines and the use of the app.
 
 ## Table of contents
 - [Starting the app](#how-to-start-the-app)
 
+
 - [Development workflow](#development-workflow)
- - [Branching strategy](#branching-strategy)
- - [Commit Guidelines](#commit-guidelines)
- - [Pull Request (PR) Process](#pull-request-pr-process)
- - [Git Etiquette](#git-etiquette)
- - [Tools](#tools)
+    - [Branching strategy](#branching-strategy)
+    - [Commit Guidelines](#commit-guidelines)
+    - [Pull Request (PR) Process](#pull-request-pr-process)
+    - [Git Etiquette](#git-etiquette)
+    - [Tools](#tools)
+
 
 - [Deployment](#deployment)
 
+
 - [Use](#use)
- - [Users](#users)
- - [Tournaments](#tournaments)
- - [Matches](#matches)
+    - [Users](#users)
+    - [Tournaments](#tournaments)
+    - [Matches](#matches)
 
 
 ## How to Start the App
