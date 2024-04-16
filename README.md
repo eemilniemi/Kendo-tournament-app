@@ -18,7 +18,7 @@ This document provides instructions for setting up the app, our development work
  - [Users](#users)
  - [Tournaments](#tournaments)
  - [Matches](#matches)
- 
+
 
 ## How to Start the App
 
@@ -78,11 +78,17 @@ To create or participate in tournaments, you need to create an account. The acco
 
 You can follow the tournaments and matches without an account.
 
+The available languages at the moment are Finnish and English. The language can be changed from the dropdown ("FI" or "EN") in the navigation bar. For developers: New languages can be added by creating new JSON files for them.
+
 ### Tournaments
 
-To create a tournament, tournament name, place, time and description are required to input in the tournament creation form. There are also some dropdowns to choose other required data, like tournament type, match length and the maximum number of participants. The input data depends on the tournament type. After a tournament is created, it can be seen in the "upcoming tournaments" tab. The tournament creator can see the tournaments they have created in their profile, under the "created tournaments" tab. The tab will show only when there are the user has some created tournaments. Every logged in user can sign up to the tournament with their profile data until the tournament starts. You can also see the details and other participants of the tournament by clicking the tournament card. As a tournament creator, it is possible to edit the tournament information or delete the tournament before it starts.
+To create a tournament, tournament name, place, time and description are required to input in the tournament creation form. There are also some dropdowns to choose other required data, like tournament type, match length, tournament category (hobby, championship or league) and the maximum number of participants. The input data depends a bit on the tournament type. 
 
-When the tournament starts, the matches are created automatically. By clicking the tournament card, you can see all the matches and the bracket or score table, depending on the tournament type. At this point, it's not possible to edit the tournament anymore. 
+After a tournament is created, it can be seen in the "upcoming tournaments" tab. The tournament creator can see the tournaments they have created in their profile, under the "created tournaments" tab. The tab will show only when the user has some created tournaments. This tab will have a more detailed list of the participants, with their emails and phone numbers, in case they need to be contacted. Every logged in user can sign up to the tournament with their profile data until the tournament starts. You can also see the details and other participants of the tournament by clicking the tournament card. As a tournament creator, it is possible to edit the tournament information or delete the tournament before it starts.
+
+When the tournament starts, the matches are created automatically. By clicking the tournament card, you can see all the matches and the bracket or score table, depending on the tournament type. At this point, it's not possible to edit the tournament anymore. The tournament creator can withdraw a player from a tournament, for example if the player gets injured. This marks all their matches to losses and gives free wins to the opponents. 
+
+The tournament listings can be sorted and filtered. There are sorters by names from A-Ö and Ö-A, time and location. The filters are by time, location, tournament type and tournament category.
 
 There are four types of tournaments: Round robin, Playoff, Preliminary groups with playoff and Swiss. 
 
@@ -101,4 +107,3 @@ In round robin, preliminary group stage and swiss, the points are accumulated so
 The matches for each tournament are generated automatically. You can navigate to the match view by clicking the match-up buttons (round robin and preliminary groups) or the match-up cards (playoff, preliminary playoff stage and swiss). Each match needs a point maker and a timekeeper before it's possible to start the match. To sign up for these roles, click the "Select role as an official" button. The timekeeper handles the timer and they are the only person who can see the "Start" button to start the timer. The point maker is the only one who can add points by clicking the "Add point for player x" button. They can also modify or delete the recent point they have assigned, were any mistakes to happen. If a match was started accidentally, the tournament creator can reset the match so that the timer and points are both reset to zero.
 
 The match ends after any of the players gets two points. If the timer meets the set length of the match (three, four or five minutes), the player with more points wins. If the points are even at this point, the match ends in a tie (round robin, preliminary groups, swiss) or an overtime starts (playoff, preliminary playoff stage). Overtime is played as long as one player makes a point and wins.
-
