@@ -11,7 +11,8 @@ import {
   Typography,
   FormGroup,
   MenuItem,
-  Box
+  Box,
+  IconButton
 } from "@mui/material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,7 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import { useTournaments } from "context/TournamentsContext";
 import { sortTournamentsByLocation } from "utils/sorters";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface FilterTournamentsProps {
   tournaments: Tournament[];
@@ -104,6 +106,8 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   }, [tab, previousTab, shouldResetFilters]);
 
   // State variables for keeping track of checkbox states
+  const [participationSelection, setParticipationSelection] = useState(false);
+
   const [tournamentTypeSelections, setTournamentTypeSelections] = useState<{
     [key in TournamentType]: boolean;
   }>({
@@ -124,20 +128,25 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     const storedFilters = sessionStorage.getItem("tournamentFilters");
     if (storedFilters !== null && storedFilters !== undefined) {
       const parsedFilters = JSON.parse(storedFilters);
-      // Check if startDate and endDate exist in parsedFilters
-      if (parsedFilters.startDate !== null && parsedFilters.endDate !== null) {
-        // Convert dates to Day.js objects
-        const startDate = dayjs(parsedFilters.startDate);
-        const endDate = dayjs(parsedFilters.endDate);
-        updateCriteria({
-          ...parsedFilters,
-          startDate,
-          endDate
-        });
-      } else {
-        updateCriteria(parsedFilters);
-      }
+
+      // Convert dates to Day.js objects if they are not null
+      const startDate =
+        parsedFilters.startDate !== null
+          ? dayjs(parsedFilters.startDate)
+          : null;
+      const endDate =
+        parsedFilters.endDate !== null ? dayjs(parsedFilters.endDate) : null;
+      updateCriteria({
+        ...parsedFilters,
+        startDate,
+        endDate
+      });
+
       // Update checkbox selections based on loaded filter criteria
+      if (parsedFilters.participation !== undefined) {
+        setParticipationSelection(parsedFilters.participation);
+      }
+
       setTournamentTypeSelections((prevSelections) => {
         const updatedSelections: { [key in TournamentType]: boolean } = {
           ...prevSelections
@@ -181,6 +190,8 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       endDate: null,
       location: ""
     });
+
+    setParticipationSelection(false);
 
     // Reset tournament type selections
     setTournamentTypeSelections((prevSelections) => {
@@ -267,8 +278,14 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   };
 
   const handleParticipationChange = (): void => {
+    const newParticipation =
+      filterCriteria.participation === null ||
+      filterCriteria.participation === undefined
+        ? false // Default value if filterCriteria.participation is null or undefined
+        : !filterCriteria.participation;
+    setParticipationSelection(newParticipation);
     const newCriteria: Partial<FilterCriteria> = {
-      participation: !filterCriteria.participation
+      participation: newParticipation
     };
     updateCriteria(newCriteria);
   };
@@ -371,7 +388,20 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       <Button onClick={handleOpenDialog}>{t("buttons.filter")}</Button>
 
       <Dialog open={filteringDialog} onClose={handleCloseDialog}>
-        <DialogTitle variant="h5">{t("filtering.options")}</DialogTitle>
+        <DialogTitle variant="h5">
+          {t("filtering.options")}
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseDialog}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           {/* this needs to be made visible only for logged in user */}
           {isAuthenticated && (
@@ -382,7 +412,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={filterCriteria.participation}
+                    checked={participationSelection}
                     onChange={handleParticipationChange}
                   />
                 }
