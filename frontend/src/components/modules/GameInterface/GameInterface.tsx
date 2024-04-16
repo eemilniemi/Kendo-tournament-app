@@ -558,6 +558,7 @@ const GameInterface: React.FC = () => {
     if (matchId !== undefined) {
       try {
         await api.match.resetMatch(matchId);
+        showToast(t("messages.match_reset"), "success");
       } catch (error) {
         showToast(error, "error");
       }
@@ -568,6 +569,7 @@ const GameInterface: React.FC = () => {
     if (matchId !== undefined) {
       try {
         await api.match.resetRoles(matchId);
+        showToast(t("messages.role_reset"), "success");
       } catch (error) {
         showToast(error, "error");
       }
@@ -591,7 +593,11 @@ const GameInterface: React.FC = () => {
         )}
         {!isLoading && !isError && (
           <>
-            <Grid container justifyContent="space-between">
+            <Grid
+              container
+              justifyContent="space-between"
+              style={{ display: "flex", alignItems: "center" }}
+            >
               {/* button is shown until the match is started */}
               {userId !== null &&
                 userId !== undefined &&
@@ -693,15 +699,14 @@ const GameInterface: React.FC = () => {
                     <br />
                   </>
                 )}
-              <Grid item xs={4}>
-                {isUserTheCreator && (
+              <Grid item xs={4} style={{ marginLeft: "auto" }}>
+                {isUserTheCreator && matchInfo.endTimeStamp === undefined && (
                   <>
                     {/* Reset button 
                         Only shown for the tournament creator before the match ends */}
                     {userId !== null &&
                     userId !== undefined &&
-                    matchInfo.startTimestamp !== undefined &&
-                    matchInfo.endTimeStamp === undefined ? (
+                    matchInfo.startTimestamp !== undefined ? (
                       <Button
                         variant="contained"
                         onClick={async () => {
@@ -718,6 +723,10 @@ const GameInterface: React.FC = () => {
                         onClick={async () => {
                           await handleResetRoles();
                         }}
+                        disabled={
+                          matchInfo.pointMaker === undefined ||
+                          matchInfo.timeKeeper === undefined
+                        }
                       >
                         {t("game_interface.reset_roles")}
                       </Button>
