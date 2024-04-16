@@ -25,6 +25,7 @@ import { SocketProvider } from "context/SocketContext";
 import GameInterface from "components/modules/GameInterface/GameInterface";
 import PasswordControl from "components/modules/PasswordControl/PasswordControl";
 import PrivacyPolicy from "components/modules/Legal/PrivacyPolicy";
+import OwnTournament from "components/modules/Tournaments/OwnTournament";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
@@ -41,15 +42,27 @@ const routes = createRoutesFromElements(
           <Route path="new-tournament" element={<CreateTournamentForm />} />
         </Route>
 
-        <Route path=":id" element={<TournamentProvider />}>
+        <Route
+          path="own-tournament/:tournamentId"
+          element={<OwnTournament />}
+        />
+
+        <Route
+          path=":id"
+          element={
+            <SocketProvider>
+              <TournamentProvider />
+            </SocketProvider>
+          }
+        >
           <Route index element={<TournamentDetails />} />
           <Route element={<AuthenticationGuard />}>
             <Route path="sign-up" element={<Signup />} />
-            <Route
-              path="match/:matchId"
-              element={<SocketProvider>{<GameInterface />}</SocketProvider>}
-            ></Route>
           </Route>
+          <Route
+            path="match/:matchId"
+            element={<SocketProvider>{<GameInterface />}</SocketProvider>}
+          />
         </Route>
       </Route>
 
@@ -61,16 +74,12 @@ const routes = createRoutesFromElements(
         <Route path={routePaths.register} element={<RegisterForm />} />
       </Route>
 
-      <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
-        <Route
-          path={routePaths.termsAndConditions}
-          element={<TermsAndConditions />}
-        />
-      </Route>
+      <Route
+        path={routePaths.termsAndConditions}
+        element={<TermsAndConditions />}
+      />
 
-      <Route element={<AuthenticationGuard guardType="unauthenticated" />}>
-        <Route path={routePaths.privacy} element={<PrivacyPolicy />} />
-      </Route>
+      <Route path={routePaths.privacy} element={<PrivacyPolicy />} />
 
       <Route element={<AuthenticationGuard />}>
         <Route path={routePaths.profile} element={<Profile />} />
