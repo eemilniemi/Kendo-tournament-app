@@ -29,7 +29,9 @@
     "minimum_player_to_playoff": "At least one player has to proceed",
     "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
-    "copy_failure": "Failed to copy tournament link"
+    "copy_failure": "Failed to copy tournament link",
+    "role_reset": "Official roles reset successfully!",
+    "match_reset": "Match reset successfully!"
   },
   "game_interface": {
     "player": "Player",
@@ -47,7 +49,8 @@
     "time_keeper": "Time keeper",
     "point_maker": "Point maker",
     "tie": "It's a tie!",
-    "reset": "Reset match"
+    "reset": "Reset match",
+    "reset_roles": "Reset official roles"
   },
   "buttons": {
     "add_point_player_1": "Add point for player 1",

@@ -29,7 +29,9 @@
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
     "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
-    "copy_failure": "Linkin kopioinnissa tapahtui virhe"
+    "copy_failure": "Linkin kopioinnissa tapahtui virhe",
+    "role_reset": "Toimitsijaroolien nollaus onnistui!",
+    "match_reset": "Ottelun nollaus onnistui!"
   },
   "game_interface": {
     "player": "Pelaaja",
@@ -47,7 +49,8 @@
     "time_keeper": "Kellokalle",
     "point_maker": "Pistevastaava",
     "tie": "Tasapeli!",
-    "reset": "Nollaa ottelu"
+    "reset": "Nollaa ottelu",
+    "reset_roles": "Nollaa toimitsijaroolit"
   },
   "buttons": {
     "add_point_player_1": "Lisää piste pelaajalle 1",
