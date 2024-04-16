@@ -2,6 +2,24 @@
 
 This document provides instructions for setting up the app, our development workflow, and deployment guidelines.
 
+## Table of contents
+- [Starting the app](#how-to-start-the-app)
+
+- [Development workflow](#development-workflow)
+ - [Branching strategy](#branching-strategy)
+ - [Commit Guidelines](#commit-guidelines)
+ - [Pull Request (PR) Process](#pull-request-pr-process)
+ - [Git Etiquette](#git-etiquette)
+ - [Tools](#tools)
+
+- [Deployment](#deployment)
+
+- [Use](#use)
+ - [Users](#users)
+ - [Tournaments](#tournaments)
+ - [Matches](#matches)
+ 
+
 ## How to Start the App
 
 The project is divided into three main components: [Frontend](https://github.com/Kendoers/Kendo-tournament-app/tree/development/frontend), [Backend](https://github.com/Koodikukkaro/Kendo-tournament-app/tree/development/backend/server), and [Database](https://github.com/Kendoers/Kendo-tournament-app/tree/development/backend/database). Instructions for setting up each component are available in their respective README files.
