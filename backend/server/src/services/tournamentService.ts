@@ -11,16 +11,21 @@ import { type HydratedDocument, Types } from "mongoose";
 import MatchModel, {
   type MatchType,
   type Match,
-  type MatchPlayer,
   type MatchTime
 } from "../models/matchModel.js";
 import {
   type EditTournamentRequest,
   type CreateTournamentRequest
 } from "../models/requestModel.js";
+import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
 
 export class TournamentService {
+  public async emitTournamentUpdate(tournamentId: string): Promise<void> {
+    const updatedTournament = await this.getTournamentById(tournamentId);
+    io.to(tournamentId).emit("tournament-updated", updatedTournament);
+  }
+
   public async getTournamentById(id: string): Promise<Tournament> {
     const tournament = await TournamentModel.findById(id)
       .populate<{ creator: User }>({ path: "creator", model: "User" })
@@ -133,10 +138,19 @@ export class TournamentService {
 
       tournament.matchSchedule = [];
     }
+    if(tournament.type === TournamentType.Swiss){
+      await MatchModel.deleteMany({ tournamentId: tournament.id });
+
+      tournament.matchSchedule = [];
+    }
 
     await tournament.save();
 
-    if (tournament.players.length > 1) {
+    // Playoff matches are calculated separately when the tournament has started
+    if (
+      tournament.players.length > 1 &&
+      tournament.type !== TournamentType.Playoff
+    ) {
       const newMatchIds = await this.generateTournamentSchedule(
         tournament,
         player.id
@@ -235,7 +249,7 @@ export class TournamentService {
     }
 
     // Check if the creatorId matches the tournament's creator
-    if (tournament.creator.id.toString() !== creatorId) {
+    if (tournament.creator.id.toString("hex") !== creatorId) {
       throw new BadRequestError({
         message: "Only the tournament creator can modify the tournament!"
       });
@@ -272,21 +286,68 @@ export class TournamentService {
     }
   }
 
+  public async getTournamentAndCreateSchedule(
+    tournamentId: string
+  ): Promise<Tournament | undefined> {
+    // Helper function for getting tournament based on id and creating schedule
+    // Used for tournament types where all matches are calculated simultaneously
+    try {
+      const tournament = await TournamentModel.findById(tournamentId).exec();
+      if (tournament === null) {
+        return;
+      } else if (tournament.matchSchedule.length !== 0) {
+        await tournament.populate([
+          { path: "matchSchedule", model: "Match" },
+          { path: "players", model: "User" }
+        ]);
+        return await tournament.toObject();
+      }
+
+      const newMatchIds = await this.generateTournamentSchedule(
+        tournament as Tournament
+      );
+      if (newMatchIds.length !== 0) {
+        tournament.matchSchedule.push(...newMatchIds);
+        await tournament.save();
+      }
+      await tournament.populate([
+        { path: "matchSchedule", model: "Match" },
+        { path: "players", model: "User" }
+      ]);
+      return await tournament.toObject();
+    } catch (error) {
+      console.error(
+        "Error in fetching tournament and creating schedule:",
+        error
+      );
+    }
+  }
+
   private async generateTournamentSchedule(
     tournament: Tournament,
-    newPlayer: Types.ObjectId
+    newPlayer: Types.ObjectId | undefined = undefined
   ): Promise<Types.ObjectId[]> {
-    let matches: UnsavedMatch[] = [];
+    let matches: Array<UnsavedMatch | Match> = [];
     switch (tournament.type) {
       case TournamentType.RoundRobin:
+        if (newPlayer === null) {
+          throw new TypeError(
+            "newPlayer shouldn't be null for round robin tournaments!"
+          );
+        }
         matches = TournamentService.generateRoundRobinSchedule(
           tournament.players as Types.ObjectId[],
-          newPlayer,
+          newPlayer as Types.ObjectId,
           tournament.id,
           tournament.matchTime
         );
         break;
       case TournamentType.Playoff:
+        if (newPlayer !== undefined) {
+          throw new TypeError(
+            "Playoff matches should be generated all at once"
+          );
+        }
         matches = await this.generatePlayoffSchedule(
           tournament.players as Types.ObjectId[],
           tournament.matchSchedule as Types.ObjectId[],
@@ -311,13 +372,12 @@ export class TournamentService {
         }
         break;
       case TournamentType.Swiss:
-        matches = await this.generatePlayoffSchedule(
+      
+        matches = TournamentService.generateSwissSchedule(
           tournament.players as Types.ObjectId[],
-          tournament.matchSchedule as Types.ObjectId[],
           tournament.id,
-          tournament.matchTime,
-          "swiss"
-        );
+          tournament.matchTime
+        )
 
         break;
     }
@@ -362,41 +422,38 @@ export class TournamentService {
     playerIds: Types.ObjectId[],
     previousMatches: Types.ObjectId[],
     tournament: Types.ObjectId,
-    tournamentMatchTime: MatchTime,
-    tournamentMatchType: MatchType = "playoff"
-  ): Promise<UnsavedMatch[]> {
-    const matches: UnsavedMatch[] = [];
-    const playerSet = new Set<string>();
+    tournamentMatchTime: MatchTime
+  ): Promise<Array<UnsavedMatch | Match>> {
+    const matches: Array<UnsavedMatch | Match> = [];
 
-    const matchDatas = await MatchModel.find({
-      _id: { $in: previousMatches }
-    }).exec();
+    const bracketSize = this.nextPowerOfTwo(playerIds.length);
+    const byesNeeded = bracketSize - playerIds.length;
 
-    for (const matchData of matchDatas) {
-      matchData.players.forEach((player) => {
-        const playerAsMatchPlayer = player as MatchPlayer;
-        if (
-          playerAsMatchPlayer.id !== null &&
-          playerAsMatchPlayer.id !== undefined
-        ) {
-          playerSet.add((player as MatchPlayer).id.toString());
-        }
+    // create the byes first to be added later
+    // this way the first registrants get the byes
+    let i: number;
+    const byes = [];
+    for (i = 0; i < byesNeeded; i++) {
+      byes.push({
+        players: [{ id: playerIds[i], points: [], color: "white" }],
+        type: "playoff",
+        elapsedTime: 0,
+        timerStartedTimestamp: null,
+        tournamentRound: 1,
+        tournamentId: tournament,
+        matchTime: tournamentMatchTime,
+        winner: playerIds[i]
       });
     }
-    const extraPlayers = [];
-    for (const id of playerIds) {
-      if (!playerSet.has(id.toString())) {
-        extraPlayers.push(id);
-      }
-    }
 
-    if (extraPlayers.length === 2) {
+    // add the rest of the matches
+    for (i; i < playerIds.length - 1; i += 2) {
       matches.push({
         players: [
-          { id: extraPlayers[0], points: [], color: "white" },
-          { id: extraPlayers[1], points: [], color: "red" }
+          { id: playerIds[i], points: [], color: "white" },
+          { id: playerIds[i + 1], points: [], color: "red" }
         ],
-        type: tournamentMatchType,
+        type: "playoff",
         elapsedTime: 0,
         timerStartedTimestamp: null,
         tournamentRound: 1,
@@ -405,6 +462,7 @@ export class TournamentService {
       });
     }
 
+    matches.push(...(byes as UnsavedMatch[]));
     return matches;
   }
 
@@ -413,6 +471,14 @@ export class TournamentService {
       return false;
     }
     return (n & (n - 1)) === 0;
+  }
+
+  private nextPowerOfTwo(n: number): number {
+    let power = 1;
+    while (power < n) {
+      power *= 2;
+    }
+    return power;
   }
 
   private calculateRoundRobinMatches(playerCount: number): number {
@@ -461,6 +527,47 @@ export class TournamentService {
     return tournament;
   }
 
+  private static generateSwissSchedule(
+    playerIds: Types.ObjectId[],
+    tournament: Types.ObjectId,
+    tournamentMatchTime: MatchTime,
+    tournamentRound: number = 1
+  ): UnsavedMatch[] {
+    const matches: UnsavedMatch[] = [];
+    const bye = []
+    for(let i=0; i<playerIds.length; i+=2){
+      if(i+1 === playerIds.length){
+        bye.push({
+          players: [{ id: playerIds[i], points: [], color: "white" }],
+          type: "swiss",
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound: 1,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime,
+          winner: playerIds[i],
+        });
+        matches.push(...bye as UnsavedMatch[]);
+      }
+      else{
+        matches.push({
+          players: [
+            { id: playerIds[i], points: [], color: "white" },
+            { id: playerIds[i+1], points: [], color: "red" }
+          ],
+          type: "swiss",
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime
+        });
+      }
+    }
+
+    return matches;
+  }
+
   private async validateTournamentDetails(
     tournamentDetails: CreateTournamentRequest | EditTournamentRequest,
     creatorOrUpdaterId: string,
@@ -469,17 +576,7 @@ export class TournamentService {
   ): Promise<void> {
     const MINIMUM_GROUP_SIZE = 3;
 
-    // If the tournament is of type playoff, validate max players
     if (
-      tournamentDetails.type === TournamentType.Playoff &&
-      tournamentDetails.maxPlayers !== undefined &&
-      !this.isPowerOfTwo(tournamentDetails.maxPlayers)
-    ) {
-      throw new BadRequestError({
-        message:
-          "Invalid number of players for a playoff tournament. The total number of players must be a power of 2."
-      });
-    } else if (
       tournamentDetails.type === TournamentType.RoundRobin &&
       tournamentDetails.maxPlayers !== undefined
     ) {

@@ -53,6 +53,7 @@ export interface Match {
   player1Score: number;
   player2Score: number;
   matchTime: MatchTime;
+  courtNumber: number;
 }
 
 export interface Tournament {

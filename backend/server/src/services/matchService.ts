@@ -98,6 +98,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -137,6 +142,10 @@ export class MatchService {
     // Mark the timer to be off
     match.isTimerOn = false;
     await match.save();
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -296,6 +305,7 @@ export class MatchService {
       }
     }
 
+    // swiss match generation logic
     if (match.type === "swiss") {
       const tournament = await this.checkAllMatchesPlayed(match);
       if (tournament !== null) {
@@ -316,6 +326,36 @@ export class MatchService {
             tournament.matchSchedule as Match[],
             tournament.players as Types.ObjectId[]
           );
+          console.log(rankings);
+          // grant bye
+          if(rankings.length % 2 !== 0){
+            for(let i=0; i<rankings.length; i++){
+              if(!this.hasHadBye(tournament.matchSchedule as Match[], rankings[i][0])){
+                const byeMatch = {
+                  players: [{ id: rankings[i][0], points: [], color: "white" }],
+                  type: "swiss",
+                  elapsedTime: 0,
+                  timerStartedTimestamp: null,
+                  tournamentRound: nextRound,
+                  tournamentId: tournament.id,
+                  matchTime: tournament.matchTime,
+                  winner: rankings[i][0]
+                }
+
+                swissPairings = this.removeFromAvailableSwiss(
+                  swissPairings,
+                  rankings[i][0],
+                  undefined
+                );
+                rankings.splice(i, 1);
+
+                const matchDocuments = await MatchModel.create(byeMatch);
+                tournament.matchSchedule.push(matchDocuments.id);
+
+                break;
+              }
+            }
+          }
 
           let i = 0;
           while (rankings.length > 0) {
@@ -352,7 +392,7 @@ export class MatchService {
             }
 
             if (i + 1 >= rankings.length && rankings.length > 0) {
-              console.log("SHIT, SOMETHING WRONG");
+              console.log("SOMETHING GONE WRONG");
               break;
             }
           }
@@ -362,6 +402,10 @@ export class MatchService {
         }
       }
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -389,6 +433,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -415,6 +464,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -438,6 +492,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -460,6 +519,11 @@ export class MatchService {
     match.pointMaker = undefined;
 
     await match.save();
+
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -493,7 +557,7 @@ export class MatchService {
             : player2.id;
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, match.winner);
+          await this.updatePlayoffSchedule(match.id, match.winner);
         }
       } else {
         // If the points are the same, it's a tie (in round robin)
@@ -516,6 +580,10 @@ export class MatchService {
 
       await match.save();
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -552,6 +620,10 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -594,10 +666,15 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
-  public static async divideMatchesToCourts(id: Types.ObjectId) {
+  public static async divideMatchesToCourts(id: Types.ObjectId): Promise<void> {
     const tournament = await TournamentModel.findById(id).exec();
 
     if (tournament === null || tournament === undefined) {
@@ -705,6 +782,38 @@ export class MatchService {
     }
   }
 
+  public async resetMatch(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set time to zero
+    match.elapsedTime = 0;
+    match.startTimestamp = undefined;
+    match.timerStartedTimestamp = null;
+    match.isTimerOn = false;
+
+    // Set points to zero
+    if (match.players !== null && match.players.length > 0) {
+      const players = match.players as MatchPlayer[];
+      players.forEach((player) => {
+        player.points = [];
+      });
+    }
+
+    await match.save();
+
+    return await match.toObject();
+  }
+
   private findMostRecentPoint(players: MatchPlayer[]): {
     player: MatchPlayer | null;
     pointIndex: number;
@@ -749,8 +858,8 @@ export class MatchService {
       match.endTimestamp = new Date();
 
       if (match.type === "playoff") {
-        // If playoff, create next round schedule
-        await this.createPlayoffSchedule(match.id, match.winner);
+        // If playoff, add match to next round schedule
+        await this.updatePlayoffSchedule(match.id, match.winner);
       }
     }
 
@@ -796,7 +905,7 @@ export class MatchService {
     pointWinner.points.push(point);
   }
 
-  private async createPlayoffSchedule(
+  private async updatePlayoffSchedule(
     matchId: Types.ObjectId,
     winnerId: Types.ObjectId
   ): Promise<void> {
@@ -889,6 +998,7 @@ export class MatchService {
 
         const matchDocuments = await MatchModel.create(newMatch);
         tournament.matchSchedule.push(matchDocuments.id);
+        break;
       }
     }
 
@@ -1053,7 +1163,7 @@ export class MatchService {
     let played = 0;
 
     for (let i = 0; i < playedMatches.length; i++) {
-      if (playedMatches[i].endTimestamp !== undefined) {
+      if (playedMatches[i].endTimestamp !== undefined || playedMatches[i].winner !== undefined) {
         played++;
       }
     }
@@ -1185,13 +1295,15 @@ export class MatchService {
       () => []
     );
     for (const match of matches) {
-      for (let i = 0; i < tournament.groups.length; i++) {
-        const player = match.players[0] as MatchPlayer;
-        const playerId = player.id;
-        if (tournament.groups[i].includes(playerId)) {
-          matchesByGroup[i].push(match);
-          break;
-        }
+      const player = match.players[0] as MatchPlayer;
+      const playerId = player.id;
+      const groupIndex = tournament.groups.findIndex((group) =>
+        group.includes(playerId)
+      );
+
+      if (groupIndex !== -1) {
+        matchesByGroup[groupIndex].push(match);
+        break;
       }
     }
 
@@ -1221,24 +1333,34 @@ export class MatchService {
     const map = new Map<string, string[]>();
     for (const match of matches) {
       const matchPlayer1 = match.players[0] as MatchPlayer;
-      const matchPlayer2 = match.players[1] as MatchPlayer;
       const player1Id = matchPlayer1.id.toString();
-      const player2Id = matchPlayer2.id.toString();
-      if (map.has(player1Id)) {
-        const array = map.get(player1Id) as string[];
-        array.push(matchPlayer2.id.toString());
-        map.set(player1Id, array);
-      } else {
-        map.set(player1Id, [player1Id, player2Id]);
+
+      if(match.players.length !== 1){
+        const matchPlayer2 = match.players[1] as MatchPlayer;
+        const player2Id = matchPlayer2.id.toString();
+        if (map.has(player1Id)) {
+          const array = map.get(player1Id) as string[];
+          array.push(player2Id);
+          map.set(player1Id, array);
+        } else {
+          map.set(player1Id, [player1Id, player2Id]);
+        }
+
+        if (map.has(player2Id)) {
+          const array = map.get(player2Id) as string[];
+          array.push(player1Id);
+          map.set(player2Id, array);
+        } else {
+          map.set(player2Id, [player2Id, player1Id]);
+        }
+      }
+      else {
+        if(!map.has(player1Id)){
+          map.set(player1Id, [player1Id]);
+        }
       }
 
-      if (map.has(player2Id)) {
-        const array = map.get(player2Id) as string[];
-        array.push(player1Id);
-        map.set(player2Id, array);
-      } else {
-        map.set(player2Id, [player2Id, player1Id]);
-      }
+      
     }
 
     const swissMap = new Map<string, Types.ObjectId[]>();
@@ -1273,28 +1395,50 @@ export class MatchService {
   private removeFromAvailableSwiss(
     swissMap: Map<string, Types.ObjectId[]>,
     player1Id: Types.ObjectId,
-    player2Id: Types.ObjectId
+    player2Id: Types.ObjectId | undefined
   ): Map<string, Types.ObjectId[]> {
     for (const [key, value] of swissMap) {
       if (player1Id.toString() === key) {
         swissMap.delete(key);
       }
-      if (player2Id.toString() === key) {
-        swissMap.delete(key);
-      }
+      
       const index1 = value.indexOf(player1Id);
-      const index2 = value.indexOf(player2Id);
-
+      
       if (index1 !== -1) {
         value.splice(index1, 1);
         swissMap.set(key, value);
       }
-      if (index2 !== -1) {
-        value.splice(index2, 1);
-        swissMap.set(key, value);
+
+      if(player2Id !== undefined){
+        const index2 = value.indexOf(player2Id);
+        if (player2Id.toString() === key) {
+          swissMap.delete(key);
+        }
+        if (index2 !== -1) {
+          value.splice(index2, 1);
+          swissMap.set(key, value);
+        }
       }
+      
     }
 
     return swissMap;
+  }
+
+  private hasHadBye(
+    matches: Match[],
+    playerId: Types.ObjectId
+  ): boolean {
+
+    for(const match of matches){
+      if(match.players.length === 1){
+        const matchPlayer = match.players[0] as MatchPlayer;
+        if(matchPlayer.id.toString() === playerId.toString()){
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

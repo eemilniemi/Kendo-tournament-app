@@ -222,4 +222,18 @@ export class MatchController extends Controller {
 
     io.to(matchId).emit("modify-recent", match);
   }
+
+  /*
+   * Reset the match: time and points to zero
+   */
+
+  @Patch("{matchId}/reset")
+  @Tags("Match")
+  @Security("jwt")
+  public async resetMatch(@Path() matchId: ObjectIdString): Promise<void> {
+    this.setStatus(204);
+    const match = await this.service.resetMatch(matchId);
+
+    io.to(matchId).emit("reset", match);
+  }
 }

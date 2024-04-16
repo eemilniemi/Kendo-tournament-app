@@ -3,16 +3,16 @@ import { Tabs, Tab, Typography, Grid } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
-import CopyToClipboardButton from "./CopyToClipboardButton";
+import CopyToClipboardButton from "../CopyToClipboardButton";
 import {
   getPlayerNames,
   Scoreboard,
   sortMatches,
   type TournamentPlayer,
   updatePlayerStats
-} from "./RoundRobinTournamentView";
-import PlayoffTournamentView from "./PlayoffTournamentView";
-import { type Match } from "../../../../types/models";
+} from "../RoundRobin/RoundRobinTournamentView";
+import PlayoffTournamentView from "../Playoff/PlayoffTournamentView";
+import { type Match } from "../../../../../types/models";
 
 const SwissTournamentView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +84,7 @@ const SwissTournamentView: React.FC = () => {
           <Tab label={t("tournament_view_labels.matches")} value="playoff" />
         </Tabs>
 
-        {currentTab === "scoreboard" && <Scoreboard players={players} />}
+        {currentTab === "scoreboard" && <Scoreboard players={players} haveSameNames={false} />}
 
         {currentTab === "playoff" && <PlayoffTournamentView />}
       </>

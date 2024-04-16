@@ -119,8 +119,20 @@ const tournaments = {
     });
   },
 
+  getTournament: async (tournamentId: string) => {
+    return await request.get<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`);
+  },
+
   createNew: async (body: CreateTournamentRequest) => {
     return await request.post<Tournament>(`${TOURNAMENTS_API}`, body);
+  },
+
+  createSchedule: async (tournamentId: string): Promise<Tournament> => {
+    const res = await request.post(
+      `${TOURNAMENTS_API}/${tournamentId}/create-schedule`,
+      {}
+    );
+    return res as Tournament;
   },
 
   signup: async (tournamentId: string, body: SignupForTournamentRequest) => {
@@ -193,6 +205,9 @@ const match = {
     await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
       newPointType
     });
+  },
+  resetMatch: async (matchId: string) => {
+    await request.patch(`${MATCH_API}/${matchId}/reset`);
   }
 };
 
