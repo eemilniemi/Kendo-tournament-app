@@ -104,23 +104,44 @@ const TournamentList: React.FC = () => {
         tournaments = [...ongoing];
     }
 
-    // Sort tournaments based on chosen sorting criteria
-    switch (sortBy) {
-      case "mostRecent":
-        sortTournamentsByMostRecent(tournaments);
-        break;
-      case "oldest":
-        sortTournamentsByOldest(tournaments);
-        break;
-      case "name":
-        sortTournamentsByName(tournaments);
-        break;
-      case "nameDesc":
-        sortTournamentsByDescName(tournaments);
-        break;
-      case "location":
-        sortTournamentsByLocation(tournaments);
-        break;
+    if (filtersApplied) {
+      // Sort tournaments based on chosen sorting criteria
+      switch (sortBy) {
+        case "mostRecent":
+          sortTournamentsByMostRecent(filteredTournaments);
+          break;
+        case "oldest":
+          sortTournamentsByOldest(filteredTournaments);
+          break;
+        case "name":
+          sortTournamentsByName(filteredTournaments);
+          break;
+        case "nameDesc":
+          sortTournamentsByDescName(filteredTournaments);
+          break;
+        case "location":
+          sortTournamentsByLocation(filteredTournaments);
+          break;
+      }
+    } else {
+      // Sort tournaments based on chosen sorting criteria
+      switch (sortBy) {
+        case "mostRecent":
+          sortTournamentsByMostRecent(tournaments);
+          break;
+        case "oldest":
+          sortTournamentsByOldest(tournaments);
+          break;
+        case "name":
+          sortTournamentsByName(tournaments);
+          break;
+        case "nameDesc":
+          sortTournamentsByDescName(tournaments);
+          break;
+        case "location":
+          sortTournamentsByLocation(tournaments);
+          break;
+      }
     }
 
     // Show filtered tournaments if filters are applied
