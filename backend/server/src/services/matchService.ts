@@ -21,7 +21,7 @@ import {
 } from "../models/tournamentModel.js";
 import { TournamentService } from "./tournamentService";
 import { shuffle } from "../utility/utils.js";
-import { match } from "assert";
+
 type rankingStruct = [Types.ObjectId, number, number];
 
 // Note by Samuel:
@@ -329,9 +329,14 @@ export class MatchService {
           );
           console.log(rankings);
           // grant bye
-          if(rankings.length % 2 !== 0){
-            for(let i=0; i<rankings.length; i++){
-              if(!this.hasHadBye(tournament.matchSchedule as Match[], rankings[i][0])){
+          if (rankings.length % 2 !== 0) {
+            for (let i = 0; i < rankings.length; i++) {
+              if (
+                !this.hasHadBye(
+                  tournament.matchSchedule as Match[],
+                  rankings[i][0]
+                )
+              ) {
                 const byeMatch = {
                   players: [{ id: rankings[i][0], points: [], color: "white" }],
                   type: "swiss",
@@ -341,7 +346,7 @@ export class MatchService {
                   tournamentId: tournament.id,
                   matchTime: tournament.matchTime,
                   winner: rankings[i][0]
-                }
+                };
 
                 swissPairings = this.removeFromAvailableSwiss(
                   swissPairings,
@@ -403,7 +408,7 @@ export class MatchService {
         }
       }
     }
-    
+
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
@@ -614,12 +619,10 @@ export class MatchService {
           match.winner = undefined; // Clear the winner
           match.endTimestamp = undefined; // Clear the end timestamp
 
-          
-          if(match.type !== "group"){
+          if (match.type !== "group") {
             const tournamentId = match.tournamentId as Types.ObjectId;
-            this.deleteNextRound(tournamentId, match.tournamentRound);
+            await this.deleteNextRound(tournamentId, match.tournamentRound);
           }
-
         }
 
         await match.save();
@@ -1015,15 +1018,15 @@ export class MatchService {
     eligibleWinners.push(winnerId);
     // Pair current winner with eligible winners for the next round
 
-    for(let i = 0; i<eligibleWinners.length; i+=2){
-      if(i+1===eligibleWinners.length){
+    for (let i = 0; i < eligibleWinners.length; i += 2) {
+      if (i + 1 === eligibleWinners.length) {
         break;
       }
       // Create a new match.
       const newMatch = {
         players: [
           { id: eligibleWinners[i], points: [], color: "white" },
-          { id: eligibleWinners[i+1], points: [], color: "red" }
+          { id: eligibleWinners[i + 1], points: [], color: "red" }
         ],
         type: "playoff",
         elapsedTime: 0,
@@ -1198,7 +1201,10 @@ export class MatchService {
     let played = 0;
 
     for (let i = 0; i < playedMatches.length; i++) {
-      if (playedMatches[i].endTimestamp !== undefined || playedMatches[i].winner !== undefined) {
+      if (
+        playedMatches[i].endTimestamp !== undefined ||
+        playedMatches[i].winner !== undefined
+      ) {
         played++;
       }
     }
@@ -1370,7 +1376,7 @@ export class MatchService {
       const matchPlayer1 = match.players[0] as MatchPlayer;
       const player1Id = matchPlayer1.id.toString();
 
-      if(match.players.length !== 1){
+      if (match.players.length !== 1) {
         const matchPlayer2 = match.players[1] as MatchPlayer;
         const player2Id = matchPlayer2.id.toString();
         if (map.has(player1Id)) {
@@ -1388,14 +1394,11 @@ export class MatchService {
         } else {
           map.set(player2Id, [player2Id, player1Id]);
         }
-      }
-      else {
-        if(!map.has(player1Id)){
+      } else {
+        if (!map.has(player1Id)) {
           map.set(player1Id, [player1Id]);
         }
       }
-
-      
     }
 
     const swissMap = new Map<string, Types.ObjectId[]>();
@@ -1436,15 +1439,15 @@ export class MatchService {
       if (player1Id.toString() === key) {
         swissMap.delete(key);
       }
-      
+
       const index1 = value.indexOf(player1Id);
-      
+
       if (index1 !== -1) {
         value.splice(index1, 1);
         swissMap.set(key, value);
       }
 
-      if(player2Id !== undefined){
+      if (player2Id !== undefined) {
         const index2 = value.indexOf(player2Id);
         if (player2Id.toString() === key) {
           swissMap.delete(key);
@@ -1454,21 +1457,16 @@ export class MatchService {
           swissMap.set(key, value);
         }
       }
-      
     }
 
     return swissMap;
   }
 
-  private hasHadBye(
-    matches: Match[],
-    playerId: Types.ObjectId
-  ): boolean {
-
-    for(const match of matches){
-      if(match.players.length === 1){
+  private hasHadBye(matches: Match[], playerId: Types.ObjectId): boolean {
+    for (const match of matches) {
+      if (match.players.length === 1) {
         const matchPlayer = match.players[0] as MatchPlayer;
-        if(matchPlayer.id.toString() === playerId.toString()){
+        if (matchPlayer.id.toString() === playerId.toString()) {
           return true;
         }
       }
@@ -1480,17 +1478,21 @@ export class MatchService {
   private async deleteNextRound(
     tournamentId: Types.ObjectId,
     currentRound: number
-  ){
-    const matches = await MatchModel.find({tournamentId: tournamentId, tournamentRound: currentRound+1});
-    if(matches.length > 0){
-      
-      const matchIds = matches.map(match => match.id);
+  ): Promise<void> {
+    const matches = await MatchModel.find({
+      tournamentId,
+      tournamentRound: currentRound + 1
+    });
+    if (matches.length > 0) {
+      const matchIds = matches.map((match) => match.id);
       await TournamentModel.updateOne(
         { _id: tournamentId },
-        { $pull: { matchSchedule: { $in: matchIds } } });
-      await MatchModel.deleteMany({ tournamentId: tournamentId, round: currentRound+1 });
-      
+        { $pull: { matchSchedule: { $in: matchIds } } }
+      );
+      await MatchModel.deleteMany({
+        tournamentId,
+        round: currentRound + 1
+      });
     }
-    
   }
 }

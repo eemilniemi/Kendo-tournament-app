@@ -138,7 +138,7 @@ export class TournamentService {
 
       tournament.matchSchedule = [];
     }
-    if(tournament.type === TournamentType.Swiss){
+    if (tournament.type === TournamentType.Swiss) {
       await MatchModel.deleteMany({ tournamentId: tournament.id });
 
       tournament.matchSchedule = [];
@@ -372,12 +372,11 @@ export class TournamentService {
         }
         break;
       case TournamentType.Swiss:
-      
         matches = TournamentService.generateSwissSchedule(
           tournament.players as Types.ObjectId[],
           tournament.id,
           tournament.matchTime
-        )
+        );
 
         break;
     }
@@ -534,9 +533,9 @@ export class TournamentService {
     tournamentRound: number = 1
   ): UnsavedMatch[] {
     const matches: UnsavedMatch[] = [];
-    const bye = []
-    for(let i=0; i<playerIds.length; i+=2){
-      if(i+1 === playerIds.length){
+    const bye = [];
+    for (let i = 0; i < playerIds.length; i += 2) {
+      if (i + 1 === playerIds.length) {
         bye.push({
           players: [{ id: playerIds[i], points: [], color: "white" }],
           type: "swiss",
@@ -545,15 +544,14 @@ export class TournamentService {
           tournamentRound: 1,
           tournamentId: tournament,
           matchTime: tournamentMatchTime,
-          winner: playerIds[i],
+          winner: playerIds[i]
         });
-        matches.push(...bye as UnsavedMatch[]);
-      }
-      else{
+        matches.push(...(bye as UnsavedMatch[]));
+      } else {
         matches.push({
           players: [
             { id: playerIds[i], points: [], color: "white" },
-            { id: playerIds[i+1], points: [], color: "red" }
+            { id: playerIds[i + 1], points: [], color: "red" }
           ],
           type: "swiss",
           elapsedTime: 0,
