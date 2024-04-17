@@ -21,6 +21,7 @@ import {
 } from "../models/tournamentModel.js";
 import { TournamentService } from "./tournamentService";
 import { shuffle } from "../utility/utils.js";
+import { match } from "assert";
 type rankingStruct = [Types.ObjectId, number, number];
 
 // Note by Samuel:
@@ -612,6 +613,13 @@ export class MatchService {
         if (wasMatchEndingPoint) {
           match.winner = undefined; // Clear the winner
           match.endTimestamp = undefined; // Clear the end timestamp
+
+          
+          if(match.type !== "group"){
+            const tournamentId = match.tournamentId as Types.ObjectId;
+            this.deleteNextRound(tournamentId, match.tournamentRound);
+          }
+
         }
 
         await match.save();
@@ -1004,31 +1012,29 @@ export class MatchService {
       );
     });
 
+    eligibleWinners.push(winnerId);
     // Pair current winner with eligible winners for the next round
-    for (const pairWithWinnerId of eligibleWinners) {
-      if (
-        pairWithWinnerId !== null &&
-        pairWithWinnerId !== undefined &&
-        !pairWithWinnerId.equals(winnerId)
-      ) {
-        // Create a new match.
-        const newMatch = {
-          players: [
-            { id: winnerId, points: [], color: "white" },
-            { id: pairWithWinnerId, points: [], color: "red" }
-          ],
-          type: "playoff",
-          elapsedTime: 0,
-          timerStartedTimestamp: null,
-          tournamentRound: nextRound,
-          matchTime: tournament.matchTime,
-          tournamentId: tournament.id
-        };
 
-        const matchDocuments = await MatchModel.create(newMatch);
-        tournament.matchSchedule.push(matchDocuments.id);
+    for(let i = 0; i<eligibleWinners.length; i+=2){
+      if(i+1===eligibleWinners.length){
         break;
       }
+      // Create a new match.
+      const newMatch = {
+        players: [
+          { id: eligibleWinners[i], points: [], color: "white" },
+          { id: eligibleWinners[i+1], points: [], color: "red" }
+        ],
+        type: "playoff",
+        elapsedTime: 0,
+        timerStartedTimestamp: null,
+        tournamentRound: nextRound,
+        matchTime: tournament.matchTime,
+        tournamentId: tournament.id
+      };
+
+      const matchDocuments = await MatchModel.create(newMatch);
+      tournament.matchSchedule.push(matchDocuments.id);
     }
 
     // Save the tournament if new matches were added
@@ -1469,5 +1475,22 @@ export class MatchService {
     }
 
     return false;
+  }
+
+  private async deleteNextRound(
+    tournamentId: Types.ObjectId,
+    currentRound: number
+  ){
+    const matches = await MatchModel.find({tournamentId: tournamentId, tournamentRound: currentRound+1});
+    if(matches.length > 0){
+      
+      const matchIds = matches.map(match => match.id);
+      await TournamentModel.updateOne(
+        { _id: tournamentId },
+        { $pull: { matchSchedule: { $in: matchIds } } });
+      await MatchModel.deleteMany({ tournamentId: tournamentId, round: currentRound+1 });
+      
+    }
+    
   }
 }
