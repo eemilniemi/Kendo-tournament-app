@@ -13,13 +13,17 @@ let app: Application;
 let authToken: string;
 
 before(async () => {
-    // Create test database
-    Helper.initializeTestDb();
-    // Create app instance
-    app = CreateApp();
-    console.log('App created');
-    // Create jwt token for authorization
-    authToken = Helper.createTestJwtToken('test-user@gmail.com');
+    try {
+        // Create test database
+        await Helper.initializeTestDb();
+        // Create app instance
+        app = CreateApp();
+        console.log('App created');
+        // Create jwt token for authorization
+        authToken = Helper.createTestJwtToken('test-user@gmail.com');
+    } catch (error) {
+        console.error('Failed to work:', error);
+    }
 });
 
 describe('UserController', () => {
@@ -74,7 +78,9 @@ describe('UserController', () => {
 
         before(async () => {
             user = await Helper.getTestUserByEmail('test-user@gmail.com');
-            endpoint = `/api/user/${user.id}`;
+            if(user) {
+                endpoint = `/api/user/${user.id}`;
+            }
         });
 
         it('should return 401 when trying to fetch data unauthorized', async () => {

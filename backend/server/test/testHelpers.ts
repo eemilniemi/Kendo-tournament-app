@@ -114,16 +114,26 @@ const badPassword: any = {
 };
 
 
-async function initializeTestDb() {
-  console.log('Creating test database...');
-  mongo = await MongoMemoryServer.create();
-  const mongoUri = mongo.getUri();
-  await mongoose.connect(mongoUri);
-  console.log(`Connected to test database ${mongoUri}`);
-  await UserModel.create(testUser);
-  await UserModel.create(testUser2);
-  return mongo;
-};
+function initializeTestDb() {
+  return new Promise(async (resolve, reject) => {
+    console.log('Creating test database...');
+    try {
+      mongo = await MongoMemoryServer.create();
+      const mongoUri = mongo.getUri();
+
+      await mongoose.connect(mongoUri);
+      console.log(`Connected to test database at ${mongoUri}`);
+
+      // Prepopulate the database with test data
+      await UserModel.create([testUser, testUser2]); 
+      resolve(mongo); // Resolve the promise with the mongo server instance
+    } catch (error) {
+      console.error('Failed to initialize test database:', error);
+      reject(error); // Reject the promise if there's an error
+    }
+  });
+}
+
 
 async function closeTestDb() {
   await mongoose.disconnect();
