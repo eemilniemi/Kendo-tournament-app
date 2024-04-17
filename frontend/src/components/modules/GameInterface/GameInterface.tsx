@@ -768,15 +768,15 @@ const GameInterface: React.FC = () => {
                       alignItems="center"
                       margin="auto"
                       mb={2}
-                      minWidth={300}
-                      minHeight={160}
+                      minWidth={400}
+                      minHeight={130}
                       sx={{
                         wordWrap: "break-word", // Allow long names to break onto new lines
-                        maxWidth: "350px"
+                        maxWidth: "400px"
                       }}
                     >
                       <Typography
-                        variant="h3"
+                        variant="h4"
                         textAlign="center"
                         sx={{ width: "100%" }}
                       >
