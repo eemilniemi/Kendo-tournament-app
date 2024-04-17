@@ -26,6 +26,7 @@ import GameInterface from "components/modules/GameInterface/GameInterface";
 import PasswordControl from "components/modules/PasswordControl/PasswordControl";
 import PrivacyPolicy from "components/modules/Legal/PrivacyPolicy";
 import OwnTournament from "components/modules/Tournaments/OwnTournament";
+import Help from "components/modules/Help/Help";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
@@ -80,6 +81,8 @@ const routes = createRoutesFromElements(
       />
 
       <Route path={routePaths.privacy} element={<PrivacyPolicy />} />
+
+      <Route path={routePaths.help} element={<Help />} />
 
       <Route element={<AuthenticationGuard />}>
         <Route path={routePaths.profile} element={<Profile />} />
