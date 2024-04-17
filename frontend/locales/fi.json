@@ -73,8 +73,10 @@
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
-	  "withdraw_user": "Keskeytä pelaajan turnaus",
+    "withdraw_user": "Keskeytä pelaajan turnaus",
     "copy_to_clipboard": "Jaa turnaus",
+    "save_changes_button": "Tallenna muutokset",
+    "edit_button": "Muokkaa",
     "filter": "Suodata",
     "reset": "Tyhjennä"
   },
@@ -90,7 +92,9 @@
     "select_new_type": "Valitse uusi tyyppi viimeisimmälle pisteelle:",
     "confirm_tournament_deletion": "Vahvista turnauksen poistaminen",
     "withdraw_user_from_tournament": "Keskeytä pelaajan turnaus",
-    "confirm_user_withdrawal": "Vahvista pelaajan turnauksen keskeyttäminen"
+    "confirm_user_withdrawal": "Vahvista pelaajan turnauksen keskeyttäminen",
+    "confirm_tournament_editing": "Vahvista turnauksen muokkaus"
+
   },
   "login_form": {
     "forgot_password": "Unohtuiko salasana?",
@@ -218,6 +222,12 @@
     "paid": "Tämä turnaus on maksullinen",
     "payment_link": "Linkki maksusivustolle",
     "required_text": "Tämä kenttä on pakollinen"
+  },
+  "edit_tournament_form": {
+    "confirmation_message": "Oletko varma, että haluat muokata turnausta annetuilla tiedoilla?"
+  },
+  "edit_tournament_labels": {
+    "edit_tournament": "Muokkaa turnausta"
   },
   "upcoming_tournament_view": {
     "date_header": "Milloin",
