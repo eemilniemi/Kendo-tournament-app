@@ -737,7 +737,7 @@ const GameInterface: React.FC = () => {
             </Grid>
             <br />
             <br />
-            {/*Court number text */}
+            {/* Court number text */}
             <Box
               display="flex"
               gap="20px"
@@ -750,30 +750,48 @@ const GameInterface: React.FC = () => {
                 {matchInfo.courtNumber}
               </Typography>
             </Box>
-            {/*Player name boxes */}
+            {/* Player name boxes */}
             <Grid container justifyContent="center" spacing={2}>
-              {matchInfo.firstNames.map((firstName, index) => (
-                <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-                  <Box
-                    className="playerBox"
-                    bgcolor={index === 0 ? "white" : "#db4744"}
-                    textAlign="center"
-                    p={2}
-                    borderRadius={4}
-                    boxShadow={1}
-                  >
-                    <Typography variant="h3">
-                      <PlayerName
-                        firstName={firstName}
-                        lastName={matchInfo.lastNames[index]}
-                        sameNames={haveSameNames}
-                      />
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="center" flexWrap="wrap">
+                  {matchInfo.firstNames.map((firstName, index) => (
+                    <Box
+                      key={index}
+                      className="playerBox"
+                      bgcolor={index === 0 ? "white" : "#db4744"}
+                      textAlign="center"
+                      p={2}
+                      borderRadius={4}
+                      border="1px solid black"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      margin="auto"
+                      mb={2}
+                      minWidth={300}
+                      minHeight={160}
+                      sx={{
+                        wordWrap: "break-word", // Allow long names to break onto new lines
+                        maxWidth: "350px"
+                      }}
+                    >
+                      <Typography
+                        variant="h3"
+                        textAlign="center"
+                        sx={{ width: "100%" }}
+                      >
+                        <PlayerName
+                          firstName={firstName}
+                          lastName={matchInfo.lastNames[index]}
+                          sameNames={haveSameNames}
+                        />
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Grid>
             </Grid>
-            {/*Overtime text */}
+            {/* Overtime text */}
             {matchInfo.isOvertime && (
               <Box display="flex" gap="20px" justifyContent="center">
                 <Typography variant="body2">
@@ -781,7 +799,7 @@ const GameInterface: React.FC = () => {
                 </Typography>
               </Box>
             )}
-            {/*Timer */}
+            {/* Timer */}
             <Box display="flex" gap="20px" justifyContent="center">
               <Timer timer={timer} />
               {/* timer button only shown to time keeper */}
@@ -795,7 +813,7 @@ const GameInterface: React.FC = () => {
                   />
                 )}
             </Box>
-            {/*Score table*/}
+            {/* Score table */}
             <PointTable matchInfo={matchInfo} />
             <br></br>
             {/* point buttons only shown to point maker */}
