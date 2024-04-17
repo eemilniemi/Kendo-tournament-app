@@ -112,9 +112,9 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     [key in TournamentType]: boolean;
   }>({
     "Round Robin": false,
-    "Playoff": false,
+    Playoff: false,
     "Preliminary Playoff": false,
-    "Swiss": false
+    Swiss: false
   });
   const [categorySelections, setCategorySelections] = useState<{
     [key in Category]: boolean;

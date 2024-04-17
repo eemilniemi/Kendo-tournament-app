@@ -207,7 +207,10 @@ const match = {
     });
   },
   resetMatch: async (matchId: string) => {
-    await request.patch(`${MATCH_API}/${matchId}/reset`);
+    await request.patch(`${MATCH_API}/${matchId}/reset-match`);
+  },
+  resetRoles: async (matchId: string) => {
+    await request.patch(`${MATCH_API}/${matchId}/reset-roles`);
   }
 };
 

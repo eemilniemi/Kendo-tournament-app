@@ -5,6 +5,7 @@ import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "../CopyToClipboardButton";
 import {
+  createMatchButton,
   getPlayerNames,
   Scoreboard,
   sortMatches,
@@ -12,7 +13,16 @@ import {
   updatePlayerStats
 } from "../RoundRobin/RoundRobinTournamentView";
 import PlayoffTournamentView from "../Playoff/PlayoffTournamentView";
-import { type Match } from "../../../../../types/models";
+import { type Match, type Tournament } from "../../../../../types/models";
+
+import { useAuth } from "context/AuthContext";
+import DeleteUserFromTournament from "../DeleteUserFromTournament";
+
+import { useSocket } from "context/SocketContext";
+import { joinTournament, leaveTournament } from "sockets/emit";
+import PlayerName, { checkSameNames } from "../../PlayerNames";
+import api from "api/axios";
+import useToast from "hooks/useToast";
 
 const SwissTournamentView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +37,53 @@ const SwissTournamentView: React.FC = () => {
   const [ongoingMatches, setOngoingMatches] = useState<Match[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [pastMatches, setPastMatches] = useState<Match[]>([]);
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const showToast = useToast();
 
   try {
+    useEffect(() => {
+      const result = checkSameNames(tournament);
+      setHaveSameNames(result);
+    }, []);
+
+    const { tournamentData: socketData } = useSocket();
+
+    const [tournamentData, setTournamentData] =
+      useState<Tournament>(tournament);
+
+    // Listening to tournaments websocket
+    useEffect(() => {
+      if (tournament.id !== undefined && !hasJoined) {
+        joinTournament(tournament.id);
+        setHasJoined(true);
+
+        return () => {
+          leaveTournament(tournament.id);
+          setHasJoined(false);
+        };
+      }
+    }, [tournament.id]);
+
+    useEffect(() => {
+      const fetchData = async (): Promise<void> => {
+        try {
+          if (socketData !== undefined) {
+            setTournamentData(socketData);
+          } else {
+            const data: Tournament = await api.tournaments.getTournament(
+              tournament.id
+            );
+            setTournamentData(data);
+          }
+        } catch (error) {
+          showToast(error, "error");
+        }
+      };
+
+      void fetchData();
+    }, [socketData]);
+
     useEffect(() => {
       if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
         setSearchParams((params) => {
@@ -46,19 +101,54 @@ const SwissTournamentView: React.FC = () => {
     };
 
     useEffect(() => {
-      getPlayerNames(tournament, setPlayers);
-      const sortedMatches = sortMatches(tournament.matchSchedule);
+      getPlayerNames(tournamentData, setPlayers);
+      const sortedMatches = sortMatches(tournamentData.matchSchedule);
       setOngoingMatches(sortedMatches.ongoingMatches);
       setUpcomingMatches(sortedMatches.upcomingMatches);
       setPastMatches(sortedMatches.pastMatches);
-    }, [tournament]);
+    }, [tournamentData]);
+
+    const prevMatchScheduleRef = useRef(tournamentData.matchSchedule);
+
+    useEffect(() => {
+      // Function to check if there are any recently finished matches
+      const hasFinishedMatches = (
+        currentMatches: Match[],
+        previousMatches: Match[]
+      ): boolean => {
+        return currentMatches.some((match) => {
+          if (match.endTimestamp === undefined) return false; // Skip if match hasn't ended
+          // Search for a match with the same ID in previousMatches to compare its state to the current one
+          const prevMatch = previousMatches.find((m) => m.id === match.id);
+          // Returns true if either the match was not present in previousMatches (meaning
+          // it's a new match that has ended since the last check) or if the endTimestamp has changed
+          // (indicating the match has recently concluded)
+          return (
+            prevMatch === undefined ||
+            prevMatch.endTimestamp !== match.endTimestamp
+          );
+        });
+      };
+
+      if (
+        hasFinishedMatches(
+          tournamentData.matchSchedule,
+          prevMatchScheduleRef.current
+        )
+      ) {
+        updatePlayerStats(tournamentData, setPlayers);
+      }
+
+      // Update the ref with the current matchSchedule after running checks
+      prevMatchScheduleRef.current = tournamentData.matchSchedule;
+    }, [tournamentData.matchSchedule]);
 
     useEffect(() => {
       if (initialRender.current && players.length > 0) {
         initialRender.current = false;
-        updatePlayerStats(tournament, setPlayers);
+        updatePlayerStats(tournamentData, setPlayers);
       }
-    }, [players, tournament]);
+    }, [players, tournamentData]);
 
     return (
       <>
@@ -84,7 +174,9 @@ const SwissTournamentView: React.FC = () => {
           <Tab label={t("tournament_view_labels.matches")} value="playoff" />
         </Tabs>
 
-        {currentTab === "scoreboard" && <Scoreboard players={players} haveSameNames={false} />}
+        {currentTab === "scoreboard" && (
+          <Scoreboard players={players} haveSameNames={haveSameNames} />
+        )}
 
         {currentTab === "playoff" && <PlayoffTournamentView />}
       </>

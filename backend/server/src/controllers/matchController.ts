@@ -227,13 +227,26 @@ export class MatchController extends Controller {
    * Reset the match: time and points to zero
    */
 
-  @Patch("{matchId}/reset")
+  @Patch("{matchId}/reset-match")
   @Tags("Match")
   @Security("jwt")
   public async resetMatch(@Path() matchId: ObjectIdString): Promise<void> {
     this.setStatus(204);
     const match = await this.service.resetMatch(matchId);
 
-    io.to(matchId).emit("reset", match);
+    io.to(matchId).emit("reset-match", match);
+  }
+
+  /*
+   * Reset the official roles of a match
+   */
+  @Patch("{matchId}/reset-roles")
+  @Tags("Match")
+  @Security("jwt")
+  public async resetRoles(@Path() matchId: ObjectIdString): Promise<void> {
+    this.setStatus(204);
+    const match = await this.service.resetRoles(matchId);
+
+    io.to(matchId).emit("reset-roles", match);
   }
 }

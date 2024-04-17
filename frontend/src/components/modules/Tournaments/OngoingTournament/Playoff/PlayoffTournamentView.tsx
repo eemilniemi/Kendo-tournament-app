@@ -175,9 +175,12 @@ const PlayoffTournamentView: React.FC = () => {
                         textDecoration: "underline"
                       }}
                     >
-                      {parseInt(roundNumber) === totalRounds && tournament.type === "Playoff"
+                      {parseInt(roundNumber) === totalRounds &&
+                      tournament.type === "Playoff"
                         ? t("tournament_view_labels.final")
-                        : `${t("tournament_view_labels.round")} ${roundNrPrint}`}
+                        : `${t(
+                            "tournament_view_labels.round"
+                          )} ${roundNrPrint}`}
                     </Typography>
                     {matches.map((match: Match) => {
                       const tempPlayers: User[] = match.players.map(
