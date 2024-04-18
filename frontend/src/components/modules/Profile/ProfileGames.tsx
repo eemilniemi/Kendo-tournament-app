@@ -88,7 +88,6 @@ const ProfileGames: React.FC = () => {
       <FilterTournaments
         parentComponent="ProfileGames"
         tournaments={tournaments}
-        tab="games"
         handleFilteredTournaments={handleFilteredTournaments}
       />
       {/* Map through tournaments and print info */}
