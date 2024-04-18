@@ -1,7 +1,7 @@
 import React from "react";
-import PlayoffTournamentView from "./OngoingTournament/PlayoffTournamentView";
-import RoundRobinTournamentView from "./OngoingTournament/RoundRobinTournamentView";
-import PreliminaryPlayoffView from "./OngoingTournament/PreliminaryPlayoffView";
+import PlayoffTournamentView from "./OngoingTournament/Playoff/PlayoffTournamentView";
+import RoundRobinTournamentView from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
+import PreliminaryPlayoffView from "./OngoingTournament/PremPlayoff/PreliminaryPlayoffView";
 import UpcomingTournamentView from "./UpcomingTournamentView";
 import ErrorModal from "components/common/ErrorModal";
 import { type Tournament } from "types/models";

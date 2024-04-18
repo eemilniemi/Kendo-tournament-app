@@ -1,31 +1,12 @@
-import React, { useState } from "react";
-import type { Dayjs } from "dayjs";
-import dayjs from "dayjs";
-import { isValidPhone } from "utils/form-validators";
-import api from "api/axios";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useToast from "hooks/useToast";
-import { useNavigate } from "react-router-dom";
-import {
-  type TournamentType,
-  type MatchTime,
-  type Category
-} from "types/models";
+import api from "api/axios";
+import ErrorModal from "components/common/ErrorModal";
+import routePaths from "routes/route-paths";
+import { useAuth } from "context/AuthContext";
+import type { Category, MatchTime, TournamentType } from "types/models";
 import { useTranslation } from "react-i18next";
-import {
-  Typography,
-  Button,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  Box,
-  useMediaQuery
-} from "@mui/material";
-import updateLocale from "dayjs/plugin/updateLocale";
-
-// Readily defined components from the react-hook-form-mui library.
 import {
   CheckboxElement,
   DateTimePickerElement,
@@ -36,13 +17,26 @@ import {
   useWatch
 } from "react-hook-form-mui";
 
-import routePaths from "routes/route-paths";
+import {
+  Typography,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Box
+} from "@mui/material";
 
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import Loader from "components/common/Loader";
 const MIN_PLAYER_AMOUNT = 3;
 const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 
-export interface CreateTournamentFormData {
+export interface EditTournamentFormData {
   name: string;
   location: string;
   startDate: Dayjs;
@@ -50,9 +44,6 @@ export interface CreateTournamentFormData {
   description: string;
   type: TournamentType;
   maxPlayers: number;
-  differentOrganizer: boolean;
-  organizerEmail?: string;
-  organizerTel?: string;
   playersToPlayoffsPerGroup?: number;
   groupsSizePreference?: number;
   matchTime: MatchTime;
@@ -63,7 +54,7 @@ export interface CreateTournamentFormData {
   numberOfCourts: number;
 }
 
-const defaultValues: CreateTournamentFormData = {
+const defaultValues: EditTournamentFormData = {
   name: "",
   location: "",
   startDate: now,
@@ -71,7 +62,6 @@ const defaultValues: CreateTournamentFormData = {
   description: "",
   type: "Round Robin",
   maxPlayers: MIN_PLAYER_AMOUNT,
-  differentOrganizer: false,
   matchTime: 300000,
   category: "hobby",
   paid: false,
@@ -80,48 +70,97 @@ const defaultValues: CreateTournamentFormData = {
   numberOfCourts: 1
 };
 
-// Make monday the first day of the week
-dayjs.extend(updateLocale);
-dayjs.updateLocale("en", {
-  weekStart: 1
-});
-
-const CreateTournamentForm: React.FC = () => {
-  const showToast = useToast();
+const EditInfo: React.FC = () => {
   const navigate = useNavigate();
+  const showToast = useToast();
+  const { tournamentId } = useParams();
   const { t } = useTranslation();
-  const formContext = useForm<CreateTournamentFormData>({
-    defaultValues,
-    mode: "onBlur"
-  });
-  const { differentOrganizer, startDate, type, paid } =
-    useWatch<CreateTournamentFormData>(formContext);
-  const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
-  const mobile = useMediaQuery("(max-width:600px)");
+  const { userId } = useAuth();
 
-  const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const formContext = useForm<EditTournamentFormData>({
+    defaultValues
+  });
+  const { startDate, type, paid } =
+    useWatch<EditTournamentFormData>(formContext);
+  const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchTournaments = async (): Promise<void> => {
+      try {
+        const tournamentsData = await api.tournaments.getAll();
+        const selectedTournament = tournamentsData.find(
+          (tournament) => tournament.id === tournamentId
+        );
+        if (selectedTournament !== undefined) {
+          const linkToPay = selectedTournament.linkToPay ?? "";
+          const tournamentData = {
+            ...selectedTournament,
+            startDate: dayjs(selectedTournament.startDate),
+            endDate: dayjs(selectedTournament.endDate),
+            paid: linkToPay !== ""
+          };
+          formContext.reset(tournamentData);
+          // Check if the current user is the creator of the tournament
+          const isUserTheCreator = tournamentData.creator.id === userId;
+          if (!isUserTheCreator) {
+            // Redirect user to home page if not the creator
+            navigate(routePaths.homeRoute);
+          }
+        }
+      } catch (error) {
+        setIsError(true);
+        showToast(error, "error");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void fetchTournaments();
+  }, [tournamentId, formContext.reset]);
+
+  if (isLoading || tournamentId === undefined) {
+    return <Loader />;
+  }
+
+  // Redirect the user back in case of an error
+  if (isError) {
+    return (
+      <ErrorModal
+        open={true}
+        onClose={() => {
+          navigate(routePaths.homeRoute);
+        }}
+        errorMessage={t("messages.error_retrieving_info")}
+      />
+    );
+  }
+
+  const onSubmit = async (data: EditTournamentFormData): Promise<void> => {
+    // Submit form data to update tournament
+    if (!data.paid) {
+      data.linkToPay = "";
+    }
     try {
-      await api.tournaments.createNew({
+      await api.tournaments.update(tournamentId, {
         ...data,
-        startDate: data.startDate.toString(),
-        endDate: data.endDate.toString()
+        startDate: data.startDate?.toString(),
+        endDate: data.endDate?.toString()
       });
-      showToast(
-        t("messages.creations_success", { name: data.name }),
-        "success"
-      );
-      navigate(routePaths.homeRoute, {
-        replace: true,
-        state: { refresh: true }
-      });
+      showToast(t("messages.update_success"), "success");
     } catch (error) {
+      // Handle errors during form submission
       showToast(error, "error");
     }
   };
 
   const handleConfirm = async (): Promise<void> => {
+    // Confirm tournament editing and submit form data
     setConfirmationDialogOpen(false);
     await formContext.handleSubmit(onSubmit)();
+    // Redirect user to home page after making changes
+    navigate(routePaths.homeRoute);
   };
 
   const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
@@ -169,22 +208,20 @@ const CreateTournamentForm: React.FC = () => {
     <Container component="main" maxWidth="xs">
       <Box display="flex" flexDirection="column" gap="5px" width="100%">
         <Typography variant="h5" className="header" fontWeight="bold">
-          {t("titles.create_tournament")}
-        </Typography>
-        <Typography variant="subtitle1" className="subtext">
-          {t("create_tournament_form.info")}
+          {t("edit_tournament_labels.edit_tournament")}
         </Typography>
       </Box>
-      <FormContainer defaultValues={defaultValues} formContext={formContext}>
+      <FormContainer
+        defaultValues={defaultValues}
+        formContext={formContext}
+        onSuccess={onSubmit}
+      >
         <TextFieldElement
           required
           name="name"
           label={t("create_tournament_form.tournament_name")}
           fullWidth
           margin="normal"
-          validation={{
-            required: t("create_tournament_form.required_text")
-          }}
         />
 
         <TextFieldElement
@@ -193,9 +230,6 @@ const CreateTournamentForm: React.FC = () => {
           label={t("create_tournament_form.location")}
           fullWidth
           margin="normal"
-          validation={{
-            required: t("create_tournament_form.required_text")
-          }}
         />
 
         <Stack spacing={2} marginY={2}>
@@ -206,14 +240,11 @@ const CreateTournamentForm: React.FC = () => {
             minDateTime={now}
             format="DD/MM/YYYY HH:mm"
             ampm={false}
-            {...(!mobile && {
-              // Only text input on desktop
-              viewRenderers: {
-                hours: null,
-                minutes: null,
-                seconds: null
-              }
-            })}
+            viewRenderers={{
+              hours: null,
+              minutes: null,
+              seconds: null
+            }}
           />
           <DateTimePickerElement
             required
@@ -222,14 +253,11 @@ const CreateTournamentForm: React.FC = () => {
             minDateTime={startDate}
             format="DD/MM/YYYY HH:mm"
             ampm={false}
-            {...(!mobile && {
-              // Only text input on desktop
-              viewRenderers: {
-                hours: null,
-                minutes: null,
-                seconds: null
-              }
-            })}
+            viewRenderers={{
+              hours: null,
+              minutes: null,
+              seconds: null
+            }}
           />
         </Stack>
 
@@ -240,9 +268,6 @@ const CreateTournamentForm: React.FC = () => {
           label={t("create_tournament_form.description")}
           fullWidth
           margin="normal"
-          validation={{
-            required: t("create_tournament_form.required_text")
-          }}
         />
 
         <TextFieldElement
@@ -271,9 +296,6 @@ const CreateTournamentForm: React.FC = () => {
               label={t("create_tournament_form.payment_link")}
               fullWidth
               margin="normal"
-              validation={{
-                required: t("create_tournament_form.required_text")
-              }}
             />
           </React.Fragment>
         )}
@@ -294,25 +316,6 @@ const CreateTournamentForm: React.FC = () => {
             {
               id: "300000",
               label: t("create_tournament_form.5_min")
-            }
-          ]}
-          fullWidth
-          margin="normal"
-        />
-
-        <SelectElement
-          required
-          label={t("create_tournament_form.select_tournament_type")}
-          name="type"
-          options={[
-            {
-              id: "Round Robin",
-              label: t("create_tournament_form.round_robin")
-            },
-            { id: "Playoff", label: t("create_tournament_form.playoff") },
-            {
-              id: "Preliminary Playoff",
-              label: t("create_tournament_form.preliminary_playoff")
             }
           ]}
           fullWidth
@@ -374,59 +377,34 @@ const CreateTournamentForm: React.FC = () => {
           }}
         />
 
-        <CheckboxElement
-          name="differentOrganizer"
-          label={t("create_tournament_form.different_organizer_info")}
-          onChange={(e) => {
-            formContext.resetField("organizerEmail");
-            formContext.resetField("organizerTel");
-            formContext.setValue("differentOrganizer", e.target.checked);
-          }}
-        />
+        <Box
+          display="flex"
+          justifyContent="space-evenly"
+          flexWrap="wrap"
+          gap="10px"
+        >
+          <Button
+            type="button"
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              navigate(routePaths.homeRoute);
+            }}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {t("buttons.cancel_button")}
+          </Button>
 
-        {differentOrganizer !== undefined && differentOrganizer && (
-          <React.Fragment>
-            <TextFieldElement
-              required
-              name="organizerEmail"
-              type="email"
-              label={t("create_tournament_form.organizer_email")}
-              fullWidth
-              margin="normal"
-              validation={{
-                required: t("create_tournament_form.required_text")
-              }}
-            />
-
-            <TextFieldElement
-              required
-              name="organizerTel"
-              type="tel"
-              label={t("create_tournament_form.organizer_phone_number")}
-              fullWidth
-              margin="normal"
-              validation={{
-                validate: (value: string) => {
-                  return (
-                    isValidPhone(value) || t("messages.phonenumber_validation")
-                  );
-                }
-              }}
-            />
-          </React.Fragment>
-        )}
-        <Box textAlign="center">
           <Button
             variant="contained"
             color="primary"
             onClick={() => {
               setConfirmationDialogOpen(true);
             }}
-            disabled={!formContext.formState.isValid}
-            fullWidth
+            disabled={!formContext.formState.isDirty}
             sx={{ mt: 3, mb: 2 }}
           >
-            {t("buttons.create_button")}
+            {t("buttons.save_changes_button")}
           </Button>
         </Box>
 
@@ -439,11 +417,11 @@ const CreateTournamentForm: React.FC = () => {
           aria-describedby="confirmation-dialog-description"
         >
           <DialogTitle id="confirmation-dialog-title">
-            {t("titles.confirm_tournament_creation")}
+            {t("titles.confirm_tournament_editing")}
           </DialogTitle>
           <DialogContent>
             <Typography>
-              {t("create_tournament_form.confirmation_message")}
+              {t("edit_tournament_form.confirmation_message")}
             </Typography>
           </DialogContent>
           <DialogActions>
@@ -471,4 +449,4 @@ const CreateTournamentForm: React.FC = () => {
   );
 };
 
-export default CreateTournamentForm;
+export default EditInfo;

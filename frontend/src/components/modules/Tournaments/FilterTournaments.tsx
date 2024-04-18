@@ -11,7 +11,8 @@ import {
   Typography,
   FormGroup,
   MenuItem,
-  Box
+  Box,
+  IconButton
 } from "@mui/material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { useTranslation } from "react-i18next";
@@ -34,7 +35,6 @@ import type { Dayjs } from "dayjs";
 import { useTournaments } from "context/TournamentsContext";
 import { sortTournamentsByLocation } from "utils/sorters";
 import DateRangePicker from "../Tournaments/TournamentListing/DateRangePicker";
-import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useLocation } from "react-router-dom";
 
@@ -193,6 +193,10 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       }
 
       // Update checkbox selections based on loaded filter criteria
+      if (parsedFilters.participation !== undefined) {
+        setParticipationSelection(parsedFilters.participation);
+      }
+
       setTournamentTypeSelections((prevSelections) => {
         const updatedSelections: { [key in TournamentType]: boolean } = {
           ...prevSelections
@@ -246,6 +250,8 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       endDate: null,
       location: ""
     });
+
+    setParticipationSelection(false);
 
     // Reset tournament type selections
     setTournamentTypeSelections((prevSelections) => {
