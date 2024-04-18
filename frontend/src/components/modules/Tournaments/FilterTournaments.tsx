@@ -34,6 +34,9 @@ import type { Dayjs } from "dayjs";
 import { useTournaments } from "context/TournamentsContext";
 import { sortTournamentsByLocation } from "utils/sorters";
 import DateRangePicker from "../Tournaments/TournamentListing/DateRangePicker";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import { useLocation } from "react-router-dom";
 
 interface FilterTournamentsProps {
   parentComponent: "TournamentsList" | "ProfileGames";
@@ -62,25 +65,13 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   tournaments
 }) => {
   const { t } = useTranslation();
-  const [filteringDialog, setFilteringDialog] = useState(false);
   const { userId, isAuthenticated } = useAuth();
-  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false);
   const { upcoming, ongoing, past } = useTournaments() ?? {};
-
-  // tää valinnaiseksi
-  const getOriginalTournamentData = (): Tournament[] => {
-    if (parentComponent === "TournamentsList") {
-      if (tab === "upcoming") {
-        return upcoming;
-      } else if (tab === "ongoing") {
-        return ongoing;
-      } else {
-        return past;
-      }
-    } else {
-      return [];
-    }
-  };
+  const [filteringDialog, setFilteringDialog] = useState(false);
+  const [isFilterCriteriaLoaded, setIsFilterCriteriaLoaded] = useState(false);
+  const [previousTab, setPreviousTab] = useState<string | undefined>(undefined);
+  const [shouldResetFilters, setShouldResetFilters] = useState(false);
+  const location = useLocation();
 
   // Arrays of tuples containing the type and its localization key, for populating dialog window
   const tournamentTypeOptions: Array<[TournamentType, string]> = [
@@ -113,12 +104,9 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     pointTypes: []
   });
 
-  // Reset filter criteria when tab changes
-  useEffect(() => {
-    resetFilters();
-  }, [tab]);
-
   // State variables for keeping track of checkbox states
+  const [participationSelection, setParticipationSelection] = useState(false);
+
   const [tournamentTypeSelections, setTournamentTypeSelections] = useState<{
     [key in TournamentType]: boolean;
   }>({
@@ -145,25 +133,65 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     hansoku: false
   });
 
+  const getOriginalTournamentData = (): Tournament[] => {
+    if (parentComponent === "TournamentsList") {
+      if (tab === "upcoming") {
+        return upcoming;
+      } else if (tab === "ongoing") {
+        return ongoing;
+      } else {
+        return past;
+      }
+    } else {
+      return [];
+    }
+  };
+
+  // Reset filter criteria when tab changes
+  useEffect(() => {
+    if (
+      (previousTab !== undefined && previousTab !== tab) ||
+      shouldResetFilters
+    ) {
+      resetFilters();
+      setShouldResetFilters(false);
+    }
+
+    // If the user navigates to the front page or profile
+    // Clear session storage not to transfer potential filters
+    if (
+      location.pathname === "/tournaments" ||
+      location.pathname === "/profile"
+    ) {
+      sessionStorage.removeItem("tournamentFilters");
+      sessionStorage.removeItem("filteredTournaments");
+    }
+    setPreviousTab(tab);
+  }, [tab, previousTab, shouldResetFilters, location]);
+
   // When app mounts check if there is filters stored in sessionStorage
-  // create a hook out of this?
   useEffect(() => {
     const storedFilters = sessionStorage.getItem("tournamentFilters");
     if (storedFilters !== null && storedFilters !== undefined) {
       const parsedFilters = JSON.parse(storedFilters);
-      // Check if startDate and endDate exist in parsedFilters -- but nulls are now allowed so check this
-      if (parsedFilters.startDate !== null && parsedFilters.endDate !== null) {
-        // Convert dates to Day.js objects
-        const startDate = dayjs(parsedFilters.startDate);
-        const endDate = dayjs(parsedFilters.endDate);
-        updateCriteria({
-          ...parsedFilters,
-          startDate,
-          endDate
-        });
-      } else {
-        updateCriteria(parsedFilters);
+
+      // Convert dates to Day.js objects if they are not null
+      const startDate =
+        parsedFilters.startDate !== null
+          ? dayjs(parsedFilters.startDate)
+          : null;
+      const endDate =
+        parsedFilters.endDate !== null ? dayjs(parsedFilters.endDate) : null;
+      updateCriteria({
+        ...parsedFilters,
+        startDate,
+        endDate
+      });
+
+      if (parsedFilters.participation !== undefined) {
+        setParticipationSelection(parsedFilters.participation);
       }
+
       // Update checkbox selections based on loaded filter criteria
       setTournamentTypeSelections((prevSelections) => {
         const updatedSelections: { [key in TournamentType]: boolean } = {
@@ -189,7 +217,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
         const updatedSelections: { [key in PointType]: boolean } = {
           ...prevSelections
         };
-        parsedFilters.pointTypes.forEach((pointType: PointType) => {
+        parsedFilters.pointTypes?.forEach((pointType: PointType) => {
           updatedSelections[pointType] = true;
         });
         return updatedSelections;
@@ -303,14 +331,6 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     return menuItems;
   };
 
-  const handleOpenDialog = (): void => {
-    setFilteringDialog(true);
-  };
-
-  const handleCloseDialog = (): void => {
-    setFilteringDialog(false);
-  };
-
   // Function to update filter criteria state
   const updateCriteria = (newCriteria: Partial<FilterCriteria>): void => {
     // Combine the existing filter criteria with the new criteria
@@ -321,12 +341,21 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     setFilterCriteria(updatedCriteria);
   };
 
+  const handleOpenDialog = (): void => {
+    setFilteringDialog(true);
+  };
+
+  const handleCloseDialog = (): void => {
+    setFilteringDialog(false);
+  };
+
   const handleParticipationChange = (): void => {
     const newParticipation =
       filterCriteria.participation === null ||
       filterCriteria.participation === undefined
         ? false // Default value if filterCriteria.participation is null or undefined
         : !filterCriteria.participation;
+    setParticipationSelection(newParticipation);
     const newCriteria: Partial<FilterCriteria> = {
       participation: newParticipation
     };
@@ -393,6 +422,12 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     });
   };
 
+  // Function to handle reset button click
+  const handleResetButtonClick = (): void => {
+    // Set shouldResetFilters to true to trigger resetting
+    setShouldResetFilters(true);
+  };
+
   // Function to apply filters when the user clicks the filter button
   const handleFilterClick = (): void => {
     const filteredTournaments = applyFilters();
@@ -406,7 +441,14 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
   };
 
   const applyFilters = (): Tournament[] => {
-    let filtered: Tournament[] = getOriginalTournamentData();
+    let filtered: Tournament[] = [];
+    if (parentComponent === "TournamentsList") {
+      filtered = getOriginalTournamentData();
+    } else {
+      if (tournaments !== undefined) {
+        filtered = tournaments;
+      }
+    }
 
     if (
       filterCriteria.participation !== null ||
@@ -428,8 +470,17 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     if (filterCriteria.location !== "") {
       filtered = filterByLocation(filtered, filterCriteria.location);
     }
-    if (filterCriteria.pointTypes !== undefined && tournaments !== undefined) {
-      filtered = filterByPointType(tournaments, filterCriteria.pointTypes);
+    if (
+      filterCriteria.pointTypes !== undefined &&
+      tournaments !== undefined &&
+      userId !== undefined &&
+      filterCriteria.pointTypes?.length > 0
+    ) {
+      filtered = filterByPointType(
+        tournaments,
+        filterCriteria.pointTypes,
+        userId
+      );
     }
     // Apply filter by time in any case, nulls are also handled by filterByTime
     filtered = filterByTime(
@@ -437,6 +488,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       filterCriteria.startDate,
       filterCriteria.endDate
     );
+
     return filtered;
   };
 
@@ -445,7 +497,20 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       <Button onClick={handleOpenDialog}>{t("buttons.filter")}</Button>
 
       <Dialog open={filteringDialog} onClose={handleCloseDialog}>
-        <DialogTitle variant="h5">{t("filtering.options")}</DialogTitle>
+        <DialogTitle variant="h5">
+          {t("filtering.options")}
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseDialog}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           {/* this is visible only for logged in user in tournamentslist */}
           {isAuthenticated && parentComponent === "TournamentsList" && (
@@ -456,7 +521,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={filterCriteria.participation}
+                    checked={participationSelection}
                     onChange={handleParticipationChange}
                   />
                 }
@@ -486,62 +551,88 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
           </Box>
 
           <FormGroup>
-            <Typography variant="h6">
-              {t("filtering.by_tournament_type")}
-            </Typography>
-            {tournamentTypeOptions.map(([type, localizationKey]) => (
-              <FormControlLabel
-                key={type}
-                control={
-                  <Checkbox
-                    checked={tournamentTypeSelections[type]}
-                    onChange={() => {
-                      handleTournamentTypeChange(type);
-                    }}
-                  />
-                }
-                label={t(localizationKey)}
-              />
-            ))}
-
-            <Typography variant="h6">
-              {t("filtering.by_tournament_category")}
-            </Typography>
-            {categoryOptions.map(([category, localizationKey]) => (
-              <FormControlLabel
-                key={category}
-                control={
-                  <Checkbox
-                    checked={categorySelections[category]}
-                    onChange={() => {
-                      handleCategoryChange(category);
-                    }}
-                  />
-                }
-                label={t(localizationKey)}
-              />
-            ))}
+            <Box sx={{ display: "flex", flexDirection: "row" }}>
+              {/* Tournament Type Options */}
+              <Box sx={{ marginRight: "20px" }}>
+                <Typography variant="h6">
+                  {t("filtering.by_tournament_type")}
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  {tournamentTypeOptions.map(([type, localizationKey]) => (
+                    <FormControlLabel
+                      key={type}
+                      control={
+                        <Checkbox
+                          checked={tournamentTypeSelections[type]}
+                          onChange={() => {
+                            handleTournamentTypeChange(type);
+                          }}
+                        />
+                      }
+                      label={t(localizationKey)}
+                    />
+                  ))}
+                </Box>
+              </Box>
+              {/* Category Options */}
+              <Box>
+                <Typography variant="h6">
+                  {t("filtering.by_tournament_category")}
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  {categoryOptions.map(([category, localizationKey]) => (
+                    <FormControlLabel
+                      key={category}
+                      control={
+                        <Checkbox
+                          checked={categorySelections[category]}
+                          onChange={() => {
+                            handleCategoryChange(category);
+                          }}
+                        />
+                      }
+                      label={t(localizationKey)}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          </FormGroup>
+          <FormGroup>
             {/* This is visible only in profile matches filter dialog */}
             {parentComponent === "ProfileGames" && (
-              <>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column"
+                }}
+              >
                 <Typography variant="h6">
                   {t("filtering.by_point_type")}
                 </Typography>
-                {pointTypeOptions.map(([point, localizationKey]) => (
-                  <FormControlLabel
-                    key={point}
-                    control={
-                      <Checkbox
-                        checked={pointTypeSelections[point]}
-                        onChange={() => {
-                          handlePointTypeChange(point);
-                        }}
-                      />
-                    }
-                    label={t(localizationKey)}
-                  />
-                ))}
-              </>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "wrap"
+                  }}
+                >
+                  {pointTypeOptions.map(([point, localizationKey]) => (
+                    <FormControlLabel
+                      key={point}
+                      control={
+                        <Checkbox
+                          checked={pointTypeSelections[point]}
+                          onChange={() => {
+                            handlePointTypeChange(point);
+                          }}
+                        />
+                      }
+                      label={t(localizationKey)}
+                    />
+                  ))}
+                </Box>
+              </Box>
             )}
           </FormGroup>
 
@@ -560,7 +651,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
               color="secondary"
               variant="outlined"
               onClick={() => {
-                resetFilters();
+                handleResetButtonClick();
               }}
             >
               {t("buttons.reset")}
