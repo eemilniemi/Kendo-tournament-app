@@ -25,24 +25,13 @@ const ProfileGames: React.FC = () => {
     []
   );
 
-  // If nothing filtered, get right tournaments again
-  useEffect(() => {
-    if (filteredTournaments.length === 0) {
-      // tournaments; not sure what here
-    }
-  }, [filtersApplied]);
-
   // Function to receive filtered tournaments from FilterTournaments
   const handleFilteredTournaments = (
-    filteredTournaments: Tournament[],
+    filtTournaments: Tournament[],
     areFiltersApplied: boolean
   ): void => {
     setFiltersApplied(areFiltersApplied);
-    if (filteredTournaments !== null) {
-      setFilteredTournaments(filteredTournaments);
-    } else {
-      // is undefined, sort somehow?
-    }
+    setFilteredTournaments(filtTournaments);
   };
 
   useEffect(() => {
@@ -90,15 +79,26 @@ const ProfileGames: React.FC = () => {
     return <div>No user ID available</div>;
   }
 
+  const getTournamentsToRender = (): Tournament[] => {
+    return filtersApplied ? filteredTournaments : tournaments;
+  };
+
   return (
     <Box>
       <FilterTournaments
         parentComponent="ProfileGames"
         tournaments={tournaments}
+        tab="games"
         handleFilteredTournaments={handleFilteredTournaments}
       />
       {/* Map through tournaments and print info */}
-      {tournaments.map((tournament, index) => (
+      {/* If filters applied, show those tournaments */}
+      {getTournamentsToRender().length === 0 && (
+        <Typography variant="h6" marginTop="32px" textAlign="center">
+          {t("frontpage_labels.no_tournaments_found")}
+        </Typography>
+      )}
+      {getTournamentsToRender().map((tournament, index) => (
         <Box key={index} style={{ marginBottom: "20px" }}>
           <Typography variant="h5" sx={{ marginBottom: 4, marginTop: 4 }}>
             {tournament.name}
@@ -108,23 +108,23 @@ const ProfileGames: React.FC = () => {
               sx={{ display: "inline", marginLeft: 1 }}
             >
               {/* Print tournament start date */}
-              {new Date(tournament.startDate).toLocaleDateString("en-US", {
+              {new Date(tournament.startDate).toLocaleDateString("en-gb", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric"
               })}
               {/* Check if tournament duration spans multiple days and print end date if necessary */}
-              {new Date(tournament.startDate).toLocaleDateString("en-US", {
+              {new Date(tournament.startDate).toLocaleDateString("en-gb", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric"
               }) !==
-                new Date(tournament.endDate).toLocaleDateString("en-US", {
+                new Date(tournament.endDate).toLocaleDateString("en-gb", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric"
                 }) &&
-                ` - ${new Date(tournament.endDate).toLocaleDateString("en-US", {
+                ` - ${new Date(tournament.endDate).toLocaleDateString("en-gb", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric"
