@@ -39,6 +39,7 @@ const Profile: React.FC = () => {
       params.set("tab", tab);
       return params;
     });
+    sessionStorage.clear();
   };
 
   useEffect(() => {

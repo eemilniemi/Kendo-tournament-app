@@ -147,6 +147,17 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
     }
   };
 
+  useEffect(() => {
+    // If the user navigates to the front page or profile
+    // Clear session storage not to transfer potential filters
+    if (
+      (location.pathname === "/tournaments" && location.search === "") ||
+      (location.pathname === "/profile" && location.search === "")
+    ) {
+      resetFilters();
+    }
+  }, [location]);
+
   // Reset filter criteria when tab changes
   useEffect(() => {
     if (
@@ -156,18 +167,8 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
       resetFilters();
       setShouldResetFilters(false);
     }
-
-    // If the user navigates to the front page or profile
-    // Clear session storage not to transfer potential filters
-    if (
-      location.pathname === "/tournaments" ||
-      location.pathname === "/profile"
-    ) {
-      sessionStorage.removeItem("tournamentFilters");
-      sessionStorage.removeItem("filteredTournaments");
-    }
     setPreviousTab(tab);
-  }, [tab, previousTab, shouldResetFilters, location]);
+  }, [tab, previousTab, shouldResetFilters]);
 
   // When app mounts check if there is filters stored in sessionStorage
   useEffect(() => {
