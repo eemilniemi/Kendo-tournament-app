@@ -1,4 +1,10 @@
-import type { Tournament, TournamentType, Category } from "types/models";
+import type {
+  Tournament,
+  TournamentType,
+  Category,
+  PointType,
+  Match
+} from "types/models";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 
@@ -82,5 +88,34 @@ export const filterByLocation = (
   const filtered = tournaments.filter(
     (tournament) => tournament.location === locationOfTournament
   );
+  return filtered;
+};
+
+// Filter a certain user's matches based on point type(s)
+export const filterByPointType = (
+  tournaments: Tournament[],
+  pointTypes: PointType[],
+  userId: string
+): Tournament[] => {
+  const filtered = tournaments
+    .map((tournament) => {
+      const filteredMatchSchedule = tournament.matchSchedule
+        .map((match) => {
+          const filteredPlayers = match.players.filter(
+            (player) =>
+              player.id === userId &&
+              player.points.some((point) => pointTypes.includes(point.type))
+          );
+          return filteredPlayers.length > 0 ? match : null;
+        })
+        .filter((match) => match !== null) as Match[];
+
+      return {
+        ...tournament,
+        matchSchedule: filteredMatchSchedule
+      };
+    })
+    .filter((tournament) => tournament.matchSchedule.length > 0);
+
   return filtered;
 };

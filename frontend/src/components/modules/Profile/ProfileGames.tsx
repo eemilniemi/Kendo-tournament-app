@@ -11,12 +11,28 @@ import { useAuth } from "context/AuthContext";
 import api from "api/axios";
 import type { Tournament, Match, User } from "types/models";
 import { useTranslation } from "react-i18next";
+import FilterTournaments from "../Tournaments/FilterTournaments";
 
 const ProfileGames: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const navigate = useNavigate();
   const { userId } = useAuth();
   const { t } = useTranslation();
+  // State to keep track if filters have been applied
+  const [filtersApplied, setFiltersApplied] = useState(false);
+  // State for storing possible filtered tournaments
+  const [filteredTournaments, setFilteredTournaments] = useState<Tournament[]>(
+    []
+  );
+
+  // Function to receive filtered tournaments from FilterTournaments
+  const handleFilteredTournaments = (
+    filtTournaments: Tournament[],
+    areFiltersApplied: boolean
+  ): void => {
+    setFiltersApplied(areFiltersApplied);
+    setFilteredTournaments(filtTournaments);
+  };
 
   useEffect(() => {
     const fetchTournaments = async (): Promise<void> => {
@@ -63,10 +79,25 @@ const ProfileGames: React.FC = () => {
     return <div>No user ID available</div>;
   }
 
+  const getTournamentsToRender = (): Tournament[] => {
+    return filtersApplied ? filteredTournaments : tournaments;
+  };
+
   return (
     <Box>
+      <FilterTournaments
+        parentComponent="ProfileGames"
+        tournaments={tournaments}
+        handleFilteredTournaments={handleFilteredTournaments}
+      />
       {/* Map through tournaments and print info */}
-      {tournaments.map((tournament, index) => (
+      {/* If filters applied, show those tournaments */}
+      {getTournamentsToRender().length === 0 && (
+        <Typography variant="h6" marginTop="32px" textAlign="center">
+          {t("frontpage_labels.no_tournaments_found")}
+        </Typography>
+      )}
+      {getTournamentsToRender().map((tournament, index) => (
         <Box key={index} style={{ marginBottom: "20px" }}>
           <Typography variant="h5" sx={{ marginBottom: 4, marginTop: 4 }}>
             {tournament.name}
@@ -76,23 +107,23 @@ const ProfileGames: React.FC = () => {
               sx={{ display: "inline", marginLeft: 1 }}
             >
               {/* Print tournament start date */}
-              {new Date(tournament.startDate).toLocaleDateString("en-US", {
+              {new Date(tournament.startDate).toLocaleDateString("en-gb", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric"
               })}
               {/* Check if tournament duration spans multiple days and print end date if necessary */}
-              {new Date(tournament.startDate).toLocaleDateString("en-US", {
+              {new Date(tournament.startDate).toLocaleDateString("en-gb", {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric"
               }) !==
-                new Date(tournament.endDate).toLocaleDateString("en-US", {
+                new Date(tournament.endDate).toLocaleDateString("en-gb", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric"
                 }) &&
-                ` - ${new Date(tournament.endDate).toLocaleDateString("en-US", {
+                ` - ${new Date(tournament.endDate).toLocaleDateString("en-gb", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric"
