@@ -564,7 +564,13 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
                 <Typography variant="h6">
                   {t("filtering.by_tournament_type")}
                 </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    marginBottom: 2
+                  }}
+                >
                   {tournamentTypeOptions.map(([type, localizationKey]) => (
                     <FormControlLabel
                       key={type}
@@ -586,7 +592,13 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
                 <Typography variant="h6">
                   {t("filtering.by_tournament_category")}
                 </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    marginBottom: 2
+                  }}
+                >
                   {categoryOptions.map(([category, localizationKey]) => (
                     <FormControlLabel
                       key={category}
@@ -621,7 +633,8 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
                   sx={{
                     display: "flex",
                     flexDirection: "row",
-                    flexWrap: "wrap"
+                    flexWrap: "wrap",
+                    marginBottom: 2
                   }}
                 >
                   {pointTypeOptions.map(([point, localizationKey]) => (
