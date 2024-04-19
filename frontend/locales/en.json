@@ -154,7 +154,9 @@
     "missing_and": "and point maker",
     "group": "Group",
     "playoff_stage_not_started": "Playoff stage has not started yet.",
-    "court_number": "Court"
+    "court_number": "Court",
+    "tournament_winner": "Winner of tournament: ",
+    "no_winner": "No winner"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",

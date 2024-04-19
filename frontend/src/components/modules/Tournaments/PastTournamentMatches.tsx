@@ -1,12 +1,35 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useTournaments } from "context/TournamentsContext";
-import type { User, Match, MatchPoint, MatchPlayer } from "types/models";
-import { Grid, Typography, Paper } from "@mui/material";
+import type { User, Match, TournamentType } from "types/models";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardActionArea,
+  Grid
+} from "@mui/material";
+import { useTranslation } from "react-i18next";
+import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
+
+type Rounds = Record<string, Match[]>; // Define the type for rounds
 
 const PastTournamentMatches: React.FC = () => {
   const { tournamentId } = useParams();
   const { past } = useTournaments();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  // Tournament types with their translations
+  const tournamentTypes: Record<TournamentType, string> = {
+    "Round Robin": "types.round_robin",
+    Playoff: "types.playoff",
+    "Preliminary Playoff": "types.preliminary_playoff"
+    // TODO add swiss
+    // Swiss: "types.swiss"
+  };
+
   const selectedTournament = past.find(
     (tournament) => tournament.id === tournamentId
   );
@@ -15,64 +38,162 @@ const PastTournamentMatches: React.FC = () => {
     return <div>Tournament not found.</div>;
   }
 
+  const rounds: Rounds = {}; // To sort matches per rounds
+  selectedTournament.matchSchedule.forEach((match) => {
+    const round = match.tournamentRound;
+    if (round !== undefined) {
+      if (!(round in rounds)) {
+        rounds[round] = [];
+      }
+      rounds[round].push(match);
+    }
+  });
+
+  // Function to get player name by ID
+  const getPlayerNameById = (players: User[], playerId: string): string => {
+    const player = players.find((player) => player.id === playerId);
+    if (player != null) {
+      return `${player.firstName} ${player.lastName}`;
+    } else {
+      return "Unknown Player";
+    }
+  };
+
+  // Find out the winner of a tournament, calculates who got most points
+  const winnerOfRoundOrSwissTournament = (): string => {
+    const playerPointsMap: Record<string, number> = {}; // Map to store players ids and their points
+    // Iterate over all matches to calculate each player's points
+    selectedTournament.matchSchedule.forEach((match) => {
+      const player1Id = match.players[0].id;
+      const player2Id = match.players[1].id;
+      const winnerId = match.winner;
+
+      // Add points for winner and tie for both players in case of a draw
+      if (winnerId !== undefined) {
+        playerPointsMap[winnerId] = (playerPointsMap[winnerId] ?? 0) + 3;
+      } else {
+        playerPointsMap[player1Id] = (playerPointsMap[player1Id] ?? 0) + 1;
+        playerPointsMap[player2Id] = (playerPointsMap[player2Id] ?? 0) + 1;
+      }
+    });
+
+    // Find the player with the highest points
+    let maxPoints = 0;
+    let winnerId = "";
+    Object.entries(playerPointsMap).forEach(([playerId, points]) => {
+      if (points > maxPoints) {
+        maxPoints = points;
+        winnerId = playerId;
+      }
+    });
+
+    if (winnerId === "") {
+      return t("tournament_view_labels.no_winner");
+    } else {
+      // Return the name of the winner
+      return getPlayerNameById(selectedTournament.players, winnerId);
+    }
+  };
+
+  const winnerOfTournament = (): string | undefined => {
+    let winnerId;
+    if (
+      // in case of playoff or preli playoff, winner is the winner of last match
+      selectedTournament !== undefined &&
+      (selectedTournament.type === "Playoff" ||
+        selectedTournament.type === "Preliminary Playoff")
+    ) {
+      const lastMatchIndex = selectedTournament.matchSchedule.length - 1;
+      winnerId = selectedTournament.matchSchedule[lastMatchIndex].winner;
+      if (winnerId !== undefined) {
+        const winnerText =
+          t("tournament_view_labels.tournament_winner") +
+          getPlayerNameById(selectedTournament.players, winnerId);
+        return winnerText;
+      } else {
+        return t("tournament_view_labels.no_winner");
+      }
+    } else if (
+      selectedTournament.type === "Round Robin" // ||
+      // selectedTournament.type === "Swiss" TODO edit and test when swiss is available
+    ) {
+      return (
+        t("tournament_view_labels.tournament_winner") +
+        winnerOfRoundOrSwissTournament()
+      );
+    }
+  };
+
   return (
     <div>
-      <Typography variant="h4" sx={{ marginBottom: 4 }}>
-        {selectedTournament.name}
+      <Grid container alignItems="center" spacing={4} marginBottom={2}>
+        <Grid item>
+          <Typography variant="h4">{selectedTournament.name}</Typography>
+        </Grid>
+        <Grid item>
+          <CopyToClipboardButton />
+        </Grid>
+      </Grid>
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        {t(tournamentTypes[selectedTournament.type])}
       </Typography>
-      <Typography variant="h6" sx={{ marginBottom: 4 }}>
-        {selectedTournament.type}
+      <Typography variant="subtitle1" sx={{ marginBottom: 2 }}>
+        {winnerOfTournament()}
       </Typography>
 
-      {/* Fetch match player names */}
-      {selectedTournament.matchSchedule.map((match: Match, index: number) => {
-        const matchPlayers = match.players.map((player: MatchPlayer) => {
-          const user: User | undefined = selectedTournament.players.find(
-            (tournamentPlayer: User) => tournamentPlayer.id === player.id
-          );
-          return `${user?.firstName ?? "Unknown"} ${user?.lastName ?? "User"}`;
-        });
-
-        let player1Points = 0;
-        let player2Points = 0;
-
-        match.players[0].points.forEach((point: MatchPoint) => {
-          if (point.type === "hansoku") {
-            player2Points += 0.5;
-          } else {
-            player1Points += 1;
-          }
-        });
-
-        match.players[1].points.forEach((point: MatchPoint) => {
-          if (point.type === "hansoku") {
-            player1Points += 0.5;
-          } else {
-            player2Points += 1;
-          }
-        });
-
-        player1Points = Math.floor(player1Points);
-        player2Points = Math.floor(player2Points);
-
-        return (
-          <Paper key={index} elevation={2} style={{ padding: "10px" }}>
-            <Grid container justifyContent="center" rowSpacing={2}>
-              <Grid item xs={2}>
-                <Typography variant="body1">{matchPlayers[0]}</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="body1">
-                  {player1Points} - {player2Points}
-                </Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="body1">{matchPlayers[1]}</Typography>
-              </Grid>
-            </Grid>
-          </Paper>
-        );
-      })}
+      {/* Map through tournament matches and print each */}
+      {Object.entries(rounds).map(([round, matches]) => (
+        <div key={round}>
+          {/* Add round print only if there is several rounds */}
+          {Object.keys(rounds).length > 1 && (
+            <Typography variant="h6" sx={{ marginTop: 2 }}>
+              Round {round}
+            </Typography>
+          )}
+          <Box
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: "20px"
+            }}
+          >
+            {matches.map((match, matchIndex) => (
+              <Card key={matchIndex} variant="outlined" sx={{ mb: 1 }}>
+                <CardActionArea
+                  onClick={() => {
+                    navigate(
+                      `/tournaments/${selectedTournament.id}/match/${match.id}`
+                    );
+                  }}
+                >
+                  <CardContent>
+                    <Typography textAlign="center">
+                      {/* Print match details, including player names and scores */}
+                      {t("profile.match")} {matchIndex + 1}:
+                      <br />
+                      <span>
+                        {getPlayerNameById(
+                          selectedTournament.players,
+                          match.players[0].id
+                        )}
+                        {"  "}
+                        {match.player1Score}
+                        {" - "}
+                        {match.player2Score}
+                        {"  "}
+                        {getPlayerNameById(
+                          selectedTournament.players,
+                          match.players[1].id
+                        )}
+                      </span>
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))}
+          </Box>
+        </div>
+      ))}
     </div>
   );
 };

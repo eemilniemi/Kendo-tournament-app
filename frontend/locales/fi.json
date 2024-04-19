@@ -155,7 +155,9 @@
     "missing_and": "ja pistevastaava",
     "group": "Lohko",
     "playoff_stage_not_started": "Pudotuspelivaihe ei ole vielä alkanut.",
-    "court_number": "Kenttä"
+    "court_number": "Kenttä",
+    "tournament_winner": "Turnauksen voittaja: ",
+    "no_winner": "Ei voittajaa"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",
