@@ -7,10 +7,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import SpeedDial from "@mui/material/SpeedDial";
-import SpeedDialAction from "@mui/material/SpeedDialAction";
-import SpeedDialIcon from "@mui/material/SpeedDialIcon";
-import EventIcon from "@mui/icons-material/Event";
+import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Select from "@mui/material/Select";
 import type { Tournament } from "types/models";
@@ -183,11 +180,6 @@ const TournamentList: React.FC = () => {
     }
   };
 
-  // SpeedDial actions
-  const actions = [
-    { icon: <EventIcon />, name: t("frontpage_labels.create_tournament") }
-  ];
-
   return (
     <Container sx={{ position: "relative", paddingBottom: "30px" }}>
       {/* Welcome Message */}
@@ -198,23 +190,44 @@ const TournamentList: React.FC = () => {
       </Box>
 
       {/* Floating Create Tournament Button */}
-      <SpeedDial
-        ariaLabel={t("frontpage_labels.create_tournament")}
-        icon={<SpeedDialIcon />}
-        direction="up"
-        sx={{ position: "fixed", bottom: "100px", right: "20px" }}
-      >
-        {actions.map((action) => (
-          <SpeedDialAction
-            key={action.name}
-            icon={action.icon}
-            tooltipTitle={action.name}
-            onClick={() => {
-              navigate("new-tournament");
-            }}
-          />
-        ))}
-      </SpeedDial>
+      <Button
+        type="button"
+        variant="outlined"
+        color="primary"
+        onClick={() => {
+          navigate("new-tournament");
+        }}
+        sx={{
+          fontSize: "34px",
+          position: "fixed",
+          bottom: "110px",
+          right: "20px",
+          color: "white",
+          backgroundColor: "red",
+          borderRadius: "50%",
+          width: "56px",
+          height: "60px",
+          textTransform: "none",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+          transition: "transform 0.3s",
+
+          "&::after": {
+            content: "'+'"
+          },
+
+          "&:hover": {
+            width: "130px",
+            height: "60px",
+            borderRadius: "10px",
+            color: "white",
+            backgroundColor: "red",
+            "&::after": {
+              content: `'${t("frontpage_labels.create_tournament")}'`,
+              fontSize: "16px"
+            }
+          }
+        }}
+      ></Button>
 
       {/* Tournament Listings */}
       {/* If the device is mobile */}
