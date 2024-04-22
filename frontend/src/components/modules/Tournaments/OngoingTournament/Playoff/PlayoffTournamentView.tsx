@@ -175,7 +175,8 @@ const PlayoffTournamentView: React.FC = () => {
                         textDecoration: "underline"
                       }}
                     >
-                      {parseInt(roundNumber) === totalRounds
+                      {parseInt(roundNumber) === totalRounds &&
+                      tournament.type === "Playoff"
                         ? t("tournament_view_labels.final")
                         : `${t(
                             "tournament_view_labels.round"
