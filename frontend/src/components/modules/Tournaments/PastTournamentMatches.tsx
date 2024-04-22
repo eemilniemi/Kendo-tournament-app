@@ -147,7 +147,7 @@ const PastTournamentMatches: React.FC = () => {
           {/* Add round print only if there is several rounds */}
           {Object.keys(rounds).length > 1 && (
             <Typography variant="h6" sx={{ marginTop: 2 }}>
-              Round {round}
+              {t("tournament_view_labels.round")} {round}
             </Typography>
           )}
           <Box
