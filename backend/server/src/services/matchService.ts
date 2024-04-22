@@ -327,7 +327,7 @@ export class MatchService {
             tournament.matchSchedule as Match[],
             tournament.players as Types.ObjectId[]
           );
-          console.log(rankings);
+
           // grant bye
           if (rankings.length % 2 !== 0) {
             for (let i = 0; i < rankings.length; i++) {
@@ -398,7 +398,6 @@ export class MatchService {
             }
 
             if (i + 1 >= rankings.length && rankings.length > 0) {
-              console.log("SOMETHING GONE WRONG");
               break;
             }
           }

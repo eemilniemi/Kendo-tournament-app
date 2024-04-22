@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Tabs, Tab, Typography, Grid } from "@mui/material";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "../CopyToClipboardButton";
 import {
-  createMatchButton,
   getPlayerNames,
   Scoreboard,
   sortMatches,
@@ -15,17 +14,14 @@ import {
 import PlayoffTournamentView from "../Playoff/PlayoffTournamentView";
 import { type Match, type Tournament } from "../../../../../types/models";
 
-import { useAuth } from "context/AuthContext";
-import DeleteUserFromTournament from "../DeleteUserFromTournament";
-
 import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
-import PlayerName, { checkSameNames } from "../../PlayerNames";
+import { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 
 const SwissTournamentView: React.FC = () => {
-  const [error, setError] = useState<string | null>(null);
+  const setError = useState<string | null>(null)[1];
   const { t } = useTranslation();
   const tournament = useTournament();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,9 +30,9 @@ const SwissTournamentView: React.FC = () => {
   const tabTypes = ["scoreboard", "playoff"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
-  const [ongoingMatches, setOngoingMatches] = useState<Match[]>([]);
-  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
-  const [pastMatches, setPastMatches] = useState<Match[]>([]);
+  const setOngoingMatches = useState<Match[]>([])[1];
+  const setUpcomingMatches = useState<Match[]>([])[1];
+  const setPastMatches = useState<Match[]>([])[1];
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const [hasJoined, setHasJoined] = useState(false);
   const showToast = useToast();
