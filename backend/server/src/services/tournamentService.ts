@@ -402,7 +402,8 @@ export class TournamentService {
     playerIds: Types.ObjectId[],
     tournament: Types.ObjectId,
     tournamentMatchTime: MatchTime,
-    currentRound: number = 1
+    currentRound: number = 1,
+    matchType: string = "playoff"
   ): Promise<UnsavedMatch[]> {
     const matches: UnsavedMatch[] = [];
 
@@ -416,7 +417,7 @@ export class TournamentService {
     for (i = 0; i < byesNeeded; i++) {
       byes.push({
         players: [{ id: playerIds[i], points: [], color: "white" }],
-        type: "playoff",
+        type: matchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
         tournamentRound: currentRound,
@@ -433,7 +434,7 @@ export class TournamentService {
           { id: playerIds[i], points: [], color: "white" },
           { id: playerIds[i + 1], points: [], color: "red" }
         ],
-        type: "playoff",
+        type: matchType as MatchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
         tournamentRound: currentRound,

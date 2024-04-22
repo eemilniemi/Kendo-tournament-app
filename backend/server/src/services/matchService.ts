@@ -235,12 +235,12 @@ export class MatchService {
             // case: some players tied for spot/spots, generate playoff elimination matches
             else if (ties[i].length > 0) {
               if (ties[i].length % 2 !== 0) {
-                console.log("UNEVEN TIES PLAYOFF, CHECK IMPLEMENTATION");
                 const matches = await TournamentService.generatePlayoffSchedule(
                   ties[i],
                   tournament.id,
                   tournament.matchTime,
-                  nextRound
+                  nextRound,
+                  "pre playoff"
                 );
                 const matchDocs = await MatchModel.insertMany(matches);
                 for (const match of matchDocs) {
