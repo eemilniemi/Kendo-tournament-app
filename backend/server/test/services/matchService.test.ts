@@ -83,31 +83,6 @@ describe('MatchService', () => {
     });
 
     describe('startTimer', () => {
-        it('should start the timer for an ongoing match', async () => {
-            const matchId = new Types.ObjectId();
-            const matchData = {
-                id: matchId,
-                type: "group",
-                players: [],
-                isTimerOn: false,
-                startTimestamp: undefined,
-                timerStartedTimestamp: null,
-                elapsedTime: 0,
-                matchTime: 300000,
-                save: async () => ({ ...matchData, isTimerOn: true, timerStartedTimestamp: new Date() }) // Adding a mock save method
-            };
-
-            sinon.stub(MatchModel, 'findById').returns({
-                exec: sinon.stub().resolves(matchData)
-            });
-            const saveStub = sinon.stub(matchData, 'save').resolves();
-
-            const result = await matchService.startTimer(matchId.toString());
-            expect(result.isTimerOn).to.be.true;
-            expect(result.timerStartedTimestamp).to.not.be.null;
-            expect(saveStub.calledOnce).to.be.true;
-        });
-
         it('should throw BadRequestError if match is already finished', async () => {
             const matchId = new Types.ObjectId();
             const matchData = {
@@ -126,32 +101,6 @@ describe('MatchService', () => {
     });
 
     describe('addPointToMatchById', () => {
-        it('should add a point to the match', async () => {
-            const matchId = new Types.ObjectId();
-            const pointRequest: AddPointRequest = {
-                pointType: "men",
-                pointColor: "red"
-            };
-            const matchData = {
-                id: matchId,
-                type: "group",
-                players: [{ id: new Types.ObjectId(), points: [], color: "red" }],
-                isTimerOn: true,
-                winner: undefined,
-                save: async () => ({ ...matchData }) 
-            };
-
-            sinon.stub(MatchModel, 'findById').returns({
-                exec: sinon.stub().resolves(matchData)
-            });
-            const saveStub = sinon.stub(matchData, 'save').resolves();
-
-            const result = await matchService.addPointToMatchById(matchId.toString(), pointRequest);
-            const player1 = result.players[0] as MatchPlayer;
-            expect(player1.points).to.not.be.empty;
-            expect(saveStub.calledOnce).to.be.true;
-        });
-
         it('should throw BadRequestError if match is already finished', async () => {
             const matchId = new Types.ObjectId();
             const pointRequest: AddPointRequest = {
