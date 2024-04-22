@@ -143,7 +143,6 @@ const TournamentList: React.FC = () => {
           break;
       }
     }
-
     // Show filtered tournaments if filters are applied
     if (filtersApplied) {
       return filteredTournaments;
@@ -293,9 +292,9 @@ const TournamentList: React.FC = () => {
         </Select>
         {/* Filtering options button */}
         <FilterTournaments
-          tournaments={tournamentsToRender()}
-          tab={currentTab}
+          parentComponent="TournamentsList"
           handleFilteredTournaments={handleFilteredTournaments}
+          tab={currentTab}
         />
       </Box>
 

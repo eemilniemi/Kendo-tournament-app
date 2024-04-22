@@ -109,7 +109,11 @@ const ProfileInfo: React.FC = () => {
           width: "500px"
         }}
       >
-        <ProfileHeader />
+        <ProfileHeader
+          editingEnabled={editingEnabled}
+          setEditingEnabled={setEditingEnabled}
+          formContext={formContext}
+        />
         <FormContainer
           defaultValues={defaultValues}
           formContext={formContext}
