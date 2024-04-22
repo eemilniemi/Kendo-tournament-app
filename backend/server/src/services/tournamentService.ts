@@ -138,6 +138,12 @@ export class TournamentService {
 
       tournament.matchSchedule = [];
     }
+    if (tournament.type === TournamentType.Swiss) {
+      await MatchModel.deleteMany({ tournamentId: tournament.id });
+
+      tournament.matchSchedule = [];
+    }
+
     await tournament.save();
 
     // Playoff matches are calculated separately when the tournament has started
@@ -365,6 +371,14 @@ export class TournamentService {
           }
         }
         break;
+      case TournamentType.Swiss:
+        matches = TournamentService.generateSwissSchedule(
+          tournament.players as Types.ObjectId[],
+          tournament.id,
+          tournament.matchTime
+        );
+
+        break;
     }
 
     if (matches.length === 0) {
@@ -510,6 +524,46 @@ export class TournamentService {
     }
 
     return tournament;
+  }
+
+  private static generateSwissSchedule(
+    playerIds: Types.ObjectId[],
+    tournament: Types.ObjectId,
+    tournamentMatchTime: MatchTime,
+    tournamentRound: number = 1
+  ): UnsavedMatch[] {
+    const matches: UnsavedMatch[] = [];
+    const bye = [];
+    for (let i = 0; i < playerIds.length; i += 2) {
+      if (i + 1 === playerIds.length) {
+        bye.push({
+          players: [{ id: playerIds[i], points: [], color: "white" }],
+          type: "swiss",
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound: 1,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime,
+          winner: playerIds[i]
+        });
+        matches.push(...(bye as UnsavedMatch[]));
+      } else {
+        matches.push({
+          players: [
+            { id: playerIds[i], points: [], color: "white" },
+            { id: playerIds[i + 1], points: [], color: "red" }
+          ],
+          type: "swiss",
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime
+        });
+      }
+    }
+
+    return matches;
   }
 
   private async validateTournamentDetails(

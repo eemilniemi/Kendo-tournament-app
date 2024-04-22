@@ -30,6 +30,7 @@
     "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
     "copy_failure": "Failed to copy tournament link",
+    "swiss_rounds_error": "Numbers of swiss rounds must be at least 1",
     "role_reset": "Official roles reset successfully!",
     "match_reset": "Match reset successfully!"
   },
@@ -49,6 +50,7 @@
     "time_keeper": "Time keeper",
     "point_maker": "Point maker",
     "tie": "It's a tie!",
+    "reset": "Reset match",
     "reset": "Reset match",
     "reset_roles": "Reset official roles"
   },
@@ -222,6 +224,9 @@
     "site_link": "Link to organizer's site",
     "paid": "This tournament requires payment",
     "payment_link": "Link to payment site",
+    "required_text": "This field is required",
+    "swiss": "Swiss",
+    "swiss_rounds": "Number of swiss rounds",
     "required_text": "This field is required"
   },
   "edit_tournament_form": {
