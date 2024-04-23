@@ -268,7 +268,8 @@
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
     "preliminary_playoff": "Alkulohkot ja pudotuspelit",
-    "preliminary": "Alkulohkot"
+    "preliminary": "Alkulohkot",
+    "swiss": "Sveitsiläinen"
   },
   "sorting": {
     "orderBy": "Järjestä: ",

@@ -267,7 +267,8 @@
     "round_robin": "Round Robin",
     "playoff": "Playoff",
     "preliminary_playoff": "Preliminary and playoff",
-    "preliminary": "Preliminary"
+    "preliminary": "Preliminary",
+    "swiss": "Swiss"
   },
   "sorting": {
     "orderBy": "Order By: ",

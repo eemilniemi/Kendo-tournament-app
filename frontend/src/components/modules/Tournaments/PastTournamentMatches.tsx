@@ -25,9 +25,8 @@ const PastTournamentMatches: React.FC = () => {
   const tournamentTypes: Record<TournamentType, string> = {
     "Round Robin": "types.round_robin",
     Playoff: "types.playoff",
-    "Preliminary Playoff": "types.preliminary_playoff"
-    // TODO add swiss
-    // Swiss: "types.swiss"
+    "Preliminary Playoff": "types.preliminary_playoff",
+    Swiss: "types.swiss"
   };
 
   const selectedTournament = past.find(
@@ -114,8 +113,8 @@ const PastTournamentMatches: React.FC = () => {
         return t("tournament_view_labels.no_winner");
       }
     } else if (
-      selectedTournament.type === "Round Robin" // ||
-      // selectedTournament.type === "Swiss" TODO edit and test when swiss is available
+      selectedTournament.type === "Round Robin" ||
+      selectedTournament.type === "Swiss"
     ) {
       return (
         t("tournament_view_labels.tournament_winner") +
