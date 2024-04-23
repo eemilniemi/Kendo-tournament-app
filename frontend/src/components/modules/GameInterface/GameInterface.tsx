@@ -104,6 +104,8 @@ const GameInterface: React.FC = () => {
   // state handlers for whether or not checkbox is checked
   const [timeKeeper, setTimeKeeper] = useState<boolean>(false);
   const [pointMaker, setPointMaker] = useState<boolean>(false);
+  const [timeKeeperInfo, setTimeKeeperInfo] = useState<User | null>(null);
+  const [pointMakerInfo, setPointMakerInfo] = useState<User | null>(null);
 
   // Listening to matches websocket
   useEffect(() => {
@@ -529,25 +531,40 @@ const GameInterface: React.FC = () => {
     setMostRecentPointType(pointRequest.pointType);
   };
 
-  const findTimekeeper = (): User => {
-    const timeKeeper = tournament.players.find(
-      (p) => p.id === matchInfo.timeKeeper
-    );
+  // Function to fetch time keeper information
+  const findTimekeeper = async (): Promise<void> => {
+    if (matchInfo.timeKeeper === undefined) {
+      setTimeKeeperInfo(null);
+      return;
+    }
+
+    const timeKeeper = await api.user.details(matchInfo.timeKeeper);
     if (timeKeeper === undefined) {
       throw new Error("Time keeper not found");
     }
-    return timeKeeper;
+    setTimeKeeperInfo(timeKeeper);
   };
 
-  const findPointmaker = (): User => {
-    const pointMaker = tournament.players.find(
-      (p) => p.id === matchInfo.pointMaker
-    );
+  // Function to fetch point maker information
+  const findPointmaker = async (): Promise<void> => {
+    if (matchInfo.pointMaker === undefined) {
+      setPointMakerInfo(null);
+      return;
+    }
+
+    const pointMaker = await api.user.details(matchInfo.pointMaker);
+    console.log(pointMaker);
     if (pointMaker === undefined) {
       throw new Error("Point maker not found");
     }
-    return pointMaker;
+    setPointMakerInfo(pointMaker);
   };
+
+  // Call the findTimekeeper and findPointmaker functions when matchInfo updates
+  useEffect(() => {
+    void findTimekeeper();
+    void findPointmaker();
+  }, [matchInfo]);
 
   // Function to check if the user is a player in the tournament
   const isUserInTournament = (userId: string, players: User[]): boolean => {
@@ -601,8 +618,7 @@ const GameInterface: React.FC = () => {
               {/* button is shown until the match is started */}
               {userId !== null &&
                 userId !== undefined &&
-                matchInfo.startTimestamp === undefined &&
-                isUserInTournament(userId, tournament.players) && (
+                matchInfo.startTimestamp === undefined && (
                   <>
                     <Grid item>
                       {/* button is disabled if both roles are checked and user is not one of them */}
@@ -680,19 +696,17 @@ const GameInterface: React.FC = () => {
                       <Typography variant="body2">
                         {t("game_interface.time_keeper")}:{" "}
                         <PlayerName
-                          firstName={findTimekeeper().firstName}
-                          lastName={findTimekeeper().lastName}
+                          firstName={timeKeeperInfo?.firstName ?? ""}
+                          lastName={timeKeeperInfo?.lastName ?? ""}
                           sameNames={haveSameNames}
                         />
                         <br />
                         {t("game_interface.point_maker")}:{" "}
-                        {
-                          <PlayerName
-                            firstName={findPointmaker().firstName}
-                            lastName={findPointmaker().lastName}
-                            sameNames={haveSameNames}
-                          />
-                        }
+                        <PlayerName
+                          firstName={pointMakerInfo?.firstName ?? ""}
+                          lastName={pointMakerInfo?.lastName ?? ""}
+                          sameNames={haveSameNames}
+                        />
                       </Typography>
                     </Grid>
                     <br />
