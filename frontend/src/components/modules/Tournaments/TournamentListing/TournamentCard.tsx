@@ -104,7 +104,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           title={tournament.name}
           titleTypographyProps={{ fontWeight: "500" }}
         />
-        <CardContent sx={{ marginBottom: "32px" }}>
+        <CardContent sx={{ marginBottom: "64px" }}>
           {tournamentFull && type === "upcoming" && (
             <Typography variant="subtitle1" marginBottom="32px">
               {t("upcoming_tournament_view.tournament_full")}
@@ -162,7 +162,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
               onClick={() => {
                 navigate(`edit-tournament-info/${tournament.id}`);
               }}
-              sx={{ position: "absolute", bottom: 10, left: 120 }}
+              sx={{ position: "absolute", bottom: 60, right: 10 }}
             >
               {t("buttons.edit_button")}
             </Button>

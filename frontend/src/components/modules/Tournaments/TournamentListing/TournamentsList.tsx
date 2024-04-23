@@ -200,19 +200,25 @@ const TournamentList: React.FC = () => {
         sx={{
           fontSize: "34px",
           position: "fixed",
-          bottom: "110px",
+          zIndex: "999",
+          bottom: "70px",
           right: "20px",
           color: "white",
-          backgroundColor: "red",
+          backgroundColor: "#db4744",
           borderRadius: "50%",
           width: "56px",
-          height: "60px",
+          height: "62px",
           textTransform: "none",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
           transition: "transform 0.3s",
 
           "&::after": {
-            content: "'+'"
+            content: "'+'",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            top: "5%",
+            transform: "translateY(-5%)"
           },
 
           "&:hover": {
@@ -220,7 +226,7 @@ const TournamentList: React.FC = () => {
             height: "60px",
             borderRadius: "10px",
             color: "white",
-            backgroundColor: "red",
+            backgroundColor: "#db4744",
             "&::after": {
               content: `'${t("frontpage_labels.create_tournament")}'`,
               fontSize: "16px"
