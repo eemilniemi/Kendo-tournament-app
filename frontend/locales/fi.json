@@ -225,8 +225,7 @@
     "payment_link": "Linkki maksusivustolle",
     "required_text": "Tämä kenttä on pakollinen",
     "swiss": "Sveitsiläinen",
-    "swiss_rounds": "Sveitsiläisiä kierroksia",
-    "required_text": "Tämä kenttä on pakollinen"
+    "swiss_rounds": "Sveitsiläisiä kierroksia"
   },
   "edit_tournament_form": {
     "confirmation_message": "Oletko varma, että haluat muokata turnausta annetuilla tiedoilla?"

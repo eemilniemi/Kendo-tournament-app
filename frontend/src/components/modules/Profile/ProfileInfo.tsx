@@ -129,6 +129,9 @@ const ProfileInfo: React.FC = () => {
                 label={t("user_info_labels.first_name")}
                 margin="normal"
                 disabled={!editingEnabled}
+                validation={{
+                  required: t("create_tournament_form.required_text")
+                }}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -139,6 +142,9 @@ const ProfileInfo: React.FC = () => {
                 label={t("user_info_labels.last_name")}
                 margin="normal"
                 disabled={!editingEnabled}
+                validation={{
+                  required: t("create_tournament_form.required_text")
+                }}
               />
             </Grid>
           </Grid>
@@ -151,6 +157,9 @@ const ProfileInfo: React.FC = () => {
             fullWidth
             margin="normal"
             disabled={!editingEnabled}
+            validation={{
+              required: t("create_tournament_form.required_text")
+            }}
           />
 
           <TextFieldElement
@@ -166,7 +175,8 @@ const ProfileInfo: React.FC = () => {
                 return (
                   isValidPhone(value) || t("messages.phonenumber_validation")
                 );
-              }
+              },
+              required: t("create_tournament_form.required_text")
             }}
           />
 
@@ -241,6 +251,9 @@ const ProfileInfo: React.FC = () => {
               fullWidth
               margin="normal"
               disabled={!editingEnabled}
+              validation={{
+                required: t("create_tournament_form.required_text")
+              }}
             />
           )}
           <EditButtonRow
