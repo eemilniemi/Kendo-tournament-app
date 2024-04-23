@@ -264,8 +264,24 @@ const PreliminaryPlayoffView: React.FC = () => {
     if (initialRender.current && players.length > 0) {
       initialRender.current = false;
       updatePlayerStats(tournamentData, setPlayers);
+
+      // Show toast when a tiebreaker match is there, only once per render
+      if (tournamentStage === "preliminary") {
+        for (const [index, matches] of upcomingMatches.entries()) {
+          const hasPrePlayoffMatch = matches.some(
+            (match) => match.type === "pre playoff"
+          );
+          // If a match with type 'pre playoff' is found
+          if (hasPrePlayoffMatch) {
+            showToast(
+              t("tournament_view_labels.tiebreaker", { groupNr: index + 1 }),
+              "success"
+            );
+          }
+        }
+      }
     }
-  }, [players, tournamentData]);
+  }, [players, tournamentData, upcomingMatches]);
 
   // When a scoreboard is clicked, find out matches for that group to show
   useEffect(() => {
