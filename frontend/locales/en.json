@@ -176,7 +176,8 @@
     "no_past": "No past tournaments.",
     "start_date": "Start Date",
     "end_date": "End Date",
-    "welcome": "Welcome to KendoApp! Here you can participate, host or follow tournaments!"
+    "welcome": "Welcome to KendoApp! Here you can participate, host or follow tournaments!",
+    "winner": "WINNER"
   },
   "created_tournament": {
     "signed_up": "Signed up",
@@ -263,7 +264,8 @@
     "round_robin": "Round Robin",
     "playoff": "Playoff",
     "preliminary_playoff": "Preliminary and playoff",
-    "preliminary": "Preliminary"
+    "preliminary": "Preliminary",
+    "swiss": "Swiss"
   },
   "sorting": {
     "orderBy": "Order By: ",

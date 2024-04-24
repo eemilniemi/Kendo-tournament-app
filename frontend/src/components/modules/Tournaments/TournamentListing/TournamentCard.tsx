@@ -18,6 +18,7 @@ import {
   DialogContentText,
   DialogTitle
 } from "@mui/material";
+import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 interface TournamentCardProps {
   tournament: Tournament;
@@ -39,6 +40,8 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
   const isUserTheCreator = tournament.creator.id === userId;
   const tournamentHasNotStarted = new Date() < new Date(tournament.startDate);
   const [openDialog, setOpenDialog] = useState(false);
+
+  const finished = allMatchesPlayed(tournament);
 
   const handleOpenDialog = (): void => {
     setOpenDialog(true);
@@ -108,6 +111,11 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           {tournamentFull && type === "upcoming" && (
             <Typography variant="subtitle1" marginBottom="32px">
               {t("upcoming_tournament_view.tournament_full")}
+            </Typography>
+          )}
+          {finished && (
+            <Typography color="text.secondary">
+              <strong>{t("frontpage_labels.winner")}: {findTournamentWinner(tournament)}</strong>
             </Typography>
           )}
           {(type === "ongoing" || type === "upcoming") && (
