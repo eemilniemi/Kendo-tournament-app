@@ -566,11 +566,6 @@ const GameInterface: React.FC = () => {
     void findPointmaker();
   }, [matchInfo]);
 
-  // Function to check if the user is a player in the tournament
-  const isUserInTournament = (userId: string, players: User[]): boolean => {
-    return players.some((player) => player.id === userId);
-  };
-
   const handleReset = async (): Promise<void> => {
     if (matchId !== undefined) {
       try {

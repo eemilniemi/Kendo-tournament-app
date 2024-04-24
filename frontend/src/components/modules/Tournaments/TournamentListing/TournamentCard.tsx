@@ -115,7 +115,10 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           )}
           {finished && (
             <Typography color="text.secondary">
-              <strong>{t("frontpage_labels.winner")}: {findTournamentWinner(tournament)}</strong>
+              <strong>
+                {t("frontpage_labels.winner")}:{" "}
+                {findTournamentWinner(tournament)}
+              </strong>
             </Typography>
           )}
           {(type === "ongoing" || type === "upcoming") && (
