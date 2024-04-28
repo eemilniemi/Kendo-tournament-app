@@ -268,11 +268,11 @@ const PreliminaryPlayoffView: React.FC = () => {
       // Show toast when a tiebreaker match is there, only once per render
       if (tournamentStage === "preliminary") {
         for (const [index, matches] of upcomingMatches.entries()) {
-          const hasPrePlayoffMatch = matches.some(
-            (match) => match.type === "pre playoff"
+          const hasTiebreakers = matches.some(
+            (match) => match.tournamentRound > 1
           );
-          // If a match with type 'pre playoff' is found
-          if (hasPrePlayoffMatch) {
+          // If a new round of matches is created
+          if (hasTiebreakers) {
             showToast(
               t("tournament_view_labels.tiebreaker", { groupNr: index + 1 }),
               "success"
