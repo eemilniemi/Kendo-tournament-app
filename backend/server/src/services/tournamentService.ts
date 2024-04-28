@@ -348,9 +348,8 @@ export class TournamentService {
             "Playoff matches should be generated all at once"
           );
         }
-        matches = await this.generatePlayoffSchedule(
+        matches = await TournamentService.generatePlayoffSchedule(
           tournament.players as Types.ObjectId[],
-          tournament.matchSchedule as Types.ObjectId[],
           tournament.id,
           tournament.matchTime
         );
@@ -417,15 +416,16 @@ export class TournamentService {
     return matches;
   }
 
-  private async generatePlayoffSchedule(
+  public static async generatePlayoffSchedule(
     playerIds: Types.ObjectId[],
-    previousMatches: Types.ObjectId[],
     tournament: Types.ObjectId,
-    tournamentMatchTime: MatchTime
-  ): Promise<Array<UnsavedMatch | Match>> {
-    const matches: Array<UnsavedMatch | Match> = [];
+    tournamentMatchTime: MatchTime,
+    currentRound: number = 1,
+    matchType: string = "playoff"
+  ): Promise<UnsavedMatch[]> {
+    const matches: UnsavedMatch[] = [];
 
-    const bracketSize = this.nextPowerOfTwo(playerIds.length);
+    const bracketSize = TournamentService.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
 
     // create the byes first to be added later
@@ -435,10 +435,10 @@ export class TournamentService {
     for (i = 0; i < byesNeeded; i++) {
       byes.push({
         players: [{ id: playerIds[i], points: [], color: "white" }],
-        type: "playoff",
+        type: matchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
-        tournamentRound: 1,
+        tournamentRound: currentRound,
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
         winner: playerIds[i]
@@ -452,10 +452,10 @@ export class TournamentService {
           { id: playerIds[i], points: [], color: "white" },
           { id: playerIds[i + 1], points: [], color: "red" }
         ],
-        type: "playoff",
+        type: matchType as MatchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
-        tournamentRound: 1,
+        tournamentRound: currentRound,
         tournamentId: tournament,
         matchTime: tournamentMatchTime
       });
@@ -472,7 +472,7 @@ export class TournamentService {
     return (n & (n - 1)) === 0;
   }
 
-  private nextPowerOfTwo(n: number): number {
+  private static nextPowerOfTwo(n: number): number {
     let power = 1;
     while (power < n) {
       power *= 2;

@@ -51,7 +51,6 @@
     "point_maker": "Point maker",
     "tie": "It's a tie!",
     "reset": "Reset match",
-    "reset": "Reset match",
     "reset_roles": "Reset official roles"
   },
   "buttons": {
@@ -225,8 +224,7 @@
     "payment_link": "Link to payment site",
     "required_text": "This field is required",
     "swiss": "Swiss",
-    "swiss_rounds": "Number of swiss rounds",
-    "required_text": "This field is required"
+    "swiss_rounds": "Number of swiss rounds"
   },
   "edit_tournament_form": {
     "confirmation_message": "Are you sure you want to edit the tournament with the provided information?"
