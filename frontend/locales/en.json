@@ -27,6 +27,7 @@
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
     "minimum_player_to_playoff": "At least one player has to proceed",
+    "cancel_success": "Successfully cancelled sign up for tournament {{name}} ",
     "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
     "copy_failure": "Failed to copy tournament link",
@@ -74,6 +75,7 @@
     "save_button": "Save",
     "modify_or_delete": "Modify or delete recent point",
     "delete": "Delete",
+    "cancel_sign_up": "Cancel sign up",
     "withdraw_user": "Withdraw player from tournament",
     "copy_to_clipboard": "Share tournament",
     "save_changes_button": "Save changes",
@@ -163,7 +165,8 @@
     "click_here": "Click here",
     "user_info": "The information you are signing up with:",
     "user_info_table": "User Information",
-    "player_table": "Player Table"
+    "player_table": "Player Table",
+    "cancel": "Cancel sign up for"
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Ongoing Tournaments",

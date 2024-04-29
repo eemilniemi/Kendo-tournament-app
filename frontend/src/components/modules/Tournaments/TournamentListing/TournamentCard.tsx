@@ -145,6 +145,18 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           >
             {t("buttons.sign_up_button")}
           </Button>
+          {userAlreadySigned && tournamentHasNotStarted && (
+            <Button
+              color="secondary"
+              variant="contained"
+              onClick={() => {
+                navigate(`${tournament.id}/cancel-sign-up`);
+              }}
+              sx={{ position: "absolute", bottom: 10, right: 10 }}
+            >
+              {t("buttons.cancel_sign_up")}
+            </Button>
+          )}
           {isUserTheCreator && tournamentHasNotStarted && (
             <Button
               color="error"

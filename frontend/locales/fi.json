@@ -27,6 +27,7 @@
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "cancel_success": "Ilmoittautuminen turnaukseen {{name}} peruttiin onnistuneesti",
     "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
     "copy_failure": "Linkin kopioinnissa tapahtui virhe",
@@ -51,7 +52,6 @@
     "point_maker": "Pistevastaava",
     "tie": "Tasapeli!",
     "reset": "Nollaa ottelu",
-    "reset": "Nollaa ottelu",
     "reset_roles": "Nollaa toimitsijaroolit"
   },
   "buttons": {
@@ -75,6 +75,7 @@
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
+    "cancel_sign_up": "Peruuta ilmoittautuminen",
     "withdraw_user": "Keskeytä pelaajan turnaus",
     "copy_to_clipboard": "Jaa turnaus",
     "save_changes_button": "Tallenna muutokset",
@@ -165,7 +166,8 @@
     "click_here": "Klikkaa tästä",
     "user_info": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
-    "player_table": "Pelaajataulu"
+    "player_table": "Pelaajataulu",
+    "cancel": "Peruuta ilmoittautuminen: "
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Käynnissä olevat turnaukset",

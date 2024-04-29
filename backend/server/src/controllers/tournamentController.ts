@@ -26,6 +26,9 @@ import type * as express from "express";
 
 @Route("tournaments")
 export class TournamentController extends Controller {
+  /*
+   * Get tournament details from a specific tournament.
+   */
   @Get("{tournamentId}")
   @Tags("Tournaments")
   public async getTournament(
@@ -35,6 +38,9 @@ export class TournamentController extends Controller {
     return await this.service.getTournamentById(tournamentId);
   }
 
+  /*
+   * Get all tournaments.
+   */
   @Get()
   @Tags("Tournaments")
   public async getTournaments(
@@ -44,6 +50,9 @@ export class TournamentController extends Controller {
     return await this.service.getAllTournaments(limit);
   }
 
+  /*
+   * Create a new tournament.
+   */
   @Post()
   @Tags("Tournaments")
   @Security("jwt")
@@ -88,6 +97,26 @@ export class TournamentController extends Controller {
     );
   }
 
+  /*
+   *  Remove a player from a tournament.
+   */
+  @Delete("{tournamentId}/cancel-signup")
+  @Tags("Tournaments")
+  @Security("jwt")
+  public async cancelSignup(
+    @Path() tournamentId: ObjectIdString,
+    @Body() request: { playerId: ObjectIdString }
+  ): Promise<void> {
+    this.setStatus(204);
+    await this.service.removePlayerFromTournament(
+      tournamentId,
+      request.playerId
+    );
+  }
+
+  /*
+   *  Add a match to a tournament.
+   */
   @Put("{tournamentId}/manual-schedule")
   @Tags("Tournaments")
   @Security("jwt")
@@ -103,6 +132,9 @@ export class TournamentController extends Controller {
     return result;
   }
 
+  /*
+   *  Update tournament details.
+   */
   @Put("{tournamentId}/update")
   @Tags("Tournaments")
   @Security("jwt")
@@ -121,6 +153,9 @@ export class TournamentController extends Controller {
     );
   }
 
+  /*
+   * Delete a tournament
+   */
   @Delete("{tournamentId}/delete")
   @Tags("Tournaments")
   @Security("jwt")

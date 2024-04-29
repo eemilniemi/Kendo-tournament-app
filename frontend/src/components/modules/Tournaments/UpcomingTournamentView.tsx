@@ -212,6 +212,21 @@ const UpcomingTournamentView: React.FC = () => {
         </Box>
       )}
 
+      {userAlreadySigned && (
+        <Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              navigate("cancel-sign-up");
+            }}
+          >
+            {t("buttons.cancel_sign_up")}
+          </Button>
+          <br />
+        </Box>
+      )}
+
       {/* There are players in the tournament, generate table if user is logged in */}
       {tournament.players.length > 0 && userId !== undefined && (
         <React.Fragment>
