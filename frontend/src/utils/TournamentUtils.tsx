@@ -6,6 +6,7 @@ import {
   type Tournament
 } from "types/models";
 
+ // [playerId, victoryPoints, ippons]
 type rankingStruct = [string, number, number];
 
 export const allMatchesPlayed = (tournament: Tournament): boolean => {
@@ -13,10 +14,10 @@ export const allMatchesPlayed = (tournament: Tournament): boolean => {
 
   let played = 0;
 
-  for (let i = 0; i < matches.length; i++) {
+  for (const match of tournament.matchSchedule) {
     if (
-      matches[i].endTimestamp !== undefined ||
-      matches[i].winner !== undefined
+      match.endTimestamp !== undefined ||
+      match.winner !== undefined
     ) {
       played++;
     }
@@ -46,24 +47,21 @@ const calculateScores = (tournament: Tournament): rankingStruct[] => {
     for (let j = 0; j < match.players.length; j++) {
       const matchPlayer: MatchPlayer = match.players[j];
       let playerPoints = 0;
-      matchPlayer.points.forEach((point: MatchPoint) => {
-        if (point.type === "hansoku") {
-          // In case of hansoku, the opponent recieves half a point.
-          playerPoints += 0.5;
-        } else {
-          // Otherwise give one point to the player.
-          playerPoints++;
-        }
-      });
-
-      if (rankingMap.has(matchPlayer.id.toString())) {
-        const currentPoints = rankingMap.get(matchPlayer.id.toString()) ?? [
+      if(j === 0){
+        playerPoints = match.player1Score;
+      }
+      else if(j === 1){
+        playerPoints = match.player2Score;
+      }
+      const matchPlayerId = matchPlayer.id.toString();
+      if (rankingMap.has(matchPlayerId)) {
+        const currentPoints = rankingMap.get(matchPlayerId) ?? [
           0, 0
         ];
         currentPoints[1] += playerPoints;
         if (
           match.winner !== undefined &&
-          match.winner.toString() === matchPlayer.id.toString() &&
+          match.winner.toString() === matchPlayerId &&
           match.players.length > 1
         ) {
           currentPoints[0] += 3;
@@ -73,12 +71,12 @@ const calculateScores = (tournament: Tournament): rankingStruct[] => {
         ) {
           currentPoints[0] += 1;
         }
-        rankingMap.set(matchPlayer.id.toString(), currentPoints);
+        rankingMap.set(matchPlayerId, currentPoints);
       } else {
         const currentPoints = [0, playerPoints];
         if (
           match.winner !== undefined &&
-          match.winner.toString() === matchPlayer.id.toString() &&
+          match.winner.toString() === matchPlayerId &&
           match.players.length > 1
         ) {
           currentPoints[0] += 3;
@@ -88,12 +86,13 @@ const calculateScores = (tournament: Tournament): rankingStruct[] => {
         ) {
           currentPoints[0] += 1;
         }
-        rankingMap.set(matchPlayer.id.toString(), currentPoints);
+        rankingMap.set(matchPlayerId, currentPoints);
       }
     }
   }
   const playerScores: rankingStruct[] = [];
   for (const player of rankingMap) {
+    // [playerId, victoryPoints, ippons]
     playerScores.push([player[0], player[1][0], player[1][1]]);
   }
   return playerScores;

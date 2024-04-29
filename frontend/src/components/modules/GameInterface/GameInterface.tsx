@@ -553,7 +553,6 @@ const GameInterface: React.FC = () => {
     }
 
     const pointMaker = await api.user.details(matchInfo.pointMaker);
-    console.log(pointMaker);
     if (pointMaker === undefined) {
       throw new Error("Point maker not found");
     }

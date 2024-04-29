@@ -62,11 +62,6 @@ const getSortedTournaments = async (): Promise<SortedTournaments> => {
       allMatchesPlayed(tournament)
   );
 
-  console.log("ALL");
-  console.log(sortedTournaments);
-
-  console.log("PAST");
-  console.log(past);
   return { past, ongoing, upcoming } as const;
 };
 
