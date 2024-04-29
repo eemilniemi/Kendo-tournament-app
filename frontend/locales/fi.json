@@ -248,7 +248,8 @@
     "category_header": "Turnauksen kategoria",
     "link_to_payment_header": "Tämä turnaus vaatii maksun, vierailethan osoitteessa",
     "link_to_site_header": "Järjestäjän sivut",
-    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan"
+    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan",
+    "max_players": "Ilmoittautuneiden pelaajien määrä"
   },
   "navigation": {
     "back": "Takaisin",
