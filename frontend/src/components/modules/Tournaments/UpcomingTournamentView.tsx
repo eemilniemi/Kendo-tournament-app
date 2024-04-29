@@ -226,7 +226,7 @@ const UpcomingTournamentView: React.FC = () => {
           <br />
         </Box>
       )}
-      
+
       {/* There are players in the tournament, generate table if user is logged in */}
       {tournament.players.length > 0 && userId !== undefined && (
         <React.Fragment>
