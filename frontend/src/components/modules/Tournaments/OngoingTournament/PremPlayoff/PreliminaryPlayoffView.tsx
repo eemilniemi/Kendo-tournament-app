@@ -269,11 +269,12 @@ const PreliminaryPlayoffView: React.FC = () => {
     if (initialRender.current && players.length > 0) {
       initialRender.current = false;
       updatePlayerStats(tournamentData, setPlayers);
-
-      // Show toast when a tiebreaker match is there, only once per render
-      showTiebreakerToasts();
     }
-  }, [players, tournamentData, upcomingMatches]);
+  }, [players, tournamentData]);
+
+  useEffect(() => {
+    showTiebreakerToasts();
+  }, [upcomingMatches]);
 
   const showTiebreakerToasts = (): void => {
     if (tournamentStage === "preliminary" && upcomingMatches.size > 0) {
