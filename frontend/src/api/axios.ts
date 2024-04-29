@@ -119,8 +119,20 @@ const tournaments = {
     });
   },
 
+  getTournament: async (tournamentId: string) => {
+    return await request.get<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`);
+  },
+
   createNew: async (body: CreateTournamentRequest) => {
     return await request.post<Tournament>(`${TOURNAMENTS_API}`, body);
+  },
+
+  createSchedule: async (tournamentId: string): Promise<Tournament> => {
+    const res = await request.post(
+      `${TOURNAMENTS_API}/${tournamentId}/create-schedule`,
+      {}
+    );
+    return res as Tournament;
   },
 
   signup: async (tournamentId: string, body: SignupForTournamentRequest) => {
@@ -143,13 +155,20 @@ const tournaments = {
 
   update: async (tournamentId: string, body: EditTournamentRequest) => {
     return await request.put<Tournament>(
-      `${TOURNAMENTS_API}/${tournamentId}`,
+      `${TOURNAMENTS_API}/${tournamentId}/update`,
       body
     );
   },
 
   delete: async (tournamentId: string) => {
-    return await request.delete(`${TOURNAMENTS_API}/${tournamentId}`);
+    return await request.delete(`${TOURNAMENTS_API}/${tournamentId}/delete`);
+  },
+
+  markUserMatchesLost: async (tournamentId: string, userId: string) => {
+    return await request.put(
+      `${TOURNAMENTS_API}/${tournamentId}/mark-user-matches-lost`,
+      { userId }
+    );
   }
 };
 
@@ -197,6 +216,12 @@ const match = {
     await request.patch(`${MATCH_API}/${matchId}/modify-recent`, {
       newPointType
     });
+  },
+  resetMatch: async (matchId: string) => {
+    await request.patch(`${MATCH_API}/${matchId}/reset-match`);
+  },
+  resetRoles: async (matchId: string) => {
+    await request.patch(`${MATCH_API}/${matchId}/reset-roles`);
   }
 };
 

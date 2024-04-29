@@ -19,8 +19,9 @@ import {
   TournamentType,
   type UnsavedMatch
 } from "../models/tournamentModel.js";
-import { TournamentService } from "./tournamentService";
+import { TournamentService } from "./tournamentService.js";
 import { shuffle } from "../utility/utils.js";
+
 type rankingStruct = [Types.ObjectId, number, number];
 
 // Note by Samuel:
@@ -98,6 +99,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -137,6 +143,10 @@ export class MatchService {
     // Mark the timer to be off
     match.isTimerOn = false;
     await match.save();
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -181,7 +191,7 @@ export class MatchService {
 
     if (match.type === "preliminary" || match.type === "pre playoff") {
       // check if all matches are done, if not tournament is null
-      const tournament = await this.checkPreliminary(match);
+      const tournament = await this.checkAllMatchesPlayed(match);
       if (tournament !== null) {
         // getting players that proceed to playoffs and ties that need to be solved before playoff
         const [players, ties] = this.playersToPlayoffsFromPreliminary(
@@ -191,7 +201,8 @@ export class MatchService {
 
         if (ties.flat().length !== 0) {
           const nextRound =
-            this.findHighestRound(tournament.matchSchedule as Match[]) + 1;
+            MatchService.findHighestRound(tournament.matchSchedule as Match[]) +
+            1;
 
           for (let i = 0; i < ties.length; i++) {
             // case: all group players have same score
@@ -234,7 +245,17 @@ export class MatchService {
             // case: some players tied for spot/spots, generate playoff elimination matches
             else if (ties[i].length > 0) {
               if (ties[i].length % 2 !== 0) {
-                console.log("UNEVEN TIES PLAYOFF, NOT IMPLEMENTED YET");
+                const matches = await TournamentService.generatePlayoffSchedule(
+                  ties[i],
+                  tournament.id,
+                  tournament.matchTime,
+                  nextRound,
+                  "pre playoff"
+                );
+                const matchDocs = await MatchModel.insertMany(matches);
+                for (const match of matchDocs) {
+                  tournament.matchSchedule.push(match.id);
+                }
               } else {
                 const tiedPlayers = ties[i];
                 for (let j = 0; j < tiedPlayers.length; j += 2) {
@@ -246,7 +267,9 @@ export class MatchService {
                     type: "pre playoff",
                     elapsedTime: 0,
                     timerStartedTimestamp: null,
-                    tournamentRound: nextRound
+                    tournamentRound: nextRound,
+                    matchTime: tournament.matchTime,
+                    tournamentId: tournament.id
                   };
 
                   const matchDocuments = await MatchModel.create(newMatch);
@@ -260,33 +283,133 @@ export class MatchService {
         // no ties, proceeding to playoffs
         if (ties.flat().length === 0) {
           const playerIds = players.flat();
-          if (playerIds.length % 2 !== 0) {
-            console.log("UNEVEN PLAYOFF, NOT IMPLEMENTED YET");
-          } else {
-            const shuffledPlayerIds = playerIds;
-            const playoffRound =
-              this.findHighestRound(tournament.matchSchedule as Match[]) + 1;
-            for (let i = 0; i < shuffledPlayerIds.length; i += 2) {
-              const newMatch = {
-                players: [
-                  { id: shuffledPlayerIds[i], points: [], color: "white" },
-                  { id: shuffledPlayerIds[i + 1], points: [], color: "red" }
-                ],
-                type: "playoff",
-                elapsedTime: 0,
-                timerStartedTimestamp: null,
-                tournamentRound: playoffRound
-              };
+          const playoffRound =
+            MatchService.findHighestRound(tournament.matchSchedule as Match[]) +
+            1;
 
-              const matchDocuments = await MatchModel.create(newMatch);
-              tournament.matchSchedule.push(matchDocuments.id);
-            }
+          const matches = await TournamentService.generatePlayoffSchedule(
+            playerIds,
+            tournament.id,
+            tournament.matchTime,
+            playoffRound
+          );
+          const matchDocs = await MatchModel.insertMany(matches);
+          for (const match of matchDocs) {
+            tournament.matchSchedule.push(match.id);
           }
         }
 
         await tournament.save();
+        await MatchService.divideMatchesToCourts(tournament.id);
       }
     }
+
+    // swiss match generation logic
+    if (match.type === "swiss") {
+      const tournament = await this.checkAllMatchesPlayed(match);
+      if (tournament !== null) {
+        const rankingMap = this.getAllPlayerScores(
+          tournament.matchSchedule as Match[],
+          "swiss"
+        );
+        const rankings = this.formRankings(rankingMap, tournament)[0];
+        const nextRound =
+          MatchService.findHighestRound(tournament.matchSchedule as Match[]) +
+          1;
+
+        if (
+          tournament.swissRounds !== undefined &&
+          nextRound <= tournament.swissRounds
+        ) {
+          let swissPairings = this.generateAvailableSwiss(
+            tournament.matchSchedule as Match[],
+            tournament.players as Types.ObjectId[]
+          );
+
+          // grant bye
+          if (rankings.length % 2 !== 0) {
+            for (let i = 0; i < rankings.length; i++) {
+              if (
+                !this.hasHadBye(
+                  tournament.matchSchedule as Match[],
+                  rankings[i][0]
+                )
+              ) {
+                const byeMatch = {
+                  players: [{ id: rankings[i][0], points: [], color: "white" }],
+                  type: "swiss",
+                  elapsedTime: 0,
+                  timerStartedTimestamp: null,
+                  tournamentRound: nextRound,
+                  tournamentId: tournament.id,
+                  matchTime: tournament.matchTime,
+                  winner: rankings[i][0]
+                };
+
+                swissPairings = this.removeFromAvailableSwiss(
+                  swissPairings,
+                  rankings[i][0],
+                  undefined
+                );
+                rankings.splice(i, 1);
+
+                const matchDocuments = await MatchModel.create(byeMatch);
+                tournament.matchSchedule.push(matchDocuments.id);
+
+                break;
+              }
+            }
+          }
+
+          let i = 0;
+          while (rankings.length > 0) {
+            const player1 = rankings.shift() as rankingStruct;
+            const player2 = rankings[i];
+
+            if (this.hasAvailableSwiss(swissPairings, player1[0], player2[0])) {
+              const newMatch = {
+                players: [
+                  { id: player1[0], points: [], color: "white" },
+                  { id: player2[0], points: [], color: "red" }
+                ],
+                type: "swiss",
+                elapsedTime: 0,
+                timerStartedTimestamp: null,
+                tournamentRound: nextRound,
+                matchTime: tournament.matchTime,
+                tournamentId: tournament.id
+              };
+
+              swissPairings = this.removeFromAvailableSwiss(
+                swissPairings,
+                player1[0],
+                player2[0]
+              );
+              rankings.splice(i, 1);
+
+              const matchDocuments = await MatchModel.create(newMatch);
+              tournament.matchSchedule.push(matchDocuments.id);
+              i = 0;
+            } else {
+              i++;
+              rankings.unshift(player1);
+            }
+
+            if (i + 1 >= rankings.length && rankings.length > 0) {
+              break;
+            }
+          }
+
+          await tournament.save();
+          await MatchService.divideMatchesToCourts(tournament.id);
+        }
+      }
+    }
+
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -314,6 +437,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -340,6 +468,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -363,6 +496,11 @@ export class MatchService {
 
     await match.save();
 
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -385,6 +523,11 @@ export class MatchService {
     match.pointMaker = undefined;
 
     await match.save();
+
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -418,7 +561,7 @@ export class MatchService {
             : player2.id;
         match.endTimestamp = new Date();
         if (match.type === "playoff") {
-          await this.createPlayoffSchedule(match.id, match.winner);
+          await this.updatePlayoffSchedule(match.id, match.winner);
         }
       } else {
         // If the points are the same, it's a tie (in round robin)
@@ -441,6 +584,10 @@ export class MatchService {
 
       await match.save();
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -468,6 +615,11 @@ export class MatchService {
         if (wasMatchEndingPoint) {
           match.winner = undefined; // Clear the winner
           match.endTimestamp = undefined; // Clear the end timestamp
+
+          if (match.type !== "group") {
+            const tournamentId = match.tournamentId as Types.ObjectId;
+            await this.deleteNextRound(tournamentId, match.tournamentRound);
+          }
         }
 
         await match.save();
@@ -477,6 +629,10 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
 
     return await match.toObject();
   }
@@ -519,6 +675,179 @@ export class MatchService {
     } else {
       throw new BadRequestError({ message: "No players in match." });
     }
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
+    return await match.toObject();
+  }
+
+  public static async divideMatchesToCourts(id: Types.ObjectId): Promise<void> {
+    const tournament = await TournamentModel.findById(id).exec();
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+    if (tournament.numberOfCourts === 1) {
+      return;
+    }
+
+    const matches = await MatchModel.find({ tournamentId: id });
+
+    const latestRound = MatchService.findHighestRound(matches);
+
+    const latestMatches = matches.filter(
+      (match) => match.tournamentRound === latestRound
+    );
+
+    if (tournament.type === TournamentType.PreliminaryPlayoff) {
+      if (
+        latestMatches[0].type === "preliminary" ||
+        latestMatches[0].type === "pre playoff"
+      ) {
+        const matchesByGroups = MatchService.matchesByGroup(
+          tournament,
+          latestMatches
+        );
+        let court = 1;
+        for (const groupMatches of matchesByGroups) {
+          for (const match of groupMatches) {
+            match.courtNumber = court;
+            await match.save();
+          }
+          court++;
+          if (court > tournament.numberOfCourts) {
+            court = 1;
+          }
+        }
+      } else {
+        let court = 1;
+        for (const match of latestMatches) {
+          match.courtNumber = court;
+          await match.save();
+
+          court++;
+          if (court > tournament.numberOfCourts) {
+            court = 1;
+          }
+        }
+      }
+    } else if (tournament.type === TournamentType.RoundRobin) {
+      let tournamentCourts = tournament.numberOfCourts;
+      if (tournament.players.length / 2 < tournamentCourts) {
+        tournamentCourts = Math.floor(tournament.players.length / 2);
+      }
+      const queue = latestMatches;
+      const matches: Match[][] & Document[][] = [];
+      let sorted = 0;
+      let round = -1;
+      while (queue.length > 0) {
+        const match = queue.shift();
+
+        if (match === undefined) {
+          throw new NotFoundError({
+            message: "Match not found"
+          });
+        }
+
+        if (sorted % tournamentCourts === 0) {
+          matches.push([]);
+          round++;
+        }
+
+        if (!this.hasPlayerAlready(matches[round], match)) {
+          matches[round].push(match);
+          sorted++;
+        } else {
+          queue.push(match);
+        }
+      }
+
+      for (const matchRound of matches) {
+        let court = 1;
+
+        for (const match of matchRound) {
+          match.courtNumber = court;
+          await match.save();
+          court++;
+        }
+      }
+    } else if (
+      tournament.type === TournamentType.Playoff ||
+      tournament.type === TournamentType.Swiss
+    ) {
+      let court = 1;
+      for (const match of latestMatches) {
+        match.courtNumber = court;
+        court++;
+        if (court > tournament.numberOfCourts) {
+          court = 1;
+        }
+        await match.save();
+      }
+    }
+  }
+
+  public async resetMatch(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set time to zero
+    match.elapsedTime = 0;
+    match.startTimestamp = undefined;
+    match.timerStartedTimestamp = null;
+    match.isTimerOn = false;
+
+    // Set points to zero
+    if (match.players !== null && match.players.length > 0) {
+      const players = match.players as MatchPlayer[];
+      players.forEach((player) => {
+        player.points = [];
+      });
+    }
+
+    await match.save();
+
+    return await match.toObject();
+  }
+
+  public async resetRoles(matchId: string): Promise<Match> {
+    const match = await MatchModel.findById(matchId).exec();
+    if (match === null) {
+      throw new NotFoundError({
+        message: `Match not found for ID: ${matchId}`
+      });
+    }
+    if (match.winner !== undefined) {
+      throw new BadRequestError({
+        message: "Finished matches cannot be edited"
+      });
+    }
+
+    // Set the roles to zero
+    match.timeKeeper = undefined;
+    match.pointMaker = undefined;
+
+    await match.save();
+
+    // Websocket
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+
     return await match.toObject();
   }
 
@@ -566,8 +895,8 @@ export class MatchService {
       match.endTimestamp = new Date();
 
       if (match.type === "playoff") {
-        // If playoff, create next round schedule
-        await this.createPlayoffSchedule(match.id, match.winner);
+        // If playoff, add match to next round schedule
+        await this.updatePlayoffSchedule(match.id, match.winner);
       }
     }
 
@@ -613,7 +942,7 @@ export class MatchService {
     pointWinner.points.push(point);
   }
 
-  private async createPlayoffSchedule(
+  private async updatePlayoffSchedule(
     matchId: Types.ObjectId,
     winnerId: Types.ObjectId
   ): Promise<void> {
@@ -683,33 +1012,35 @@ export class MatchService {
       );
     });
 
+    eligibleWinners.push(winnerId);
     // Pair current winner with eligible winners for the next round
-    for (const pairWithWinnerId of eligibleWinners) {
-      if (
-        pairWithWinnerId !== null &&
-        pairWithWinnerId !== undefined &&
-        !pairWithWinnerId.equals(winnerId)
-      ) {
-        // Create a new match.
-        const newMatch = {
-          players: [
-            { id: winnerId, points: [], color: "white" },
-            { id: pairWithWinnerId, points: [], color: "red" }
-          ],
-          type: "playoff",
-          elapsedTime: 0,
-          timerStartedTimestamp: null,
-          tournamentRound: nextRound
-        };
 
-        const matchDocuments = await MatchModel.create(newMatch);
-        tournament.matchSchedule.push(matchDocuments.id);
+    for (let i = 0; i < eligibleWinners.length; i += 2) {
+      if (i + 1 === eligibleWinners.length) {
+        break;
       }
+      // Create a new match.
+      const newMatch = {
+        players: [
+          { id: eligibleWinners[i], points: [], color: "white" },
+          { id: eligibleWinners[i + 1], points: [], color: "red" }
+        ],
+        type: "playoff",
+        elapsedTime: 0,
+        timerStartedTimestamp: null,
+        tournamentRound: nextRound,
+        matchTime: tournament.matchTime,
+        tournamentId: tournament.id
+      };
+
+      const matchDocuments = await MatchModel.create(newMatch);
+      tournament.matchSchedule.push(matchDocuments.id);
     }
 
     // Save the tournament if new matches were added
     if (eligibleWinners.length > 0) {
       await tournament.save();
+      await MatchService.divideMatchesToCourts(tournament.id);
     }
   }
 
@@ -731,7 +1062,7 @@ export class MatchService {
       matches,
       "preliminary"
     );
-    const groupRankings: rankingStruct[][] = this.formGroupRankings(
+    const groupRankings: rankingStruct[][] = this.formRankings(
       rankingMap,
       tournament
     );
@@ -795,7 +1126,7 @@ export class MatchService {
     );
     if (prePlayoffRankingMap.size > 0) {
       // get tie breaker scores
-      const prePlayoffRankings: rankingStruct[][] = this.formGroupRankings(
+      const prePlayoffRankings: rankingStruct[][] = this.formRankings(
         prePlayoffRankingMap,
         tournament
       );
@@ -843,7 +1174,7 @@ export class MatchService {
   }
 
   // just check that all preliminary matches are played, returns tournament if so
-  private async checkPreliminary(
+  private async checkAllMatchesPlayed(
     match: Match
   ): Promise<(Tournament & Document) | null> {
     const tournament = await TournamentModel.findOne({
@@ -864,22 +1195,21 @@ export class MatchService {
     }
     const playedMatches = tournament.matchSchedule;
 
-    if (tournament.type === TournamentType.PreliminaryPlayoff) {
-      let played = 0;
+    let played = 0;
 
-      for (let i = 0; i < playedMatches.length; i++) {
-        if (playedMatches[i].endTimestamp != null) {
-          played++;
-        }
+    for (let i = 0; i < playedMatches.length; i++) {
+      if (
+        playedMatches[i].endTimestamp !== undefined ||
+        playedMatches[i].winner !== undefined
+      ) {
+        played++;
       }
-
-      if (played === playedMatches.length) {
-        return tournament;
-      }
-      return null;
-    } else {
-      return null;
     }
+
+    if (played === playedMatches.length) {
+      return tournament;
+    }
+    return null;
   }
 
   // determine player scores of certain match type or all matches
@@ -909,17 +1239,29 @@ export class MatchService {
               0, 0
             ];
             currentPoints[1] += playerPoints;
-            if (match.winner !== null && match.winner === matchPlayer.id) {
+            if (
+              match.winner !== undefined &&
+              match.winner.toString() === matchPlayer.id.toString()
+            ) {
               currentPoints[0] += 3;
-            } else if (match.winner === null && match.endTimestamp !== null) {
+            } else if (
+              match.winner === undefined &&
+              match.endTimestamp !== undefined
+            ) {
               currentPoints[0] += 1;
             }
             rankingMap.set(matchPlayer.id.toString(), currentPoints);
           } else {
             const currentPoints = [0, playerPoints];
-            if (match.winner !== null && match.winner === matchPlayer.id) {
+            if (
+              match.winner !== undefined &&
+              match.winner.toString() === matchPlayer.id.toString()
+            ) {
               currentPoints[0] += 3;
-            } else if (match.winner === null && match.endTimestamp !== null) {
+            } else if (
+              match.winner === undefined &&
+              match.endTimestamp !== undefined
+            ) {
               currentPoints[0] += 1;
             }
             rankingMap.set(matchPlayer.id.toString(), currentPoints);
@@ -933,20 +1275,30 @@ export class MatchService {
 
   // arrange rankings by group and scores consisting of wins and ippons (scored points),
   // descending order (highest score first)
-  private formGroupRankings(
+  private formRankings(
     rankingMap: Map<string, number[]>,
     tournament: Tournament & Document
   ): rankingStruct[][] {
     const groupRankings: rankingStruct[][] = [];
 
-    for (let i = 0; i < tournament.groups.length; i++) {
-      const groupRankingMap: rankingStruct[] = [];
-      groupRankings.push(groupRankingMap);
+    if (tournament.type === TournamentType.PreliminaryPlayoff) {
+      for (let i = 0; i < tournament.groups.length; i++) {
+        const groupRankingMap: rankingStruct[] = [];
+        groupRankings.push(groupRankingMap);
 
-      for (const playerId of tournament.groups[i]) {
+        for (const playerId of tournament.groups[i]) {
+          if (rankingMap.has(playerId.toString())) {
+            const score = rankingMap.get(playerId.toString()) ?? [0, 0];
+            groupRankings[i].push([playerId, score[0], score[1]]);
+          }
+        }
+      }
+    } else {
+      groupRankings.push([]);
+      for (const playerId of tournament.players as Types.ObjectId[]) {
         if (rankingMap.has(playerId.toString())) {
           const score = rankingMap.get(playerId.toString()) ?? [0, 0];
-          groupRankings[i].push([playerId, score[0], score[1]]);
+          groupRankings[0].push([playerId, score[0], score[1]]);
         }
       }
     }
@@ -962,7 +1314,7 @@ export class MatchService {
     return groupRankings;
   }
 
-  private findHighestRound(matches: Match[]): number {
+  private static findHighestRound(matches: Match[]): number {
     let round = 1;
     for (const match of matches) {
       if (match.tournamentRound > round) {
@@ -970,5 +1322,174 @@ export class MatchService {
       }
     }
     return round;
+  }
+
+  private static matchesByGroup(
+    tournament: Tournament & Document,
+    matches: Match[] & Document[]
+  ): Match[][] & Document[][] {
+    const matchesByGroup: Match[][] & Document[][] = Array.from(
+      { length: tournament.groups.length },
+      () => []
+    );
+    for (const match of matches) {
+      const player = match.players[0] as MatchPlayer;
+      const playerId = player.id;
+      const groupIndex = tournament.groups.findIndex((group) =>
+        group.includes(playerId)
+      );
+
+      if (groupIndex !== -1) {
+        matchesByGroup[groupIndex].push(match);
+        break;
+      }
+    }
+
+    return matchesByGroup;
+  }
+
+  private static hasPlayerAlready(
+    matches: Match[] & Document[],
+    match: Match & Document
+  ): boolean {
+    const player1 = match.players[0] as MatchPlayer;
+    const player2 = match.players[1] as MatchPlayer;
+    for (const listMatch of matches) {
+      const players = listMatch.players as MatchPlayer[];
+      const playerIds: Types.ObjectId[] = players.map((player) => player.id);
+      if (playerIds.includes(player1.id) || playerIds.includes(player2.id)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private generateAvailableSwiss(
+    matches: Match[],
+    players: Types.ObjectId[]
+  ): Map<string, Types.ObjectId[]> {
+    const map = new Map<string, string[]>();
+    for (const match of matches) {
+      const matchPlayer1 = match.players[0] as MatchPlayer;
+      const player1Id = matchPlayer1.id.toString();
+
+      if (match.players.length !== 1) {
+        const matchPlayer2 = match.players[1] as MatchPlayer;
+        const player2Id = matchPlayer2.id.toString();
+        if (map.has(player1Id)) {
+          const array = map.get(player1Id) as string[];
+          array.push(player2Id);
+          map.set(player1Id, array);
+        } else {
+          map.set(player1Id, [player1Id, player2Id]);
+        }
+
+        if (map.has(player2Id)) {
+          const array = map.get(player2Id) as string[];
+          array.push(player1Id);
+          map.set(player2Id, array);
+        } else {
+          map.set(player2Id, [player2Id, player1Id]);
+        }
+      } else {
+        if (!map.has(player1Id)) {
+          map.set(player1Id, [player1Id]);
+        }
+      }
+    }
+
+    const swissMap = new Map<string, Types.ObjectId[]>();
+    for (const [key, value] of map) {
+      const array = players.filter((item) => !value.includes(item.toString()));
+      swissMap.set(key, array);
+    }
+
+    return swissMap;
+  }
+
+  private hasAvailableSwiss(
+    map: Map<string, Types.ObjectId[]>,
+    player1Id: Types.ObjectId,
+    player2Id: Types.ObjectId
+  ): boolean {
+    const toRemove = [player1Id.toString(), player2Id.toString()];
+    for (const [key, value] of map) {
+      const array = value.filter((item) => !toRemove.includes(item.toString()));
+      if (
+        array.length === 0 &&
+        player1Id.toString() !== key &&
+        player2Id.toString() !== key
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private removeFromAvailableSwiss(
+    swissMap: Map<string, Types.ObjectId[]>,
+    player1Id: Types.ObjectId,
+    player2Id: Types.ObjectId | undefined
+  ): Map<string, Types.ObjectId[]> {
+    for (const [key, value] of swissMap) {
+      if (player1Id.toString() === key) {
+        swissMap.delete(key);
+      }
+
+      const index1 = value.indexOf(player1Id);
+
+      if (index1 !== -1) {
+        value.splice(index1, 1);
+        swissMap.set(key, value);
+      }
+
+      if (player2Id !== undefined) {
+        const index2 = value.indexOf(player2Id);
+        if (player2Id.toString() === key) {
+          swissMap.delete(key);
+        }
+        if (index2 !== -1) {
+          value.splice(index2, 1);
+          swissMap.set(key, value);
+        }
+      }
+    }
+
+    return swissMap;
+  }
+
+  private hasHadBye(matches: Match[], playerId: Types.ObjectId): boolean {
+    for (const match of matches) {
+      if (match.players.length === 1) {
+        const matchPlayer = match.players[0] as MatchPlayer;
+        if (matchPlayer.id.toString() === playerId.toString()) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private async deleteNextRound(
+    tournamentId: Types.ObjectId,
+    currentRound: number
+  ): Promise<void> {
+    const matches = await MatchModel.find({
+      tournamentId,
+      tournamentRound: currentRound + 1
+    });
+    if (matches.length > 0) {
+      const matchIds = matches.map((match) => match.id);
+      await TournamentModel.updateOne(
+        { _id: tournamentId },
+        { $pull: { matchSchedule: { $in: matchIds } } }
+      );
+      await MatchModel.deleteMany({
+        tournamentId,
+        round: currentRound + 1
+      });
+    }
   }
 }

@@ -1,252 +1,115 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import useToast from "hooks/useToast";
-import { useAuth } from "context/AuthContext";
-import { isValidPhone, isValidUsername } from "utils/form-validators";
-import api from "api/axios";
-import Loader from "components/common/Loader";
-import ErrorModal from "components/common/ErrorModal";
-import EditButtonRow from "./EditInfoButtonRow";
-import ProfileHeader from "./ProfileHeader";
-import type { EditUserRequest } from "types/requests";
-import routePaths from "routes/route-paths";
+import React, { Fragment, useState, useEffect } from "react";
+import ProfileInfo from "./ProfileInfo";
+import ProfileGames from "./ProfileGames";
+import ProfilePoints from "./ProfilePoints";
+import CreatedTournaments from "./CreatedTournaments";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import { useTranslation } from "react-i18next";
-
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-
-import {
-  CheckboxElement,
-  FormContainer,
-  TextFieldElement,
-  useForm,
-  useWatch
-} from "react-hook-form-mui";
-
-const defaultValues: EditUserRequest = {
-  firstName: "",
-  lastName: "",
-  userName: "",
-  email: "",
-  phoneNumber: "",
-  nationality: "",
-  inNationalTeam: false,
-  suomisportId: "",
-  clubName: "",
-  danRank: "",
-  underage: false,
-  guardiansEmail: ""
-};
+import { Box, Container, MenuItem, Select } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useAuth } from "context/AuthContext";
+import api from "api/axios";
+import type { Tournament } from "types/models";
+import { useSearchParams } from "react-router-dom";
 
 const Profile: React.FC = () => {
-  const navigate = useNavigate();
-  const showToast = useToast();
-  const { userId } = useAuth();
+  const [userCreatedTournaments, setUserCreatedTournaments] = useState<
+    Tournament[]
+  >([]);
   const { t } = useTranslation();
+  const mobile = useMediaQuery("(max-width:600px)");
+  const { userId } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabTypes = ["info", "games", "points", "created_t"] as const;
+  const defaultTab = "info";
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [editingEnabled, setEditingEnabled] = useState<boolean>(false);
-
-  const formContext = useForm<EditUserRequest>({
-    defaultValues,
-    mode: "onBlur",
-    disabled: !editingEnabled
-  });
-
-  const { underage } = useWatch<EditUserRequest>(formContext);
-
+  const currentTab = searchParams.get("tab") ?? defaultTab;
   useEffect(() => {
-    const fetchUserData = async (): Promise<void> => {
-      try {
-        if (userId !== undefined) {
-          const user = await api.user.details(userId);
-          formContext.reset(user);
-        }
-      } catch (error) {
-        setIsError(true);
-        showToast(error, "error");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void fetchUserData();
-  }, [userId, formContext.reset]);
-
-  if (isLoading || userId === undefined) {
-    return <Loader />;
-  }
-
-  // Redirect the user back in case of an error
-  if (isError) {
-    return (
-      <ErrorModal
-        open={true}
-        onClose={() => {
-          navigate(routePaths.homeRoute);
-        }}
-        errorMessage={t("messages.error_retrieving_info")}
-      />
-    );
-  }
-
-  const onSubmit = async (data: EditUserRequest): Promise<void> => {
-    try {
-      await api.user.update(userId, data);
-      showToast(t("messages.update_success"), "success");
-    } catch (error) {
-      showToast(error, "error");
+    if (currentTab === null || !tabTypes.some((tab) => tab === currentTab)) {
+      setSearchParams((params) => {
+        params.set("tab", defaultTab);
+        return params;
+      });
     }
+  }, [currentTab]);
+
+  const handleTabChange = (tab: string): void => {
+    setSearchParams((params) => {
+      params.set("tab", tab);
+      return params;
+    });
+    sessionStorage.clear();
   };
 
+  useEffect(() => {
+    const fetchUserCreatedTournaments = async (): Promise<void> => {
+      try {
+        const tournamentsData = await api.tournaments.getAll();
+        const filteredTournaments = tournamentsData.filter(
+          (tournament) => tournament.creator.id === userId
+        );
+        setUserCreatedTournaments(filteredTournaments);
+      } catch (error) {}
+    };
+
+    void fetchUserCreatedTournaments();
+  }, [userId]);
+
   return (
-    <Box display="flex" justifyContent="center">
-      {/* Form for editing user info */}
-      <Box
-        sx={{
-          padding: "1em",
-          width: "500px"
-        }}
-      >
-        <ProfileHeader />
-        <FormContainer
-          defaultValues={defaultValues}
-          formContext={formContext}
-          onSuccess={onSubmit}
+    <Container sx={{ position: "relative", paddingBottom: "30px" }}>
+      {/* If the device is mobile */}
+      {mobile ? (
+        <Fragment>
+          <Select
+            value={currentTab}
+            onChange={(event) => {
+              handleTabChange(event.target.value);
+            }}
+            style={{ marginBottom: "10px", alignItems: "center" }}
+            sx={{
+              border: "2px solid #db4744",
+              fontSize: "20px",
+              color: "#db4744"
+            }}
+          >
+            <MenuItem value="info">{t("profile.profile_info")}</MenuItem>
+            <MenuItem value="games">{t("profile.my_games")}</MenuItem>
+            <MenuItem value="points">{t("profile.my_points")}</MenuItem>
+            {userCreatedTournaments.length > 0 && (
+              <MenuItem value="created_t">
+                {t("profile.created_tournaments")}
+              </MenuItem>
+            )}
+          </Select>
+          <br></br>
+        </Fragment>
+      ) : (
+        <Box
+          style={{ display: "flex", alignItems: "center" }}
+          sx={{ borderBottom: 1, borderColor: "divider", marginBottom: "10px" }}
         >
-          {/* Container for first and last name */}
-          <Grid container columnSpacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextFieldElement
-                required
-                fullWidth
-                name="firstName"
-                label={t("user_info_labels.first_name")}
-                margin="normal"
-                disabled={!editingEnabled}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextFieldElement
-                required
-                fullWidth
-                name="lastName"
-                label={t("user_info_labels.last_name")}
-                margin="normal"
-                disabled={!editingEnabled}
-              />
-            </Grid>
-          </Grid>
-
-          <TextFieldElement
-            required
-            name="email"
-            label={t("user_info_labels.email_address")}
-            type="email"
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-          />
-
-          <TextFieldElement
-            required
-            name="phoneNumber"
-            label={t("user_info_labels.phone_number")}
-            type="tel"
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-            validation={{
-              validate: (value: string) => {
-                return (
-                  isValidPhone(value) || t("messages.phonenumber_validation")
-                );
-              }
+          {/* If the device is desktop */}
+          <Tabs
+            value={currentTab}
+            onChange={(_, value) => {
+              handleTabChange(value);
             }}
-          />
-
-          <TextFieldElement
-            name="userName"
-            label={t("user_info_labels.username")}
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-            validation={{
-              validate: (value: string) => {
-                return (
-                  isValidUsername(value) || t("messages.username_validation")
-                );
-              }
-            }}
-          />
-
-          <TextFieldElement
-            name="nationality"
-            label={t("user_info_labels.nationality")}
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-          />
-
-          <CheckboxElement
-            name="inNationalTeam"
-            label={t("user_info_labels.in_national_team")}
-            disabled={!editingEnabled}
-          />
-
-          <TextFieldElement
-            name="rank"
-            label={t("user_info_labels.dan_rank")}
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-          />
-
-          <TextFieldElement
-            name="club"
-            label={t("user_info_labels.club")}
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-          />
-
-          <TextFieldElement
-            name="suomisport"
-            label={t("user_info_labels.suomisport_id")}
-            fullWidth
-            margin="normal"
-            disabled={!editingEnabled}
-          />
-
-          <CheckboxElement
-            name="underage"
-            label={t("user_info_labels.underage")}
-            disabled={!editingEnabled}
-            onChange={(e) => {
-              formContext.resetField("guardiansEmail");
-              formContext.setValue("underage", e.target.checked);
-            }}
-          />
-          {(underage as boolean) && (
-            <TextFieldElement
-              required
-              name="guardiansEmail"
-              label={t("user_info_labels.guardians_email")}
-              type="email"
-              fullWidth
-              margin="normal"
-              disabled={!editingEnabled}
-            />
-          )}
-          <EditButtonRow
-            editingEnabled={editingEnabled}
-            setEditingEnabled={setEditingEnabled}
-            formContext={formContext}
-          />
-        </FormContainer>
-      </Box>
-    </Box>
+          >
+            <Tab label={t("profile.profile_info")} value="info" />
+            <Tab label={t("profile.my_games")} value="games" />
+            <Tab label={t("profile.my_points")} value="points" />
+            {userCreatedTournaments.length > 0 && (
+              <Tab label={t("profile.created_tournaments")} value="created_t" />
+            )}
+          </Tabs>
+        </Box>
+      )}
+      {currentTab === "info" && <ProfileInfo />}
+      {currentTab === "games" && <ProfileGames />}
+      {currentTab === "points" && <ProfilePoints />}
+      {currentTab === "created_t" && <CreatedTournaments />}
+    </Container>
   );
 };
 

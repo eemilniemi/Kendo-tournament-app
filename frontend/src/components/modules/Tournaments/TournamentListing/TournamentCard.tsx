@@ -167,6 +167,18 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
               {t("buttons.delete")}
             </Button>
           )}
+          {isUserTheCreator && tournamentHasNotStarted && (
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={() => {
+                navigate(`edit-tournament-info/${tournament.id}`);
+              }}
+              sx={{ position: "absolute", bottom: 10, left: 120 }}
+            >
+              {t("buttons.edit_button")}
+            </Button>
+          )}
         </>
       )}
       {deleteConfirmationDialog()}
