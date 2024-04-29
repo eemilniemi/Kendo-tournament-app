@@ -141,8 +141,16 @@ const UpcomingTournamentView: React.FC = () => {
       <Box>
         <Typography variant="subtitle1">
           <strong>{t("upcoming_tournament_view.date_header")}:</strong>{" "}
-          {new Date(tournament.startDate).toLocaleString("fi")} -{" "}
-          {new Date(tournament.endDate).toLocaleString("fi")}
+          {new Date(tournament.startDate).toLocaleString("fi", {
+            // dont show seconds
+            dateStyle: "short",
+            timeStyle: "short"
+          })}{" "}
+          -{" "}
+          {new Date(tournament.endDate).toLocaleString("fi", {
+            dateStyle: "short",
+            timeStyle: "short"
+          })}
         </Typography>
       </Box>
 
@@ -164,6 +172,15 @@ const UpcomingTournamentView: React.FC = () => {
         <Typography variant="subtitle1">
           <strong>{t("upcoming_tournament_view.category_header")}:</strong>{" "}
           {t(getCategoryTranslationKey(tournament.category))}
+        </Typography>
+      </Box>
+
+      <Box>
+        <Typography variant="subtitle1">
+          <strong>{t("upcoming_tournament_view.max_players")}:</strong>{" "}
+          {tournament.players.length}
+          {"/"}
+          {tournament.maxPlayers}
         </Typography>
       </Box>
 
@@ -231,7 +248,7 @@ const UpcomingTournamentView: React.FC = () => {
       {tournament.players.length > 0 && userId !== undefined && (
         <React.Fragment>
           <Typography variant="body1" className="header" fontWeight="bold">
-            {t("upcoming_tournament_view.others_signed_up_header")}
+            {t("upcoming_tournament_view.others_signed_up_header")}:
           </Typography>
           {generateTable(tournament)}
         </React.Fragment>

@@ -247,7 +247,8 @@
     "category_header": "Tournament category",
     "link_to_payment_header": "There is a fee for this tournament, please visit",
     "link_to_site_header": "Organizer's website",
-    "attendee_list": "Log in to see the list of attendees"
+    "attendee_list": "Log in to see the list of attendees",
+    "max_players": "The number of players signed up"
   },
   "navigation": {
     "back": "Back",
