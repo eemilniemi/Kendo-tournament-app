@@ -84,6 +84,8 @@ const UpcomingTournamentView: React.FC = () => {
         return "types.playoff";
       case "Preliminary Playoff":
         return "types.preliminary_playoff";
+      case "Swiss":
+        return "types.swiss";
       default:
         return "";
     }

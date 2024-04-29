@@ -180,7 +180,8 @@
     "no_past": "Ei menneitä turnauksia.",
     "start_date": "Aloituspäivä",
     "end_date": "Päättymispäivä",
-    "welcome": "Tervetuloa KendoAppiin! Voit osallistua, luoda tai seurata turnauksia sivustollamme!"
+    "welcome": "Tervetuloa KendoAppiin! Voit osallistua, luoda tai seurata turnauksia sivustollamme!",
+    "winner": "VOITTAJA"
   },
   "created_tournament": {
     "signed_up": "Ilmottautuneet",
@@ -268,7 +269,8 @@
     "round_robin": "Kaikki vastaan kaikki",
     "playoff": "Pudotuspelit",
     "preliminary_playoff": "Alkulohkot ja pudotuspelit",
-    "preliminary": "Alkulohkot"
+    "preliminary": "Alkulohkot",
+    "swiss": "Sveitsiläinen"
   },
   "sorting": {
     "orderBy": "Järjestä: ",
