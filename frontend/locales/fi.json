@@ -27,7 +27,7 @@
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
-    "cancel_success": "Ilmoittautuminen peruttiin onnistuneesti turnaukseen: ",
+    "cancel_success": "Ilmoittautuminen turnaukseen {{name}} peruttiin onnistuneesti",
     "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
     "copy_failure": "Linkin kopioinnissa tapahtui virhe",

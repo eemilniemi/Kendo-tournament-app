@@ -26,7 +26,7 @@ const CancelSignup: React.FC = (): ReactElement => {
       if (userId !== undefined) {
         await api.tournaments.cancelSignup(tournament.id, userId);
         showToast(
-          `${t("messages.cancel_success")}${tournament.name}`,
+          t("messages.cancel_success", { name: tournament.name }),
           "success"
         );
         navigate(routePaths.homeRoute, {

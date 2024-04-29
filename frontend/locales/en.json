@@ -27,7 +27,7 @@
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
     "minimum_player_to_playoff": "At least one player has to proceed",
-    "cancel_success": "Successfully cancelled sign up for tournament: ",
+    "cancel_success": "Successfully cancelled sign up for tournament {{name}} ",
     "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
     "copy_failure": "Failed to copy tournament link",
