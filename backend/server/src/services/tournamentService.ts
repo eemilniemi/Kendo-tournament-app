@@ -210,7 +210,7 @@ export class TournamentService {
         if (match === undefined || match === null) {
           continue; // Skip if match doesn't exist
         }
-        // Check if the match involves the removed player
+        // Check if a match involves the removed player
         const matchPlayerIds = match.players.map((player) =>
           player.id.toString()
         );
@@ -228,18 +228,37 @@ export class TournamentService {
       );
     }
 
-    // Preliminary requires also removing from "groups"
+    // Preliminary changes
     if (tournament.type === TournamentType.PreliminaryPlayoff) {
-      if (tournament.groups.length > 0) {
-        for (const group of tournament.groups) {
-          const playerIndex = group.indexOf(player.id);
-          if (playerIndex !== -1) {
-            group.splice(playerIndex, 1);
-          }
-        }
+      // Removing a player to preliminary requires redoing all groups and matches
+      if (tournament.groupsSizePreference !== undefined) {
+        tournament.groups = this.dividePlayersIntoGroups(
+          tournament.players as Types.ObjectId[],
+          tournament.groupsSizePreference
+        );
+        await MatchModel.deleteMany({ tournamentId: tournament.id });
+
+        tournament.matchSchedule = [];
       }
-      // TODO: new groups and match schedule
-      // How to replace "new player id" in generateTournamentSchedule??
+    }
+    // Also swiss requires new matches
+    if (tournament.type === TournamentType.Swiss) {
+      await MatchModel.deleteMany({ tournamentId: tournament.id });
+
+      tournament.matchSchedule = [];
+    }
+
+    // Playoff matches are calculated separately when the tournament has started,
+    // round robin works without this
+    if (
+      tournament.players.length > 1 &&
+      tournament.type !== TournamentType.Playoff &&
+      tournament.type !== TournamentType.RoundRobin
+    ) {
+      const newMatchIds = await this.generateTournamentSchedule(tournament);
+      if (newMatchIds.length !== 0) {
+        tournament.matchSchedule.push(...newMatchIds);
+      }
     }
 
     await tournament.save();
