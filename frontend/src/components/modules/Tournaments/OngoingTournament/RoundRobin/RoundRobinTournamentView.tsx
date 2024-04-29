@@ -255,14 +255,17 @@ export const sortMatches = (
     (match) => match.elapsedTime > 0 && match.endTimestamp === undefined
   );
   const upcomingMatches = matches.filter(
-    (match) => match.elapsedTime <= 0 && match.endTimestamp === undefined
+    (match) =>
+      match.elapsedTime <= 0 &&
+      match.endTimestamp === undefined &&
+      match.winner === undefined
   );
   const pastMatches = matches.filter(
     (match) =>
       (match.elapsedTime > 0 && match.endTimestamp !== undefined) ||
-      (match.endTimestamp !== undefined && match.winner !== "undefined")
+      (match.endTimestamp !== undefined && match.winner !== undefined) ||
+      (match.elapsedTime === 0 && match.winner !== undefined)
   );
-
   return { ongoingMatches, upcomingMatches, pastMatches };
 };
 
@@ -274,12 +277,36 @@ export const createMatchButton = (
   haveSameNames: boolean,
   props: ButtonProps
 ): React.ReactNode => {
-  const player1 = players.find((player) => player.id === match.players[0].id);
-  const player2 = players.find((player) => player.id === match.players[1].id);
+  // Find the players in the players array using their IDs
+  const player1 = players.find(
+    (player) => player.id === match.players[0].id
+  ) as TournamentPlayer;
+  const player2 = players.find(
+    (player) => player.id === match.players[1]?.id
+  ) as TournamentPlayer;
+
+  // Get the names of the players
+  const player1Name = (
+    <PlayerName
+      firstName={player1.firstName}
+      lastName={player1.lastName}
+      sameNames={haveSameNames}
+    />
+  );
+  const player2Name =
+    player2 !== undefined ? (
+      <PlayerName
+        firstName={player2.firstName}
+        lastName={player2.lastName}
+        sameNames={haveSameNames}
+      />
+    ) : (
+      <PlayerName firstName="BYE" lastName="" sameNames={false} />
+    );
 
   let officialsInfo = "";
 
-  if (match.elapsedTime <= 0) {
+  if (match.elapsedTime <= 0 && match.winner !== undefined) {
     // Match is upcoming
     const timerPerson = match.timeKeeper ?? undefined;
     const pointMaker = match.pointMaker ?? undefined;
@@ -300,33 +327,27 @@ export const createMatchButton = (
   return (
     <div style={{ marginBottom: "10px" }} key={match.id}>
       <Box display="flex" alignItems="center">
-        {player1 !== undefined && player2 !== undefined && (
-          <Button
-            onClick={() => {
+        <Button
+          onClick={() => {
+            if (match.players.length === 2) {
               navigate(`match/${match.id}`);
-            }}
-            {...props}
-          >
-            <PlayerName
-              firstName={player1.firstName}
-              lastName={player1.lastName}
-              sameNames={haveSameNames}
-            />
-            {" - "}
-            <PlayerName
-              firstName={player2.firstName}
-              lastName={player2.lastName}
-              sameNames={haveSameNames}
-            />
-          </Button>
-        )}
+            } else {
+              // No match details to display for a bye
+            }
+          }}
+          {...props}
+        >
+          {player1Name}
+          {" - "}
+          {player2Name}
+        </Button>
         <Typography variant="body1" marginLeft="10px">
           {t("tournament_view_labels.court_number")}
           {": "}
           {match.courtNumber}
         </Typography>
       </Box>
-      {officialsInfo !== undefined && (
+      {officialsInfo !== undefined && match.winner === undefined && (
         <Typography variant="body2">{officialsInfo}</Typography>
       )}
     </div>
