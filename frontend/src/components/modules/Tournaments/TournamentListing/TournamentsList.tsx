@@ -216,9 +216,7 @@ const TournamentList: React.FC = () => {
             content: "'+'",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            top: "5%",
-            transform: "translateY(-5%)"
+            justifyContent: "center"
           },
 
           "&:hover": {
