@@ -1226,24 +1226,22 @@ export class MatchService {
         for (let j = 0; j < match.players.length; j++) {
           const matchPlayer: MatchPlayer = match.players[j] as MatchPlayer;
           let playerPoints = 0;
-          matchPlayer.points.forEach((point: MatchPoint) => {
-            if (point.type === "hansoku") {
-              // In case of hansoku, the opponent recieves half a point.
-              playerPoints += 0.5;
-            } else {
-              // Otherwise give one point to the player.
-              playerPoints++;
-            }
-          });
+          if(j === 0){
+            playerPoints = match.player1Score;
+          }
+          else if(j === 1){
+            playerPoints = match.player2Score;
+          }
 
-          if (rankingMap.has(matchPlayer.id.toString())) {
-            const currentPoints = rankingMap.get(matchPlayer.id.toString()) ?? [
+          const matchPlayerId = matchPlayer.id.toString();
+          if (rankingMap.has(matchPlayerId)) {
+            const currentPoints = rankingMap.get(matchPlayerId) ?? [
               0, 0
             ];
             currentPoints[1] += playerPoints;
             if (
               match.winner !== undefined &&
-              match.winner.toString() === matchPlayer.id.toString()
+              match.winner.toString() === matchPlayerId
             ) {
               currentPoints[0] += 3;
             } else if (
@@ -1252,12 +1250,12 @@ export class MatchService {
             ) {
               currentPoints[0] += 1;
             }
-            rankingMap.set(matchPlayer.id.toString(), currentPoints);
+            rankingMap.set(matchPlayerId, currentPoints);
           } else {
             const currentPoints = [0, playerPoints];
             if (
               match.winner !== undefined &&
-              match.winner.toString() === matchPlayer.id.toString()
+              match.winner.toString() === matchPlayerId
             ) {
               currentPoints[0] += 3;
             } else if (
@@ -1266,7 +1264,7 @@ export class MatchService {
             ) {
               currentPoints[0] += 1;
             }
-            rankingMap.set(matchPlayer.id.toString(), currentPoints);
+            rankingMap.set(matchPlayerId, currentPoints);
           }
         }
       }

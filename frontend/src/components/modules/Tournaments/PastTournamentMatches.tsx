@@ -51,6 +51,8 @@ const PastTournamentMatches: React.FC = () => {
               player2Points += 1;
             }
           });
+        } else {
+          matchPlayers[1] = "BYE";
         }
 
         player1Points = Math.floor(player1Points);
@@ -69,7 +71,7 @@ const PastTournamentMatches: React.FC = () => {
               </Grid>
               <Grid item xs={2}>
                 <Typography variant="body1">
-                  {matchPlayers[1] ? matchPlayers[1] : "BYE"}
+                  <Typography variant="body1">{matchPlayers[1]}</Typography>
                 </Typography>
               </Grid>
             </Grid>

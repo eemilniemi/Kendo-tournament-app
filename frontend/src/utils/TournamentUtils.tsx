@@ -1,12 +1,11 @@
 import {
   type Match,
   type MatchPlayer,
-  type MatchPoint,
   type User,
   type Tournament
 } from "types/models";
 
- // [playerId, victoryPoints, ippons]
+// [playerId, victoryPoints, ippons]
 type rankingStruct = [string, number, number];
 
 export const allMatchesPlayed = (tournament: Tournament): boolean => {
@@ -15,10 +14,7 @@ export const allMatchesPlayed = (tournament: Tournament): boolean => {
   let played = 0;
 
   for (const match of tournament.matchSchedule) {
-    if (
-      match.endTimestamp !== undefined ||
-      match.winner !== undefined
-    ) {
+    if (match.endTimestamp !== undefined || match.winner !== undefined) {
       played++;
     }
   }
@@ -47,17 +43,14 @@ const calculateScores = (tournament: Tournament): rankingStruct[] => {
     for (let j = 0; j < match.players.length; j++) {
       const matchPlayer: MatchPlayer = match.players[j];
       let playerPoints = 0;
-      if(j === 0){
+      if (j === 0) {
         playerPoints = match.player1Score;
-      }
-      else if(j === 1){
+      } else if (j === 1) {
         playerPoints = match.player2Score;
       }
       const matchPlayerId = matchPlayer.id.toString();
       if (rankingMap.has(matchPlayerId)) {
-        const currentPoints = rankingMap.get(matchPlayerId) ?? [
-          0, 0
-        ];
+        const currentPoints = rankingMap.get(matchPlayerId) ?? [0, 0];
         currentPoints[1] += playerPoints;
         if (
           match.winner !== undefined &&
