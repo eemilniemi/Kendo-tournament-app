@@ -17,6 +17,7 @@ import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
 import {
   getPlayerNames,
   Scoreboard,
+  updatePlayerStats,
   type TournamentPlayer
 } from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
 import { checkSameNames } from "./PlayerNames";
@@ -71,6 +72,7 @@ const PastTournamentMatches: React.FC = () => {
       const result = checkSameNames(selectedTournament);
       setHaveSameNames(result);
       getPlayerNames(selectedTournament, setPlayers);
+      updatePlayerStats(selectedTournament, setPlayers);
     }
   }, []);
 
