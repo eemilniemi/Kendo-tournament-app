@@ -27,6 +27,7 @@
     "missing_timekeeper": "Match is missing a time keeper!",
     "minimum_groupsize_error": "Minimum group size is  ",
     "minimum_player_to_playoff": "At least one player has to proceed",
+    "cancel_success": "Successfully cancelled sign up for tournament {{name}} ",
     "number_of_courts_error": "Tournament must have at least 1 court",
     "copy_success": "Tournament link copied to clipboard!",
     "copy_failure": "Failed to copy tournament link",
@@ -74,6 +75,7 @@
     "save_button": "Save",
     "modify_or_delete": "Modify or delete recent point",
     "delete": "Delete",
+    "cancel_sign_up": "Cancel sign up",
     "withdraw_user": "Withdraw player from tournament",
     "copy_to_clipboard": "Share tournament",
     "save_changes_button": "Save changes",
@@ -164,7 +166,8 @@
     "click_here": "Click here",
     "user_info": "The information you are signing up with:",
     "user_info_table": "User Information",
-    "player_table": "Player Table"
+    "player_table": "Player Table",
+    "cancel": "Cancel sign up for"
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Ongoing Tournaments",
@@ -177,7 +180,8 @@
     "no_past": "No past tournaments.",
     "start_date": "Start Date",
     "end_date": "End Date",
-    "welcome": "Welcome to KendoApp! Here you can participate, host or follow tournaments!"
+    "welcome": "Welcome to KendoApp! Here you can participate, host or follow tournaments!",
+    "winner": "WINNER"
   },
   "created_tournament": {
     "signed_up": "Signed up",
@@ -245,7 +249,8 @@
     "category_header": "Tournament category",
     "link_to_payment_header": "There is a fee for this tournament, please visit",
     "link_to_site_header": "Organizer's website",
-    "attendee_list": "Log in to see the list of attendees"
+    "attendee_list": "Log in to see the list of attendees",
+    "max_players": "The number of players signed up"
   },
   "navigation": {
     "back": "Back",
@@ -264,7 +269,8 @@
     "round_robin": "Round Robin",
     "playoff": "Playoff",
     "preliminary_playoff": "Preliminary and playoff",
-    "preliminary": "Preliminary"
+    "preliminary": "Preliminary",
+    "swiss": "Swiss"
   },
   "sorting": {
     "orderBy": "Order By: ",

@@ -43,14 +43,17 @@ const PastTournamentMatches: React.FC = () => {
             player1Points += 1;
           }
         });
-
-        match.players[1].points.forEach((point: MatchPoint) => {
-          if (point.type === "hansoku") {
-            player1Points += 0.5;
-          } else {
-            player2Points += 1;
-          }
-        });
+        if (match.players.length === 2) {
+          match.players[1].points.forEach((point: MatchPoint) => {
+            if (point.type === "hansoku") {
+              player1Points += 0.5;
+            } else {
+              player2Points += 1;
+            }
+          });
+        } else {
+          matchPlayers[1] = "BYE";
+        }
 
         player1Points = Math.floor(player1Points);
         player2Points = Math.floor(player2Points);
@@ -67,7 +70,9 @@ const PastTournamentMatches: React.FC = () => {
                 </Typography>
               </Grid>
               <Grid item xs={2}>
-                <Typography variant="body1">{matchPlayers[1]}</Typography>
+                <Typography variant="body1">
+                  <Typography variant="body1">{matchPlayers[1]}</Typography>
+                </Typography>
               </Grid>
             </Grid>
           </Paper>
