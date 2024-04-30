@@ -187,9 +187,13 @@ const PastTournamentMatches: React.FC = () => {
               <Card key={matchIndex} variant="outlined" sx={{ mb: 1 }}>
                 <CardActionArea
                   onClick={() => {
-                    navigate(
-                      `/tournaments/${selectedTournament.id}/match/${match.id}`
-                    );
+                    if (match.players.length === 2) {
+                      navigate(
+                        `/tournaments/${selectedTournament.id}/match/${match.id}`
+                      );
+                    } else {
+                      // No match details to display for a bye
+                    }
                   }}
                 >
                   <CardContent>
