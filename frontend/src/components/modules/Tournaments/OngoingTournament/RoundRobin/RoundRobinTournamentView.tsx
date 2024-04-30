@@ -306,7 +306,7 @@ export const createMatchButton = (
 
   let officialsInfo = "";
 
-  if (match.elapsedTime <= 0 && match.winner !== undefined) {
+  if (match.elapsedTime <= 0 && match.winner === undefined) {
     // Match is upcoming
     const timerPerson = match.timeKeeper ?? undefined;
     const pointMaker = match.pointMaker ?? undefined;
