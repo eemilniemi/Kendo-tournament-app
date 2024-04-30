@@ -160,7 +160,8 @@
     "playoff_stage_not_started": "Pudotuspelivaihe ei ole vielä alkanut.",
     "court_number": "Kenttä",
     "tournament_winner": "Turnauksen voittaja: ",
-    "no_winner": "Ei voittajaa"
+    "no_winner": "Ei voittajaa",
+    "tiebreaker": "Lohkossa {{groupNr}} on uusi ratkaisuottelu"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",
