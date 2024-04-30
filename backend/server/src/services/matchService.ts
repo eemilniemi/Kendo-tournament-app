@@ -19,7 +19,7 @@ import {
   TournamentType,
   type UnsavedMatch
 } from "../models/tournamentModel.js";
-import { TournamentService } from "./tournamentService";
+import { TournamentService } from "./tournamentService.js";
 import { shuffle } from "../utility/utils.js";
 
 type rankingStruct = [Types.ObjectId, number, number];
@@ -245,7 +245,17 @@ export class MatchService {
             // case: some players tied for spot/spots, generate playoff elimination matches
             else if (ties[i].length > 0) {
               if (ties[i].length % 2 !== 0) {
-                console.log("UNEVEN TIES PLAYOFF, NOT IMPLEMENTED YET");
+                const matches = await TournamentService.generatePlayoffSchedule(
+                  ties[i],
+                  tournament.id,
+                  tournament.matchTime,
+                  nextRound,
+                  "pre playoff"
+                );
+                const matchDocs = await MatchModel.insertMany(matches);
+                for (const match of matchDocs) {
+                  tournament.matchSchedule.push(match.id);
+                }
               } else {
                 const tiedPlayers = ties[i];
                 for (let j = 0; j < tiedPlayers.length; j += 2) {
@@ -273,31 +283,19 @@ export class MatchService {
         // no ties, proceeding to playoffs
         if (ties.flat().length === 0) {
           const playerIds = players.flat();
-          if (playerIds.length % 2 !== 0) {
-            console.log("UNEVEN PLAYOFF, NOT IMPLEMENTED YET");
-          } else {
-            const shuffledPlayerIds = playerIds;
-            const playoffRound =
-              MatchService.findHighestRound(
-                tournament.matchSchedule as Match[]
-              ) + 1;
-            for (let i = 0; i < shuffledPlayerIds.length; i += 2) {
-              const newMatch = {
-                players: [
-                  { id: shuffledPlayerIds[i], points: [], color: "white" },
-                  { id: shuffledPlayerIds[i + 1], points: [], color: "red" }
-                ],
-                type: "playoff",
-                elapsedTime: 0,
-                timerStartedTimestamp: null,
-                tournamentRound: playoffRound,
-                matchTime: tournament.matchTime,
-                tournamentId: tournament.id
-              };
+          const playoffRound =
+            MatchService.findHighestRound(tournament.matchSchedule as Match[]) +
+            1;
 
-              const matchDocuments = await MatchModel.create(newMatch);
-              tournament.matchSchedule.push(matchDocuments.id);
-            }
+          const matches = await TournamentService.generatePlayoffSchedule(
+            playerIds,
+            tournament.id,
+            tournament.matchTime,
+            playoffRound
+          );
+          const matchDocs = await MatchModel.insertMany(matches);
+          for (const match of matchDocs) {
+            tournament.matchSchedule.push(match.id);
           }
         }
 
@@ -1226,24 +1224,22 @@ export class MatchService {
         for (let j = 0; j < match.players.length; j++) {
           const matchPlayer: MatchPlayer = match.players[j] as MatchPlayer;
           let playerPoints = 0;
-          matchPlayer.points.forEach((point: MatchPoint) => {
-            if (point.type === "hansoku") {
-              // In case of hansoku, the opponent recieves half a point.
-              playerPoints += 0.5;
-            } else {
-              // Otherwise give one point to the player.
-              playerPoints++;
-            }
-          });
+          if(j === 0){
+            playerPoints = match.player1Score;
+          }
+          else if(j === 1){
+            playerPoints = match.player2Score;
+          }
 
-          if (rankingMap.has(matchPlayer.id.toString())) {
-            const currentPoints = rankingMap.get(matchPlayer.id.toString()) ?? [
+          const matchPlayerId = matchPlayer.id.toString();
+          if (rankingMap.has(matchPlayerId)) {
+            const currentPoints = rankingMap.get(matchPlayerId) ?? [
               0, 0
             ];
             currentPoints[1] += playerPoints;
             if (
               match.winner !== undefined &&
-              match.winner.toString() === matchPlayer.id.toString()
+              match.winner.toString() === matchPlayerId
             ) {
               currentPoints[0] += 3;
             } else if (
@@ -1252,12 +1248,12 @@ export class MatchService {
             ) {
               currentPoints[0] += 1;
             }
-            rankingMap.set(matchPlayer.id.toString(), currentPoints);
+            rankingMap.set(matchPlayerId, currentPoints);
           } else {
             const currentPoints = [0, playerPoints];
             if (
               match.winner !== undefined &&
-              match.winner.toString() === matchPlayer.id.toString()
+              match.winner.toString() === matchPlayerId
             ) {
               currentPoints[0] += 3;
             } else if (
@@ -1266,7 +1262,7 @@ export class MatchService {
             ) {
               currentPoints[0] += 1;
             }
-            rankingMap.set(matchPlayer.id.toString(), currentPoints);
+            rankingMap.set(matchPlayerId, currentPoints);
           }
         }
       }

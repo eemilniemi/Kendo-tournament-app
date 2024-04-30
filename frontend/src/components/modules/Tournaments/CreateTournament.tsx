@@ -102,10 +102,14 @@ const CreateTournamentForm: React.FC = () => {
 
   const onSubmit = async (data: CreateTournamentFormData): Promise<void> => {
     try {
+      // Round dates to the nearest minute down
+      const roundedStartDate = data.startDate.startOf("minute");
+      const roundedEndDate = data.endDate.startOf("minute");
+
       await api.tournaments.createNew({
         ...data,
-        startDate: data.startDate.toString(),
-        endDate: data.endDate.toString()
+        startDate: roundedStartDate.toString(),
+        endDate: roundedEndDate.toString()
       });
       showToast(
         t("messages.creations_success", { name: data.name }),

@@ -25,6 +25,7 @@ import { SocketProvider } from "context/SocketContext";
 import GameInterface from "components/modules/GameInterface/GameInterface";
 import PasswordControl from "components/modules/PasswordControl/PasswordControl";
 import PrivacyPolicy from "components/modules/Legal/PrivacyPolicy";
+import CancelSignup from "components/modules/Tournaments/Signup/CancelSignup";
 import EditTournametInfo from "components/modules/Tournaments/EditTournament/EditInfo";
 import OwnTournament from "components/modules/Tournaments/OwnTournament";
 import Help from "components/modules/Help/Help";
@@ -64,6 +65,7 @@ const routes = createRoutesFromElements(
           <Route index element={<TournamentDetails />} />
           <Route element={<AuthenticationGuard />}>
             <Route path="sign-up" element={<Signup />} />
+            <Route path="cancel-sign-up" element={<CancelSignup />} />
           </Route>
           <Route
             path="match/:matchId"

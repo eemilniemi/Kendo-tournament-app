@@ -27,6 +27,7 @@
     "missing_timekeeper": "Matsilta puuttuu kellokalle!",
     "minimum_groupsize_error": "Lohkon minimikoko on  ",
     "minimum_player_to_playoff": "Vähintään yhden pelaajan täytyy edetä",
+    "cancel_success": "Ilmoittautuminen turnaukseen {{name}} peruttiin onnistuneesti",
     "number_of_courts_error": "Turnauksella tulee olla ainakin 1 kenttä",
     "copy_success": "Linkki kopioitu leikepöydälle!",
     "copy_failure": "Linkin kopioinnissa tapahtui virhe",
@@ -51,7 +52,6 @@
     "point_maker": "Pistevastaava",
     "tie": "Tasapeli!",
     "reset": "Nollaa ottelu",
-    "reset": "Nollaa ottelu",
     "reset_roles": "Nollaa toimitsijaroolit"
   },
   "buttons": {
@@ -75,6 +75,7 @@
     "save_button": "Tallenna",
     "modify_or_delete": "Muokkaa tai poista viimeisin piste",
     "delete": "Poista",
+    "cancel_sign_up": "Peruuta ilmoittautuminen",
     "withdraw_user": "Keskeytä pelaajan turnaus",
     "copy_to_clipboard": "Jaa turnaus",
     "save_changes_button": "Tallenna muutokset",
@@ -167,7 +168,8 @@
     "click_here": "Klikkaa tästä",
     "user_info": "Ilmoittautumisen yhteydessä annettavat tiedot:",
     "user_info_table": "Käyttäjätiedot",
-    "player_table": "Pelaajataulu"
+    "player_table": "Pelaajataulu",
+    "cancel": "Peruuta ilmoittautuminen: "
   },
   "frontpage_labels": {
     "ongoing_tournaments": "Käynnissä olevat turnaukset",
@@ -180,7 +182,8 @@
     "no_past": "Ei menneitä turnauksia.",
     "start_date": "Aloituspäivä",
     "end_date": "Päättymispäivä",
-    "welcome": "Tervetuloa KendoAppiin! Voit osallistua, luoda tai seurata turnauksia sivustollamme!"
+    "welcome": "Tervetuloa KendoAppiin! Voit osallistua, luoda tai seurata turnauksia sivustollamme!",
+    "winner": "VOITTAJA"
   },
   "created_tournament": {
     "signed_up": "Ilmottautuneet",
@@ -227,8 +230,7 @@
     "payment_link": "Linkki maksusivustolle",
     "required_text": "Tämä kenttä on pakollinen",
     "swiss": "Sveitsiläinen",
-    "swiss_rounds": "Sveitsiläisiä kierroksia",
-    "required_text": "Tämä kenttä on pakollinen"
+    "swiss_rounds": "Sveitsiläisiä kierroksia"
   },
   "edit_tournament_form": {
     "confirmation_message": "Oletko varma, että haluat muokata turnausta annetuilla tiedoilla?"
@@ -249,7 +251,8 @@
     "category_header": "Turnauksen kategoria",
     "link_to_payment_header": "Tämä turnaus vaatii maksun, vierailethan osoitteessa",
     "link_to_site_header": "Järjestäjän sivut",
-    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan"
+    "attendee_list": "Kirjaudu sisään nähdäksesi osallistujalistan",
+    "max_players": "Ilmoittautuneiden pelaajien määrä"
   },
   "navigation": {
     "back": "Takaisin",
