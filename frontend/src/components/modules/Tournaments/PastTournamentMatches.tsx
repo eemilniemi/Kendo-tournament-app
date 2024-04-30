@@ -20,6 +20,7 @@ import {
   type TournamentPlayer
 } from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
 import { checkSameNames } from "./PlayerNames";
+import { findTournamentWinner } from "utils/TournamentUtils";
 
 type Rounds = Record<string, Match[]>; // Define the type for rounds
 
@@ -100,71 +101,6 @@ const PastTournamentMatches: React.FC = () => {
     }
   });
 
-  // Find out the winner of a tournament, calculates who got most points
-  const winnerOfRoundOrSwissTournament = (): string => {
-    const playerPointsMap: Record<string, number> = {}; // Map to store players ids and their points
-    // Iterate over all matches to calculate each player's points
-    selectedTournament.matchSchedule.forEach((match) => {
-      const player1Id = match.players[0].id;
-      const player2Id = match.players[1].id;
-      const winnerId = match.winner;
-
-      // Add points for winner and tie for both players in case of a draw
-      if (winnerId !== undefined) {
-        playerPointsMap[winnerId] = (playerPointsMap[winnerId] ?? 0) + 3;
-      } else {
-        playerPointsMap[player1Id] = (playerPointsMap[player1Id] ?? 0) + 1;
-        playerPointsMap[player2Id] = (playerPointsMap[player2Id] ?? 0) + 1;
-      }
-    });
-
-    // Find the player with the highest points
-    let maxPoints = 0;
-    let winnerId = "";
-    Object.entries(playerPointsMap).forEach(([playerId, points]) => {
-      if (points > maxPoints) {
-        maxPoints = points;
-        winnerId = playerId;
-      }
-    });
-
-    if (winnerId === "") {
-      return t("tournament_view_labels.no_winner");
-    } else {
-      // Return the name of the winner
-      return getPlayerNameById(selectedTournament.players, winnerId);
-    }
-  };
-
-  const winnerOfTournament = (): string | undefined => {
-    let winnerId;
-    if (
-      // in case of playoff or preli playoff, winner is the winner of last match
-      selectedTournament !== undefined &&
-      (selectedTournament.type === "Playoff" ||
-        selectedTournament.type === "Preliminary Playoff")
-    ) {
-      const lastMatchIndex = selectedTournament.matchSchedule.length - 1;
-      winnerId = selectedTournament.matchSchedule[lastMatchIndex].winner;
-      if (winnerId !== undefined) {
-        const winnerText =
-          t("tournament_view_labels.tournament_winner") +
-          getPlayerNameById(selectedTournament.players, winnerId);
-        return winnerText;
-      } else {
-        return t("tournament_view_labels.no_winner");
-      }
-    } else if (
-      selectedTournament.type === "Round Robin" ||
-      selectedTournament.type === "Swiss"
-    ) {
-      return (
-        t("tournament_view_labels.tournament_winner") +
-        winnerOfRoundOrSwissTournament()
-      );
-    }
-  };
-
   const ShowMatches: React.FC<{ rounds: Rounds }> = ({ rounds }) => (
     <div>
       {/* Map through tournament rounds and matches and print each */}
@@ -239,6 +175,15 @@ const PastTournamentMatches: React.FC = () => {
     </div>
   );
 
+  const printTournamentWinner = (): string => {
+    const winner = findTournamentWinner(selectedTournament);
+    if (winner === undefined) {
+      return t("tournament_view_labels.no_winner");
+    } else {
+      return t("tournament_view_labels.tournament_winner") + winner;
+    }
+  };
+
   return (
     <div>
       <Grid container alignItems="center" spacing={4} marginBottom={2}>
@@ -253,7 +198,7 @@ const PastTournamentMatches: React.FC = () => {
         {t(tournamentTypes[selectedTournament.type])}
       </Typography>
       <Typography variant="subtitle1" sx={{ marginBottom: 2 }}>
-        {winnerOfTournament()}
+        {printTournamentWinner()}
       </Typography>
 
       {showTabs && (
