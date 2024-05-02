@@ -155,7 +155,7 @@ const SwissTournamentView: React.FC = () => {
             {allMatchesPlayed(tournamentData) && (
               <Typography variant="subtitle1">
                 <span>
-                  {t("frontpage_labels.winner")}{" "}
+                  {t("frontpage_labels.winner")}{": "}
                   {findTournamentWinner(tournamentData)}
                 </span>
               </Typography>
