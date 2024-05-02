@@ -412,8 +412,10 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    await tournamentService.emitTournamentUpdate(tournamentId.toString());
-
+    if (tournamentId !== undefined) {
+      await tournamentService.emitTournamentUpdate(tournamentId.toString());
+    }
+    
     return await match.toObject();
   }
 
@@ -640,7 +642,9 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+    if (tournamentId !== undefined) {
+      await tournamentService.emitTournamentUpdate(tournamentId.toString());
+    }
 
     return await match.toObject();
   }
@@ -686,7 +690,9 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    await tournamentService.emitTournamentUpdate(tournamentId.toString());
+    if (tournamentId !== undefined) {
+      await tournamentService.emitTournamentUpdate(tournamentId.toString());
+    }
 
     return await match.toObject();
   }
