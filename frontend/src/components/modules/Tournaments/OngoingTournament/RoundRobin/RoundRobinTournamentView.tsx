@@ -27,6 +27,7 @@ import { joinTournament, leaveTournament } from "sockets/emit";
 import PlayerName, { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
+import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 export interface TournamentPlayer {
   id: string;
@@ -507,6 +508,15 @@ const RoundRobinTournamentView: React.FC = () => {
       <Grid container alignItems="center" spacing={4}>
         <Grid item>
           <Typography variant="h4">{tournamentData.name}</Typography>
+          {allMatchesPlayed(tournamentData) && (
+            <Typography variant="subtitle1">
+              <span>
+                {t("frontpage_labels.winner")}
+                {": "}
+                {findTournamentWinner(tournamentData)}
+              </span>
+            </Typography>
+          )}
         </Grid>
         <Grid item>
           <CopyToClipboardButton />

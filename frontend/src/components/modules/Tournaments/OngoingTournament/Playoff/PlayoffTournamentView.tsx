@@ -14,6 +14,7 @@ import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
 import api from "api/axios";
 import useToast from "hooks/useToast";
+import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 interface Rounds extends Record<number, Match[]> {}
 
@@ -140,6 +141,15 @@ const PlayoffTournamentView: React.FC = () => {
           <Grid container alignItems="center" spacing={4}>
             <Grid item>
               <Typography variant="h4">{tournament.name}</Typography>
+              {allMatchesPlayed(tournamentData) && (
+                <Typography variant="subtitle1">
+                  <span>
+                    {t("frontpage_labels.winner")}
+                    {": "}
+                    {findTournamentWinner(tournamentData)}
+                  </span>
+                </Typography>
+              )}
             </Grid>
             <Grid item>
               <CopyToClipboardButton />

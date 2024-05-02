@@ -30,6 +30,7 @@ import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
 import api from "api/axios";
 import useToast from "hooks/useToast";
+import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
@@ -358,6 +359,15 @@ const PreliminaryPlayoffView: React.FC = () => {
       <Grid container alignItems="center" spacing={4}>
         <Grid item>
           <Typography variant="h4">{tournamentData.name}</Typography>
+          {allMatchesPlayed(tournamentData) && (
+            <Typography variant="subtitle1">
+              <span>
+                {t("frontpage_labels.winner")}
+                {": "}
+                {findTournamentWinner(tournamentData)}
+              </span>
+            </Typography>
+          )}
         </Grid>
         <Grid item>
           <CopyToClipboardButton />

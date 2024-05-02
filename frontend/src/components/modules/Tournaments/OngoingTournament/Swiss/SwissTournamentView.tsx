@@ -19,6 +19,7 @@ import { joinTournament, leaveTournament } from "sockets/emit";
 import { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
+import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 const SwissTournamentView: React.FC = () => {
   const setError = useState<string | null>(null)[1];
@@ -151,6 +152,15 @@ const SwissTournamentView: React.FC = () => {
         <Grid container alignItems="center" spacing={4}>
           <Grid item>
             <Typography variant="h4">{tournament.name}</Typography>
+            {allMatchesPlayed(tournamentData) && (
+              <Typography variant="subtitle1">
+                <span>
+                  {t("frontpage_labels.winner")}
+                  {": "}
+                  {findTournamentWinner(tournamentData)}
+                </span>
+              </Typography>
+            )}
           </Grid>
           <Grid item>
             <CopyToClipboardButton />
