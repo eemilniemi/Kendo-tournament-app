@@ -24,7 +24,9 @@ const generateTable = (
     t("user_info_labels.name"),
     t("user_info_labels.club"),
     t("user_info_labels.email_address"),
-    t("user_info_labels.phone_number")
+    t("user_info_labels.phone_number"),
+    t("user_info_labels.suomisport_id"),
+    t("user_info_labels.guardians_email")
   ] as const;
 
   // Generate table with player information
@@ -58,6 +60,14 @@ const generateTable = (
               </TableCell>
               <TableCell aria-label={`cell-phone-${index}`}>
                 <Typography>{player.phoneNumber ?? "-"}</Typography>
+              </TableCell>
+              <TableCell aria-label={`cell-suomisportId-${index}`}>
+                <Typography>{player.suomisportId ?? "-"}</Typography>
+              </TableCell>
+              <TableCell aria-label={`cell-suomisportId-${index}`}>
+                <Typography>
+                  {player.underage ? player.guardiansEmail : "-"}
+                </Typography>
               </TableCell>
             </TableRow>
           ))}
