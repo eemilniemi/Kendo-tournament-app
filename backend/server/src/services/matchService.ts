@@ -102,7 +102,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
 
@@ -148,7 +148,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
@@ -443,7 +443,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
@@ -475,7 +475,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
@@ -504,7 +504,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
@@ -533,7 +533,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
@@ -594,7 +594,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
@@ -843,9 +843,13 @@ export class MatchService {
         message: "Finished matches cannot be edited"
       });
     }
-    if (match.isTimerOn || match.timerStartedTimestamp !== null || match.startTimestamp !== undefined) {
+    if (
+      match.isTimerOn ||
+      match.timerStartedTimestamp !== null ||
+      match.startTimestamp !== undefined
+    ) {
       throw new BadRequestError({
-          message: "Cannot reset roles for a match that has started"
+        message: "Cannot reset roles for a match that has started"
       });
     }
 
@@ -859,7 +863,7 @@ export class MatchService {
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId) {
+    if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
     return await match.toObject();
