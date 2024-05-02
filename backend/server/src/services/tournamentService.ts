@@ -21,6 +21,13 @@ import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
 
 export class TournamentService {
+  // This is to use matchService's functions here
+  private readonly matchService: MatchService; // Add MatchService as a member variable
+
+  constructor() {
+    this.matchService = new MatchService(); // Initialize MatchService
+  }
+
   public async emitTournamentUpdate(tournamentId: string): Promise<void> {
     const updatedTournament = await this.getTournamentById(tournamentId);
     io.to(tournamentId).emit("tournament-updated", updatedTournament);
@@ -160,6 +167,102 @@ export class TournamentService {
         await tournament.save();
       }
     }
+    return await tournament.toObject();
+  }
+
+  public async removePlayerFromTournament(
+    tournamentId: string,
+    playerId: string
+  ): Promise<void> {
+    const tournament = await TournamentModel.findById(tournamentId).exec();
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+
+    const player = await UserModel.findById(playerId).exec();
+    if (player === null || player === undefined) {
+      throw new NotFoundError({
+        message: "Player not found"
+      });
+    }
+
+    const currentDate = new Date();
+    const startDate = new Date(tournament.startDate);
+    if (currentDate > startDate) {
+      throw new BadRequestError({
+        message: `Cannot cancel sign up as the tournament has already started on ${startDate.toDateString()}`
+      });
+    }
+
+    // Remove player from tournament
+    if (tournament.players.includes(player.id)) {
+      const index = tournament.players.indexOf(player.id);
+      tournament.players.splice(index, 1);
+
+      // Remove player's matches from match schedule
+      const matchesToRemove: Array<Types.ObjectId | Match> = [];
+
+      for (const matchId of tournament.matchSchedule) {
+        const match = await MatchModel.findById(matchId).exec();
+        if (match === undefined || match === null) {
+          continue; // Skip if match doesn't exist
+        }
+        // Check if a match involves the removed player
+        const matchPlayerIds = match.players.map((player) =>
+          player.id.toString()
+        );
+        if (matchPlayerIds.includes(playerId)) {
+          matchesToRemove.push(matchId);
+          // Delete the match
+          const matchIdString = String(matchId);
+          await this.matchService.deleteMatchById(matchIdString);
+        }
+      }
+
+      // Remove match IDs involving the removed player from match schedule
+      tournament.matchSchedule = tournament.matchSchedule.filter(
+        (matchId) => !matchesToRemove.includes(matchId)
+      );
+    }
+
+    // Preliminary changes
+    if (tournament.type === TournamentType.PreliminaryPlayoff) {
+      // Removing a player to preliminary requires redoing all groups and matches
+      if (tournament.groupsSizePreference !== undefined) {
+        tournament.groups = this.dividePlayersIntoGroups(
+          tournament.players as Types.ObjectId[],
+          tournament.groupsSizePreference
+        );
+        await MatchModel.deleteMany({ tournamentId: tournament.id });
+
+        tournament.matchSchedule = [];
+      }
+    }
+    // Also swiss requires new matches
+    if (tournament.type === TournamentType.Swiss) {
+      await MatchModel.deleteMany({ tournamentId: tournament.id });
+
+      tournament.matchSchedule = [];
+    }
+
+    // Playoff matches are calculated separately when the tournament has started,
+    // round robin works without this
+    if (
+      tournament.players.length > 1 &&
+      tournament.type !== TournamentType.Playoff &&
+      tournament.type !== TournamentType.RoundRobin
+    ) {
+      const newMatchIds = await this.generateTournamentSchedule(tournament);
+      if (newMatchIds.length !== 0) {
+        tournament.matchSchedule.push(...newMatchIds);
+      }
+    }
+
+    await tournament.save();
+
     return await tournament.toObject();
   }
 
@@ -348,9 +451,8 @@ export class TournamentService {
             "Playoff matches should be generated all at once"
           );
         }
-        matches = await this.generatePlayoffSchedule(
+        matches = await TournamentService.generatePlayoffSchedule(
           tournament.players as Types.ObjectId[],
-          tournament.matchSchedule as Types.ObjectId[],
           tournament.id,
           tournament.matchTime
         );
@@ -417,15 +519,16 @@ export class TournamentService {
     return matches;
   }
 
-  private async generatePlayoffSchedule(
+  public static async generatePlayoffSchedule(
     playerIds: Types.ObjectId[],
-    previousMatches: Types.ObjectId[],
     tournament: Types.ObjectId,
-    tournamentMatchTime: MatchTime
-  ): Promise<Array<UnsavedMatch | Match>> {
-    const matches: Array<UnsavedMatch | Match> = [];
+    tournamentMatchTime: MatchTime,
+    currentRound: number = 1,
+    matchType: string = "playoff"
+  ): Promise<UnsavedMatch[]> {
+    const matches: UnsavedMatch[] = [];
 
-    const bracketSize = this.nextPowerOfTwo(playerIds.length);
+    const bracketSize = TournamentService.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
 
     // create the byes first to be added later
@@ -435,10 +538,10 @@ export class TournamentService {
     for (i = 0; i < byesNeeded; i++) {
       byes.push({
         players: [{ id: playerIds[i], points: [], color: "white" }],
-        type: "playoff",
+        type: matchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
-        tournamentRound: 1,
+        tournamentRound: currentRound,
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
         winner: playerIds[i]
@@ -452,10 +555,10 @@ export class TournamentService {
           { id: playerIds[i], points: [], color: "white" },
           { id: playerIds[i + 1], points: [], color: "red" }
         ],
-        type: "playoff",
+        type: matchType as MatchType,
         elapsedTime: 0,
         timerStartedTimestamp: null,
-        tournamentRound: 1,
+        tournamentRound: currentRound,
         tournamentId: tournament,
         matchTime: tournamentMatchTime
       });
@@ -472,7 +575,7 @@ export class TournamentService {
     return (n & (n - 1)) === 0;
   }
 
-  private nextPowerOfTwo(n: number): number {
+  private static nextPowerOfTwo(n: number): number {
     let power = 1;
     while (power < n) {
       power *= 2;

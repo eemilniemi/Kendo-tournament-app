@@ -142,6 +142,17 @@ const tournaments = {
     );
   },
 
+  cancelSignup: async (tournamentId: string, userId: string) => {
+    return await request.delete(
+      `${TOURNAMENTS_API}/${tournamentId}/cancel-signup`,
+      {
+        data: {
+          playerId: userId
+        }
+      }
+    );
+  },
+
   update: async (tournamentId: string, body: EditTournamentRequest) => {
     return await request.put<Tournament>(
       `${TOURNAMENTS_API}/${tournamentId}/update`,

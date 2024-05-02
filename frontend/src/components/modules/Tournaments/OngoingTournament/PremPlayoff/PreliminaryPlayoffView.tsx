@@ -64,6 +64,8 @@ const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
   return matchesByGroup;
 };
 
+type TiebreakerToasts = Record<number, Record<number, boolean>>;
+
 const PreliminaryPlayoffView: React.FC = () => {
   const initialTournamentData = useTournament();
   const navigate = useNavigate();
@@ -88,11 +90,14 @@ const PreliminaryPlayoffView: React.FC = () => {
   const [tournamentStage, setTournamentStage] = useState("preliminary");
   const [showMatches, setShowMatches] = useState(false);
   const defaultTab = "preliminary";
-  const [previousTab, setPreviousTab] = useState(defaultTab); // Keep track of the previous tab
+  const [previousTab, setPreviousTab] = useState(defaultTab);
   const [searchParams, setSearchParams] = useSearchParams();
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const tabTypes = ["preliminary", "playoff"] as const;
   const currentTab = searchParams.get("tab") ?? defaultTab;
+  const [tiebreakerToasts, setTiebreakerToasts] = useState<TiebreakerToasts>(
+    {}
+  );
 
   const showToast = useToast();
   const [hasJoined, setHasJoined] = useState(false);
@@ -266,6 +271,38 @@ const PreliminaryPlayoffView: React.FC = () => {
       updatePlayerStats(tournamentData, setPlayers);
     }
   }, [players, tournamentData]);
+
+  useEffect(() => {
+    showTiebreakerToasts();
+  }, [upcomingMatches]);
+
+  const showTiebreakerToasts = (): void => {
+    if (tournamentStage === "preliminary" && upcomingMatches.size > 0) {
+      upcomingMatches.forEach((matches, index) => {
+        matches.forEach((match, matchIndex) => {
+          // If the match is not from initial round and a toast for it hasn't been shown before
+          if (
+            match.tournamentRound > 1 &&
+            !tiebreakerToasts[index]?.[matchIndex]
+          ) {
+            showToast(
+              t("tournament_view_labels.tiebreaker", { groupNr: index + 1 }),
+              "success"
+            );
+
+            // Keep track of which matches have been notified of
+            setTiebreakerToasts((prevState) => ({
+              ...prevState,
+              [index]: {
+                ...prevState[index],
+                [matchIndex]: true
+              }
+            }));
+          }
+        });
+      });
+    }
+  };
 
   // When a scoreboard is clicked, find out matches for that group to show
   useEffect(() => {
