@@ -158,6 +158,8 @@
     "group": "Group",
     "playoff_stage_not_started": "Playoff stage has not started yet.",
     "court_number": "Court",
+    "tournament_winner": "Winner of tournament: ",
+    "no_winner": "No winner",
     "tiebreaker": "There is a new tiebreaker in group {{groupNr}}"
   },
   "signup_labels": {
