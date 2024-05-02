@@ -415,7 +415,7 @@ export class MatchService {
     if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
-    
+
     return await match.toObject();
   }
 
