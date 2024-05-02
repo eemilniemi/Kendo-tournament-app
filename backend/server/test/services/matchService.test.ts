@@ -236,33 +236,14 @@ describe('MatchService', () => {
                 .to.be.rejectedWith(BadRequestError, "Finished matches cannot be edited");
         });
     });
-    
 
     describe('addPointToMatchById', () => {
-        it('should add a point to the match', async () => {
+        it('should throw NotFoundError if no match with id', async () => {
             const matchId = new Types.ObjectId();
-            const pointRequest: AddPointRequest = {
-                pointType: "men",
-                pointColor: "red"
-            };
-            const matchData = {
-                id: matchId,
-                type: "group",
-                players: [{ id: new Types.ObjectId(), points: [], color: "red" }],
-                isTimerOn: true,
-                winner: undefined,
-                save: async () => ({ ...matchData }) 
-            };
-
-            sinon.stub(MatchModel, 'findById').returns({
-                exec: sinon.stub().resolves(matchData)
-            });
-            const saveStub = sinon.stub(matchData, 'save').resolves();
-
-            const result = await matchService.addPointToMatchById(matchId.toString(), pointRequest);
-            const player1 = result.players[0] as MatchPlayer;
-            expect(player1.points).to.not.be.empty;
-            expect(saveStub.calledOnce).to.be.true;
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(null) });
+    
+            await expect(matchService.addTimeKeeperToMatch(matchId.toString(), new Types.ObjectId().toString()))
+                .to.be.rejectedWith(NotFoundError);
         });
 
         it('should throw BadRequestError if match is already finished', async () => {
@@ -282,6 +263,89 @@ describe('MatchService', () => {
 
             await expect(matchService.addPointToMatchById(matchId.toString(), pointRequest))
                 .to.be.rejectedWith(BadRequestError);
+        });
+
+        it('should add a point to the match', async () => {
+            const matchId = new Types.ObjectId();
+            const pointRequest: AddPointRequest = {
+                pointType: "men",
+                pointColor: "red"
+            };
+            const player1Id = new Types.ObjectId();
+            const player2Id = new Types.ObjectId();
+            const points1 = [];
+            const points2 = [];
+            const matchData = {
+                id: matchId,
+                type: "group",
+                winner: undefined,
+                endTimestamp: undefined,
+                players: [
+                    { id: player1Id, points: points1, color: 'red' },
+                    { id: player2Id, points: points2, color: 'white' }
+                ],
+                save: sinon.stub().resolves(),
+                toObject: () => ({
+                    players: [
+                        { id: player1Id, points: [{ type: 'men', timestamp: new Date() }], color: 'red' },
+                        { id: player2Id, points: [], color: 'white' }
+                    ]
+                })
+            };
+
+            sinon.stub(MatchModel, 'findById').returns({
+                exec: sinon.stub().resolves(matchData)
+            });
+
+            const result = await matchService.addPointToMatchById(matchId.toString(), pointRequest);
+            const player1 = result.players[0] as MatchPlayer;
+            expect(player1.points).to.not.be.empty;
+            expect(player1.points[0].type).to.equal(pointRequest.pointType);
+            expect(matchData.winner).to.be.undefined;
+            expect(matchData.endTimestamp).to.be.undefined;
+        });
+
+        it('should add a point to the match, game ending point', async () => {
+            const matchId = new Types.ObjectId();
+            const pointRequest: AddPointRequest = {
+                pointType: "men",
+                pointColor: "red"
+            };
+            const player1Id = new Types.ObjectId();
+            const player2Id = new Types.ObjectId();
+            const now = new Date();
+            const points1 = [{type: 'tsuki', timestamp: new Date(now.getTime() - 5 * 60 * 1000)}];
+            const points2 = [];
+            const matchData = {
+                id: matchId,
+                type: "group",
+                players: [
+                    { id: player1Id, points: points1, color: 'red' },
+                    { id: player2Id, points: points2, color: 'white' }
+                ],
+                save: sinon.stub().resolves(),
+                toObject: () => ({
+                    players: [
+                        { id: player1Id, points: [points1, { type: 'men', timestamp: new Date() }], color: 'red' },
+                        { id: player2Id, points: [], color: 'white' }
+                    ],
+                    winner: player1Id,
+                    endTimestamp: new Date()
+                })
+            };
+
+            sinon.stub(MatchModel, 'findById').returns({
+                exec: sinon.stub().resolves(matchData)
+            });
+
+            const result = await matchService.addPointToMatchById(matchId.toString(), pointRequest);
+            const player1 = result.players[0] as MatchPlayer;
+            expect(player1.points).to.not.be.empty;
+            expect(player1.points.length).to.equal(2);
+            expect(player1.points[1].type).to.equal(pointRequest.pointType);
+            expect(result.winner).to.not.be.undefined;
+            expect(result.endTimestamp).to.not.be.undefined;
+            expect(result.winner?.toString()).to.equal(player1Id.toString())
         });
     });
 
@@ -696,9 +760,194 @@ describe('MatchService', () => {
                 expect(result.endTimestamp).to.not.be.undefined;
                 expect(result.isOvertime).to.be.false;
             });
-        });
-        
-
+        }); 
     });
+
+    describe('deleteRecentPoint', () => {
+        it('should throw NotFoundError if no match with id', async () => {
+            const matchId = new Types.ObjectId();
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(null) });
+            await expect(matchService.deleteRecentPoint(matchId.toString()))
+                .to.be.rejectedWith(NotFoundError);
+        });
+    
+        it('should delete the most recent point correctly and delete winner', async () => {
+            const matchId = new Types.ObjectId();
+            const playerId = new Types.ObjectId();
+            const now = new Date();
+            const points = [{ type: 'men', timestamp: new Date(now.getTime() - 5 * 60 * 1000) }, { type: 'do', timestamp: new Date() }];
+            const matchData = {
+                players: [{ id: playerId, points, color: 'red' }],
+                winner: playerId,
+                type: 'group',
+                endTimestamp: new Date(),
+                save: sinon.stub().resolves(),
+                toObject: () => ({ players: [{ id: playerId, points: [points[0]], color: 'red' }], winner: undefined, endTimestamp: undefined })
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            const result = await matchService.deleteRecentPoint(matchId.toString());
+            const player1 = result.players[0] as MatchPlayer;
+            expect(player1.points.length).to.equal(1);
+            expect(player1.points[0].type).to.equal('men');
+            expect(result.winner).to.be.undefined;
+            expect(result.endTimestamp).to.be.undefined;
+        });
+
+        it('should delete the most recent point correctly', async () => {
+            const matchId = new Types.ObjectId();
+            const playerId = new Types.ObjectId();
+            const points = [{ type: 'men', timestamp: new Date() }];
+            const matchData = {
+                players: [{ id: playerId, points, color: 'red' }],
+                type: 'group',
+                save: sinon.stub().resolves(),
+                toObject: () => ({ players: [{ id: playerId, points: [], color: 'red' }], winner: undefined, endTimestamp: undefined })
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            const result = await matchService.deleteRecentPoint(matchId.toString());
+            const player1 = result.players[0] as MatchPlayer;
+            expect(player1.points.length).to.equal(0);
+            expect(result.winner).to.be.undefined;
+            expect(result.endTimestamp).to.be.undefined;
+        });
+    
+        it('should handle cases where there are no points to delete', async () => {
+            const matchId = new Types.ObjectId();
+            const playerId = new Types.ObjectId();
+            const matchData = {
+                players: [{ id: playerId, points: [], color: 'red' }],
+                save: sinon.stub().resolves(),
+                toObject: sinon.stub()
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            await expect(matchService.deleteRecentPoint(matchId.toString()))
+                .to.be.rejectedWith(BadRequestError, "No points to delete.");
+        });
+    
+        it('should throw BadRequestError if no players are found in the match', async () => {
+            const matchId = new Types.ObjectId();
+            const matchData = {
+                players: [],
+                save: sinon.stub().resolves(),
+                toObject: sinon.stub()
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            await expect(matchService.deleteRecentPoint(matchId.toString()))
+                .to.be.rejectedWith(BadRequestError, "No players in match.");
+        });
+    });
+    
+    describe('modifyRecentPoint', () => {
+        it('should throw NotFoundError if no match with id', async () => {
+            const matchId = new Types.ObjectId();
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(null) });
+            await expect(matchService.modifyRecentPoint(matchId.toString(), 'men'))
+                .to.be.rejectedWith(NotFoundError);
+        });
+    
+        it('should modify the most recent point and check for match outcome', async () => {
+            const matchId = new Types.ObjectId();
+            const player1Id = new Types.ObjectId();
+            const player2Id = new Types.ObjectId();
+            const now = new Date();
+            const points1 = [{ type: 'tsuki', timestamp: new Date(now.getTime() - 5 * 60 * 1000) }, { type: 'hansoku', timestamp: now.getTime() - 3 * 60 * 1000 }];
+            const points2 = [];
+            const newType = 'men';
+            const matchData = {
+                players: [
+                    { id: player1Id, points: points1, color: 'red' },
+                    { id: player2Id, points: points2, color: 'white' }
+                ],
+                save: sinon.stub().resolves(),
+                toObject: () => ({
+                    players: [
+                        { id: player1Id, points: [{ ...points1[0], type: points1[0].type }, { ...points1[1], type: newType }], color: 'red' },
+                        { id: player2Id, points: [], color: 'white' }
+                    ],
+                    winner: player1Id,
+                    endTimestamp: new Date()
+                })
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            const result = await matchService.modifyRecentPoint(matchId.toString(), newType);
+            const player1 = result.players[0] as MatchPlayer;
+            expect(player1.points.length).to.equal(2);
+            expect(player1.points[1].type).to.equal(newType);
+            expect(result.winner?.toString()).to.equal(player1Id.toString());
+            expect(result.endTimestamp).to.not.be.undefined;
+        });
+
+        it('should modify the most recent point, no need to check match outcome', async () => {
+            const matchId = new Types.ObjectId();
+            const player1Id = new Types.ObjectId();
+            const player2Id = new Types.ObjectId();
+            const now = new Date();
+            const points1 = [{ type: 'tsuki', timestamp: new Date(now.getTime() - 5 * 60 * 1000) }];
+            const points2 = [];
+            const newType = 'men';
+            const matchData = {
+                players: [
+                    { id: player1Id, points: points1, color: 'red' },
+                    { id: player2Id, points: points2, color: 'white' }
+                ],
+                save: sinon.stub().resolves(),
+                toObject: () => ({
+                    players: [
+                        { id: player1Id, points: [{ ...points1[0], type: newType }], color: 'red' },
+                        { id: player2Id, points: [], color: 'white' }
+                    ]
+                })
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            const result = await matchService.modifyRecentPoint(matchId.toString(), newType);
+            const player1 = result.players[0] as MatchPlayer;
+            expect(player1.points.length).to.equal(1);
+            expect(player1.points[0].type).to.equal(newType);
+            expect(result.winner).to.be.undefined
+            expect(result.endTimestamp).to.be.undefined;
+        });
+    
+        it('should throw BadRequestError if there are no points to modify', async () => {
+            const matchId = new Types.ObjectId();
+            const playerId = new Types.ObjectId();
+            const matchData = {
+                players: [{ id: playerId, points: [], color: 'red' }],
+                save: sinon.stub().resolves(),
+                toObject: sinon.stub()
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            await expect(matchService.modifyRecentPoint(matchId.toString(), 'men'))
+                .to.be.rejectedWith(BadRequestError, "No points found to modify.");
+        });
+    
+        it('should throw BadRequestError if no players are found in the match', async () => {
+            const matchId = new Types.ObjectId();
+            const matchData = {
+                players: [],
+                save: sinon.stub().resolves(),
+                toObject: sinon.stub()
+            };
+    
+            sinon.stub(MatchModel, 'findById').returns({ exec: sinon.stub().resolves(matchData) });
+    
+            await expect(matchService.modifyRecentPoint(matchId.toString(), 'men'))
+                .to.be.rejectedWith(BadRequestError, "No players in match.");
+        });
+    });
+    
 
 });
