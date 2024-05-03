@@ -142,7 +142,13 @@ const ProfileGames: React.FC = () => {
               <Card key={matchIndex} variant="outlined" sx={{ mb: 1 }}>
                 <CardActionArea
                   onClick={() => {
-                    navigate(`/tournaments/${tournament.id}/match/${match.id}`);
+                    if (match.players.length === 2) {
+                      navigate(
+                        `/tournaments/${tournament.id}/match/${match.id}`
+                      );
+                    } else {
+                      // No match details to display for a bye
+                    }
                   }}
                 >
                   <CardContent>
@@ -150,21 +156,33 @@ const ProfileGames: React.FC = () => {
                       {/* Print match details, including player names and scores */}
                       {t("profile.match")} {matchIndex + 1}:
                       <br />
-                      <span>
-                        {getPlayerNameById(
-                          tournament.players,
-                          match.players[0].id
-                        )}
-                        {"  "}
-                        {match.player1Score}
-                        {" - "}
-                        {match.player2Score}
-                        {"  "}
-                        {getPlayerNameById(
-                          tournament.players,
-                          match.players[1].id
-                        )}
-                      </span>
+                      {match.players.length === 1 ? (
+                        // Handle matches with only one player (bye)
+                        <span>
+                          {getPlayerNameById(
+                            tournament.players,
+                            match.players[0].id
+                          )}
+                          {" - "}
+                          {"BYE"}
+                        </span>
+                      ) : (
+                        <span>
+                          {getPlayerNameById(
+                            tournament.players,
+                            match.players[0].id
+                          )}
+                          {"  "}
+                          {match.player1Score}
+                          {" - "}
+                          {match.player2Score}
+                          {"  "}
+                          {getPlayerNameById(
+                            tournament.players,
+                            match.players[1].id
+                          )}
+                        </span>
+                      )}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
