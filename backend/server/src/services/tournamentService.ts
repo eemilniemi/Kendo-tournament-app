@@ -53,9 +53,8 @@ export class TournamentService {
     return await tournament.toObject();
   }
 
-  public async getAllTournaments(limit: number): Promise<Tournament[]> {
+  public async getAllTournaments(): Promise<Tournament[]> {
     const tournaments = await TournamentModel.find()
-      .limit(limit)
       .populate<{ creator: User }>({ path: "creator", model: "User" })
       .populate<{ players: User[] }>({ path: "players", model: "User" })
       .populate<{
