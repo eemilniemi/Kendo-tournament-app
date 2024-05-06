@@ -64,7 +64,7 @@ const generateTable = (
               <TableCell aria-label={`cell-suomisportId-${index}`}>
                 <Typography>{player.suomisportId ?? "-"}</Typography>
               </TableCell>
-              <TableCell aria-label={`cell-suomisportId-${index}`}>
+              <TableCell aria-label={`cell-underage-${index}`}>
                 <Typography>
                   {player.underage ? player.guardiansEmail : "-"}
                 </Typography>
