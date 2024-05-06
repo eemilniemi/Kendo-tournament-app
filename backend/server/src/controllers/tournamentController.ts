@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Request,
-  Query,
   Delete
 } from "tsoa";
 import { TournamentService } from "../services/tournamentService.js";
