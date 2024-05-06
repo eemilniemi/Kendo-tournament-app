@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Request,
-  Query,
   Delete
 } from "tsoa";
 import { TournamentService } from "../services/tournamentService.js";
@@ -43,11 +42,9 @@ export class TournamentController extends Controller {
    */
   @Get()
   @Tags("Tournaments")
-  public async getTournaments(
-    @Query() limit: number = 20
-  ): Promise<Tournament[]> {
+  public async getTournaments(): Promise<Tournament[]> {
     this.setStatus(200);
-    return await this.service.getAllTournaments(limit);
+    return await this.service.getAllTournaments();
   }
 
   /*

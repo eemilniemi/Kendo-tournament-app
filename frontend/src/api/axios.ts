@@ -113,10 +113,8 @@ const auth = {
 };
 
 const tournaments = {
-  getAll: async (limit?: number) => {
-    return await request.get<Tournament[]>(`${TOURNAMENTS_API}`, {
-      params: { limit }
-    });
+  getAll: async () => {
+    return await request.get<Tournament[]>(`${TOURNAMENTS_API}`);
   },
 
   getTournament: async (tournamentId: string) => {
