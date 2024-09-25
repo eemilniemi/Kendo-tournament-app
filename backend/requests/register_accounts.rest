@@ -1,0 +1,72 @@
+POST http://localhost:8080/api/user/register
+content-type: application/json
+
+{
+  "email": "testaaja1@kendo.app",
+  "firstName": "testaaja1",
+  "lastName": "sukunimi1",
+  "phoneNumber": "0000000001",
+  "password": "salasana",
+  "inNationalTeam": false,
+  "underage": false
+}
+
+###
+
+POST http://localhost:8080/api/user/register
+content-type: application/json
+
+{
+  "email": "testaaja2@kendo.app",
+  "firstName": "testaaja2",
+  "lastName": "sukunimi2",
+  "phoneNumber": "0000000002",
+  "password": "salasana",
+  "inNationalTeam": false,
+  "underage": false
+}
+
+###
+
+POST http://localhost:8080/api/user/register
+content-type: application/json
+
+{
+  "email": "testaaja3@kendo.app",
+  "firstName": "testaaja3",
+  "lastName": "sukunimi3",
+  "phoneNumber": "0000000003",
+  "password": "salasana",
+  "inNationalTeam": false,
+  "underage": false
+}
+
+###
+
+POST http://localhost:8080/api/user/register
+content-type: application/json
+
+{
+  "email": "testaaja4@kendo.app",
+  "firstName": "testaaja4",
+  "lastName": "sukunimi4",
+  "phoneNumber": "0000000004",
+  "password": "salasana",
+  "inNationalTeam": false,
+  "underage": false
+}
+
+###
+
+POST http://localhost:8080/api/user/register
+content-type: application/json
+
+{
+  "email": "testaaja5@kendo.app",
+  "firstName": "testaaja5",
+  "lastName": "sukunimi5",
+  "phoneNumber": "0000000005",
+  "password": "salasana",
+  "inNationalTeam": false,
+  "underage": false
+}
