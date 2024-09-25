@@ -6,7 +6,7 @@ content-type: application/json
   "firstName": "testaaja1",
   "lastName": "sukunimi1",
   "phoneNumber": "0000000001",
-  "password": "salasana",
+  "password": "salasana123",
   "inNationalTeam": false,
   "underage": false
 }
@@ -21,7 +21,7 @@ content-type: application/json
   "firstName": "testaaja2",
   "lastName": "sukunimi2",
   "phoneNumber": "0000000002",
-  "password": "salasana",
+  "password": "salasana123",
   "inNationalTeam": false,
   "underage": false
 }
@@ -36,7 +36,7 @@ content-type: application/json
   "firstName": "testaaja3",
   "lastName": "sukunimi3",
   "phoneNumber": "0000000003",
-  "password": "salasana",
+  "password": "salasana123",
   "inNationalTeam": false,
   "underage": false
 }
@@ -51,7 +51,7 @@ content-type: application/json
   "firstName": "testaaja4",
   "lastName": "sukunimi4",
   "phoneNumber": "0000000004",
-  "password": "salasana",
+  "password": "salasana123",
   "inNationalTeam": false,
   "underage": false
 }
@@ -66,7 +66,7 @@ content-type: application/json
   "firstName": "testaaja5",
   "lastName": "sukunimi5",
   "phoneNumber": "0000000005",
-  "password": "salasana",
+  "password": "salasana123",
   "inNationalTeam": false,
   "underage": false
 }
