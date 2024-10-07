@@ -54,6 +54,17 @@ export class MatchService {
       });
     }
 
+    if (match.timerStartedTimestamp !== null) {
+      const currentTime = new Date();
+      const elapsedMilliseconds =
+        currentTime.getTime() - match.timerStartedTimestamp.getTime();
+      match.elapsedTime += elapsedMilliseconds;
+
+      if (match.elapsedTime > match.matchTime) {
+        match.elapsedTime = match.matchTime;
+      }
+    }
+
     return await match.toObject();
   }
 
@@ -76,7 +87,7 @@ export class MatchService {
       });
     }
 
-    if (match.winner !== undefined || match.elapsedTime === match.matchTime) {
+    if (match.winner !== undefined || (match.elapsedTime >= match.matchTime && !match.isOvertime)) {
       throw new BadRequestError({
         message: "Finished matches cannot be edited"
       });
@@ -98,13 +109,7 @@ export class MatchService {
     match.isTimerOn = true;
 
     await match.save();
-
-    const tournamentService = new TournamentService();
-    const tournamentId = match.tournamentId as Types.ObjectId;
-
-    if (tournamentId !== undefined) {
-      await tournamentService.emitTournamentUpdate(tournamentId.toString());
-    }
+    this.saveMatchToTournament(match);
 
     return await match.toObject();
   }
@@ -140,17 +145,18 @@ export class MatchService {
       currentTime.getTime() - match.timerStartedTimestamp.getTime();
 
     match.elapsedTime += elapsedMilliseconds;
+    
+    if (match.elapsedTime > match.matchTime) {
+      match.elapsedTime = match.matchTime;
+    }
     // Reset the timer timestamp
     match.timerStartedTimestamp = null;
     // Mark the timer to be off
     match.isTimerOn = false;
-    await match.save();
-    const tournamentService = new TournamentService();
-    const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId !== undefined) {
-      await tournamentService.emitTournamentUpdate(tournamentId.toString());
-    }
+    await match.save();
+    this.saveMatchToTournament(match);
+
     return await match.toObject();
   }
 
@@ -1511,4 +1517,14 @@ export class MatchService {
       });
     }
   }
+
+  private async saveMatchToTournament(match: Match): Promise<void> {
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    if (tournamentId !== undefined) {
+      await tournamentService.emitTournamentUpdate(tournamentId.toString());
+    }
+  }
 }
+  

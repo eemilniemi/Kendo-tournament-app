@@ -70,3 +70,18 @@ content-type: application/json
   "inNationalTeam": false,
   "underage": false
 }
+
+###
+
+POST http://localhost:8080/api/user/register
+content-type: application/json
+
+{
+  "email": "testaaja6@kendo.app",
+  "firstName": "testaaja6",
+  "lastName": "sukunimi6",
+  "phoneNumber": "0000000006",
+  "password": "salasana123",
+  "inNationalTeam": false,
+  "underage": false
+}
