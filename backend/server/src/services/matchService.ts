@@ -54,6 +54,9 @@ export class MatchService {
       });
     }
 
+    // Update elapsed time only for frontend.
+    // Does not need to be updated for backend because frontend handles 
+    // ending the match when time ends.
     if (match.timerStartedTimestamp !== null) {
       const currentTime = new Date();
       const elapsedMilliseconds =
