@@ -22,8 +22,7 @@ export const TournamentProvider = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { upcoming, ongoing, past, isLoading, isError, doRefresh } =
-    useTournaments();
+  const { upcoming, ongoing, past, isLoading, isError } = useTournaments();
   const [value, setValue] = useState<Tournament | undefined>();
   const [isInitialRender, setIsInitialRender] = useState(true);
   const isSet = useRef(false);
@@ -51,7 +50,7 @@ export const TournamentProvider = (): ReactElement => {
           .createSchedule(tournament.id)
           .then((tournamentWithSchedule) => {
             setValue(tournamentWithSchedule);
-            doRefresh();
+            // PAGE UPDATE NEEDED HERE!
           })
           .catch((e) => {
             console.error(e);
