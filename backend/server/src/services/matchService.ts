@@ -63,7 +63,7 @@ export class MatchService {
         currentTime.getTime() - match.timerStartedTimestamp.getTime();
       match.elapsedTime += elapsedMilliseconds;
 
-      if (match.elapsedTime > match.matchTime) {
+      if (match.elapsedTime > match.matchTime && !match.isOvertime) {
         match.elapsedTime = match.matchTime;
       }
     }
