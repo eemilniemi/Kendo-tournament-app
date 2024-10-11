@@ -54,20 +54,6 @@ export class MatchService {
       });
     }
 
-    // Update elapsed time only for frontend.
-    // Does not need to be updated for backend because frontend handles 
-    // ending the match when time ends.
-    if (match.timerStartedTimestamp !== null) {
-      const currentTime = new Date();
-      const elapsedMilliseconds =
-        currentTime.getTime() - match.timerStartedTimestamp.getTime();
-      match.elapsedTime += elapsedMilliseconds;
-
-      if (match.elapsedTime > match.matchTime && !match.isOvertime) {
-        match.elapsedTime = match.matchTime;
-      }
-    }
-
     return await match.toObject();
   }
 
@@ -149,9 +135,6 @@ export class MatchService {
 
     match.elapsedTime += elapsedMilliseconds;
     
-    if (match.elapsedTime > match.matchTime) {
-      match.elapsedTime = match.matchTime;
-    }
     // Reset the timer timestamp
     match.timerStartedTimestamp = null;
     // Mark the timer to be off

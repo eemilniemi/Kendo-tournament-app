@@ -142,8 +142,8 @@ const GameInterface: React.FC = () => {
         let matchEndTimeStamp: Date | undefined;
         let startTime: Date | undefined;
         let timer: boolean = false;
-        let elapsedtime: number = 0;
-        let isovertime: boolean = false;
+        let matchElapsedTime: number = 0;
+        let matchIsOvertime: boolean = false;
         let matchType: MatchType = "group";
         let matchTime: MatchTime = 300000;
         let court: number = 1;
@@ -196,13 +196,20 @@ const GameInterface: React.FC = () => {
           if (matchInfoFromSocket.startTimestamp !== undefined) {
             startTime = matchInfoFromSocket.startTimestamp;
           }
-          // Get time
-          time = Math.floor(matchInfoFromSocket.elapsedTime / 1000);
-          timer = matchInfoFromSocket.isTimerOn;
 
-          elapsedtime = matchInfoFromSocket.elapsedTime;
-          isovertime = matchInfoFromSocket.isOvertime;
+          matchIsOvertime = matchInfoFromSocket.isOvertime;
           matchType = matchInfoFromSocket.type;
+
+          // Get time
+          timer = matchInfoFromSocket.isTimerOn;
+          matchElapsedTime = calculateElapsedTime(
+            matchInfoFromSocket.elapsedTime,
+            matchInfoFromSocket.timerStartedTimestamp,
+            matchTime,
+            matchIsOvertime
+          );
+
+          time = Math.floor(matchElapsedTime / 1000);
 
           court = matchInfoFromSocket.courtNumber;
 
@@ -248,13 +255,19 @@ const GameInterface: React.FC = () => {
             if (matchFromApi.startTimestamp !== undefined) {
               startTime = matchFromApi.startTimestamp;
             }
-            // Get time
-            time = Math.floor(matchFromApi.elapsedTime / 1000);
-            timer = matchFromApi.isTimerOn;
-
-            elapsedtime = matchFromApi.elapsedTime;
-            isovertime = matchFromApi.isOvertime;
+            matchIsOvertime = matchFromApi.isOvertime;
             matchType = matchFromApi.type;
+
+            // Get time
+            timer = matchFromApi.isTimerOn;
+            matchElapsedTime = calculateElapsedTime(
+              matchFromApi.elapsedTime,
+              matchFromApi.timerStartedTimestamp,
+              matchTime,
+              matchIsOvertime
+            );
+
+            time = Math.floor(matchElapsedTime / 1000);
 
             court = matchFromApi.courtNumber;
 
@@ -273,8 +286,8 @@ const GameInterface: React.FC = () => {
           pointMaker: pointPerson,
           startTimestamp: startTime,
           isTimerOn: timer,
-          elapsedTime: elapsedtime,
-          isOvertime: isovertime,
+          elapsedTime: matchElapsedTime,
+          isOvertime: matchIsOvertime,
           type: matchType,
           time: matchTime,
           courtNumber: court
@@ -596,6 +609,29 @@ const GameInterface: React.FC = () => {
       } catch (error) {
         showToast(error, "error");
       }
+    }
+  };
+
+  const calculateElapsedTime = (
+    elapsedTime: number,
+    timerStart: Date | null,
+    matchTime: number,
+    isOvertime: boolean
+  ): number => {
+    if (timerStart !== null) {
+      const currentTime = new Date();
+      const startTimestamp = new Date(timerStart);
+
+      const elapsedMilliseconds =
+        currentTime.getTime() - startTimestamp.getTime();
+      elapsedTime += elapsedMilliseconds;
+
+      if (elapsedTime > matchTime && !isOvertime) {
+        elapsedTime = matchTime;
+      }
+      return elapsedTime;
+    } else {
+      return elapsedTime;
     }
   };
 
