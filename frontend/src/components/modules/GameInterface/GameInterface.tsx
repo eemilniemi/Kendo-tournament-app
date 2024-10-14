@@ -201,6 +201,8 @@ const GameInterface: React.FC = () => {
           matchType = matchInfoFromSocket.type;
 
           // Get time
+          // Backend only updates elapsedTime when match is stopped
+          // so the real time must be calculated.
           timer = matchInfoFromSocket.isTimerOn;
           matchElapsedTime = calculateElapsedTime(
             matchInfoFromSocket.elapsedTime,
@@ -259,6 +261,8 @@ const GameInterface: React.FC = () => {
             matchType = matchFromApi.type;
 
             // Get time
+            // Backend only updates elapsedTime when match is stopped
+            // so the real time must be calculated.
             timer = matchFromApi.isTimerOn;
             matchElapsedTime = calculateElapsedTime(
               matchFromApi.elapsedTime,
@@ -612,6 +616,7 @@ const GameInterface: React.FC = () => {
     }
   };
 
+  // function to calculate elapsed match time
   const calculateElapsedTime = (
     elapsedTime: number,
     timerStart: Date | null,
