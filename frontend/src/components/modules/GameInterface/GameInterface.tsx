@@ -329,14 +329,8 @@ const GameInterface: React.FC = () => {
         ) {
           if (matchInfo.isTimerOn) {
             await apiTimerRequest(matchId);
+            await api.match.checkForTie(matchId);
           }
-        }
-        if (
-          (matchInfo.elapsedTime >= matchInfo.time ||
-            matchInfo.endTimeStamp !== undefined) &&
-          matchId !== undefined
-        ) {
-          await api.match.checkForTie(matchId);
         }
       } catch (error) {
         showToast(error, "error");
