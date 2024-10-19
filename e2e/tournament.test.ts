@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { MongoClient } from 'mongodb';
 import bcrypt from "bcryptjs";
+import * as Helper from './e2eTestHelpers';
 
 require('dotenv').config({path: __dirname + '/../backend/server/.env'});
 
@@ -66,11 +67,12 @@ test.describe("Tournament tests", () => {
 
         await db.collection('users').insertMany(users);
 
-
     });
 
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
+        await page.getByText('FI', { exact: true }).click();
+        await page.getByRole('option', { name: 'EN' }).click();
     });
   
     //test to see if it is on right site
@@ -81,40 +83,32 @@ test.describe("Tournament tests", () => {
 
     test('can login', async ({page}) => {
         console.log("can login");
-        await page.goto('/login')
-        await page.getByLabel('Sähköpostiosoite *').fill("test-user1@gmail.com");
-        await page.getByLabel('Salasana *').fill("FooBar123");
-        await page.getByRole('button', { name: 'Kirjaudu', exact: true }).click();
+
+        await Helper.login(page, {email: 'test-user1@gmail.com', password: 'FooBar123'});
         
-        const text = page.getByText('Tervetuloa KendoAppiin! Voit');
+        const text = page.getByText('Welcome to KendoApp!');
         await expect(text).toBeVisible();
     });
 
-    test('can create a tournament', async ({page}) => {
-        await page.goto('/login')
-        
-        await page.getByLabel('Sähköpostiosoite *').fill('test-user1@gmail.com');
-        await page.getByLabel('Salasana *').fill('FooBar123');
-        await page.getByLabel('Salasana *').press('Enter');
-        const text = page.getByText('Tervetuloa KendoAppiin! Voit');
+    test('can create a tournament and join one', async ({page}) => {
+        await Helper.login(page, {email: 'test-user1@gmail.com', password: 'FooBar123'});
+        const text = page.getByText('Welcome to KendoApp!');
         await expect(text).toBeVisible();
 
-        console.log("can create a tournament");
+        const currentDate = new Date();
+        const startDate = new Date(currentDate.getTime() + 10 * 60000);
+        const formattedStartDate = Helper.formatDate(startDate);
 
-        const plusButton = page.getByRole('button', { name: '+' })
-        await plusButton.click();
-        await page.getByLabel('Turnauksen nimi *').fill("Testiturnaus");
-        await page.getByLabel('Sijainti *').fill("Testipaikka");
-        await page.getByLabel('Kuvaus *').fill("Testikuvaus");
-
-
-        page.on('dialog', dialog => dialog.accept());
-
-        await page.getByRole('button', { name: 'Luo' }).click();
-        await page.getByRole('button', { name: 'Vahvista' }).click();
-        await page.goto('/tournaments');
-        const newTournament = page.getByRole('button', { name: 'Testiturnaus' })
+        await Helper.createTournament(page, {name: "TestTournament", location: "TestLocation", description: "TestDescription", startDate : formattedStartDate});
+        await page.goto('/tournaments?tab=upcoming');
+        const newTournament = page.getByRole('button', { name: 'TestTournament' })
         await expect(newTournament).toBeVisible();
+
+        await Helper.joinTournament(page, 'TestTournament');
+
+        const signedUp = page.getByText('Successfully signed up for')
+        await expect(signedUp).toBeVisible();
+
     });
 
     test.afterAll(async () => {
