@@ -101,7 +101,7 @@ export class MatchService {
     match.isTimerOn = true;
 
     await match.save();
-    this.saveMatchToTournament(match);
+    void this.saveMatchToTournament(match);
 
     return await match.toObject();
   }
@@ -144,7 +144,7 @@ export class MatchService {
     match.isTimerOn = false;
 
     await match.save();
-    this.saveMatchToTournament(match);
+    void this.saveMatchToTournament(match);
 
     return await match.toObject();
   }
