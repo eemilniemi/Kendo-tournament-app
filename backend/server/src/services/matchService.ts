@@ -76,7 +76,10 @@ export class MatchService {
       });
     }
 
-    if (match.winner !== undefined || (match.elapsedTime >= match.matchTime && !match.isOvertime)) {
+    if (
+      match.winner !== undefined ||
+      (match.elapsedTime >= match.matchTime && !match.isOvertime)
+    ) {
       throw new BadRequestError({
         message: "Finished matches cannot be edited"
       });
@@ -134,7 +137,7 @@ export class MatchService {
       currentTime.getTime() - match.timerStartedTimestamp.getTime();
 
     match.elapsedTime += elapsedMilliseconds;
-    
+
     // Reset the timer timestamp
     match.timerStartedTimestamp = null;
     // Mark the timer to be off
@@ -1513,4 +1516,3 @@ export class MatchService {
     }
   }
 }
-  
