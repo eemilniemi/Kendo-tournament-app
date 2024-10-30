@@ -344,7 +344,7 @@ export class TournamentService {
     creatorId: string
   ): Promise<void> {
     // Check if the userId is provided
-    if (!userId || userId.trim() === "") {
+    if (userId == null || userId.trim() === "") {
       throw new BadRequestError({
         message: "Player must be selected before proceeding with withdrawal."
       });
@@ -726,14 +726,7 @@ export class TournamentService {
       const totalPlayers =
         tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
 
-      if (
-        tournamentDetails.maxPlayers !== undefined &&
-        totalPlayers > tournamentDetails.maxPlayers
-      ) {
-        throw new BadRequestError({
-          message: `The total number of players (${totalPlayers}) exceeds the maximum allowed (${tournamentDetails.maxPlayers}) for this tournament.`
-        });
-      }
+      tournamentDetails.maxPlayers = totalPlayers;
     }
 
     // If tournament is type preliminary playoff, validate related fields
