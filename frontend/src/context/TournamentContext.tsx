@@ -50,7 +50,7 @@ export const TournamentProvider = (): ReactElement => {
           .createSchedule(tournament.id)
           .then((tournamentWithSchedule) => {
             setValue(tournamentWithSchedule);
-            navigate(routePaths.homeRoute, { state : { refresh : true }});
+            navigate(routePaths.homeRoute, { state: { refresh: true } });
           })
           .catch((e) => {
             console.error(e);

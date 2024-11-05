@@ -32,7 +32,7 @@ import {
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import Loader from "components/common/Loader";
-import { error } from "console";
+// import { error } from "console";
 const MIN_PLAYER_AMOUNT = 3;
 const MIN_GROUP_SIZE = 3;
 const now = dayjs();
@@ -93,16 +93,15 @@ const EditInfo: React.FC = () => {
     defaultValues,
     mode: "onBlur"
   });
-  //For changing the form type if changed
+  // For changing the form type if changed
   const { startDate, type, paid } =
     useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-
   const fetchTournaments = async (): Promise<void> => {
     try {
       // Why does it have to get all and not just one???
-      if(tournamentId === undefined){
+      if (tournamentId === undefined) {
         return;
       }
       const tournamentsData = await api.tournaments.getTournament(tournamentId);
@@ -133,12 +132,10 @@ const EditInfo: React.FC = () => {
     }
   };
 
-  if(isInitialRender.current){
+  if (isInitialRender.current) {
     void fetchTournaments();
     isInitialRender.current = false;
   }
-
-  
 
   if (isLoading || tournamentId === undefined) {
     return <Loader />;
