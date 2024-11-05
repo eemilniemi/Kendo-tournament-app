@@ -708,8 +708,7 @@ export class TournamentService {
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         throw new BadRequestError({
-          message:
-            "Invalid tournament dates."
+          message: "Invalid tournament dates."
         });
       }
 
