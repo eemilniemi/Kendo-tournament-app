@@ -6,6 +6,9 @@ import DotenvPlugin from "dotenv-webpack";
 import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
 import type { Configuration } from "webpack";
 
+import WebpackBar from "webpackbar";
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+
 const envFilePath = path.resolve(__dirname, ".env");
 const prod = process.env.NODE_ENV === "production";
 
@@ -33,7 +36,14 @@ const config: Configuration = {
         resolve: {
           extensions: [".ts", ".tsx", ".js", ".json"]
         },
-        use: "ts-loader"
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true,
+            },
+          },
+        ]
       },
       {
         test: /\.css$/,
@@ -43,6 +53,14 @@ const config: Configuration = {
   },
   devServer,
   devtool: prod ? undefined : "source-map",
+  cache: {
+    type: 'filesystem', // stores cache on the file system
+  },
+  optimization: {
+    usedExports: true,
+    sideEffects: true,
+    splitChunks: { chunks: 'all' }
+  },
   plugins: [
     new DotenvPlugin({
       path: envFilePath
@@ -53,7 +71,9 @@ const config: Configuration = {
     new HtmlWebpackPlugin({
       template: "index.html"
     }),
-    new MiniCssExtractPlugin()
+    new MiniCssExtractPlugin(),
+    new WebpackBar(),
+    new ForkTsCheckerWebpackPlugin()
   ]
 };
 
