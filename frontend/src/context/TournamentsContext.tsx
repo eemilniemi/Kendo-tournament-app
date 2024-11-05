@@ -44,23 +44,37 @@ const getSortedTournaments = async (): Promise<SortedTournaments> => {
     return dateB.getTime() - dateA.getTime();
   });
 
-  const ongoing = sortedTournaments.filter(
-    (tournament) =>
-      (new Date(tournament.startDate) <= currentDate &&
-        new Date(tournament.endDate) > currentDate) ||
-      (new Date(tournament.startDate) <= currentDate &&
-        !allMatchesPlayed(tournament))
-  );
+  // Define ongoing and past criteria
+  const ongoing = sortedTournaments.filter((tournament) => {
+    const tournamentHasStarted =
+      new Date(tournament.startDate) <= currentDate &&
+      new Date(tournament.endDate) > currentDate;
+
+    const matchesNotPlayed = !allMatchesPlayed(tournament);
+    const hasFewerThanTwoPlayers = tournament.players.length < 2;
+
+    // Ongoing if the tournament has started but not ended and has at least 2 players
+    return (
+      tournamentHasStarted && matchesNotPlayed && !hasFewerThanTwoPlayers // Consider ongoing if there are matches left or more than 1 player
+    );
+  });
 
   const upcoming = sortedTournaments.filter(
     (tournament) => new Date(tournament.startDate) > currentDate
   );
 
-  const past = sortedTournaments.filter(
-    (tournament) =>
-      new Date(tournament.endDate) <= currentDate &&
-      allMatchesPlayed(tournament)
-  );
+  const past = sortedTournaments.filter((tournament) => {
+    const tournamentHasEnded = new Date(tournament.endDate) <= currentDate;
+    const hasFewerThanTwoPlayers = tournament.players.length < 2;
+    const tournamentHasStarted = new Date(tournament.startDate) <= currentDate;
+
+    // Consider past if all matches are played or the tournament has started with less than 2 players
+    return (
+      tournamentHasEnded ||
+      allMatchesPlayed(tournament) ||
+      (tournamentHasStarted && hasFewerThanTwoPlayers)
+    );
+  });
 
   return { past, ongoing, upcoming } as const;
 };

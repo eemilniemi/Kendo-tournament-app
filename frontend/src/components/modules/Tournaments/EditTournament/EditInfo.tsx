@@ -53,6 +53,10 @@ export interface EditTournamentFormData {
   linkToPay?: string;
   linkToSite?: string;
   numberOfCourts: number;
+  swissRounds?: number;
+
+  numberOfTeams?: number;
+  playersPerTeam?: number;
 }
 
 const defaultValues: EditTournamentFormData = {
@@ -68,7 +72,11 @@ const defaultValues: EditTournamentFormData = {
   paid: false,
   linkToPay: "",
   linkToSite: "",
-  numberOfCourts: 1
+  numberOfCourts: 1,
+  swissRounds: 1,
+
+  numberOfTeams: 2,
+  playersPerTeam: 3
 };
 
 const EditInfo: React.FC = () => {
@@ -82,7 +90,8 @@ const EditInfo: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const formContext = useForm<EditTournamentFormData>({
-    defaultValues
+    defaultValues,
+    mode: "onBlur"
   });
   //For changing the form type if changed
   const { startDate, type, paid } =
@@ -149,10 +158,10 @@ const EditInfo: React.FC = () => {
   }
 
   const onSubmit = async (data: EditTournamentFormData): Promise<void> => {
-    // Submit form data to update tournament
     if (!data.paid) {
       data.linkToPay = "";
     }
+
     try {
       await api.tournaments.update(tournamentId, {
         ...data,
@@ -160,8 +169,9 @@ const EditInfo: React.FC = () => {
         endDate: data.endDate?.toString()
       });
       showToast(t("messages.update_success"), "success");
+      // Redirect only on successful form submission
+      navigate(routePaths.homeRoute);
     } catch (error) {
-      // Handle errors during form submission
       showToast(error, "error");
     }
   };
@@ -205,6 +215,64 @@ const EditInfo: React.FC = () => {
               validate: (value: number) => {
                 return (
                   value > 0 || `${t("messages.minimum_player_to_playoff")}`
+                );
+              }
+            }}
+          />
+        </React.Fragment>
+      );
+    }
+    return null;
+  };
+
+  const renderTournamentTypeSpecificFields = (): JSX.Element | null => {
+    if (type === "Swiss") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="swissRounds"
+            type="number"
+            label={t("create_tournament_form.swiss_rounds")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return value >= 1 || `${t("messages.swiss_rounds_error")}`;
+              }
+            }}
+          />
+        </React.Fragment>
+      );
+    }
+
+    if (type === "Team Round Robin") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="numberOfTeams"
+            type="number"
+            label={t("create_tournament_form.number_of_teams")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return value > 1 || `${t("messages.minimum_teams_error")}`;
+              }
+            }}
+          />
+          <TextFieldElement
+            required
+            name="playersPerTeam"
+            type="number"
+            label={t("create_tournament_form.players_per_team")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value > 1 || `${t("messages.minimum_players_per_team_error")}`
                 );
               }
             }}
@@ -356,6 +424,7 @@ const EditInfo: React.FC = () => {
         />
 
         {renderPreliminaryPlayoffFields()}
+        {renderTournamentTypeSpecificFields()}
 
         <TextFieldElement
           required
@@ -412,7 +481,7 @@ const EditInfo: React.FC = () => {
             onClick={() => {
               setConfirmationDialogOpen(true);
             }}
-            disabled={!formContext.formState.isDirty}
+            disabled={!formContext.formState.isValid}
             sx={{ mt: 3, mb: 2 }}
           >
             {t("buttons.save_changes_button")}
