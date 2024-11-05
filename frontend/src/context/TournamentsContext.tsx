@@ -86,7 +86,7 @@ export const TournamentsProvider = (): ReactElement => {
   const location = useLocation() as LocationState;
   const isInitialRender = useRef(true);
 
-  // Meant to return the opposite value of what is in 'value' (see above). When this value is passed in setValue,
+  // Meant to return the opposite value of what is in 'value.doRefresh' (see above). When this value is passed in setValue,
   // it causes a re-render of the page.
   const doRefresh = (): boolean => {
     if (value.doRefresh) {
