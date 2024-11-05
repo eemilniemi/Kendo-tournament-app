@@ -42,7 +42,6 @@ const MIN_PLAYER_AMOUNT = 3; // Minimum total players for individual tournament
 const MIN_GROUP_SIZE = 3;
 const now = dayjs();
 const MIN_START_DATE = now.add(5, "minutes");
-const MIN_NUMBER_OF_COURTS = 1;
 
 export interface CreateTournamentFormData {
   name: string;
@@ -143,19 +142,6 @@ const CreateTournamentForm: React.FC = () => {
   const handleConfirm = async (): Promise<void> => {
     setConfirmationDialogOpen(false);
     await formContext.handleSubmit(onSubmit)();
-  };
-
-  // Handle number of players and courts, resetting them if below minimum values
-  const handlePlayersChange = (value: number): void => {
-    if (value < MIN_PLAYER_AMOUNT) {
-      formContext.setValue("maxPlayers", MIN_PLAYER_AMOUNT);
-    }
-  };
-
-  const handleCourtsChange = (value: number): void => {
-    if (value < MIN_NUMBER_OF_COURTS) {
-      formContext.setValue("numberOfCourts", MIN_NUMBER_OF_COURTS);
-    }
   };
 
   const renderTournamentTypeSpecificFields = (): JSX.Element | null => {
@@ -450,9 +436,6 @@ const CreateTournamentForm: React.FC = () => {
           label={t("create_tournament_form.number_of_courts")}
           fullWidth
           margin="normal"
-          onChange={(e) => {
-            handleCourtsChange(Number(e.target.value));
-          }}
           validation={{
             validate: (value: number) => {
               return value >= 1 || `${t("messages.number_of_courts_error")}`;
@@ -460,25 +443,24 @@ const CreateTournamentForm: React.FC = () => {
           }}
         />
 
-        <TextFieldElement
-          required
-          name="maxPlayers"
-          type="number"
-          label={t("create_tournament_form.max_players")}
-          fullWidth
-          margin="normal"
-          onChange={(e) => {
-            handlePlayersChange(Number(e.target.value));
-          }}
-          validation={{
-            validate: (value: number) => {
-              return (
-                value >= MIN_PLAYER_AMOUNT ||
-                `${t("messages.minimum_players_error")}${MIN_PLAYER_AMOUNT}`
-              );
-            }
-          }}
-        />
+        {type !== "Team Round Robin" && (
+          <TextFieldElement
+            required
+            name="maxPlayers"
+            type="number"
+            label={t("create_tournament_form.max_players")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= MIN_PLAYER_AMOUNT ||
+                  `${t("messages.minimum_players_error")}${MIN_PLAYER_AMOUNT}`
+                );
+              }
+            }}
+          />
+        )}
 
         <CheckboxElement
           name="differentOrganizer"
