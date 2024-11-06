@@ -10,12 +10,7 @@ This document provides instructions for running the End-to-End (E2E) tests for t
 
 ## Running the tests
 
-- If you want to run E2E tests on a specific database, you can add the following line to your /backend/server/.env file:
-    ```bash
-    E2E_MONGODB_URL="mongodb://127.0.0.1:27017/kendo_test"
-    ```
-
-- Start database with Docker
+- Start database with Docker (guide on /backend/database)
 - Start backend server
 - Start frontend
 

@@ -3,9 +3,10 @@ import { MongoClient } from 'mongodb';
 import bcrypt from "bcryptjs";
 import * as Helper from './e2eTestHelpers';
 
-require('dotenv').config({path: __dirname + '/../backend/server/.env'});
 
-const uri = process.env.E2E_MONGODB_URL || 'mongodb://localhost:27017';
+//require('dotenv').config({path: __dirname + '/../backend/server/.env'});
+
+const uri = "mongodb://127.0.0.1:27017/kendo_test";
 const client = new MongoClient(uri);
 
 
@@ -17,6 +18,7 @@ test.describe("Tournament tests", () => {
         console.log("Connected to " + uri);
 
         await db.dropDatabase();
+        
         await db.createCollection('users');
 
         const salt = await bcrypt.genSalt(10);
@@ -90,7 +92,8 @@ test.describe("Tournament tests", () => {
         await expect(text).toBeVisible();
     });
 
-    test('can create a tournament and join one', async ({page}) => {
+    test('4 player playoffs', async ({page}) => {
+        test.setTimeout(60000);
         await Helper.login(page, {email: 'test-user1@gmail.com', password: 'FooBar123'});
         const text = page.getByText('Welcome to KendoApp!');
         await expect(text).toBeVisible();
@@ -99,16 +102,42 @@ test.describe("Tournament tests", () => {
         const startDate = new Date(currentDate.getTime() + 10 * 60000);
         const formattedStartDate = Helper.formatDate(startDate);
 
-        await Helper.createTournament(page, {name: "TestTournament", location: "TestLocation", description: "TestDescription", startDate : formattedStartDate});
-        await page.goto('/tournaments?tab=upcoming');
-        const newTournament = page.getByRole('button', { name: 'TestTournament' })
-        await expect(newTournament).toBeVisible();
+        await Helper.createTournament(page, 
+            {name: "TestTournament", 
+                location: "TestLocation", 
+                description: "TestDescription", 
+                startDate : formattedStartDate, 
+                tournamentType: "Playoff",
+                rounds: "3",
+                maxPlayers: "4"
+            });
 
-        await Helper.joinTournament(page, 'TestTournament');
 
-        const signedUp = page.getByText('Successfully signed up for')
-        await expect(signedUp).toBeVisible();
+        await Helper.joinTournament(page);
+        
+        await Helper.logout(page);
+        await Helper.login(page, {email: 'test-user2@gmail.com', password: 'FooBar123'});
+        await Helper.joinTournament(page);
+        
+        await Helper.logout(page);
+        await Helper.login(page, {email: 'test-user3@gmail.com', password: 'FooBar123'});
+        await Helper.joinTournament(page);
 
+        await Helper.logout(page);
+        await Helper.login(page, {email: 'test-user4@gmail.com', password: 'FooBar123'});
+        await Helper.joinTournament(page);
+
+        await Helper.logout(page);
+        await Helper.login(page, {email: 'test-user1@gmail.com', password: 'FooBar123'});
+        await Helper.editTournament(page, {startDate: Helper.formatDate(currentDate)});
+        
+
+        await Helper.openTournament(page, 'TestTournament');
+
+        await Helper.completeMatch(page, 'Test1', 'Test2', 'Test2');
+        await Helper.completeMatch(page, 'Test3', 'Test4', 'Test3');
+        await Helper.completeMatch(page, 'Test2', 'Test3', 'Test2');
+        await expect(page.getByText('WINNER: Test2')).toBeVisible();
     });
 
     test.afterAll(async () => {

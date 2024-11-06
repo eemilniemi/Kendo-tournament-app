@@ -12,7 +12,7 @@
   "devDependencies": {
     "@playwright/test": "^1.47.2",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^22.7.4"
+    "@types/node": "^22.8.4"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
