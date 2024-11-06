@@ -1,0 +1,47 @@
+.overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    color: black;
+    font-family: Arial, sans-serif;
+}
+
+.overlay-teams {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.team-name {
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.team-score {
+    font-size: 3rem;
+}
+
+.overlay-status {
+    font-size: 1.5rem;
+    color: #ffd700;
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+.status-text {
+    font-size: 2rem;
+}
