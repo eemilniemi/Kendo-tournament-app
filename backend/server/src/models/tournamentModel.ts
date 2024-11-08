@@ -53,6 +53,14 @@ export interface Tournament {
     players: Array<Types.ObjectId | User>;
   }>;
   playersPerTeam?: number;
+
+  rounds: Array<{name?: string}>;
+  matches: Array<Types.ObjectId | Match>;
+  contestants: {
+    [contestantId: string]: {
+      players: Array<Types.ObjectId | User>;
+    }
+  }
 }
 
 const tournamentSchema = new Schema<Tournament & Document>(
@@ -97,7 +105,16 @@ const tournamentSchema = new Schema<Tournament & Document>(
       }
     ],
     playersPerTeam: { type: Number, required: false },
-    numberOfTeams: { type: Number, required: false }
+    numberOfTeams: { type: Number, required: false },
+
+    rounds: [{name: {type: String, default: []}}],
+    matches: [{ type: Schema.Types.ObjectId, ref: "Match", default: [] }],
+    contestants: {
+      type: Map,
+      of: {
+        players: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }]
+      }
+    }
   },
   {
     timestamps: true,
