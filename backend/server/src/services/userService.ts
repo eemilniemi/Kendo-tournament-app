@@ -11,7 +11,6 @@ import { TournamentService } from "../services/tournamentService.js";
 import UserModel, { type User } from "../models/userModel.js";
 
 export class UserService {
-
   private get tournamentService(): TournamentService {
     return new TournamentService();
   }
