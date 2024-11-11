@@ -196,29 +196,34 @@ export class TournamentService {
       });
     }
 
+    if (!tournament.players.includes(player.id)) {
+      throw new BadRequestError({
+        message: "Player not in tournament"
+      });
+    }
+
     // Remove player from tournament
-    if (tournament.players.includes(player.id)) {
-      const index = tournament.players.indexOf(player.id);
-      tournament.players.splice(index, 1);
 
-      // Remove player's matches from match schedule
-      const matchesToRemove: Array<Types.ObjectId | Match> = [];
+    const index = tournament.players.indexOf(player.id);
+    tournament.players.splice(index, 1);
 
-      for (const matchId of tournament.matchSchedule) {
-        const match = await MatchModel.findById(matchId).exec();
-        if (match === undefined || match === null) {
-          continue; // Skip if match doesn't exist
-        }
-        // Check if a match involves the removed player
-        const matchPlayerIds = match.players.map((player) =>
-          player.id.toString()
-        );
-        if (matchPlayerIds.includes(playerId)) {
-          matchesToRemove.push(matchId);
-          // Delete the match
-          const matchIdString = String(matchId);
-          await this.matchService.deleteMatchById(matchIdString);
-        }
+    // Remove player's matches from match schedule
+    const matchesToRemove: Array<Types.ObjectId | Match> = [];
+
+    for (const matchId of tournament.matchSchedule) {
+      const match = await MatchModel.findById(matchId).exec();
+      if (match === undefined || match === null) {
+        continue; // Skip if match doesn't exist
+      }
+      // Check if a match involves the removed player
+      const matchPlayerIds = match.players.map((player) =>
+        player.id.toString()
+      );
+      if (matchPlayerIds.includes(playerId)) {
+        matchesToRemove.push(matchId);
+        // Delete the match
+        const matchIdString = String(matchId);
+        await this.matchService.deleteMatchById(matchIdString);
       }
 
       // Remove match IDs involving the removed player from match schedule
@@ -343,6 +348,13 @@ export class TournamentService {
     userId: string,
     creatorId: string
   ): Promise<void> {
+    // Check if the userId is provided
+    if (userId == null || userId.trim() === "") {
+      throw new BadRequestError({
+        message: "Player must be selected before proceeding with withdrawal."
+      });
+    }
+
     const tournament = await TournamentModel.findById(tournamentId).exec();
     if (tournament === null || tournament === undefined) {
       throw new NotFoundError({
@@ -361,7 +373,6 @@ export class TournamentService {
     const matches = await MatchModel.find({ tournamentId }).exec();
 
     const currentTime = new Date();
-
     for (const match of matches) {
       // Only modify if there is no winner or end timestamp, so only the unfinished matches
       if (match.winner === undefined && match.endTimestamp === undefined) {
@@ -669,12 +680,17 @@ export class TournamentService {
   }
 
   private async validateTournamentDetails(
-    tournamentDetails: CreateTournamentRequest | EditTournamentRequest,
+    request: CreateTournamentRequest | EditTournamentRequest,
     creatorOrUpdaterId: string,
     isUpdate: boolean = false,
     existingTournamentDoc?: HydratedDocument<Tournament>
   ): Promise<void> {
     const MINIMUM_GROUP_SIZE = 3;
+
+    const tournamentDetails = {
+      ...existingTournamentDoc?.toObject(),
+      ...request
+    };
 
     if (
       tournamentDetails.type === TournamentType.RoundRobin &&
@@ -683,7 +699,6 @@ export class TournamentService {
       this.calculateRoundRobinMatches(tournamentDetails.maxPlayers);
     }
 
-    // Validate startDate and endDate
     if (
       tournamentDetails.startDate !== undefined &&
       tournamentDetails.endDate !== undefined
@@ -691,12 +706,45 @@ export class TournamentService {
       const startDate = new Date(tournamentDetails.startDate);
       const endDate = new Date(tournamentDetails.endDate);
 
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new BadRequestError({
+          message: "Invalid tournament dates."
+        });
+      }
+
       if (startDate >= endDate) {
         throw new BadRequestError({
           message:
             "Invalid tournament dates. The start date must be before the end date."
         });
       }
+
+      const now = new Date();
+
+      // Check if start date and time is before the current date and time
+      if (startDate < now) {
+        throw new BadRequestError({
+          message:
+            "Invalid tournament date. The start date and time cannot be in the past."
+        });
+      }
+    }
+
+    if (tournamentDetails.type === TournamentType.TeamRoundRobin) {
+      if (
+        tournamentDetails.numberOfTeams === undefined ||
+        tournamentDetails.playersPerTeam === undefined
+      ) {
+        throw new BadRequestError({
+          message:
+            "Number of teams and players per team are required for Team Round Robin tournaments."
+        });
+      }
+
+      const totalPlayers =
+        tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
+
+      tournamentDetails.maxPlayers = totalPlayers;
     }
 
     // If tournament is type preliminary playoff, validate related fields
@@ -734,6 +782,7 @@ export class TournamentService {
       tournamentDetails.organizerPhone = organizer.phoneNumber;
     }
 
+    // TODO: might be unnecessary with the new validator
     // Additional checks for updates can be added here, e.g., ensuring the tournament hasn't started
     if (isUpdate && existingTournamentDoc !== undefined) {
       const currentDate = new Date();

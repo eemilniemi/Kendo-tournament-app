@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type ReactElement, useRef } from "react";
+import React, { useState, type ReactElement, useRef } from "react";
 import { type Tournament } from "types/models";
 import useToast from "hooks/useToast";
 import api from "api/axios";
@@ -14,7 +14,7 @@ interface ITournamentsContext {
   past: Tournament[];
   ongoing: Tournament[];
   upcoming: Tournament[];
-  doRefresh: () => void;
+  doRefresh: boolean;
 }
 
 const initialContextValue: ITournamentsContext = {
@@ -23,7 +23,7 @@ const initialContextValue: ITournamentsContext = {
   past: [],
   ongoing: [],
   upcoming: [],
-  doRefresh: () => {}
+  doRefresh: false
 };
 
 interface SortedTournaments {
@@ -44,23 +44,37 @@ const getSortedTournaments = async (): Promise<SortedTournaments> => {
     return dateB.getTime() - dateA.getTime();
   });
 
-  const ongoing = sortedTournaments.filter(
-    (tournament) =>
-      (new Date(tournament.startDate) <= currentDate &&
-        new Date(tournament.endDate) > currentDate) ||
-      (new Date(tournament.startDate) <= currentDate &&
-        !allMatchesPlayed(tournament))
-  );
+  // Define ongoing and past criteria
+  const ongoing = sortedTournaments.filter((tournament) => {
+    const tournamentHasStarted =
+      new Date(tournament.startDate) <= currentDate &&
+      new Date(tournament.endDate) > currentDate;
+
+    const matchesNotPlayed = !allMatchesPlayed(tournament);
+    const hasFewerThanTwoPlayers = tournament.players.length < 2;
+
+    // Ongoing if the tournament has started but not ended and has at least 2 players
+    return (
+      tournamentHasStarted && matchesNotPlayed && !hasFewerThanTwoPlayers // Consider ongoing if there are matches left or more than 1 player
+    );
+  });
 
   const upcoming = sortedTournaments.filter(
     (tournament) => new Date(tournament.startDate) > currentDate
   );
 
-  const past = sortedTournaments.filter(
-    (tournament) =>
-      new Date(tournament.endDate) <= currentDate &&
-      allMatchesPlayed(tournament)
-  );
+  const past = sortedTournaments.filter((tournament) => {
+    const tournamentHasEnded = new Date(tournament.endDate) <= currentDate;
+    const hasFewerThanTwoPlayers = tournament.players.length < 2;
+    const tournamentHasStarted = new Date(tournament.startDate) <= currentDate;
+
+    // Consider past if all matches are played or the tournament has started with less than 2 players
+    return (
+      tournamentHasEnded ||
+      allMatchesPlayed(tournament) ||
+      (tournamentHasStarted && hasFewerThanTwoPlayers)
+    );
+  });
 
   return { past, ongoing, upcoming } as const;
 };
@@ -70,45 +84,50 @@ export const TournamentsProvider = (): ReactElement => {
   const { t } = useTranslation();
   const [value, setValue] = useState<ITournamentsContext>(initialContextValue);
   const location = useLocation() as LocationState;
-  const [shouldRefresh, setShouldRefresh] = useState(
-    location.state?.refresh ?? false
-  );
   const isInitialRender = useRef(true);
 
-  useEffect(() => {
-    const doRefresh = (): void => {
-      setShouldRefresh(true);
-    };
-    const getAllTournaments = async (): Promise<void> => {
-      try {
-        const { past, ongoing, upcoming } = await getSortedTournaments();
-        setValue((prevValue) => ({
-          ...prevValue,
-          isLoading: false,
-          past,
-          ongoing,
-          upcoming,
-          doRefresh
-        }));
-        setShouldRefresh(false);
-      } catch (error) {
-        showToast(t("messages.could_not_fetch_tournaments"), "error");
-        setValue((prevValue) => ({
-          ...prevValue,
-          isLoading: false,
-          isError: true,
-          doRefresh
-        }));
-        setShouldRefresh(false);
-      }
-    };
-
-    // Fetch tournaments on initial render or when shouldRefresh is true
-    if (isInitialRender.current || shouldRefresh) {
-      void getAllTournaments();
-      isInitialRender.current = false;
+  // Meant to return the opposite value of what is in 'value.doRefresh' (see above). When this value is passed in setValue,
+  // it causes a re-render of the page.
+  const doRefresh = (): boolean => {
+    if (value.doRefresh) {
+      return false;
+    } else {
+      return true;
     }
-  }, [shouldRefresh]);
+  };
+
+  const getAllTournaments = async (): Promise<void> => {
+    const triggerValue = doRefresh();
+
+    try {
+      const { past, ongoing, upcoming } = await getSortedTournaments();
+      setValue((prevValue) => ({
+        ...prevValue,
+        isLoading: false,
+        past,
+        ongoing,
+        upcoming,
+        doRefresh: triggerValue
+      }));
+    } catch (error) {
+      showToast(t("messages.could_not_fetch_tournaments"), "error");
+      setValue((prevValue) => ({
+        ...prevValue,
+        isLoading: false,
+        isError: true,
+        doRefresh: triggerValue
+      }));
+    }
+  };
+
+  // Fetch tournaments on initial render or when location.state.refresh is true
+  if (isInitialRender.current || location.state?.refresh) {
+    void getAllTournaments();
+    isInitialRender.current = false;
+    if (location.state?.refresh) {
+      location.state.refresh = false;
+    }
+  }
 
   if (value.isLoading) {
     return <Loader />;

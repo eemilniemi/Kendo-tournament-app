@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useToast from "hooks/useToast";
 import api from "api/axios";
@@ -32,6 +32,7 @@ import {
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import Loader from "components/common/Loader";
+// import { error } from "console";
 const MIN_PLAYER_AMOUNT = 3;
 const MIN_GROUP_SIZE = 3;
 const now = dayjs();
@@ -52,6 +53,10 @@ export interface EditTournamentFormData {
   linkToPay?: string;
   linkToSite?: string;
   numberOfCourts: number;
+  swissRounds?: number;
+
+  numberOfTeams?: number;
+  playersPerTeam?: number;
 }
 
 const defaultValues: EditTournamentFormData = {
@@ -67,7 +72,11 @@ const defaultValues: EditTournamentFormData = {
   paid: false,
   linkToPay: "",
   linkToSite: "",
-  numberOfCourts: 1
+  numberOfCourts: 1,
+  swissRounds: 1,
+
+  numberOfTeams: 2,
+  playersPerTeam: 3
 };
 
 const EditInfo: React.FC = () => {
@@ -77,48 +86,56 @@ const EditInfo: React.FC = () => {
   const { t } = useTranslation();
   const { userId } = useAuth();
 
+  const isInitialRender = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const formContext = useForm<EditTournamentFormData>({
-    defaultValues
+    defaultValues,
+    mode: "onBlur"
   });
+  // For changing the form type if changed
   const { startDate, type, paid } =
     useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchTournaments = async (): Promise<void> => {
-      try {
-        const tournamentsData = await api.tournaments.getAll();
-        const selectedTournament = tournamentsData.find(
-          (tournament) => tournament.id === tournamentId
-        );
-        if (selectedTournament !== undefined) {
-          const linkToPay = selectedTournament.linkToPay ?? "";
-          const tournamentData = {
-            ...selectedTournament,
-            startDate: dayjs(selectedTournament.startDate),
-            endDate: dayjs(selectedTournament.endDate),
-            paid: linkToPay !== ""
-          };
-          formContext.reset(tournamentData);
-          // Check if the current user is the creator of the tournament
-          const isUserTheCreator = tournamentData.creator.id === userId;
-          if (!isUserTheCreator) {
-            // Redirect user to home page if not the creator
-            navigate(routePaths.homeRoute);
-          }
-        }
-      } catch (error) {
-        setIsError(true);
-        showToast(error, "error");
-      } finally {
-        setIsLoading(false);
+  const fetchTournaments = async (): Promise<void> => {
+    try {
+      // Why does it have to get all and not just one???
+      if (tournamentId === undefined) {
+        return;
       }
-    };
+      const tournamentsData = await api.tournaments.getTournament(tournamentId);
+      // const selectedTournament = tournamentsData.find(
+      //   (tournament) => tournament.id === tournamentId
+      // );
+      if (tournamentsData !== undefined) {
+        const linkToPay = tournamentsData.linkToPay ?? "";
+        const tournamentData = {
+          ...tournamentsData,
+          startDate: dayjs(tournamentsData.startDate),
+          endDate: dayjs(tournamentsData.endDate),
+          paid: linkToPay !== ""
+        };
+        formContext.reset(tournamentData);
+        // Check if the current user is the creator of the tournament
+        const isUserTheCreator = tournamentData.creator.id === userId;
+        if (!isUserTheCreator) {
+          // Redirect user to home page if not the creator
+          navigate(routePaths.homeRoute);
+        }
+      }
+    } catch (error) {
+      setIsError(true);
+      showToast(error, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  if (isInitialRender.current) {
     void fetchTournaments();
-  }, [tournamentId, formContext.reset]);
+    isInitialRender.current = false;
+  }
 
   if (isLoading || tournamentId === undefined) {
     return <Loader />;
@@ -138,10 +155,10 @@ const EditInfo: React.FC = () => {
   }
 
   const onSubmit = async (data: EditTournamentFormData): Promise<void> => {
-    // Submit form data to update tournament
     if (!data.paid) {
       data.linkToPay = "";
     }
+
     try {
       await api.tournaments.update(tournamentId, {
         ...data,
@@ -149,8 +166,9 @@ const EditInfo: React.FC = () => {
         endDate: data.endDate?.toString()
       });
       showToast(t("messages.update_success"), "success");
+      // Redirect only on successful form submission
+      navigate(routePaths.homeRoute);
     } catch (error) {
-      // Handle errors during form submission
       showToast(error, "error");
     }
   };
@@ -160,7 +178,7 @@ const EditInfo: React.FC = () => {
     setConfirmationDialogOpen(false);
     await formContext.handleSubmit(onSubmit)();
     // Redirect user to home page after making changes
-    navigate(routePaths.homeRoute);
+    navigate(routePaths.homeRoute, { state: { refresh: true } });
   };
 
   const renderPreliminaryPlayoffFields = (): JSX.Element | null => {
@@ -194,6 +212,64 @@ const EditInfo: React.FC = () => {
               validate: (value: number) => {
                 return (
                   value > 0 || `${t("messages.minimum_player_to_playoff")}`
+                );
+              }
+            }}
+          />
+        </React.Fragment>
+      );
+    }
+    return null;
+  };
+
+  const renderTournamentTypeSpecificFields = (): JSX.Element | null => {
+    if (type === "Swiss") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="swissRounds"
+            type="number"
+            label={t("create_tournament_form.swiss_rounds")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return value >= 1 || `${t("messages.swiss_rounds_error")}`;
+              }
+            }}
+          />
+        </React.Fragment>
+      );
+    }
+
+    if (type === "Team Round Robin") {
+      return (
+        <React.Fragment>
+          <TextFieldElement
+            required
+            name="numberOfTeams"
+            type="number"
+            label={t("create_tournament_form.number_of_teams")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return value > 1 || `${t("messages.minimum_teams_error")}`;
+              }
+            }}
+          />
+          <TextFieldElement
+            required
+            name="playersPerTeam"
+            type="number"
+            label={t("create_tournament_form.players_per_team")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value > 1 || `${t("messages.minimum_players_per_team_error")}`
                 );
               }
             }}
@@ -345,6 +421,7 @@ const EditInfo: React.FC = () => {
         />
 
         {renderPreliminaryPlayoffFields()}
+        {renderTournamentTypeSpecificFields()}
 
         <TextFieldElement
           required
@@ -401,7 +478,7 @@ const EditInfo: React.FC = () => {
             onClick={() => {
               setConfirmationDialogOpen(true);
             }}
-            disabled={!formContext.formState.isDirty}
+            disabled={!formContext.formState.isValid}
             sx={{ mt: 3, mb: 2 }}
           >
             {t("buttons.save_changes_button")}
