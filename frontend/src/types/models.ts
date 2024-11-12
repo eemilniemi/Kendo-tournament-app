@@ -13,6 +13,7 @@ export interface User {
   danRank: string;
   underage: boolean;
   guardiansEmail?: string;
+  invitations: string[];
 }
 
 export type PlayerColor = "red" | "white";
@@ -79,10 +80,13 @@ export interface Tournament {
   linkToSite?: string;
   numberOfCourts: number;
   swissRounds?: number;
+  passwordEnabled: boolean;
+  password?: string;
 
   numberOfTeams?: number;
   playersPerTeam?: number;
   teams?: Array<{
+    id: string;
     name: string;
     players: User[];
   }>;

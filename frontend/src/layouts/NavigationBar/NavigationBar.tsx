@@ -1,11 +1,6 @@
-/*
-  Much of the code comes from the corresponding MUI examples that are MIT licensed.
-  https://github.com/mui/material-ui/blob/v5.14.18/docs/data/material/components/app-bar/DrawerAppBar.tsx
-  https://github.com/mui/material-ui/blob/v5.14.18/docs/data/material/components/app-bar/ResponsiveAppBar.tsx
-*/
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useTranslation } from "react-i18next";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -14,17 +9,15 @@ import CssBaseline from "@mui/material/CssBaseline";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import LanguageSwitcher from "./LanguageSwitcher";
-
+import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import HelpIcon from "@mui/icons-material/Help";
-
 import NavigationDrawer from "./NavigationDrawer";
 import NavigationUserMenu from "./NavigationUserMenu";
 import LogoButton from "./LogoButton";
-// Text to display in the hamburger menu, navbar and the corresponding link
-// -,- in the menu and the corresponding link
-
+import { MenuItem, useMediaQuery } from "@mui/material";
 import type { NavigationData, NavigationItem } from "./navigation-bar";
+import { ProfileNavItems } from "./profile-navigation";
 import routePaths from "routes/route-paths";
 import { useAuth } from "context/AuthContext";
 
@@ -40,14 +33,18 @@ const NavigationBar: React.FC<Props> = (props) => {
   const { window, navigationItems } = props;
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const { t } = useTranslation();
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
-
   const [openDrawer, setOpenDrawer] = React.useState<boolean>(false);
   const toggleDrawer = (): void => {
-    setOpenDrawer((previousState) => !previousState);
+    setOpenDrawer((prevState) => !prevState);
   };
+
+  const isMobile = useMediaQuery("(max-width:650px)");
 
   const handleButtonClick = async (
     navigationItem: NavigationItem
@@ -55,7 +52,6 @@ const NavigationBar: React.FC<Props> = (props) => {
     if (navigationItem.link === routePaths.logout) {
       await logout();
     }
-
     navigate(navigationItem.link);
   };
 
@@ -65,30 +61,59 @@ const NavigationBar: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Box sx={{ display: "flex" }}>
+      <Box
+        sx={{
+          display: "flex",
+          height: isMobile ? "44px" : "64px",
+          minHeight: isMobile ? "44px" : "64px"
+        }}
+      >
         <CssBaseline />
-        <AppBar position="static" component="nav">
+        <AppBar
+          position="static"
+          component="nav"
+          sx={{
+            height: "100%",
+            justifyContent: "center"
+          }}
+        >
           <Container maxWidth="xl">
-            <Toolbar disableGutters>
-              {/* Hamburger menu icon */}
-              <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="start"
-                  onClick={toggleDrawer}
-                  sx={{ mr: 2, display: { sm: "none" } }}
-                >
-                  <MenuIcon />
-                </IconButton>
-              </Box>
-              <LanguageSwitcher />
-              {/* Navigation bar links */}
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <Toolbar
+              disableGutters
+              sx={{
+                height: isMobile ? "44px" : "64px",
+                alignItems: "center"
+              }}
+            >
+              {isMobile ? (
+                <Box sx={{ flexGrow: 1, display: "flex" }}>
+                  <IconButton
+                    color="inherit"
+                    aria-label="open drawer"
+                    edge="start"
+                    onClick={toggleDrawer}
+                    sx={{ display: "block" }}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
+              ) : (
+                <LogoButton logoName={APP_NAME} />
+              )}
+              <Box
+                sx={{
+                  display: isMobile ? "none" : "inline-flex",
+                  flexGrow: 1,
+                  justifyContent: "flex-end",
+                  gap: "20px",
+                  marginRight: "20px",
+                  alignItems: "center"
+                }}
+              >
                 {navigationItems.map((item) => (
                   <Button
                     key={item.text}
-                    sx={{ color: "#fff" }}
+                    sx={{ color: "#fff", fontSize: "13px" }}
                     onClick={async () => {
                       await handleButtonClick(item);
                     }}
@@ -96,33 +121,74 @@ const NavigationBar: React.FC<Props> = (props) => {
                     {item.text}
                   </Button>
                 ))}
+                {isAuthenticated && (
+                  <Button
+                    sx={{ color: "#fff", marginRight: 2, fontSize: "13px" }}
+                    onMouseEnter={(event) => {
+                      setAnchorEl(event.currentTarget);
+                    }}
+                    aria-controls={open ? "profile-dropdown" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? "true" : undefined}
+                  >
+                    {t("navigation.profile")}
+                  </Button>
+                )}
+                <Menu
+                  id="profile-dropdown"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={() => {
+                    setAnchorEl(null);
+                  }}
+                  MenuListProps={{
+                    "aria-labelledby": "test",
+                    onMouseEnter: () => {
+                      setAnchorEl(anchorEl);
+                    },
+                    onMouseLeave: () => {
+                      setAnchorEl(null);
+                    }
+                  }}
+                >
+                  {ProfileNavItems.map((item) => (
+                    <MenuItem
+                      key={item.text}
+                      onClick={() => {
+                        setAnchorEl(null);
+                        navigate(`/profile?tab=${item.tab}`);
+                      }}
+                      sx={{ fontSize: "13px" }}
+                    >
+                      {t(item.text)}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </Box>
-              <LogoButton logoName={APP_NAME} />
-              {/* Help Page Button */}
+              <LanguageSwitcher />
               <IconButton
                 color="inherit"
                 aria-label="help page"
-                onClick={() => {
-                  handleHelpButton();
-                }}
+                onClick={handleHelpButton}
               >
                 <HelpIcon />
               </IconButton>
-              {isAuthenticated ? (
+              {isAuthenticated && (
                 <NavigationUserMenu settings={props.settings} />
-              ) : null}
+              )}
             </Toolbar>
           </Container>
         </AppBar>
       </Box>
-      {/* Actual hamburger menu */}
-      <NavigationDrawer
-        container={container}
-        toggleDrawer={toggleDrawer}
-        drawerIsOpen={openDrawer}
-        navigationItems={navigationItems}
-        drawerTitle={APP_NAME}
-      />
+      {isMobile && (
+        <NavigationDrawer
+          container={container}
+          toggleDrawer={toggleDrawer}
+          drawerIsOpen={openDrawer}
+          navigationItems={navigationItems}
+          drawerTitle={APP_NAME}
+        />
+      )}
     </>
   );
 };

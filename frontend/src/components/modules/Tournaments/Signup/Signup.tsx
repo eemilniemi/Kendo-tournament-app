@@ -15,6 +15,7 @@ import Container from "@mui/material/Container";
 import routePaths from "routes/route-paths";
 import Link from "@mui/material/Link";
 import Loader from "components/common/Loader";
+import { TextField } from "@mui/material";
 import UserInfoTable from "./UserInfoTable";
 
 const Signup: React.FC = (): ReactElement => {
@@ -24,6 +25,7 @@ const Signup: React.FC = (): ReactElement => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | undefined>();
   const [loading, setLoading] = useState(true);
+  const [password, setPassword] = useState("");
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -43,11 +45,30 @@ const Signup: React.FC = (): ReactElement => {
     void fetchUserData();
   }, [userId]);
 
+  const userInvited = user?.invitations.includes(tournament.id);
+
   const handleSubmit = async (): Promise<void> => {
     try {
-      // Submit is disabled if the userId is null.
-      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-      await api.tournaments.signup(tournament.id, { playerId: userId! });
+      // Check if userId is defined before proceeding
+      if (userId === undefined || userId === null) {
+        showToast("User ID is not available", "error");
+        return;
+      }
+
+      // Prepare the signup data conditionally based on passwordEnabled
+      const signupData: { playerId: string; password?: string } = {
+        playerId: userId
+      };
+
+      // Include the password only if passwordEnabled is true
+      if (tournament.passwordEnabled && userInvited === false) {
+        signupData.password = password;
+      }
+
+      // Make the signup API call
+      await api.tournaments.signup(tournament.id, signupData);
+
+      // Show success message and navigate
       showToast(
         `${t("messages.sign_up_success")}${tournament.name}`,
         "success"
@@ -110,10 +131,27 @@ const Signup: React.FC = (): ReactElement => {
         </Typography>
 
         {/* User info */}
-        <Box sx={{ width: "50%", paddingY: "8px" }}>
+        <Box sx={{ width: "100%", maxWidth: "700px", paddingY: "8px" }}>
           {<UserInfoTable user={user} />}
         </Box>
       </Box>
+
+      {/* Password Input if Tournament is Private */}
+      {Boolean(tournament.passwordEnabled) && userInvited === false && (
+        <Box sx={{ marginBottom: "16px" }}>
+          <TextField
+            label={t("signup_labels.private_tournament_password")}
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            sx={{ width: "50%" }}
+            variant="outlined"
+            helperText={t("signup_labels.password_required")}
+          />
+        </Box>
+      )}
 
       <Box display="flex">
         <Button
@@ -123,7 +161,12 @@ const Signup: React.FC = (): ReactElement => {
           onClick={async () => {
             await handleSubmit();
           }}
-          disabled={userId === undefined}
+          disabled={
+            userId === undefined ||
+            (Boolean(tournament.passwordEnabled) &&
+              password === "" &&
+              userInvited === false)
+          }
         >
           {t("buttons.sign_up_button")}
         </Button>
