@@ -33,6 +33,7 @@ import {
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import Loader from "components/common/Loader";
+// import { error } from "console";
 const MIN_PLAYER_AMOUNT = 3;
 const MIN_GROUP_SIZE = 3;
 const now = dayjs();
