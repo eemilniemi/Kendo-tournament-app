@@ -1,10 +1,13 @@
 import * as Helper from './testHelpers';
 
+// Initialize test database before running tests
+// and close the connection after all tests have been run
+
 before(async () => {
-    await Helper.initializeTestDb(); // Open the database connection for testing
+    await Helper.initializeTestDb();
 });
 
 after(async () => {
-    await Helper.closeTestDb(); // Close the database connection after all tests
+    await Helper.closeTestDb();
 });
 
