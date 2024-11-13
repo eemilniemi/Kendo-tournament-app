@@ -3,14 +3,17 @@ import {
   Typography,
   Box,
   Button,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  TableSortLabel
+  TableSortLabel,
+  useMediaQuery,
+  Card,
+  CardContent
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "context/AuthContext";
@@ -58,6 +61,7 @@ const TournamentHistory: React.FC = () => {
   const { t } = useTranslation();
   const queryParams = new URLSearchParams(location.search);
   const selectedTournamentId = queryParams.get("tournament");
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   const handleFilteredTournaments = (
     filtTournaments: Tournament[],
@@ -288,7 +292,7 @@ const TournamentHistory: React.FC = () => {
             <Typography variant="h6" marginTop="32px" textAlign="center">
               {t("frontpage_labels.no_tournaments_found")}
             </Typography>
-          ) : (
+          ) : !isMobile ? (
             <TableContainer component={Paper}>
               <Table>
                 <TableHead
@@ -415,6 +419,58 @@ const TournamentHistory: React.FC = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+          ) : (
+            <Box>
+              {sortedTournaments.map((tournament) => (
+                <Card key={tournament.id} variant="outlined" sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6">{tournament.name}</Typography>
+                    <Typography variant="body2">
+                      {new Date(tournament.startDate).toLocaleDateString(
+                        "en-gb",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric"
+                        }
+                      )}
+                    </Typography>
+                    <Typography variant="body2">
+                      {t("profile.placement")}:{" "}
+                      {tournament.stats.placement > 0 &&
+                      tournament.stats.matches > 0
+                        ? tournament.stats.placement
+                        : "-"}
+                    </Typography>
+                    <Typography variant="body2">
+                      {t("profile.points")}: {tournament.stats.points}
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {
+                          navigate(
+                            `/profile?tab=history&tournament=${tournament.id}`
+                          );
+                        }}
+                      >
+                        {t("profile.matches")}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {
+                          navigate(`/tournaments/${tournament.id}`);
+                        }}
+                      >
+                        {t("profile.more_info")}
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
           )}
           <ProfilePoints />
         </>
