@@ -55,9 +55,10 @@ export interface Tournament {
   playersPerTeam?: number;
 
   rounds: Array<{name?: string}>;
-  matches: Array<Types.ObjectId | Match>;
+  matches?: Array<Types.ObjectId | Match>;
   contestants: {
     [contestantId: string]: {
+      entryStatus?: string,
       players: Array<Types.ObjectId | User>;
     }
   }
