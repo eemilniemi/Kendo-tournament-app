@@ -1,5 +1,3 @@
-import { expect } from "@playwright/test";
-
 
 async function login(page, user) {
     await page.goto('/login');
@@ -25,7 +23,7 @@ async function createTournament(page, tournamentData) {
     
     switch (tournamentData.tournamentType) {
         case 'Round Robin':
-            await page.getByRole('option', { name: 'Round Robin' }).click();
+            await page.getByRole('option', { name: 'Round Robin', exact: true }).click();
             break;
         case 'Playoff':
             await page.getByRole('option', { name: 'Playoff', exact: true }).click();
@@ -33,13 +31,14 @@ async function createTournament(page, tournamentData) {
         case 'Preliminary groups and playoffs':
             await page.getByRole('option', { name: 'Preliminary groups and' }).click();
             await page.getByLabel('Group max size (players) *').fill(tournamentData.playerCount);
+            await page.getByLabel('Players proceeding to').fill(tournamentData.playersProceeding);
             break;
         case 'Swiss':
             await page.getByRole('option', { name: 'Swiss' }).click();
             await page.getByLabel('Number of swiss rounds *').fill(tournamentData.rounds);
             break;
         default:
-            await page.getByRole('option', { name: 'Round Robin' }).click();
+            await page.getByRole('option', { name: 'Round Robin', exact: true }).click();
             break;
         }
     
@@ -75,8 +74,17 @@ async function openTournament(page, tournamentName){
     await page.getByRole('button', { name: `${tournamentName}` }).click();
 }
 
-async function completeMatch(page, player1, player2, winningPlayer){
-    await page.getByRole('button', { name: `${player1} vs ${player2}  Missing: Time` }).click();
+async function completeMatch(page, player1, player2, winningPlayer, gameType = 'Playoffs') {
+    switch (gameType) {
+        case 'Round Robin':
+        case 'Preliminary groups and playoffs':
+            await page.getByRole('button', { name: `${player1} - ${player2}` }).click();
+            break;
+        default:
+            await page.getByRole('button', { name: `${player1} vs ${player2}  Missing: Time` }).click();
+            break;
+    }
+    
     await page.getByRole('button', { name: 'Select role as an official' }).click();
     await page.getByLabel('Time keeper').click();
     await page.getByLabel('Point maker').click();
@@ -91,6 +99,8 @@ async function completeMatch(page, player1, player2, winningPlayer){
     await page.getByRole('button', { name: 'OK' }).click();
     await page.getByRole('button', { name: 'Back' }).click();
 }
+
+
 
 
 function formatDate(date) {
