@@ -55,7 +55,7 @@ export interface Tournament {
   playersPerTeam?: number;
 
   rounds: Array<{name?: string}>;
-  matches?: Array<Types.ObjectId | Match>;
+  matches: Array<Types.ObjectId | Match>;
   contestants: {
     [contestantId: string]: {
       entryStatus?: string,
@@ -110,12 +110,7 @@ const tournamentSchema = new Schema<Tournament & Document>(
 
     rounds: [{name: {type: String, default: []}}],
     matches: [{ type: Schema.Types.ObjectId, ref: "Match", default: [] }],
-    contestants: {
-      type: Map,
-      of: {
-        players: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }]
-      }
-    }
+    contestants: { type: Schema.Types.Mixed }
   },
   {
     timestamps: true,

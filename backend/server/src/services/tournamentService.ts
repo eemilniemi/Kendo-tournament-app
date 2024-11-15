@@ -130,6 +130,8 @@ export class TournamentService {
 
     tournament.players.push(player.id);
 
+    tournament.contestants[player.id] = {players: [player.id]};
+
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
     if (
@@ -206,6 +208,8 @@ export class TournamentService {
 
     const index = tournament.players.indexOf(player.id);
     tournament.players.splice(index, 1);
+
+    delete tournament.contestants[player.id];
 
     // Remove player's matches from match schedule
     const matchesToRemove: Array<Types.ObjectId | Match> = [];
