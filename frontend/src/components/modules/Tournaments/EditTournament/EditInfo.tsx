@@ -11,6 +11,7 @@ import {
   CheckboxElement,
   DateTimePickerElement,
   FormContainer,
+  PasswordElement,
   SelectElement,
   TextFieldElement,
   useForm,
@@ -54,6 +55,8 @@ export interface EditTournamentFormData {
   linkToSite?: string;
   numberOfCourts: number;
   swissRounds?: number;
+  passwordEnabled: boolean;
+  password?: string;
 
   numberOfTeams?: number;
   playersPerTeam?: number;
@@ -74,6 +77,8 @@ const defaultValues: EditTournamentFormData = {
   linkToSite: "",
   numberOfCourts: 1,
   swissRounds: 1,
+  passwordEnabled: false,
+  password: "",
 
   numberOfTeams: 2,
   playersPerTeam: 3
@@ -93,8 +98,7 @@ const EditInfo: React.FC = () => {
     defaultValues,
     mode: "onBlur"
   });
-  // For changing the form type if changed
-  const { startDate, type, paid } =
+  const { startDate, type, paid, passwordEnabled } =
     useWatch<EditTournamentFormData>(formContext);
   const [isConfirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -376,6 +380,33 @@ const EditInfo: React.FC = () => {
           </React.Fragment>
         )}
 
+        {/* Checkbox to enable password */}
+        <CheckboxElement
+          name="passwordEnabled"
+          label={
+            passwordEnabled === true
+              ? t("create_tournament_form.remove_password")
+              : t("create_tournament_form.enable_password")
+          }
+          onChange={(e) => {
+            formContext.resetField("password");
+            formContext.setValue("passwordEnabled", e.target.checked);
+          }}
+        />
+
+        {/* Password field, shown only if passwordEnabled is true */}
+        {passwordEnabled === true && (
+          <PasswordElement
+            name="password"
+            label={t("create_tournament_form.change_password")}
+            fullWidth
+            margin="normal"
+            validation={{
+              required: t("create_tournament_form.required_text")
+            }}
+          />
+        )}
+
         <SelectElement
           required
           label={t("create_tournament_form.match_time")}
@@ -437,22 +468,24 @@ const EditInfo: React.FC = () => {
           }}
         />
 
-        <TextFieldElement
-          required
-          name="maxPlayers"
-          type="number"
-          label={t("create_tournament_form.max_players")}
-          fullWidth
-          margin="normal"
-          validation={{
-            validate: (value: number) => {
-              return (
-                value >= MIN_PLAYER_AMOUNT ||
-                `${t("messages.minimum_players_error")}${MIN_PLAYER_AMOUNT}`
-              );
-            }
-          }}
-        />
+        {type !== "Team Round Robin" && (
+          <TextFieldElement
+            required
+            name="maxPlayers"
+            type="number"
+            label={t("create_tournament_form.max_players")}
+            fullWidth
+            margin="normal"
+            validation={{
+              validate: (value: number) => {
+                return (
+                  value >= MIN_PLAYER_AMOUNT ||
+                  `${t("messages.minimum_players_error")}${MIN_PLAYER_AMOUNT}`
+                );
+              }
+            }}
+          />
+        )}
 
         <Box
           display="flex"

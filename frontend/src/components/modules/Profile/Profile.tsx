@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ProfileInfo from "./ProfileInfo";
 import ProfileGames from "./ProfileGames";
 import ProfilePoints from "./ProfilePoints";
@@ -12,6 +12,8 @@ import { useAuth } from "context/AuthContext";
 import api from "api/axios";
 import type { Tournament } from "types/models";
 import { useSearchParams } from "react-router-dom";
+import Invitations from "./Invitations";
+import NewTournamentButton from "../Tournaments/NewTournamentButton";
 
 const Profile: React.FC = () => {
   const [userCreatedTournaments, setUserCreatedTournaments] = useState<
@@ -21,7 +23,13 @@ const Profile: React.FC = () => {
   const mobile = useMediaQuery("(max-width:600px)");
   const { userId } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabTypes = ["info", "games", "points", "created_t"] as const;
+  const tabTypes = [
+    "info",
+    "games",
+    "points",
+    "created_t",
+    "invitations"
+  ] as const;
   const defaultTab = "info";
 
   const currentTab = searchParams.get("tab") ?? defaultTab;
@@ -60,55 +68,85 @@ const Profile: React.FC = () => {
     <Container sx={{ position: "relative", paddingBottom: "30px" }}>
       {/* If the device is mobile */}
       {mobile ? (
-        <Fragment>
-          <Select
-            value={currentTab}
-            onChange={(event) => {
-              handleTabChange(event.target.value);
-            }}
-            style={{ marginBottom: "10px", alignItems: "center" }}
-            sx={{
-              border: "2px solid #db4744",
-              fontSize: "20px",
-              color: "#db4744"
-            }}
-          >
-            <MenuItem value="info">{t("profile.profile_info")}</MenuItem>
-            <MenuItem value="games">{t("profile.my_games")}</MenuItem>
-            <MenuItem value="points">{t("profile.my_points")}</MenuItem>
-            {userCreatedTournaments.length > 0 && (
-              <MenuItem value="created_t">
-                {t("profile.created_tournaments")}
-              </MenuItem>
-            )}
-          </Select>
-          <br></br>
-        </Fragment>
-      ) : (
-        <Box
-          style={{ display: "flex", alignItems: "center" }}
-          sx={{ borderBottom: 1, borderColor: "divider", marginBottom: "10px" }}
+        <Select
+          value={currentTab}
+          onChange={(event) => {
+            handleTabChange(event.target.value);
+          }}
+          style={{ marginBottom: "10px", alignItems: "center", padding: "0" }}
+          sx={{
+            border: "2px solid #db4744",
+            fontSize: "13px",
+            color: "#db4744"
+          }}
         >
-          {/* If the device is desktop */}
-          <Tabs
-            value={currentTab}
-            onChange={(_, value) => {
-              handleTabChange(value);
+          <MenuItem value="info">{t("profile.profile_info")}</MenuItem>
+          <MenuItem value="games">{t("profile.my_games")}</MenuItem>
+          <MenuItem value="points">{t("profile.my_points")}</MenuItem>
+          {userCreatedTournaments.length > 0 && (
+            <MenuItem value="created_t">
+              {t("profile.created_tournaments")}
+            </MenuItem>
+          )}
+          <MenuItem value="invitations">{t("profile.invitations")}</MenuItem>
+        </Select>
+      ) : (
+        <>
+          <Box
+            style={{ display: "flex", alignItems: "center" }}
+            sx={{
+              borderBottom: 1,
+              borderColor: "divider",
+              marginBottom: "10px"
             }}
           >
-            <Tab label={t("profile.profile_info")} value="info" />
-            <Tab label={t("profile.my_games")} value="games" />
-            <Tab label={t("profile.my_points")} value="points" />
-            {userCreatedTournaments.length > 0 && (
-              <Tab label={t("profile.created_tournaments")} value="created_t" />
-            )}
-          </Tabs>
-        </Box>
+            {/* If the device is desktop */}
+            <Tabs
+              value={currentTab}
+              onChange={(_, value) => {
+                handleTabChange(value);
+              }}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+            >
+              <Tab
+                label={t("profile.profile_info")}
+                value="info"
+                sx={{ fontSize: "13px" }}
+              />
+              <Tab
+                label={t("profile.my_games")}
+                value="games"
+                sx={{ fontSize: "13px" }}
+              />
+              <Tab
+                label={t("profile.my_points")}
+                value="points"
+                sx={{ fontSize: "13px" }}
+              />
+              <Tab
+                label={t("profile.created_tournaments")}
+                value="created_t"
+                sx={{ fontSize: "13px" }}
+              />
+              <Tab
+                label={t("profile.invitations")}
+                value="invitations"
+                sx={{ fontSize: "13px" }}
+              />
+            </Tabs>
+          </Box>
+        </>
       )}
       {currentTab === "info" && <ProfileInfo />}
       {currentTab === "games" && <ProfileGames />}
       {currentTab === "points" && <ProfilePoints />}
       {currentTab === "created_t" && <CreatedTournaments />}
+      {currentTab === "invitations" && <Invitations />}
+
+      {/* Floating Create Tournament Button */}
+      {currentTab === "created_t" && <NewTournamentButton />}
     </Container>
   );
 };

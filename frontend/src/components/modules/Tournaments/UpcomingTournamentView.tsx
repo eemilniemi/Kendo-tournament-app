@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { Grid, Link } from "@mui/material";
 import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
 import TeamRoundRobinUpcomingView from "./OngoingTournament/TeamRoundRobin/TeamRoundRobinUpcomingView";
+import InviteButton from "./InviteButton";
 
 const generateTable = (tournament: Tournament): React.ReactNode => {
   const { t } = useTranslation();
@@ -65,7 +66,13 @@ const generateTable = (tournament: Tournament): React.ReactNode => {
   );
 };
 
-const UpcomingTournamentView: React.FC = () => {
+interface UpcomingTournamentViewProps {
+  ongoing?: boolean;
+}
+
+const UpcomingTournamentView: React.FC<UpcomingTournamentViewProps> = ({
+  ongoing = false
+}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { userId } = useAuth();
@@ -116,21 +123,31 @@ const UpcomingTournamentView: React.FC = () => {
       component="main"
       sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
     >
-      <Grid container alignItems="center" spacing={4}>
-        <Grid item>
-          <Typography
-            variant="h4"
-            className="header"
-            fontWeight="bold"
-            marginBottom="12px"
-          >
-            {tournament.name}
-          </Typography>
+      {!ongoing && (
+        <Grid
+          container
+          alignItems="center"
+          spacing={2}
+          justifyContent="space-between"
+          marginBottom="12px"
+        >
+          <Grid item>
+            <Typography variant="h4" className="header" fontWeight="bold">
+              {tournament.name}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Grid container spacing={2}>
+              <Grid item>
+                <CopyToClipboardButton />
+              </Grid>
+              <Grid item>
+                <InviteButton />
+              </Grid>
+            </Grid>
+          </Grid>
         </Grid>
-        <Grid item>
-          <CopyToClipboardButton />
-        </Grid>
-      </Grid>
+      )}
 
       {tournamentFull && (
         <Box>
@@ -206,7 +223,8 @@ const UpcomingTournamentView: React.FC = () => {
         )}
 
       {tournament.linkToPay !== undefined &&
-        tournament.linkToPay.trim() !== "" && (
+        tournament.linkToPay.trim() !== "" &&
+        !ongoing && (
           <Box>
             <Typography variant="subtitle1">
               <strong>
@@ -219,7 +237,7 @@ const UpcomingTournamentView: React.FC = () => {
 
       <br />
 
-      {!userAlreadySigned && !tournamentFull && (
+      {!userAlreadySigned && !tournamentFull && !ongoing && (
         <Box>
           <Typography variant="body1" className="header">
             {t("upcoming_tournament_view.attend_prompt")}
@@ -238,7 +256,7 @@ const UpcomingTournamentView: React.FC = () => {
         </Box>
       )}
 
-      {userAlreadySigned && (
+      {userAlreadySigned && !ongoing && (
         <Box>
           <Button
             variant="contained"
