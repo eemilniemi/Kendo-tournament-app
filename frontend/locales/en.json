@@ -447,7 +447,8 @@
     "point_type": "Point Type",
     "points": "Points",
     "created_tournaments": "Created tournaments",
-    "invitations": "Tournament invitations"
+    "invitations": "Tournament invitations",
+    "upcoming_tournaments": "Upcoming Tournaments"
   },
   "filtering": {
     "options": "Filtering options",

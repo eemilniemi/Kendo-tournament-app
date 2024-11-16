@@ -14,6 +14,7 @@ import type { Tournament } from "types/models";
 import { useSearchParams } from "react-router-dom";
 import Invitations from "./Invitations";
 import NewTournamentButton from "../Tournaments/NewTournamentButton";
+import UpcomingTournament from "./UpcomingTournament";
 
 const Profile: React.FC = () => {
   const [userCreatedTournaments, setUserCreatedTournaments] = useState<
@@ -28,7 +29,8 @@ const Profile: React.FC = () => {
     "games",
     "points",
     "created_t",
-    "invitations"
+    "invitations",
+    "upcoming-tournament"
   ] as const;
   const defaultTab = "info";
 
@@ -89,6 +91,9 @@ const Profile: React.FC = () => {
             </MenuItem>
           )}
           <MenuItem value="invitations">{t("profile.invitations")}</MenuItem>
+          <MenuItem value="upcoming-tournament">
+            {t("profile.upcoming_tournaments")}
+          </MenuItem>
         </Select>
       ) : (
         <>
@@ -135,6 +140,11 @@ const Profile: React.FC = () => {
                 value="invitations"
                 sx={{ fontSize: "13px" }}
               />
+              <Tab
+                label={t("profile.upcoming_tournaments")}
+                value="upcoming-tournament"
+                sx={{ fontSize: "13px" }}
+              />
             </Tabs>
           </Box>
         </>
@@ -144,6 +154,7 @@ const Profile: React.FC = () => {
       {currentTab === "points" && <ProfilePoints />}
       {currentTab === "created_t" && <CreatedTournaments />}
       {currentTab === "invitations" && <Invitations />}
+      {currentTab === "upcoming-tournament" && <UpcomingTournament />}
 
       {/* Floating Create Tournament Button */}
       {currentTab === "created_t" && <NewTournamentButton />}
