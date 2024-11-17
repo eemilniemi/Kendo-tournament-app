@@ -18,7 +18,11 @@ export const ProfileNavItems: ProfileNavigationData = [
     tab: "created_t"
   },
   {
-    text: "Invitations",
+    text: "profile.invitations",
     tab: "invitations"
+  },
+  {
+    text: "profile.upcoming_tournaments",
+    tab: "upcoming-tournament"
   }
 ];

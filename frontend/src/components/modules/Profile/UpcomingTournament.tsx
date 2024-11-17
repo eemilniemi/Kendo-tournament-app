@@ -13,11 +13,13 @@ import api from "api/axios";
 import { useAuth } from "context/AuthContext";
 import type { Tournament, User } from "types/models";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const UpcomingTournament: React.FC = () => {
   const { userId } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const mobile = useMediaQuery("(max-width:600px)");
   const [showMatches, setShowMatches] = useState(false);
 
@@ -61,7 +63,7 @@ const UpcomingTournament: React.FC = () => {
       {mobile ? (
         <>
           <Typography sx={{ mt: 2, fontSize: 25 }}>
-            My upcoming tournaments
+            {t("profile.profile_info")}
           </Typography>
           {tournaments.map((tournament) => {
             return (
@@ -102,7 +104,7 @@ const UpcomingTournament: React.FC = () => {
                       navigate(`/tournaments/${tournament.id}`);
                     }}
                   >
-                    Details
+                    {t("profile.details")}
                   </Button>
                 </Typography>
                 <Divider></Divider>
@@ -123,7 +125,7 @@ const UpcomingTournament: React.FC = () => {
                     setShowMatches(!showMatches);
                   }}
                 >
-                  Known matches
+                  {t("profile.known_matches")}
                 </Button>
                 {showMatches && (
                   <>
@@ -176,7 +178,7 @@ const UpcomingTournament: React.FC = () => {
       ) : (
         <>
           <Typography sx={{ mt: 2, fontSize: 35 }}>
-            My upcoming tournaments
+            {t("profile.my_upcoming_tournaments")}
           </Typography>
           {tournaments.map((tournament) => {
             return (
@@ -231,10 +233,12 @@ const UpcomingTournament: React.FC = () => {
                       navigate(`/tournaments/${tournament.id}`);
                     }}
                   >
-                    Tournament details
+                    {t("profile.tournament_details")}
                   </Button>
                 </Box>
-                <Typography sx={{ mt: 2 }}>Known matches</Typography>
+                <Typography sx={{ mt: 2 }}>
+                  {t("profile.known_matches")}
+                </Typography>
                 {tournament.matchSchedule
                   .filter((match) =>
                     match.players.some((player) => player.id === userId)
