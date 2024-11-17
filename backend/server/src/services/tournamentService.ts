@@ -364,7 +364,8 @@ export class TournamentService {
     // Playoff matches are calculated separately when the tournament has started
     if (
       tournament.players.length > 1 &&
-      tournament.type !== TournamentType.Playoff
+      tournament.type !== TournamentType.Playoff &&
+      tournament.type !== TournamentType.TeamRoundRobin
     ) {
       const newMatchIds = await this.generateTournamentSchedule(
         tournament,
@@ -693,8 +694,38 @@ export class TournamentService {
           tournament.id,
           tournament.matchTime
         );
-
         break;
+      case TournamentType.TeamRoundRobin: {
+        if (
+          tournament.teams === null ||
+          tournament.teams === undefined ||
+          tournament.teams.length < 2
+        ) {
+          throw new TypeError(
+            "A minimum of two teams is required for a Team Round Robin tournament."
+          );
+        }
+
+        // Extract and validate players as ObjectIds
+        const formattedTeams = tournament.teams.map((team) => {
+          if (team.players.length === 0) {
+            throw new Error(
+              `Team  has no players. Schedule generation failed.`
+            );
+          }
+          return {
+            id: team.id,
+            players: team.players as Types.ObjectId[]
+          };
+        });
+
+        matches = TournamentService.generateTeamRoundRobinSchedule(
+          formattedTeams,
+          tournament.id,
+          tournament.matchTime
+        );
+        break;
+      }
     }
 
     if (matches.length === 0) {
@@ -703,6 +734,57 @@ export class TournamentService {
     const matchDocuments = await MatchModel.insertMany(matches);
     await MatchService.divideMatchesToCourts(tournament.id);
     return matchDocuments.map((doc) => doc._id);
+  }
+
+  public static generateTeamRoundRobinSchedule(
+    teams: Array<{ id: Types.ObjectId; players: Types.ObjectId[] }>,
+    tournament: Types.ObjectId,
+    tournamentMatchTime: MatchTime,
+    tournamentType: MatchType = "team",
+    tournamentRound: number = 1
+  ): UnsavedMatch[] {
+    const matches: UnsavedMatch[] = [];
+    const teamPairTracker = new Set<string>();
+
+    const sortedTeams = teams
+      .slice()
+      .sort((a, b) => a.id.toString().localeCompare(b.id.toString()));
+
+    for (let i = 0; i < sortedTeams.length - 1; i++) {
+      for (let j = i + 1; j < sortedTeams.length; j++) {
+        const team1 = sortedTeams[i];
+        const team2 = sortedTeams[j];
+
+        const teamIds = [team1.id.toString(), team2.id.toString()].sort();
+        const teamPairKey = `${teamIds[0]}-${teamIds[1]}`;
+
+        if (!teamPairTracker.has(teamPairKey)) {
+          teamPairTracker.add(teamPairKey);
+
+          if (team1.players.length === team2.players.length) {
+            for (let k = 0; k < team1.players.length; k++) {
+              const player1 = team1.players[k];
+              const player2 = team2.players[k];
+
+              matches.push({
+                players: [
+                  { id: player1, points: [], color: "white" },
+                  { id: player2, points: [], color: "red" }
+                ],
+                type: tournamentType,
+                elapsedTime: 0,
+                timerStartedTimestamp: null,
+                tournamentRound,
+                tournamentId: tournament,
+                matchTime: tournamentMatchTime
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return matches;
   }
 
   public static generateRoundRobinSchedule(
@@ -741,7 +823,6 @@ export class TournamentService {
     matchType: string = "playoff"
   ): Promise<UnsavedMatch[]> {
     const matches: UnsavedMatch[] = [];
-
     const bracketSize = TournamentService.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
 

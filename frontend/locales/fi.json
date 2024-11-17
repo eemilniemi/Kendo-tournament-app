@@ -201,7 +201,8 @@
     "scheduled_time": "Aloitusaika",
     "no_scheduled_time": "Aloitusaikaa ei ole määritetty",
     "ongoing": "Käynnissä:",
-    "no_matches": "Ei otteluita"
+    "no_matches": "Ei otteluita",
+    "team_name": "Joukkueen nimet"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",

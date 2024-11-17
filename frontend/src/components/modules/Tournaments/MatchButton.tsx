@@ -23,7 +23,7 @@ import { mapNumberToLetter } from "utils/helperFunctions";
 
 interface MatchButtonProps {
   match: Match;
-  players: TournamentPlayer[];
+  players?: TournamentPlayer[];
   haveSameNames: boolean;
   props: ButtonProps;
   isUserTheCreator: boolean;
@@ -88,40 +88,48 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     setEditMode(false); // Close modal after submit
   };
 
-  // Find the players in the players array using their IDs
-  const player1 = players.find(
-    (player) => player.id === match.players[0].id
-  ) as TournamentPlayer;
-  const player2 = players.find(
-    (player) => player.id === match.players[1]?.id
-  ) as TournamentPlayer;
+  // Get player names
+  let entity1Name: React.ReactNode = "NotFound";
+  let entity2Name: React.ReactNode = "NotFound";
 
-  // Get the names of the players
-  const player1Name =
-    player1 !== undefined ? (
-      <PlayerName
-        firstName={player1.firstName}
-        lastName={player1.lastName}
-        sameNames={haveSameNames}
-      />
-    ) : (
-      <PlayerName firstName="NotFound" lastName="" sameNames={false} />
-    );
+  if (players != null && players.length > 0) {
+    const player1 = players.find((player) => player.id === match.players[0].id);
+    console.log(player1?.firstName);
+    const player2 =
+      match.players[1] !== undefined && match.players[1] !== null
+        ? players.find((player) => player.id === match.players[1].id)
+        : undefined;
 
-  const player2Name =
-    player2 !== undefined ? (
-      <PlayerName
-        firstName={player2.firstName}
-        lastName={player2.lastName}
-        sameNames={haveSameNames}
-      />
-    ) : (
-      <PlayerName firstName="NotFound2" lastName="" sameNames={false} />
-    );
+    entity1Name =
+      player1 !== undefined && player1 !== null ? (
+        <PlayerName
+          firstName={player1.firstName}
+          lastName={player1.lastName}
+          sameNames={haveSameNames}
+        />
+      ) : (
+        "Player Not Found"
+      );
+
+    entity2Name =
+      player2 !== undefined && player2 !== null ? (
+        <PlayerName
+          firstName={player2.firstName}
+          lastName={player2.lastName}
+          sameNames={haveSameNames}
+        />
+      ) : (
+        "Player Not Found"
+      );
+  }
 
   let officialsInfo = "";
 
-  if (match.elapsedTime <= 0 && match.winner === undefined) {
+  if (
+    match.elapsedTime <= 0 &&
+    match.winner === undefined &&
+    match.winnerTeamId === undefined
+  ) {
     // Match is upcoming
     const timerPerson = match.timeKeeper ?? undefined;
     const pointMaker = match.pointMaker ?? undefined;
@@ -147,24 +155,27 @@ const MatchButton: React.FC<MatchButtonProps> = ({
 
   const isOngoing: boolean =
     match.elapsedTime > 0 && match.endTimestamp === undefined;
+
   const isFinished: boolean =
     (match.elapsedTime > 0 && match.endTimestamp !== undefined) ||
-    (match.endTimestamp !== undefined && match.winner !== undefined) ||
-    (match.elapsedTime === 0 && match.winner !== undefined);
+    (match.endTimestamp !== undefined &&
+      (match.winner !== undefined || match.winnerTeamId !== undefined)) ||
+    (match.elapsedTime === 0 &&
+      (match.winner !== undefined || match.winnerTeamId !== undefined));
 
   const winnerBackgroundColor = "#ABE2A8";
 
-  const player1Styles = {
+  // Determine if entity1 or entity2 is the winner
+  const isEntity1Winner = match.winner === match.players[0].id;
+  const isEntity2Winner = match.winner === match.players[1]?.id;
+
+  const entity1Styles = {
     bgcolor:
-      isFinished && match.player1Score === 2
-        ? winnerBackgroundColor
-        : "transparent"
+      isFinished && isEntity1Winner ? winnerBackgroundColor : "transparent"
   };
-  const player2Styles = {
+  const entity2Styles = {
     bgcolor:
-      isFinished && match.player2Score === 2
-        ? winnerBackgroundColor
-        : "transparent"
+      isFinished && isEntity2Winner ? winnerBackgroundColor : "transparent"
   };
 
   return (
@@ -232,10 +243,10 @@ const MatchButton: React.FC<MatchButtonProps> = ({
                 display: "inline-flex",
                 padding: "4px 8px",
                 borderRadius: "5px",
-                ...player1Styles
+                ...entity1Styles
               }}
             >
-              {player1Name}{" "}
+              {entity1Name}{" "}
               {isOngoing || isFinished ? ` ${match.player1Score}` : ""}
             </Typography>
             <Typography variant="body1" sx={{ margin: "0 8px" }}>
@@ -247,10 +258,10 @@ const MatchButton: React.FC<MatchButtonProps> = ({
                 display: "inline-flex",
                 padding: "4px 8px",
                 borderRadius: "5px",
-                ...player2Styles
+                ...entity2Styles
               }}
             >
-              {player2Name}{" "}
+              {entity2Name}{" "}
               {isOngoing || isFinished ? ` ${match.player2Score}` : ""}
             </Typography>
           </Box>
@@ -261,11 +272,15 @@ const MatchButton: React.FC<MatchButtonProps> = ({
           </Typography>
         </Box>
       </Box>
-      {officialsInfo !== undefined && match.winner === undefined && (
-        <Typography variant="body2" marginTop={"5px"} fontSize={"13px"}>
-          {officialsInfo}
-        </Typography>
-      )}
+      {officialsInfo !== null &&
+        officialsInfo !== "" &&
+        match.winner === undefined &&
+        match.winnerTeamId === undefined && (
+          <Typography variant="body2" marginTop={"5px"} fontSize={"13px"}>
+            {officialsInfo}
+          </Typography>
+        )}
+
       {/* Modal for editing court and time */}
       <Modal open={editMode} onClose={handleClose}>
         <Box
