@@ -449,6 +449,11 @@
     "points": "Points",
     "created_tournaments": "Created tournaments",
     "invitations": "Tournament invitations",
+    "upcoming_tournaments": "Upcoming Tournaments",
+    "my_upcoming_tournaments": "My upcoming tournaments",
+    "known_matches": "Known matches",
+    "details": "Details",
+    "tournament_details": "Tournament details"
     "tournament_history": "Tournament history",
     "tournaments": "Tournaments",
     "wins": "Wins",
