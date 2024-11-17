@@ -11,7 +11,7 @@ const routePaths = {
   github: "https://github.com/Kendoers/Kendo-tournament-app",
   termsAndConditions: "/terms-and-conditions",
   help: "/help",
-  overlay: "/overlay"
+  overlay: "/overlay/:matchId"
 } as const;
 
 export default routePaths;

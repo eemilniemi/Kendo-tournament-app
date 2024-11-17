@@ -29,11 +29,18 @@ import CancelSignup from "components/modules/Tournaments/Signup/CancelSignup";
 import EditTournametInfo from "components/modules/Tournaments/EditTournament/EditInfo";
 import OwnTournament from "components/modules/Tournaments/OwnTournament";
 import Help from "components/modules/Help/Help";
-import Overlay from "components/modules/overlay/Overlay";
+import Overlay from "components/modules/Overlay/Overlay";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
-    <Route path={routePaths.overlay} element={<Overlay />} />
+    <Route
+      path={routePaths.overlay}
+      element={
+        <SocketProvider>
+          <Overlay />
+        </SocketProvider>
+      }
+    />
     <Route element={<Layout />}>
       <Route path={routePaths.tournaments} element={<TournamentsProvider />}>
         <Route index element={<TournamentList />} />
