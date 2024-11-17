@@ -696,7 +696,11 @@ export class TournamentService {
         );
         break;
       case TournamentType.TeamRoundRobin:
-        if (!tournament.teams || tournament.teams.length < 2) {
+        if (
+          tournament.teams === null ||
+          tournament.teams === undefined ||
+          tournament.teams.length < 2
+        ) {
           throw new TypeError(
             "A minimum of two teams is required for a Team Round Robin tournament."
           );
@@ -704,9 +708,9 @@ export class TournamentService {
 
         // Extract and validate players as ObjectIds
         const formattedTeams = tournament.teams.map((team) => {
-          if (!team.players || team.players.length === 0) {
+          if (team.players.length === 0) {
             throw new Error(
-              `Team ${team.id} has no players. Schedule generation failed.`
+              `Team  has no players. Schedule generation failed.`
             );
           }
           return {
@@ -761,11 +765,6 @@ export class TournamentService {
               const player1 = team1.players[k];
               const player2 = team2.players[k];
 
-              // Validate player IDs
-              if (!player1 || !player2) {
-                continue;
-              }
-
               matches.push({
                 players: [
                   { id: player1, points: [], color: "white" },
@@ -779,10 +778,6 @@ export class TournamentService {
                 matchTime: tournamentMatchTime
               });
             }
-          } else {
-            console.warn(
-              `@Teams ${team1.id} and ${team2.id} have a different number of players (${team1.players.length} vs ${team2.players.length}). Skipping match creation.`
-            );
           }
         }
       }

@@ -626,12 +626,9 @@ export class MatchService {
             match.tournamentId as Types.ObjectId
           );
 
-          if (winnerTeam) {
+          if (winnerTeam !== null && winnerTeam !== undefined) {
             match.winnerTeamId = winnerTeam.id;
           } else {
-            console.warn(
-              `Player ID ${winnerPlayerId} does not belong to any team in Tournament ID ${match.tournamentId}`
-            );
             match.winnerTeamId = undefined;
           }
         }
@@ -979,9 +976,6 @@ export class MatchService {
     const tournament = await TournamentModel.findById(tournamentId).exec();
 
     if (!tournament || !tournament.teams) {
-      console.warn(
-        `Tournament ID ${tournamentId} not found or teams not defined.`
-      );
       return null;
     }
 
@@ -999,9 +993,6 @@ export class MatchService {
       }
     }
 
-    console.warn(
-      `Player ID ${playerId} does not belong to any team in Tournament ID ${tournamentId}.`
-    );
     return null;
   }
 
@@ -1036,10 +1027,7 @@ export class MatchService {
         if (winnerTeam) {
           match.winnerTeamId = winnerTeam.id;
         } else {
-          console.warn(
-            `Player ID ${winnerPlayerId} does not belong to any team in Tournament ID ${match.tournamentId}`
-          );
-          match.winnerTeamId = undefined; // Or handle as per your business logic
+          match.winnerTeamId = undefined;
         }
       }
 
