@@ -710,7 +710,7 @@ export class TournamentService {
         const formattedTeams = tournament.teams.map((team) => {
           if (team.players.length === 0) {
             throw new Error(
-              `Team ${team.id} has no players. Schedule generation failed.`
+              `Team  has no players. Schedule generation failed.`
             );
           }
           return {
