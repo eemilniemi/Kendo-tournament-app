@@ -695,7 +695,7 @@ export class TournamentService {
           tournament.matchTime
         );
         break;
-      case TournamentType.TeamRoundRobin:
+      case TournamentType.TeamRoundRobin: {
         if (
           tournament.teams === null ||
           tournament.teams === undefined ||
@@ -710,7 +710,7 @@ export class TournamentService {
         const formattedTeams = tournament.teams.map((team) => {
           if (team.players.length === 0) {
             throw new Error(
-              `Team  has no players. Schedule generation failed.`
+              `Team ${team.id} has no players. Schedule generation failed.`
             );
           }
           return {
@@ -725,6 +725,7 @@ export class TournamentService {
           tournament.matchTime
         );
         break;
+      }
     }
 
     if (matches.length === 0) {

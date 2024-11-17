@@ -975,7 +975,7 @@ export class MatchService {
   } | null> {
     const tournament = await TournamentModel.findById(tournamentId).exec();
 
-    if (!tournament || !tournament.teams) {
+    if (tournament == null || tournament.teams == null) {
       return null;
     }
 
@@ -1024,7 +1024,7 @@ export class MatchService {
           match.tournamentId as Types.ObjectId
         );
 
-        if (winnerTeam) {
+        if (winnerTeam != null) {
           match.winnerTeamId = winnerTeam.id;
         } else {
           match.winnerTeamId = undefined;
