@@ -15,7 +15,6 @@ import NewTournamentButton from "../Tournaments/NewTournamentButton";
 import UpcomingTournament from "./UpcomingTournament";
 import TournamentHistory from "./TournamentHistory";
 
-
 const Profile: React.FC = () => {
   const [userCreatedTournaments, setUserCreatedTournaments] = useState<
     Tournament[]
