@@ -453,6 +453,22 @@
     "known_matches": "Tunnetut ottelut",
     "details": "Yksityiskohdat",
     "tournament_details": "Turnauksen tiedot"
+    "tournament_history": "Turnaus historia",
+    "tournaments": "Turnaukset",
+    "wins": "Voitot",
+    "matches": "Ottelut",
+    "losses": "Häviöt",
+    "draws": "Tasapelit",
+    "win": "Voitto",
+    "loss": "Häviö",
+    "draw": "Tasapeli",
+    "opponent": "Vastustaja",
+    "result": "Tulos",
+    "name": "Nimi",
+    "startDate": "Aloitus pvm",
+    "placement": "Sijoitus",
+    "more_info": "Lisätietoja",
+    "total": "Yhteensä"
   },
   "filtering": {
     "options": "Suodatusvalinnat",

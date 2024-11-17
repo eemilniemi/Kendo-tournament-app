@@ -453,6 +453,22 @@
     "known_matches": "Known matches",
     "details": "Details",
     "tournament_details": "Tournament details"
+    "tournament_history": "Tournament history",
+    "tournaments": "Tournaments",
+    "wins": "Wins",
+    "matches": "Matches",
+    "losses": "Losses",
+    "draws": "Draws",
+    "win": "Win",
+    "loss": "Loss",
+    "draw": "Draw",
+    "opponent": "Opponent",
+    "result": "Result",
+    "name": "Name",
+    "startDate": "Start date",
+    "placement": "Placement",
+    "more_info": "More info",
+    "total": "Total"
   },
   "filtering": {
     "options": "Filtering options",
