@@ -91,6 +91,47 @@ const calculateScores = (tournament: Tournament): rankingStruct[] => {
   return playerScores;
 };
 
+const calculateTeamScores = (tournament: Tournament): rankingStruct[] => {
+  const teamRankingMap = new Map<string, number[]>();
+
+  for (const match of tournament.matchSchedule) {
+    if (tournament.type === "Team Round Robin") {
+      for (const team of tournament.teams ?? []) {
+        const teamId = team.id.toString();
+        let teamPoints = 0;
+
+        // Calculate team points for each match
+        if (
+          match.winnerTeamId !== undefined &&
+          match.winnerTeamId.toString() === teamId
+        ) {
+          teamPoints += 3; // Win points
+        } else if (
+          match.winnerTeamId === undefined &&
+          match.endTimestamp !== undefined
+        ) {
+          teamPoints += 1; // Tie points
+        }
+
+        if (teamRankingMap.has(teamId)) {
+          const currentPoints = teamRankingMap.get(teamId) ?? [0, 0];
+          currentPoints[0] += teamPoints; // Victory points
+          teamRankingMap.set(teamId, currentPoints);
+        } else {
+          teamRankingMap.set(teamId, [teamPoints, 0]); // Initialize points and ippons
+        }
+      }
+    }
+  }
+
+  const teamScores: rankingStruct[] = [];
+  for (const team of teamRankingMap) {
+    // [teamId, victoryPoints, ippons]
+    teamScores.push([team[0], team[1][0], team[1][1]]);
+  }
+  return teamScores;
+};
+
 const findUserInTournamentById = (
   id: string | undefined,
   tournament: Tournament
@@ -116,6 +157,18 @@ export const findTournamentWinner = (
       if (winner !== undefined) {
         return winner.firstName;
       }
+    }
+  } else if (tournament.type === "Team Round Robin") {
+    const teamScores = calculateTeamScores(tournament);
+    if (teamScores.length > 0) {
+      // Sort teams according to victory points only
+      teamScores.sort((a, b) => b[1] - a[1]);
+
+      const winningTeamId = teamScores[0][0];
+      const winningTeam = tournament.teams?.find(
+        (team) => team.id.toString() === winningTeamId
+      );
+      return winningTeam?.name;
     }
   } else {
     const playerScores = calculateScores(tournament);
