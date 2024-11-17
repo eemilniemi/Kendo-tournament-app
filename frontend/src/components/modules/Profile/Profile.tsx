@@ -30,7 +30,7 @@ const Profile: React.FC = () => {
     "points",
     "created_t",
     "invitations",
-    "upcoming-tournament"
+    "upcoming-tournament",
     "history",
     "invitations"
   ] as const;
