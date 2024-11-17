@@ -698,24 +698,33 @@ const GameInterface: React.FC = () => {
                     gap: "20px"
                   }}
                 >
-                  {/* button is shown until the match is started */}
-                  {userId !== null &&
-                    userId !== undefined &&
-                    matchInfo.startTimestamp === undefined && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" }, // Column on small screens, row on larger screens
+                      gap: 2, // Space between elements
+                      alignItems: "center",
+                      justifyContent: "flex-start", // Adjust alignment
+                      width: "100%"
+                    }}
+                  >
+                    {/* Button shown until the match is started */}
+                    {userId != null && matchInfo.startTimestamp == null && (
                       <Button
                         sx={{
                           fontSize: "13px",
                           whiteSpace: "nowrap",
                           padding: "6px 12px",
-                          minWidth: "auto"
+                          minWidth: "auto",
+                          width: { xs: "100%", sm: "auto" } // Full width on small screens
                         }}
                         variant="contained"
                         onClick={() => {
                           setOpenRoles(true);
                         }}
                         disabled={
-                          matchInfo.timeKeeper !== undefined &&
-                          matchInfo.pointMaker !== undefined &&
+                          matchInfo.timeKeeper != null &&
+                          matchInfo.pointMaker != null &&
                           matchInfo.timeKeeper !== userId &&
                           matchInfo.pointMaker !== userId
                         }
@@ -723,45 +732,51 @@ const GameInterface: React.FC = () => {
                         {t("game_interface.select_role")}
                       </Button>
                     )}
-                  {isUserTheCreator && (
-                    <Box sx={{ width: "100%" }}>
-                      {matchInfo.endTimeStamp === undefined && (
-                        <>
-                          {/* Reset button 
-                        Only shown for the tournament creator before the match ends */}
-                          {userId !== null &&
-                          userId !== undefined &&
-                          matchInfo.startTimestamp !== undefined ? (
-                            <Button
-                              sx={{ fontSize: "13px" }}
-                              variant="contained"
-                              onClick={async () => {
-                                await handleReset();
-                              }}
-                            >
-                              {t("game_interface.reset")}
-                            </Button>
-                          ) : (
-                            // Reset roles button
-                            // Only shown for the tournament creator before the match starts
-                            <Button
-                              sx={{ fontSize: "13px" }}
-                              variant="contained"
-                              onClick={async () => {
-                                await handleResetRoles();
-                              }}
-                              disabled={
-                                matchInfo.pointMaker === undefined ||
-                                matchInfo.timeKeeper === undefined
-                              }
-                            >
-                              {t("game_interface.reset_roles")}
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </Box>
-                  )}
+
+                    {isUserTheCreator && (
+                      <Box sx={{ width: "100%" }}>
+                        {matchInfo.endTimeStamp == null && (
+                          <>
+                            {/* Reset button: Only shown for the tournament creator before the match ends */}
+                            {userId != null &&
+                            matchInfo.startTimestamp != null ? (
+                              <Button
+                                sx={{
+                                  fontSize: "13px",
+                                  width: { xs: "100%", sm: "auto" } // Full width on small screens
+                                }}
+                                variant="contained"
+                                onClick={async () => {
+                                  await handleReset();
+                                }}
+                              >
+                                {t("game_interface.reset")}
+                              </Button>
+                            ) : (
+                              // Reset roles button: Only shown for the tournament creator before the match starts
+                              <Button
+                                sx={{
+                                  fontSize: "13px",
+                                  width: { xs: "100%", sm: "auto" } // Full width on small screens
+                                }}
+                                variant="contained"
+                                onClick={async () => {
+                                  await handleResetRoles();
+                                }}
+                                disabled={
+                                  matchInfo.pointMaker == null ||
+                                  matchInfo.timeKeeper == null
+                                }
+                              >
+                                {t("game_interface.reset_roles")}
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+
                   <Dialog open={openRoles} onClose={handleCloseRoles}>
                     <DialogTitle>{t("game_interface.select_role")}</DialogTitle>
                     <DialogContent>

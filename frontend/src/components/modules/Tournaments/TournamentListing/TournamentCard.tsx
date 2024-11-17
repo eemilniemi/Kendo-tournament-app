@@ -43,8 +43,20 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
 
   const finished = allMatchesPlayed(tournament);
 
+  let teamMismatch = false;
+  if (
+    tournament.type === "Team Round Robin" &&
+    tournament.teams !== null &&
+    tournament.teams !== undefined
+  ) {
+    const playerCounts = tournament.teams.map((team) => team.players.length);
+    teamMismatch = !playerCounts.every((count) => count === playerCounts[0]);
+  }
   // Check if the tournament has fewer than 2 players after it started
-  const cancelled = !tournamentHasNotStarted && tournament.players.length < 2;
+  const cancelled =
+    !tournamentHasNotStarted &&
+    (tournament.players.length < 2 ||
+      (tournament.type === "Team Round Robin" && teamMismatch));
 
   const handleOpenDialog = (): void => {
     setOpenDialog(true);

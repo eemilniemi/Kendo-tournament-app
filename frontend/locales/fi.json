@@ -204,7 +204,8 @@
     "no_matches": "Ei otteluita",
     "duration": "Kesto",
     "official_missing": "Toimitsijat puuttuvat",
-    "select_officials": "Valitse toimitsijat, jotta matsi voi alkaa"
+    "select_officials": "Valitse toimitsijat, jotta matsi voi alkaa",
+    "team_name": "Joukkueen nimet"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",
@@ -451,6 +452,11 @@
     "points": "Pisteet",
     "created_tournaments": "Luodut turnaukset",
     "invitations": "Turnaus kutsut",
+    "upcoming_tournaments": "Tulevat turnaukset",
+    "my_upcoming_tournaments": "Tulevat turnaukseni",
+    "known_matches": "Tunnetut ottelut",
+    "details": "Yksityiskohdat",
+    "tournament_details": "Turnauksen tiedot",
     "tournament_history": "Turnaus historia",
     "tournaments": "Turnaukset",
     "wins": "Voitot",

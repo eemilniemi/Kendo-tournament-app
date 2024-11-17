@@ -204,7 +204,8 @@
     "no_matches": "No matches",
     "duration": "Duration",
     "official_missing": "Officials missing",
-    "select_officials": "Select officials before match can start"
+    "select_officials": "Select officials before match can start",
+    "team_name": "Team names"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",
@@ -451,6 +452,11 @@
     "points": "Points",
     "created_tournaments": "Created tournaments",
     "invitations": "Tournament invitations",
+    "upcoming_tournaments": "Upcoming Tournaments",
+    "my_upcoming_tournaments": "My upcoming tournaments",
+    "known_matches": "Known matches",
+    "details": "Details",
+    "tournament_details": "Tournament details",
     "tournament_history": "Tournament history",
     "tournaments": "Tournaments",
     "wins": "Wins",

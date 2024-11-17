@@ -23,7 +23,7 @@ import { mapNumberToLetter } from "utils/helperFunctions";
 
 interface MatchButtonProps {
   match: Match;
-  players: TournamentPlayer[];
+  players?: TournamentPlayer[];
   haveSameNames: boolean;
   props: ButtonProps;
   isUserTheCreator: boolean;
@@ -38,7 +38,6 @@ const MatchButton: React.FC<MatchButtonProps> = ({
   isUserTheCreator,
   tournamentData
 }) => {
-  // State to track form input and modal open state
   const [editMode, setEditMode] = useState(false);
   const [newCourtNumber, setNewCourtNumber] = useState<number>(
     match.courtNumber
@@ -48,8 +47,8 @@ const MatchButton: React.FC<MatchButtonProps> = ({
   );
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:600px)");
 
-  // Function to handle modal open/close
   const handleOpen = (): void => {
     setEditMode(true);
   };
@@ -58,114 +57,112 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     setEditMode(false);
   };
 
-  const isMobile = useMediaQuery("(max-width:600px)");
-
-  // Function to handle change court time form submit
   const handleSubmit = async (): Promise<void> => {
     const updates: Partial<ChangeCourtTimeRequest> = {};
 
-    // Check if the court number has changed
-    if (Number(newCourtNumber) !== match.courtNumber) {
-      updates.courtNumber = Number(newCourtNumber);
+    if (newCourtNumber !== match.courtNumber) {
+      updates.courtNumber = newCourtNumber;
     }
-
-    // Check if the scheduled time has changed
     if (newTime !== match.scheduledTime) {
       updates.scheduledTime = newTime;
     }
 
-    // If there are updates, send the request
     if (Object.keys(updates).length > 0) {
       try {
         await api.match.changeCourtAndTime(match.id, updates);
       } catch (error) {
-        console.error("Error updating court and time:", error);
+        alert(t("error.updating_match"));
+        console.error(error);
       }
-    } else {
-      console.log("No changes detected, no update needed");
     }
-
-    setEditMode(false); // Close modal after submit
+    setEditMode(false);
   };
 
-  // Find the players in the players array using their IDs
-  const player1 = players.find(
-    (player) => player.id === match.players[0].id
-  ) as TournamentPlayer;
-  const player2 = players.find(
-    (player) => player.id === match.players[1]?.id
-  ) as TournamentPlayer;
+  const player1 = players?.find(
+    (player) => player?.id === match.players[0]?.id
+  );
+  const player2 =
+    match.players.length > 1
+      ? players?.find((player) => player?.id === match.players[1]?.id)
+      : null;
 
-  // Get the names of the players
-  const player1Name =
+  const entity1Name =
     player1 !== undefined ? (
       <PlayerName
-        firstName={player1.firstName}
-        lastName={player1.lastName}
+        firstName={player1.firstName ?? ""}
+        lastName={player1.lastName ?? ""}
         sameNames={haveSameNames}
       />
     ) : (
-      <PlayerName firstName="NotFound" lastName="" sameNames={false} />
+      "Player Not Found"
     );
 
-  const player2Name =
-    player2 !== undefined ? (
+  const entity2Name =
+    player2 !== undefined && player2 !== null ? (
       <PlayerName
-        firstName={player2.firstName}
-        lastName={player2.lastName}
+        firstName={player2.firstName ?? ""}
+        lastName={player2.lastName ?? ""}
         sameNames={haveSameNames}
       />
     ) : (
-      <PlayerName firstName="NotFound2" lastName="" sameNames={false} />
+      "Player Not Found"
     );
 
-  let officialsInfo = "";
+  const isNullOrEmpty = (value: unknown): boolean =>
+    value === null || value === undefined || value === "";
 
-  if (match.elapsedTime <= 0 && match.winner === undefined) {
-    // Match is upcoming
-    const timerPerson = match.timeKeeper ?? undefined;
-    const pointMaker = match.pointMaker ?? undefined;
+  const officialsInfo = (() => {
+    if (
+      match.elapsedTime != null &&
+      match.elapsedTime <= 0 &&
+      match.winner == null &&
+      match.winnerTeamId == null
+    ) {
+      const missingRoles = [
+        isNullOrEmpty(match.timeKeeper)
+          ? t("tournament_view_labels.missing_timer")
+          : null,
+        isNullOrEmpty(match.pointMaker)
+          ? t("tournament_view_labels.missing_point_maker")
+          : null
+      ]
+        .filter((info) => info !== null)
+        .join(", ");
 
-    // depending on which roles are missing for the match, print them under button
-    if (timerPerson === undefined && pointMaker === undefined) {
-      officialsInfo = t("tournament_view_labels.missing_both");
-    } else {
-      if (timerPerson === undefined) {
-        officialsInfo += t("tournament_view_labels.missing_timer");
-      }
-      if (pointMaker === undefined) {
-        officialsInfo += t("tournament_view_labels.missing_point_maker");
-      }
+      return missingRoles ?? t("tournament_view_labels.missing_both");
     }
-  }
+    return "";
+  })();
 
-  // Generate court number options based on the numberOfCourts in tournamentData
+  const isOngoing =
+    match.elapsedTime != null &&
+    match.elapsedTime > 0 &&
+    match.endTimestamp == null;
+
+  const isFinished =
+    match.endTimestamp != null ||
+    (match.elapsedTime == null &&
+      (match.winner != null || match.winnerTeamId != null));
+
+  const winnerBackgroundColor = "#ABE2A8";
+
+  const entity1Styles = {
+    bgcolor:
+      isFinished && match.winner === match.players[0]?.id
+        ? winnerBackgroundColor
+        : "transparent"
+  };
+  const entity2Styles = {
+    bgcolor:
+      isFinished && match.winner === match.players[1]?.id
+        ? winnerBackgroundColor
+        : "transparent"
+  };
+
   const courtOptions = Array.from(
     { length: tournamentData.numberOfCourts },
     (_, i) => i + 1
   );
-
-  const isOngoing: boolean =
-    match.elapsedTime > 0 && match.endTimestamp === undefined;
-  const isFinished: boolean =
-    (match.elapsedTime > 0 && match.endTimestamp !== undefined) ||
-    (match.endTimestamp !== undefined && match.winner !== undefined) ||
-    (match.elapsedTime === 0 && match.winner !== undefined);
-
-  const winnerBackgroundColor = "#ABE2A8";
-
-  const player1Styles = {
-    bgcolor:
-      isFinished && match.player1Score === 2
-        ? winnerBackgroundColor
-        : "transparent"
-  };
-  const player2Styles = {
-    bgcolor:
-      isFinished && match.player2Score === 2
-        ? winnerBackgroundColor
-        : "transparent"
-  };
 
   return (
     <div
@@ -178,27 +175,25 @@ const MatchButton: React.FC<MatchButtonProps> = ({
       key={match.id}
     >
       <Box>
-        {!isFinished &&
-          (isOngoing ? (
-            <Typography variant="body1" marginBottom={"5px"} fontSize={"13px"}>
-              {t("tournament_view_labels.ongoing")}{" "}
-              {`${Math.floor(match.elapsedTime / 60000)}'`}
-            </Typography>
-          ) : match.scheduledTime !== "XX:XX" ? (
-            <Typography variant="body1" marginBottom={"5px"} fontSize={"13px"}>
-              {t("tournament_view_labels.match_start_clock")}
-              {": "}
-              {match.scheduledTime}
-            </Typography>
-          ) : (
-            <Typography variant="body1" marginBottom={"5px"} fontSize={"13px"}>
-              {t("tournament_view_labels.no_scheduled_time")}
-            </Typography>
-          ))}
+        {!isFinished && (
+          <Typography variant="body1" marginBottom="5px" fontSize="13px">
+            {isOngoing
+              ? `${t("tournament_view_labels.ongoing")} ${Math.floor(
+                  match.elapsedTime / 60000
+                )}'`
+              : match.scheduledTime !== "XX:XX"
+              ? `${t("tournament_view_labels.match_start_clock")}: ${
+                  match.scheduledTime
+                }`
+              : t("tournament_view_labels.no_scheduled_time")}
+          </Typography>
+        )}
 
         {isUserTheCreator && !isFinished && (
           <Button
-            onClick={handleOpen}
+            onClick={() => {
+              handleOpen();
+            }}
             style={{ fontSize: "13px", padding: "0px", marginBottom: "5px" }}
           >
             {t("tournament_view_labels.edit_court_time")}
@@ -206,21 +201,17 @@ const MatchButton: React.FC<MatchButtonProps> = ({
         )}
         <Box
           onClick={() => {
-            if (match.players.length === 2) {
-              navigate(`match/${match.id}`);
-            }
+            navigate(`match/${match.id}`);
           }}
           display="flex"
           alignItems="center"
           justifyContent="center"
           flexDirection="column"
           border={1}
-          borderRadius={"10px"}
+          borderRadius="10px"
           gap={1}
           p={1}
           sx={{
-            width: "auto",
-            margin: "0 auto",
             cursor: "pointer",
             borderColor: isOngoing ? "#28CC3B" : "black"
           }}
@@ -230,62 +221,69 @@ const MatchButton: React.FC<MatchButtonProps> = ({
             <Typography
               variant="body1"
               sx={{
-                display: "inline-flex",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
                 padding: "4px 8px",
                 borderRadius: "5px",
-                ...player1Styles,
-                gap: "8px"
+                ...entity1Styles
               }}
             >
-              {player1Name}
-              <span
-                style={{
-                  fontWeight: "bold",
-                  marginLeft: "12px"
-                }}
-              >
-                {isOngoing || isFinished ? ` ${match.player1Score}` : ""}
-              </span>
+              <span>{entity1Name}</span>
+              {(isOngoing || isFinished) && (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: "bold"
+                  }}
+                >
+                  {match.player1Score ?? 0}
+                </Typography>
+              )}
             </Typography>
+
             {/* Separator */}
             <Typography variant="body1" sx={{ margin: "0 12px" }}>
               {" - "}
             </Typography>
+
             {/* Player 2 */}
             <Typography
               variant="body1"
               sx={{
-                display: "inline-flex",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
                 padding: "4px 8px",
                 borderRadius: "5px",
-                ...player2Styles,
-                gap: "8px"
+                ...entity2Styles
               }}
             >
-              <span
-                style={{
-                  fontWeight: "bold",
-                  marginRight: "12px"
-                }}
-              >
-                {isOngoing || isFinished ? ` ${match.player2Score}` : ""}
-              </span>
-              {player2Name}
+              {(isOngoing || isFinished) && (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: "bold"
+                  }}
+                >
+                  {match.player2Score ?? 0}
+                </Typography>
+              )}
+              <span>{entity2Name}</span>
             </Typography>
           </Box>
 
-          <Typography variant="body1" fontSize={"15px"}>
+          <Typography variant="body1" fontSize="15px">
             {t("tournament_view_labels.court_number")}:{" "}
             {mapNumberToLetter(match.courtNumber)}
           </Typography>
         </Box>
       </Box>
-      {officialsInfo !== undefined && match.winner === undefined && (
-        <Typography variant="body2" marginTop={"5px"} fontSize={"13px"}>
+      {officialsInfo !== null && (
+        <Typography variant="body2" marginTop="5px" fontSize="13px">
           {officialsInfo}
         </Typography>
       )}
-      {/* Modal for editing court and time */}
       <Modal open={editMode} onClose={handleClose}>
         <Box
           sx={{
@@ -302,7 +300,6 @@ const MatchButton: React.FC<MatchButtonProps> = ({
           <Typography variant="h6">
             {t("tournament_view_labels.edit_court_time")}
           </Typography>
-          {/* Time input for scheduling */}
           <TextField
             label={t("tournament_view_labels.scheduled_time")}
             type="time"
@@ -316,19 +313,16 @@ const MatchButton: React.FC<MatchButtonProps> = ({
               shrink: true
             }}
             inputProps={{
-              step: 300 // 5 minutes
+              step: 300
             }}
           />
-          {/* Select component for choosing court number */}
           <FormControl fullWidth margin="normal">
             <InputLabel>{t("tournament_view_labels.court_number")}</InputLabel>
             <Select
-              label={t("tournament_view_labels.court_number")}
               value={newCourtNumber}
               onChange={(e) => {
                 setNewCourtNumber(Number(e.target.value));
               }}
-              type="number"
             >
               {courtOptions.map((court) => (
                 <MenuItem key={court} value={court}>
