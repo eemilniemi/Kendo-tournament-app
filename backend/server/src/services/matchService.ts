@@ -975,7 +975,7 @@ export class MatchService {
   } | null> {
     const tournament = await TournamentModel.findById(tournamentId).exec();
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
     if (tournament == null || tournament.teams == null) {
       return null;
     }
