@@ -194,8 +194,8 @@ export const Matches: React.FC<{
       {show && (
         <Box
           display="flex"
-          gap="15px"
-          justifyContent="space-between"
+          gap="40px"
+          justifyContent="flex-start"
           flexWrap="wrap"
           marginTop="10px"
           marginLeft="10px"

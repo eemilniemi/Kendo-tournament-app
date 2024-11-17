@@ -1,19 +1,16 @@
-.tableContainer {
+.playerBox {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
-}
-
-table {
-  border-collapse: collapse;
-  margin-top: 10px;
-  width: 400px;
-}
-
-table,
-th,
-td {
+  border-bottom: 1px solid black;
+  padding: 5px 10px;
+  height: 60px;
+  gap: 30px;
   border: 1px solid black;
-  height: 20px;
-  width: 80px;
+}
+
+.playerColor {
+  width: 40px;
+  height: 40px;
+  border: 1px solid black;
 }

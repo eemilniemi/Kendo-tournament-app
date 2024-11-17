@@ -29,7 +29,12 @@ export async function expressAuthentication(
   scopes: string[] = []
 ): Promise<unknown> {
   const accessToken: string = request.cookies.accessToken;
-
+  // Add a check for public routes
+  // Bypass authentication for these routes
+  const publicRoutes = ["/user/:id"];
+  if (publicRoutes.includes(request.route.path)) {
+    return;
+  }
   // Only tournaments and matches require to be authorized
   const requestedResource: string =
     request.params.tournamentId ?? request.params.matchId;

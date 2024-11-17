@@ -56,6 +56,7 @@ export interface MatchData {
   type: MatchType;
   time: MatchTime;
   courtNumber: number;
+  scheduledTime: string;
 }
 
 const GameInterface: React.FC = () => {
@@ -83,7 +84,8 @@ const GameInterface: React.FC = () => {
     isOvertime: false,
     type: "group",
     time: 300000,
-    courtNumber: 1
+    courtNumber: 1,
+    scheduledTime: "XX:XX"
   });
 
   const [openPoints, setOpenPoints] = useState(false);
@@ -148,6 +150,7 @@ const GameInterface: React.FC = () => {
         let matchType: MatchType = "group";
         let matchTime: MatchTime = 300000;
         let court: number = 1;
+        let scheduledTime: string = "XX:XX";
 
         // Get players' names
         const findPlayerName = (playerId: string, index: number): void => {
@@ -256,6 +259,7 @@ const GameInterface: React.FC = () => {
             elapsedtime = matchFromApi.elapsedTime;
             isovertime = matchFromApi.isOvertime;
             matchType = matchFromApi.type;
+            scheduledTime = matchFromApi.scheduledTime;
 
             court = matchFromApi.courtNumber;
 
@@ -278,7 +282,8 @@ const GameInterface: React.FC = () => {
           isOvertime: isovertime,
           type: matchType,
           time: matchTime,
-          courtNumber: court
+          courtNumber: court,
+          scheduledTime
         });
       } catch (error) {
         setIsError(true);
@@ -534,41 +539,37 @@ const GameInterface: React.FC = () => {
 
   // Function to fetch time keeper information
   const findTimekeeper = async (): Promise<void> => {
-    if (userId !== null && userId !== undefined) {
-      try {
-        if (matchInfo.timeKeeper === undefined) {
-          setTimeKeeperInfo(null);
-          return;
-        }
-
-        const timeKeeper = await api.user.details(matchInfo.timeKeeper);
-        if (timeKeeper === undefined) {
-          throw new Error("Time keeper not found");
-        }
-        setTimeKeeperInfo(timeKeeper);
-      } catch (error) {
-        showToast(error, "error");
+    try {
+      if (matchInfo.timeKeeper === undefined) {
+        setTimeKeeperInfo(null);
+        return;
       }
+
+      const timeKeeper = await api.user.details(matchInfo.timeKeeper);
+      if (timeKeeper === undefined) {
+        throw new Error("Time keeper not found");
+      }
+      setTimeKeeperInfo(timeKeeper);
+    } catch (error) {
+      showToast(error, "error");
     }
   };
 
   // Function to fetch point maker information
   const findPointmaker = async (): Promise<void> => {
-    if (userId !== null && userId !== undefined) {
-      try {
-        if (matchInfo.pointMaker === undefined) {
-          setPointMakerInfo(null);
-          return;
-        }
-
-        const pointMaker = await api.user.details(matchInfo.pointMaker);
-        if (pointMaker === undefined) {
-          throw new Error("Point maker not found");
-        }
-        setPointMakerInfo(pointMaker);
-      } catch (error) {
-        showToast(error, "error");
+    try {
+      if (matchInfo.pointMaker === undefined) {
+        setPointMakerInfo(null);
+        return;
       }
+
+      const pointMaker = await api.user.details(matchInfo.pointMaker);
+      if (pointMaker === undefined) {
+        throw new Error("Point maker not found");
+      }
+      setPointMakerInfo(pointMaker);
+    } catch (error) {
+      showToast(error, "error");
     }
   };
 
@@ -602,34 +603,112 @@ const GameInterface: React.FC = () => {
 
   const isUserTheCreator = tournament.creator.id === userId;
 
+  const isOfficialsSelected =
+    matchInfo?.pointMaker != null && matchInfo?.timeKeeper != null;
+
   return (
-    <div className="app-container">
-      <main className="main-content">
-        {isLoading && <Loader />}
-        {isError && (
-          <ErrorModal
-            open={isError}
-            onClose={() => {
-              setIsError(false);
+    <main className="main-content">
+      {isLoading && <Loader />}
+      {isError && (
+        <ErrorModal
+          open={isError}
+          onClose={() => {
+            setIsError(false);
+          }}
+          errorMessage={t("messages.unexpected_error_happened")}
+        />
+      )}
+      {!isLoading && !isError && (
+        <>
+          <Grid
+            container
+            justifyContent="space-between"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%"
             }}
-            errorMessage={t("messages.unexpected_error_happened")}
-          />
-        )}
-        {!isLoading && !isError && (
-          <>
-            <Grid
-              container
-              justifyContent="space-between"
-              style={{ display: "flex", alignItems: "center" }}
+          >
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "flex-end",
+                width: "100%",
+                gap: "10px"
+              }}
             >
-              {/* button is shown until the match is started */}
-              {userId !== null &&
-                userId !== undefined &&
-                matchInfo.startTimestamp === undefined && (
-                  <>
-                    <Grid item>
-                      {/* button is disabled if both roles are checked and user is not one of them */}
+              {matchInfo.firstNames.map((firstname, index) => (
+                <React.Fragment key={index}>
+                  <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                    {firstname}
+                  </Typography>
+                  {index < matchInfo.firstNames.length - 1 && (
+                    <Typography sx={{ mx: 1 }}>-</Typography>
+                  )}
+                </React.Fragment>
+              ))}
+            </Box>
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "flex-end",
+                width: "100%",
+                gap: "20px"
+              }}
+            >
+              {" "}
+              <Typography>
+                {t("tournament_view_labels.court_number")}
+                {": "}
+                {mapNumberToLetter(matchInfo.courtNumber)}
+              </Typography>
+              {matchInfo.scheduledTime !== "XX:XX" && (
+                <Typography>{matchInfo.scheduledTime}</Typography>
+              )}
+              <Typography>
+                {t("tournament_view_labels.duration")}
+                {": "}
+                {formatMillisecondsToMinutes(tournament.matchTime)} min
+              </Typography>
+            </Box>
+
+            {!isOfficialsSelected && (
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "flex-end",
+                  width: "100%",
+                  gap: "20px",
+                  marginTop: "10px"
+                }}
+              >
+                <Typography sx={{ color: "red" }}>
+                  {t("tournament_view_labels.official_missing")}
+                </Typography>
+              </Box>
+            )}
+
+            {userId !== null && userId !== undefined && (
+              <Box sx={{ marginTop: "20px" }}>
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "flex-end",
+                    width: "100%",
+                    gap: "20px"
+                  }}
+                >
+                  {/* button is shown until the match is started */}
+                  {userId !== null &&
+                    userId !== undefined &&
+                    matchInfo.startTimestamp === undefined && (
                       <Button
+                        sx={{
+                          fontSize: "13px",
+                          whiteSpace: "nowrap",
+                          padding: "6px 12px",
+                          minWidth: "auto"
+                        }}
                         variant="contained"
                         onClick={() => {
                           setOpenRoles(true);
@@ -643,233 +722,162 @@ const GameInterface: React.FC = () => {
                       >
                         {t("game_interface.select_role")}
                       </Button>
-                    </Grid>
-                    <br />
-                    <br />
-                  </>
-                )}
-              <Dialog open={openRoles} onClose={handleCloseRoles}>
-                <DialogTitle>{t("game_interface.select_role")}</DialogTitle>
-                <DialogContent>
-                  {/* checkbox is shown if there is no time keeper yet
-                  or if user is the time keeper */}
-                  {(matchInfo.timeKeeper === undefined ||
-                    matchInfo.timeKeeper === userId) && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={timeKeeper}
-                          onChange={() => {
-                            setTimeKeeper(!timeKeeper);
-                          }}
-                        />
-                      }
-                      label={t("game_interface.time_keeper")}
-                    />
-                  )}
-                  {/* checkbox is shown if there is no point maker yet
-                  or if user is the point maker */}
-                  {(matchInfo.pointMaker === undefined ||
-                    matchInfo.pointMaker === userId) && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={pointMaker}
-                          onChange={() => {
-                            setPointMaker(!pointMaker);
-                          }}
-                        />
-                      }
-                      label={t("game_interface.point_maker")}
-                    />
-                  )}
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseRoles}>
-                    {t("buttons.cancel_button")}
-                  </Button>
-                  <Button onClick={handleRoleSave}>
-                    {t("buttons.save_button")}
-                  </Button>
-                </DialogActions>
-              </Dialog>
-              {/* elements shown only after match has started */}
-              {userId !== null &&
-                userId !== undefined &&
-                matchInfo.startTimestamp !== undefined && (
-                  <>
-                    <Grid item>
-                      {/* print time keeper and point maker names */}
-                      <Typography variant="body2">
-                        {t("game_interface.time_keeper")}:{" "}
-                        <PlayerName
-                          firstName={timeKeeperInfo?.firstName ?? ""}
-                          lastName={timeKeeperInfo?.lastName ?? ""}
-                          sameNames={haveSameNames}
-                        />
-                        <br />
-                        {t("game_interface.point_maker")}:{" "}
-                        <PlayerName
-                          firstName={pointMakerInfo?.firstName ?? ""}
-                          lastName={pointMakerInfo?.lastName ?? ""}
-                          sameNames={haveSameNames}
-                        />
-                      </Typography>
-                    </Grid>
-                    <br />
-                    <br />
-                  </>
-                )}
-              <Grid item xs={4} style={{ marginLeft: "auto" }}>
-                {isUserTheCreator && matchInfo.endTimeStamp === undefined && (
-                  <>
-                    {/* Reset button 
-                        Only shown for the tournament creator before the match ends */}
-                    {userId !== null &&
-                    userId !== undefined &&
-                    matchInfo.startTimestamp !== undefined ? (
-                      <Button
-                        variant="contained"
-                        onClick={async () => {
-                          await handleReset();
-                        }}
-                      >
-                        {t("game_interface.reset")}
-                      </Button>
-                    ) : (
-                      // Reset roles button
-                      // Only shown for the tournament creator before the match starts
-                      <Button
-                        variant="contained"
-                        onClick={async () => {
-                          await handleResetRoles();
-                        }}
-                        disabled={
-                          matchInfo.pointMaker === undefined ||
-                          matchInfo.timeKeeper === undefined
-                        }
-                      >
-                        {t("game_interface.reset_roles")}
-                      </Button>
                     )}
-                  </>
-                )}
-              </Grid>
-            </Grid>
-            <br />
-            <br />
-            {/* Court number text */}
-            <Box
-              display="flex"
-              gap="20px"
-              justifyContent="center"
-              marginBottom="20px"
-            >
-              <Typography variant="h5">
-                {t("tournament_view_labels.court_number")}
-                {": "}
-                {mapNumberToLetter(matchInfo.courtNumber)}
-              </Typography>
-            </Box>
-            {/* Player name boxes */}
-            <Grid container justifyContent="center" spacing={2}>
-              <Grid item xs={12}>
-                <Box display="flex" justifyContent="center" flexWrap="wrap">
-                  {matchInfo.firstNames.map((firstName, index) => (
-                    <Box
-                      key={index}
-                      className="playerBox"
-                      bgcolor={index === 0 ? "white" : "#db4744"}
-                      textAlign="center"
-                      p={2}
-                      borderRadius={4}
-                      border="1px solid black"
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                      margin="auto"
-                      mb={2}
-                      minWidth={400}
-                      minHeight={130}
-                      sx={{
-                        wordWrap: "break-word", // Allow long names to break onto new lines
-                        maxWidth: "400px"
-                      }}
-                    >
-                      <Typography
-                        variant="h4"
-                        textAlign="center"
-                        sx={{ width: "100%" }}
-                      >
-                        <PlayerName
-                          firstName={firstName}
-                          lastName={matchInfo.lastNames[index]}
-                          sameNames={haveSameNames}
-                        />
-                      </Typography>
+                  {isUserTheCreator && (
+                    <Box sx={{ width: "100%" }}>
+                      {matchInfo.endTimeStamp === undefined && (
+                        <>
+                          {/* Reset button 
+                        Only shown for the tournament creator before the match ends */}
+                          {userId !== null &&
+                          userId !== undefined &&
+                          matchInfo.startTimestamp !== undefined ? (
+                            <Button
+                              sx={{ fontSize: "13px" }}
+                              variant="contained"
+                              onClick={async () => {
+                                await handleReset();
+                              }}
+                            >
+                              {t("game_interface.reset")}
+                            </Button>
+                          ) : (
+                            // Reset roles button
+                            // Only shown for the tournament creator before the match starts
+                            <Button
+                              sx={{ fontSize: "13px" }}
+                              variant="contained"
+                              onClick={async () => {
+                                await handleResetRoles();
+                              }}
+                              disabled={
+                                matchInfo.pointMaker === undefined ||
+                                matchInfo.timeKeeper === undefined
+                              }
+                            >
+                              {t("game_interface.reset_roles")}
+                            </Button>
+                          )}
+                        </>
+                      )}
                     </Box>
-                  ))}
+                  )}
+                  <Dialog open={openRoles} onClose={handleCloseRoles}>
+                    <DialogTitle>{t("game_interface.select_role")}</DialogTitle>
+                    <DialogContent>
+                      {/* checkbox is shown if there is no time keeper yet
+                  or if user is the time keeper */}
+                      {(matchInfo.timeKeeper === undefined ||
+                        matchInfo.timeKeeper === userId) && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={timeKeeper}
+                              onChange={() => {
+                                setTimeKeeper(!timeKeeper);
+                              }}
+                            />
+                          }
+                          label={t("game_interface.time_keeper")}
+                        />
+                      )}
+                      {/* checkbox is shown if there is no point maker yet
+                  or if user is the point maker */}
+                      {(matchInfo.pointMaker === undefined ||
+                        matchInfo.pointMaker === userId) && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={pointMaker}
+                              onChange={() => {
+                                setPointMaker(!pointMaker);
+                              }}
+                            />
+                          }
+                          label={t("game_interface.point_maker")}
+                        />
+                      )}
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleCloseRoles}>
+                        {t("buttons.cancel_button")}
+                      </Button>
+                      <Button onClick={handleRoleSave}>
+                        {t("buttons.save_button")}
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </Box>
-              </Grid>
-            </Grid>
-            {/* Overtime text */}
-            {matchInfo.isOvertime && (
-              <Box display="flex" gap="20px" justifyContent="center">
-                <Typography variant="body2">
-                  {t("game_interface.overtime")}
-                </Typography>
               </Box>
             )}
-            {/* Timer */}
-            <Box display="flex" gap="20px" justifyContent="center">
-              <Timer timer={timer} />
-              {/* timer button only shown to time keeper */}
-              {userId !== null &&
-                userId !== undefined &&
-                showButtons() &&
-                matchInfo.timeKeeper === userId && (
-                  <TimerButton
-                    isTimerRunning={matchInfo.isTimerOn}
-                    handleTimerChange={handleTimerChange}
-                  />
-                )}
+
+            {/* Show the timekeeper and pointmaker */}
+            <Box sx={{ marginTop: "20px", width: "100%" }}>
+              {/* print time keeper and point maker names */}
+              <Typography variant="body2">
+                {t("game_interface.time_keeper")}:{" "}
+                <PlayerName
+                  firstName={timeKeeperInfo?.firstName ?? ""}
+                  lastName={timeKeeperInfo?.lastName ?? ""}
+                  sameNames={haveSameNames}
+                />
+                <br />
+                {t("game_interface.point_maker")}:{" "}
+                <PlayerName
+                  firstName={pointMakerInfo?.firstName ?? ""}
+                  lastName={pointMakerInfo?.lastName ?? ""}
+                  sameNames={haveSameNames}
+                />
+              </Typography>
             </Box>
-            {/* Score table */}
-            <PointTable matchInfo={matchInfo} />
-            <br></br>
-            {/* point buttons only shown to point maker */}
+          </Grid>
+          <br />
+          {/* Overtime text */}
+          {matchInfo.isOvertime && (
+            <Box display="flex" gap="20px" justifyContent="center">
+              <Typography variant="body2">
+                {t("game_interface.overtime")}
+              </Typography>
+            </Box>
+          )}
+          {/* Timer */}
+          <Box
+            display="flex"
+            width="100%"
+            flexDirection={"column"}
+            gap="10px"
+            alignItems="center"
+          >
+            <Timer timer={timer} />
+            {/* timer button only shown to time keeper */}
             {userId !== null &&
               userId !== undefined &&
               showButtons() &&
-              matchInfo.pointMaker === userId && (
-                <OfficialButtons
-                  open={openPoints}
-                  selectedButton={selectedButton}
-                  handleRadioButtonClick={handleRadioButtonClick}
-                  handlePointShowing={handlePointShowing}
-                  handleOpen={handleOpen}
-                  handleClose={handleClose}
-                  gameStarted={matchInfo.startTimestamp !== undefined}
-                  player1name={matchInfo.firstNames[0]}
-                  player2name={matchInfo.firstNames[1]}
+              matchInfo.timeKeeper === userId && (
+                <TimerButton
+                  isTimerRunning={matchInfo.isTimerOn}
+                  handleTimerChange={handleTimerChange}
                 />
               )}
-            <br></br>
-            {userId !== null &&
-              userId !== undefined &&
-              matchInfo.pointMaker === userId && (
-                <ModifyDeletePoints
-                  handleDeleteRecentPoint={handleDeleteRecentPoint}
-                  handleModifyRecentPoint={handleModifyRecentPoint}
-                  mostRecentPointType={mostRecentPointType}
-                />
-              )}
-            {/* Print the winner */}
+            {!isOfficialsSelected && (
+              <Typography>
+                {t("tournament_view_labels.select_officials")}
+              </Typography>
+            )}
+          </Box>
+          <br></br>
+          {/* Print the winner */}
+          <Box
+            display="flex"
+            width="100%"
+            flexDirection={"column"}
+            gap="10px"
+            alignItems="center"
+          >
             {matchInfo.winner !== undefined && (
               <div>
-                <Typography>
-                  {t("game_interface.player")} {matchInfo.winner}{" "}
-                  {t("game_interface.wins")}
+                <Typography sx={{ fontSize: "24px", fontWeight: "bold" }}>
+                  {matchInfo.winner} {t("game_interface.wins")}
                 </Typography>
               </div>
             )}
@@ -882,10 +890,40 @@ const GameInterface: React.FC = () => {
                   <Typography>{t("game_interface.tie")}</Typography>
                 </div>
               )}
-          </>
-        )}
-      </main>
-    </div>
+          </Box>
+          <br></br>
+          {/* point buttons only shown to point maker */}
+          {userId !== null &&
+            userId !== undefined &&
+            showButtons() &&
+            matchInfo.pointMaker === userId && (
+              <OfficialButtons
+                open={openPoints}
+                selectedButton={selectedButton}
+                handleRadioButtonClick={handleRadioButtonClick}
+                handlePointShowing={handlePointShowing}
+                handleOpen={handleOpen}
+                handleClose={handleClose}
+                gameStarted={matchInfo.startTimestamp !== undefined}
+                player1name={matchInfo.firstNames[0]}
+                player2name={matchInfo.firstNames[1]}
+              />
+            )}
+          <br></br>
+          <PointTable matchInfo={matchInfo} />
+          <br></br>
+          {userId !== null &&
+            userId !== undefined &&
+            matchInfo.pointMaker === userId && (
+              <ModifyDeletePoints
+                handleDeleteRecentPoint={handleDeleteRecentPoint}
+                handleModifyRecentPoint={handleModifyRecentPoint}
+                mostRecentPointType={mostRecentPointType}
+              />
+            )}
+        </>
+      )}
+    </main>
   );
 };
 
@@ -898,3 +936,7 @@ export const buttonToTypeMap: Record<string, PointType> = {
   T: "tsuki",
   "\u0394": "hansoku"
 };
+
+export function formatMillisecondsToMinutes(ms: number): number {
+  return ms / 60000; // 1 minute = 60,000 milliseconds
+}

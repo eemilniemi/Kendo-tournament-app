@@ -226,32 +226,51 @@ const MatchButton: React.FC<MatchButtonProps> = ({
           }}
         >
           <Box display="flex" alignItems="center" justifyContent="center">
+            {/* Player 1 */}
             <Typography
               variant="body1"
               sx={{
                 display: "inline-flex",
                 padding: "4px 8px",
                 borderRadius: "5px",
-                ...player1Styles
+                ...player1Styles,
+                gap: "8px"
               }}
             >
-              {player1Name}{" "}
-              {isOngoing || isFinished ? ` ${match.player1Score}` : ""}
+              {player1Name}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  marginLeft: "12px"
+                }}
+              >
+                {isOngoing || isFinished ? ` ${match.player1Score}` : ""}
+              </span>
             </Typography>
-            <Typography variant="body1" sx={{ margin: "0 8px" }}>
+            {/* Separator */}
+            <Typography variant="body1" sx={{ margin: "0 12px" }}>
               {" - "}
             </Typography>
+            {/* Player 2 */}
             <Typography
               variant="body1"
               sx={{
                 display: "inline-flex",
                 padding: "4px 8px",
                 borderRadius: "5px",
-                ...player2Styles
+                ...player2Styles,
+                gap: "8px"
               }}
             >
-              {player2Name}{" "}
-              {isOngoing || isFinished ? ` ${match.player2Score}` : ""}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  marginRight: "12px"
+                }}
+              >
+                {isOngoing || isFinished ? ` ${match.player2Score}` : ""}
+              </span>
+              {player2Name}
             </Typography>
           </Box>
 

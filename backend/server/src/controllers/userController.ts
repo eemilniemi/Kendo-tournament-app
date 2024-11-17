@@ -31,7 +31,6 @@ export class UserController extends Controller {
   }
 
   @Get("{id}")
-  @Security("jwt")
   @Tags("User")
   public async getUser(@Path() id: ObjectIdString): Promise<User> {
     this.setStatus(200);

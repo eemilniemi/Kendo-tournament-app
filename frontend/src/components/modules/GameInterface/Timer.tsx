@@ -7,13 +7,13 @@ interface TimerComponentProps {
 
 const Timer: React.FC<TimerComponentProps> = ({ timer }) => {
   return (
-    <Typography className="timer" variant="h1">
+    <Typography className="timer" variant="h2">
       {formatTime(timer)}
     </Typography>
   );
 };
 
-const formatTime = (seconds: number): string => {
+export const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
