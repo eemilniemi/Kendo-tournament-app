@@ -10,7 +10,7 @@ import type {
   MatchType
 } from "../../../types/models";
 import api from "../../../api/axios";
-import Timer from "../GameInterface/Timer";
+import OverlayTimer from "./OverlayTimer";
 
 interface OverlayData {
   timerTime: number;
@@ -294,7 +294,7 @@ const Overlay: React.FC = () => {
         </div>
 
         <div className="overlay-status">
-          <Timer timer={timer} />
+          <OverlayTimer timer={timer} />
         </div>
 
         <div className="team team-b">
