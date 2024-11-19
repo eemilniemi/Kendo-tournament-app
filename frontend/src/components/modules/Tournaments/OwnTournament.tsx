@@ -201,10 +201,10 @@ const OwnTournament: React.FC = () => {
             {tournament.matchTime === 180000
               ? t("create_tournament_form.3_min")
               : tournament.matchTime === 240000
-              ? t("create_tournament_form.4_min")
-              : tournament.matchTime === 300000
-              ? t("create_tournament_form.5_min")
-              : ""}
+                ? t("create_tournament_form.4_min")
+                : tournament.matchTime === 300000
+                  ? t("create_tournament_form.5_min")
+                  : ""}
           </Typography>
         </Box>
         <Box>

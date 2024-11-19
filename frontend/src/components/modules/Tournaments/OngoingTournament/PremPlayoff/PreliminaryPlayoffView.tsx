@@ -170,7 +170,7 @@ const PreliminaryPlayoffView: React.FC = () => {
         // Find the player in the players array by ID
         return players.find((player) => player.id === groupId);
       })
-      .filter((player) => player !== undefined) as TournamentPlayer[]; // Filter out undefined values and assert the type
+      .filter((player) => player !== undefined); // Filter out undefined values and assert the type
   };
 
   // Handles view change when scoreboard is clicked

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Bracket from "./TournamentBracket";
+import TreeComponent from "./TournamentTree";
 import { type User, type Match, type Tournament } from "types/models";
 import { useTournament } from "context/TournamentContext";
-import { Typography, Box, Grid, Divider } from "@mui/material";
+import { Typography, Box, Grid, Divider, Tabs, Tab } from "@mui/material";
 import ErrorModal from "components/common/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import routePaths from "routes/route-paths";
@@ -114,6 +115,13 @@ const PlayoffTournamentView: React.FC = () => {
     );
   }
 
+  // This is needed for tabs to function
+  const [selectedTab, setSelectedTab] = useState("rounds");
+
+  const handleTabChange = (tab: string): void => {
+    setSelectedTab(tab);
+  };
+
   try {
     // Group matches by tournamentRound
     const rounds: Rounds = playoffMatches.reduce<Rounds>((acc, match) => {
@@ -132,104 +140,148 @@ const PlayoffTournamentView: React.FC = () => {
     }, {});
 
     return (
+      /* Basic box:
+       - If it is playoff then show a grid that is center-aligned with spacing of 4.
+       -- if all matches played then show the Winner
+       - Show a grid that is flex-start aligned with spacing of 2
+       -- Iterate over 'rounds' (round number and its corresponding matches), and
+       --- Display a header for each round.
+       --- If the round is the last then name it "final", else name it "(roundNrPrint)".
+       --- For each match:
+          1) finds the players involved in the match from the players array,
+          2) displays the courts number where the match is taking place,
+          3) renders a Bracket component for the match, passing the players and match details as props.
+
+      */
       <Box
         sx={{
           overflowX: "auto",
           "&::-webkit-scrollbar": { display: "none" }
         }}
       >
-        {isPlayoff && (
-          <Grid container alignItems="center" spacing={4}>
-            <Grid item>
-              <Typography variant="h4">{tournament.name}</Typography>
-              {allMatchesPlayed(tournamentData) && (
-                <Typography variant="subtitle1">
-                  <span>
-                    {t("frontpage_labels.winner")}
-                    {": "}
-                    {findTournamentWinner(tournamentData)}
-                  </span>
-                </Typography>
-              )}
+        <Tabs
+          value={selectedTab}
+          onChange={(_, newValue) => {
+            handleTabChange(newValue);
+          }}
+          centered
+        >
+          <Tab
+            label={t("tournament_view_labels.rounds")}
+            value="rounds"
+            sx={{ fontSize: "13px" }}
+          />
+          <Tab
+            label={t("tournament_view_labels.tournament_tree")}
+            value="tree"
+            sx={{ fontSize: "13px" }}
+          />
+        </Tabs>
+
+        {selectedTab === "rounds" && (
+          <Box>
+            {isPlayoff && (
+              <Grid container alignItems="center" spacing={4}>
+                <Grid item>
+                  <Typography variant="h4">{tournament.name}</Typography>
+                  {allMatchesPlayed(tournamentData) && (
+                    <Typography variant="subtitle1">
+                      <span>
+                        {t("frontpage_labels.winner")}
+                        {": "}
+                        {findTournamentWinner(tournamentData)}
+                      </span>
+                    </Typography>
+                  )}
+                </Grid>
+                <Grid item>
+                  <CopyToClipboardButton />
+                </Grid>
+              </Grid>
+            )}
+            <Grid
+              container
+              spacing={2}
+              justifyContent="flex-start"
+              alignItems="flex-start"
+            >
+              {Object.entries(rounds).map(([roundNumber, matches], index) => {
+                const roundNrPrint = index + 1;
+                return (
+                  <React.Fragment key={roundNumber}>
+                    {index > 0 && <Divider orientation="vertical" flexItem />}
+                    <Grid item>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          minWidth: 300
+                        }}
+                      >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            marginBottom: 2,
+                            textAlign: "center",
+                            textDecoration: "underline"
+                          }}
+                        >
+                          {parseInt(roundNumber) === totalRounds &&
+                          tournament.type === "Playoff"
+                            ? t("tournament_view_labels.final")
+                            : `${t(
+                                "tournament_view_labels.round"
+                              )} ${roundNrPrint}`}
+                        </Typography>
+                        {matches.map((match: Match) => {
+                          const tempPlayers: User[] = match.players.map(
+                            (matchPlayer) => {
+                              const player = players.find(
+                                (p) => p.id === matchPlayer.id
+                              );
+                              if (player === null || player === undefined) {
+                                throw new Error();
+                              }
+                              return player;
+                            }
+                          );
+                          return (
+                            <Grid item key={match.id}>
+                              <Typography
+                                variant="body2"
+                                style={{ textAlign: "center" }}
+                              >
+                                {t("tournament_view_labels.court_number")}
+                                {": "}
+                                {mapNumberToLetter(match.courtNumber)}
+                              </Typography>
+                              <Bracket
+                                key={match.id}
+                                players={tempPlayers}
+                                match={match}
+                              />
+                            </Grid>
+                          );
+                        })}
+                      </Box>
+                    </Grid>
+                  </React.Fragment>
+                );
+              })}
             </Grid>
-            <Grid item>
-              <CopyToClipboardButton />
-            </Grid>
-          </Grid>
+            {isUserTheCreator && <DeleteUserFromTournament />}
+          </Box>
         )}
 
-        <Grid
-          container
-          spacing={2}
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          {Object.entries(rounds).map(([roundNumber, matches], index) => {
-            const roundNrPrint = index + 1;
-            return (
-              <React.Fragment key={roundNumber}>
-                {index > 0 && <Divider orientation="vertical" flexItem />}
-                <Grid item>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      minWidth: 300
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        marginBottom: 2,
-                        textAlign: "center",
-                        textDecoration: "underline"
-                      }}
-                    >
-                      {parseInt(roundNumber) === totalRounds &&
-                      tournament.type === "Playoff"
-                        ? t("tournament_view_labels.final")
-                        : `${t(
-                            "tournament_view_labels.round"
-                          )} ${roundNrPrint}`}
-                    </Typography>
-                    {matches.map((match: Match) => {
-                      const tempPlayers: User[] = match.players.map(
-                        (matchPlayer) => {
-                          const player = players.find(
-                            (p) => p.id === matchPlayer.id
-                          );
-                          if (player === null || player === undefined) {
-                            throw new Error();
-                          }
-                          return player;
-                        }
-                      );
-                      return (
-                        <Grid item key={match.id}>
-                          <Typography
-                            variant="body2"
-                            style={{ textAlign: "center" }}
-                          >
-                            {t("tournament_view_labels.court_number")}
-                            {": "}
-                            {mapNumberToLetter(match.courtNumber)}
-                          </Typography>
-                          <Bracket
-                            key={match.id}
-                            players={tempPlayers}
-                            match={match}
-                          />
-                        </Grid>
-                      );
-                    })}
-                  </Box>
-                </Grid>
-              </React.Fragment>
-            );
-          })}
-        </Grid>
-        {isUserTheCreator && <DeleteUserFromTournament />}
+        {selectedTab === "tree" && (
+          <Box>
+            <Typography variant="h6">
+              {t("tournament_view_labels.tournament_tree")}
+            </Typography>
+            <TreeComponent />
+          </Box>
+        )}
       </Box>
     );
   } catch (e) {

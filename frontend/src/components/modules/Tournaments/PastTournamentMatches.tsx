@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useTournaments } from "context/TournamentsContext";
+import TreeComponent from "./OngoingTournament/Playoff/TournamentTree";
 import type { User, Match, TournamentType } from "types/models";
 import {
   Box,
@@ -31,9 +32,7 @@ const PastTournamentMatches: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabTypes = ["scoreboard", "matches"] as const;
-  const defaultTab = "scoreboard";
-  const currentTab = searchParams.get("tab") ?? defaultTab;
+  const tabTypes = ["scoreboard", "matches", "tree"] as const;
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
 
@@ -50,13 +49,18 @@ const PastTournamentMatches: React.FC = () => {
     (tournament) => tournament.id === tournamentId
   );
 
+  const defaultTab: string =
+    selectedTournament?.type === "Playoff" ? "tree" : "scoreboard";
+  const currentTab = searchParams.get("tab") ?? defaultTab;
+
   if (selectedTournament === null || selectedTournament === undefined) {
     return <div>Tournament not found.</div>; // lisää lokalisaatuo
   }
 
   const showTabs =
     selectedTournament.type === "Round Robin" ||
-    selectedTournament.type === "Swiss";
+    selectedTournament.type === "Swiss" ||
+    selectedTournament.type === "Playoff";
 
   // Function to get player name by ID
   const getPlayerNameById = (players: User[], playerId: string): string => {
@@ -214,16 +218,25 @@ const PastTournamentMatches: React.FC = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
         >
-          <Tab
-            label={t("tournament_view_labels.scoreboard")}
-            value="scoreboard"
-            sx={{ fontSize: "13px" }}
-          />
+          {selectedTournament.type !== "Playoff" && (
+            <Tab
+              label={t("tournament_view_labels.scoreboard")}
+              value="scoreboard"
+              sx={{ fontSize: "13px" }}
+            />
+          )}
           <Tab
             label={t("tournament_view_labels.matches")}
             value="matches"
             sx={{ fontSize: "13px" }}
           />
+          {selectedTournament.type === "Playoff" && (
+            <Tab
+              label={t("tournament_view_labels.tournament_tree")}
+              value="tree"
+              sx={{ fontSize: "13px" }}
+            />
+          )}
         </Tabs>
       )}
 
@@ -233,7 +246,15 @@ const PastTournamentMatches: React.FC = () => {
 
       {showTabs && currentTab === "matches" && <ShowMatches rounds={rounds} />}
 
-      {!showTabs && <ShowMatches rounds={rounds} />}
+      {showTabs && currentTab === "tree" && (
+        <Box>
+          <Typography variant="h6">
+            {t("tournament_view_labels.tournament_tree")}
+          </Typography>
+          <TreeComponent />
+        </Box>
+      )}
+      {!showTabs && currentTab === "matches" && <ShowMatches rounds={rounds} />}
     </div>
   );
 };

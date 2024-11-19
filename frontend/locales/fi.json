@@ -172,7 +172,9 @@
   "tournament_view_labels": {
     "final": "Finaali",
     "round": "Kierros",
+    "rounds": "Kierrokset",
     "scoreboard": "Tulostaulu",
+    "tournament_tree": "Ottelukaavio",
     "matches": "Ottelut",
     "tournament_info": "Turnaus Tiedot",
     "ongoing_upcoming_matches_tab": "Käynnissä olevat ja tulevat ottelut",

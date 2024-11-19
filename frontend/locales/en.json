@@ -172,7 +172,9 @@
   "tournament_view_labels": {
     "final": "Final",
     "round": "Round",
+    "rounds": "Rounds",
     "scoreboard": "Scoreboard",
+    "tournament_tree": "Tournament Tree",
     "matches": "Matches",
     "tournament_info": "Tournament Info",
     "ongoing_upcoming_matches_tab": "Ongoing and upcoming matches",
