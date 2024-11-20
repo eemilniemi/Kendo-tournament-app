@@ -3,7 +3,8 @@ import {
   TournamentModel,
   type Tournament,
   type UnsavedMatch,
-  TournamentType
+  TournamentType,
+  UnsavedPlayoffMatch
 } from "../models/tournamentModel.js";
 import UserModel, { type User } from "../models/userModel.js";
 import BadRequestError from "../errors/BadRequestError.js";
@@ -43,6 +44,7 @@ export class TournamentService {
         path: "matchSchedule",
         model: "Match"
       })
+      .populate<{ matches: Match[] }>({ path: "matches", model: "Match" })
       .exec();
     if (tournament === null || tournament === undefined) {
       throw new NotFoundError({
@@ -63,6 +65,7 @@ export class TournamentService {
         path: "matchSchedule",
         model: "Match"
       })
+      .populate<{ matches: Match[] }>({ path: "matches", model: "Match" })
       .exec();
 
     if (tournaments === null || tournaments === undefined) {
@@ -130,7 +133,7 @@ export class TournamentService {
 
     tournament.players.push(player.id);
 
-    tournament.contestants[player.id] = {players: [player.id]};
+    tournament.contestants = {[player.id]: {players: [player.id]}};
 
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
@@ -415,7 +418,8 @@ export class TournamentService {
       } else if (tournament.matchSchedule.length !== 0) {
         await tournament.populate([
           { path: "matchSchedule", model: "Match" },
-          { path: "players", model: "User" }
+          { path: "players", model: "User" },
+          { path: "matches", model: "Match" }
         ]);
         return await tournament.toObject();
       }
@@ -429,8 +433,10 @@ export class TournamentService {
       }
       await tournament.populate([
         { path: "matchSchedule", model: "Match" },
-        { path: "players", model: "User" }
+        { path: "players", model: "User" },
+        { path: "matches", model: "Match" }
       ]);
+      console.log(tournament);
       return await tournament.toObject();
     } catch (error) {
       console.error(
@@ -444,7 +450,7 @@ export class TournamentService {
     tournament: Tournament,
     newPlayer: Types.ObjectId | undefined = undefined
   ): Promise<Types.ObjectId[]> {
-    let matches: Array<UnsavedMatch | Match> = [];
+    let matches: Array<UnsavedMatch | Match | UnsavedPlayoffMatch> = [];
     switch (tournament.type) {
       case TournamentType.RoundRobin:
         if (newPlayer === null) {
@@ -539,8 +545,8 @@ export class TournamentService {
     tournamentMatchTime: MatchTime,
     currentRound: number = 1,
     matchType: string = "playoff"
-  ): Promise<UnsavedMatch[]> {
-    const matches: UnsavedMatch[] = [];
+  ): Promise<UnsavedPlayoffMatch[]> {
+    const matches: UnsavedPlayoffMatch[] = [];
 
     const bracketSize = TournamentService.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
@@ -558,7 +564,12 @@ export class TournamentService {
         tournamentRound: currentRound,
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
-        winner: playerIds[i]
+        winner: playerIds[i],
+        roundIndex: 0,
+        order: (bracketSize/2) - byesNeeded - i,
+        sides: [
+          { contestandId: playerIds[i].toString() }
+        ]
       });
     }
 
@@ -574,11 +585,17 @@ export class TournamentService {
         timerStartedTimestamp: null,
         tournamentRound: currentRound,
         tournamentId: tournament,
-        matchTime: tournamentMatchTime
+        matchTime: tournamentMatchTime,
+        roundIndex: 0,
+        order: (i-byes.length)/2,
+        sides: [
+          { contestandId: playerIds[i].toString() },
+          { contestandId: playerIds[i + 1].toString() }
+        ]
       });
     }
 
-    matches.push(...(byes as UnsavedMatch[]));
+    matches.push(...(byes as UnsavedPlayoffMatch[]));
     return matches;
   }
 

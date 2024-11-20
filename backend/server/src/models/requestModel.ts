@@ -67,6 +67,8 @@ export interface RegisterRequest {
    * @pattern ^$|^[a-zA-Z0-9._%+-åäöÅÄÖ]+@[a-zA-Z0-9.-åäöÅÄÖ]+\.[a-zA-ZåäöÅÄÖ]{2,}$ Guardians email format invalid.
    */
   guardiansEmail?: string;
+
+  title?: string;
 }
 
 export interface LoginRequest {

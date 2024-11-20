@@ -38,6 +38,9 @@ export class UserService {
       });
     }
 
+    const { firstName, lastName } = requestBody;
+    requestBody.title = firstName + " " + lastName;
+
     await UserModel.create(requestBody);
   }
 
@@ -69,6 +72,9 @@ export class UserService {
         });
       }
     }
+
+    const { firstName, lastName } = requestBody;
+    requestBody.title = firstName + " " + lastName;
 
     userDoc.set(requestBody);
 

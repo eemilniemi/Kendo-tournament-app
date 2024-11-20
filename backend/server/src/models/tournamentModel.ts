@@ -23,6 +23,20 @@ export type UnsavedMatch = Pick<
   | "matchTime"
 >;
 
+export type UnsavedPlayoffMatch = Pick<
+  Match,
+  | "players"
+  | "type"
+  | "elapsedTime"
+  | "timerStartedTimestamp"
+  | "tournamentRound"
+  | "tournamentId"
+  | "matchTime"
+  | "roundIndex"
+  | "order"
+  | "sides"
+>;
+
 export interface Tournament {
   id: Types.ObjectId;
   name: string;
