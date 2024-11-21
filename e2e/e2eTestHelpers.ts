@@ -1,3 +1,106 @@
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcrypt';
+
+
+async function initializeDatabase(uri, dbName) {
+    const client = new MongoClient(uri);
+    await client.connect();
+
+    const db = client.db(dbName);
+    console.log("Connected to " + uri);
+
+    await db.dropDatabase();
+    
+    await db.createCollection('users');
+
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash("FooBar123", salt);
+
+    const users = [
+        {
+            email: 'test-user1@gmail.com',
+            userName: 'testUser1',
+            firstName: 'Test1',
+            lastName: 'User1',
+            phoneNumber: '045123456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user2@gmail.com',
+            userName: 'testUser2',
+            firstName: 'Test2',
+            lastName: 'User2',
+            phoneNumber: '046123456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user3@gmail.com',
+            userName: 'testUser3',
+            firstName: 'Test3',
+            lastName: 'User3',
+            phoneNumber: '047123456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user4@gmail.com',
+            userName: 'testUser4',
+            firstName: 'Test4',
+            lastName: 'User4',
+            phoneNumber: '048123456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user5@gmail.com',
+            userName: 'testUser5',
+            firstName: 'Test5',
+            lastName: 'User5',
+            phoneNumber: '049123456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user6@gmail.com',
+            userName: 'testUser6',
+            firstName: 'Test6',
+            lastName: 'User6',
+            phoneNumber: '040223456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user7@gmail.com',
+            userName: 'testUser7',
+            firstName: 'Test7',
+            lastName: 'User7',
+            phoneNumber: '040323456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+        {
+            email: 'test-user8@gmail.com',
+            userName: 'testUser8',
+            firstName: 'Test8',
+            lastName: 'User8',
+            phoneNumber: '040423456789',
+            password,
+            inNationalTeam: false,
+            underage: false
+        },
+    ];
+
+    await db.collection('users').insertMany(users);
+}
 
 async function login(page, user) {
     await page.goto('/login');
@@ -78,7 +181,7 @@ async function completeMatch(page, player1, player2, winningPlayer, gameType = '
     switch (gameType) {
         case 'Round Robin':
         case 'Preliminary groups and playoffs':
-            await page.getByRole('button', { name: `${player1} - ${player2}` }).click();
+            await page.getByText(`${player1} - ${player2}  Court: `).click();
             break;
         default:
             await page.getByRole('button', { name: `${player1} vs ${player2}  Missing: Time` }).click();
@@ -97,7 +200,7 @@ async function completeMatch(page, player1, player2, winningPlayer, gameType = '
     await page.getByRole('button', { name: `Add point for ${winningPlayer}` }).click();
     await page.getByLabel('M').click();
     await page.getByRole('button', { name: 'OK' }).click();
-    await page.getByRole('button', { name: 'Back' }).click();
+    await page.locator('#back-button').click();
 }
 
 
@@ -113,4 +216,4 @@ function formatDate(date) {
     return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export{ login, logout, createTournament, editTournament, joinTournament, openTournament, completeMatch, formatDate };
+export{ initializeDatabase, login, logout, createTournament, editTournament, joinTournament, openTournament, completeMatch, formatDate };
