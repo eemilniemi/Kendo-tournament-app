@@ -261,7 +261,6 @@ const TournamentList: React.FC = () => {
         <Select
           value={sortBy}
           onChange={handleSortChange}
-          label="Sort"
           style={{ marginBottom: "10px" }}
         >
           <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
@@ -287,7 +286,11 @@ const TournamentList: React.FC = () => {
         {tournamentsToRender().length > 0 ? (
           tournamentsToRender().map((tournament, key) => (
             <Grid item xs={12} md={6} key={tournament.id + key}>
-              <TournamentCard tournament={tournament} type={currentTab} />
+              <TournamentCard
+                tournament={tournament}
+                type={currentTab}
+                mobile={mobile}
+              />
             </Grid>
           ))
         ) : (

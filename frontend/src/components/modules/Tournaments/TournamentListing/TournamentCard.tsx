@@ -20,16 +20,19 @@ import {
 } from "@mui/material";
 import TodayIcon from "@mui/icons-material/Today";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 interface TournamentCardProps {
   tournament: Tournament;
   type: string;
+  mobile: boolean;
 }
 
 const TournamentCard: React.FC<TournamentCardProps> = ({
   tournament,
-  type
+  type,
+  mobile
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -127,7 +130,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
             navigate(tournament.id);
           }
         }}
-        sx={{ margin: 1, marginBottom: 3 }}
+        sx={{ margin: 1, marginBottom: 3, maxWidth: 485 }}
       >
         <CardHeader
           title={tournament.name}
@@ -158,7 +161,8 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           )}
           {(type === "ongoing" || type === "upcoming") && (
             <Typography color="text.secondary">
-              <TodayIcon sx={{ marginRight: 1 }} /> {tournament.location}
+              <TodayIcon sx={{ marginRight: 1 }} />
+              {tournament.location}
             </Typography>
           )}
           {(type === "ongoing" || type === "upcoming") && (
@@ -236,7 +240,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
               )}
             </>
           )}
-          {isUserTheCreator && tournamentHasNotStarted && (
+          {isUserTheCreator && tournamentHasNotStarted && !mobile && (
             <Button
               color="error"
               variant="contained"
@@ -251,7 +255,32 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
               {t("buttons.delete")}
             </Button>
           )}
-          {isUserTheCreator && tournamentHasNotStarted && (
+          {isUserTheCreator && tournamentHasNotStarted && mobile && (
+            <Button
+              onClick={handleOpenDialog}
+              sx={{ position: "absolute", bottom: 20, left: 15 }}
+            >
+              <DeleteOutlineIcon />
+            </Button>
+          )}
+          {isUserTheCreator && tournamentHasNotStarted && mobile && (
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={() => {
+                navigate(`edit-tournament-info/${tournament.id}`);
+              }}
+              sx={{
+                position: "absolute",
+                bottom: 20,
+                left: 70,
+                borderRadius: "20px"
+              }}
+            >
+              {t("buttons.edit_button")}
+            </Button>
+          )}
+          {isUserTheCreator && tournamentHasNotStarted && !mobile && (
             <Button
               color="error"
               variant="outlined"
