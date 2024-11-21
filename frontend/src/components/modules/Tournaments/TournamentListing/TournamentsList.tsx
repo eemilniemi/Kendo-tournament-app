@@ -258,10 +258,10 @@ const TournamentList: React.FC = () => {
       )}
       <Box display="flex" alignItems="center" marginBottom="10px">
         {/* Dropdown menu to choose sorting criteria */}
-        <label style={{ marginRight: "10px" }}>{t("sorting.orderBy")} </label>
         <Select
           value={sortBy}
           onChange={handleSortChange}
+          label="Sort"
           style={{ marginBottom: "10px" }}
         >
           <MenuItem value="mostRecent">{t("sorting.mostRecent")}</MenuItem>
