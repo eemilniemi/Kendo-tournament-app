@@ -18,6 +18,8 @@ import {
   DialogContentText,
   DialogTitle
 } from "@mui/material";
+import TodayIcon from "@mui/icons-material/Today";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 interface TournamentCardProps {
@@ -108,7 +110,15 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
   );
 
   return (
-    <Card component="main" sx={{ position: "relative" }}>
+    <Card
+      component="main"
+      sx={{
+        position: "relative",
+        borderRadius: 5,
+        maxWidth: 500,
+        maxHeight: 250
+      }}
+    >
       <CardActionArea
         onClick={() => {
           if (type === "past") {
@@ -117,16 +127,20 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
             navigate(tournament.id);
           }
         }}
+        sx={{ margin: 1, marginBottom: 3 }}
       >
         <CardHeader
           title={tournament.name}
           titleTypographyProps={{ fontWeight: "500" }}
+          sx={{ margin: 1, marginBottom: 0, paddingBottom: 0 }}
         />
-        <CardContent sx={{ marginBottom: "64px" }}>
+        <CardContent sx={{ margin: 1, paddingTop: 0 }}>
           {tournamentFull && type === "upcoming" && (
-            <Typography variant="subtitle1" marginBottom="32px">
-              {t("upcoming_tournament_view.tournament_full")}
-            </Typography>
+            <Typography
+              variant="subtitle1"
+              marginBottom="32px"
+              sx={{ margin: 1, paddingTop: 0 }}
+            ></Typography>
           )}
           {cancelled ? (
             <Typography color="red">
@@ -144,23 +158,18 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           )}
           {(type === "ongoing" || type === "upcoming") && (
             <Typography color="text.secondary">
-              {t("frontpage_labels.start_date")}:{" "}
-              {new Date(tournament.startDate).toLocaleString("fi", {
-                hour: "2-digit",
-                minute: "2-digit",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-              })}
+              <TodayIcon sx={{ marginRight: 1 }} /> {tournament.location}
             </Typography>
           )}
           {(type === "ongoing" || type === "upcoming") && (
             <Typography color="text.secondary">
-              {t("frontpage_labels.end_date")}:{" "}
+              <LocationOnIcon sx={{ marginRight: 1 }} />
+              {new Date(tournament.startDate).toLocaleString("fi", {
+                day: "2-digit",
+                month: "2-digit"
+              })}{" "}
+              -{" "}
               {new Date(tournament.endDate).toLocaleString("fi", {
-                hour: "2-digit",
-                minute: "2-digit",
-                year: "numeric",
                 month: "2-digit",
                 day: "2-digit"
               })}
@@ -193,13 +202,18 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           {tournament.type !== "Team Round Robin" && (
             <>
               <Button
-                color="primary"
+                color="success"
                 variant="contained"
                 disabled={userAlreadySigned || tournamentFull}
                 onClick={() => {
                   navigate(`${tournament.id}/sign-up`);
                 }}
-                sx={{ position: "absolute", bottom: 10, right: 10 }}
+                sx={{
+                  position: "absolute",
+                  bottom: 20,
+                  right: 20,
+                  borderRadius: "20px"
+                }}
               >
                 {t("buttons.sign_up_button")}
               </Button>
@@ -210,7 +224,12 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
                   onClick={() => {
                     navigate(`${tournament.id}/cancel-sign-up`);
                   }}
-                  sx={{ position: "absolute", bottom: 10, right: 10 }}
+                  sx={{
+                    position: "absolute",
+                    bottom: 20,
+                    right: 20,
+                    borderRadius: "20px"
+                  }}
                 >
                   {t("buttons.cancel_sign_up")}
                 </Button>
@@ -220,9 +239,14 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           {isUserTheCreator && tournamentHasNotStarted && (
             <Button
               color="error"
-              variant="outlined"
+              variant="contained"
               onClick={handleOpenDialog}
-              sx={{ position: "absolute", bottom: 10, left: 10 }}
+              sx={{
+                position: "absolute",
+                bottom: 20,
+                left: 20,
+                borderRadius: "20px"
+              }}
             >
               {t("buttons.delete")}
             </Button>
@@ -234,7 +258,12 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
               onClick={() => {
                 navigate(`edit-tournament-info/${tournament.id}`);
               }}
-              sx={{ position: "absolute", bottom: 60, right: 10 }}
+              sx={{
+                position: "absolute",
+                bottom: 20,
+                left: 130,
+                borderRadius: "20px"
+              }}
             >
               {t("buttons.edit_button")}
             </Button>
