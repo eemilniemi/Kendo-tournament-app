@@ -202,6 +202,9 @@
     "no_scheduled_time": "Scheduled Time not set",
     "ongoing": "Ongoing:",
     "no_matches": "No matches",
+    "duration": "Duration",
+    "official_missing": "Officials missing",
+    "select_officials": "Select officials before match can start",
     "team_name": "Team names"
   },
   "signup_labels": {
@@ -453,7 +456,7 @@
     "my_upcoming_tournaments": "My upcoming tournaments",
     "known_matches": "Known matches",
     "details": "Details",
-    "tournament_details": "Tournament details"
+    "tournament_details": "Tournament details",
     "tournament_history": "Tournament history",
     "tournaments": "Tournaments",
     "wins": "Wins",

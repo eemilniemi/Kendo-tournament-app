@@ -12,18 +12,19 @@ interface Props {
 export const checkSameNames: (tournament: Tournament) => boolean = (
   tournament
 ) => {
+  if (tournament?.players?.length > 0) {
+    return false; // Default to no same names if players are missing
+  }
+
   const firstNames = tournament.players.map((player) => player.firstName);
   const uniqueFirstNames = [...new Set(firstNames)];
-  if (firstNames.length !== uniqueFirstNames.length) {
-    return true;
-  } else {
-    return false;
-  }
+  return firstNames.length !== uniqueFirstNames.length;
 };
 
 const PlayerName: React.FC<Props> = ({ firstName, lastName, sameNames }) => {
   const tournament = useTournament();
-  const allPlayers = tournament.players;
+  const allPlayers = tournament?.players ?? [];
+
   // Check if players in the tournament have the same first name
   const displayLastNameInitial = (
     firstName: string,
@@ -35,12 +36,9 @@ const PlayerName: React.FC<Props> = ({ firstName, lastName, sameNames }) => {
       );
       if (tournamentPlayers.length > 1) {
         return `${firstName} ${lastName.charAt(0)}.`;
-      } else {
-        return `${firstName}`;
       }
-    } else {
-      return `${firstName}`;
     }
+    return `${firstName}`;
   };
 
   return displayLastNameInitial(firstName, lastName);
