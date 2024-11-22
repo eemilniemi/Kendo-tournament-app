@@ -503,7 +503,13 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
 
   return (
     <div>
-      <Button onClick={handleOpenDialog}>{t("buttons.filter")}</Button>
+      <Button
+        variant="outlined"
+        onClick={handleOpenDialog}
+        sx={{ borderRadius: 10, marginLeft: 2, height: 50, width: 100 }}
+      >
+        {t("buttons.filter")}
+      </Button>
 
       <Dialog open={filteringDialog} onClose={handleCloseDialog}>
         <DialogTitle variant="h5">
