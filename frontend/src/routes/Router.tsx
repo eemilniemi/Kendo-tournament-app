@@ -33,14 +33,25 @@ import Overlay from "components/modules/Overlay/Overlay";
 
 const routes = createRoutesFromElements(
   <Route element={<RootRoute />}>
-    <Route
-      path={routePaths.overlay}
-      element={
-        <SocketProvider>
-          <Overlay />
-        </SocketProvider>
-      }
-    />
+    <Route path={routePaths.overlay} element={<TournamentsProvider />}>
+      <Route
+        path=":id"
+        element={
+          <SocketProvider>
+            <TournamentProvider />
+          </SocketProvider>
+        }
+      >
+        <Route
+          path=":matchId"
+          element={
+            <SocketProvider>
+              <Overlay />
+            </SocketProvider>
+          }
+        />
+      </Route>
+    </Route>
     <Route element={<Layout />}>
       <Route path={routePaths.tournaments} element={<TournamentsProvider />}>
         <Route index element={<TournamentList />} />

@@ -11,12 +11,13 @@ import type {
 } from "../../../types/models";
 import api from "../../../api/axios";
 import OverlayTimer from "./OverlayTimer";
+import { useTournament } from "../../../context/TournamentContext";
 
 interface OverlayData {
   timerTime: number;
   players: MatchPlayer[];
-  firstNames: string[];
-  lastNames: string[];
+  player1Name: string;
+  player2Name: string;
   winner: string | undefined;
   endTimeStamp: Date | undefined;
   startTimestamp: Date | undefined;
@@ -29,7 +30,7 @@ interface OverlayData {
 }
 
 const Overlay: React.FC = () => {
-  // const tournament = useTournament();
+  const tournament = useTournament();
   const { matchId } = useParams();
   const { matchInfo: matchInfoFromSocket } = useSocket();
   const [hasJoined, setHasJoined] = useState(false);
@@ -38,8 +39,8 @@ const Overlay: React.FC = () => {
   const [matchInfo, setMatchInfo] = useState<OverlayData>({
     timerTime: 0,
     players: [],
-    firstNames: [],
-    lastNames: [],
+    player1Name: "",
+    player2Name: "",
     winner: undefined,
     endTimeStamp: undefined,
     startTimestamp: undefined,
@@ -69,8 +70,8 @@ const Overlay: React.FC = () => {
     const getMatchData = async (): Promise<void> => {
       try {
         let matchPlayers: MatchPlayer[] = [];
-        const playersFirstNames: string[] = [];
-        const playersLastNames: string[] = [];
+        let player1Name: string = "";
+        let player2Name: string = "";
         let matchWinner: string | undefined;
         let time: number = 0;
         let matchEndTimeStamp: Date | undefined;
@@ -83,16 +84,13 @@ const Overlay: React.FC = () => {
         let court: number = 1;
 
         // Get players' names
-        /*
-        const findPlayerName = (playerId: string, index: number): void => {
+        const findPlayerName = (playerId: string, index: number): string => {
           const player = tournament.players.find((p) => p.id === playerId);
           if (player !== undefined) {
-            playersFirstNames[index] = player.firstName;
-            playersLastNames[index] = player.lastName;
+            return player.firstName + " " + player.lastName;
           }
+          return "";
         };
-
-         */
 
         // Try to get match info from the websocket
         if (matchInfoFromSocket !== undefined) {
@@ -100,8 +98,8 @@ const Overlay: React.FC = () => {
 
           // Get players' names in this match
           matchPlayers = matchInfoFromSocket.players;
-          // findPlayerName(matchPlayers[0].id, 0);
-          // findPlayerName(matchPlayers[1].id, 1);
+          player1Name = findPlayerName(matchPlayers[0].id, 0);
+          player2Name = findPlayerName(matchPlayers[1].id, 1);
 
           // If there is a winner, save them
           /*
@@ -157,8 +155,8 @@ const Overlay: React.FC = () => {
             matchTime = matchFromApi.matchTime;
 
             matchPlayers = matchFromApi.players;
-            // findPlayerName(matchPlayers[0].id, 0);
-            // findPlayerName(matchPlayers[1].id, 1);
+            player1Name = findPlayerName(matchPlayers[0].id, 0);
+            player2Name = findPlayerName(matchPlayers[1].id, 1);
 
             // If there is a winner, save them
             /*
@@ -206,8 +204,8 @@ const Overlay: React.FC = () => {
         setMatchInfo({
           timerTime: time,
           players: matchPlayers,
-          firstNames: playersFirstNames,
-          lastNames: playersLastNames,
+          player1Name,
+          player2Name,
           winner: matchWinner,
           endTimeStamp: matchEndTimeStamp,
           startTimestamp: startTime,
@@ -218,11 +216,6 @@ const Overlay: React.FC = () => {
           time: matchTime,
           courtNumber: court
         });
-        console.log("players");
-        console.log(matchPlayers.length);
-        console.log(matchPlayers[1].points);
-        console.log(matchInfo.players.length);
-        console.log(matchInfo.players[1].points);
       } catch (error) {
         console.log(error);
       } finally {
@@ -230,11 +223,6 @@ const Overlay: React.FC = () => {
       }
     };
     void getMatchData();
-    console.log("players12");
-    console.log(matchInfo.players.length);
-    matchInfo.players.forEach((a) => {
-      console.log(a);
-    });
     // console.log(matchInfo.players[1].points);
   }, [isLoading, matchInfoFromSocket]);
 
@@ -285,12 +273,20 @@ const Overlay: React.FC = () => {
     }
   };
 
+  let p1points = 0;
+  let p2points = 0;
+
+  try {
+    p1points = matchInfo.players[0].points.length;
+    p2points = matchInfo.players[1].points.length;
+  } catch (_) {}
+
   return (
     <div className="overlay-container">
       <div className="overlay-teams">
         <div className="team team-a">
-          <div className="team-name">{"player1"}</div>
-          <div className="team-score">{1}</div>
+          <div className="team-name">{matchInfo.player1Name}</div>
+          <div className="team-score">{p1points}</div>
         </div>
 
         <div className="overlay-status">
@@ -298,8 +294,8 @@ const Overlay: React.FC = () => {
         </div>
 
         <div className="team team-b">
-          <div className="team-name">{"player2"}</div>
-          <div className="team-score">{1}</div>
+          <div className="team-name">{matchInfo.player2Name}</div>
+          <div className="team-score">{p2points}</div>
         </div>
       </div>
     </div>
