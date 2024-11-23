@@ -171,6 +171,8 @@
   },
   "tournament_view_labels": {
     "final": "Final",
+    "semi_final": "Semifinal",
+    "quarter_final": "Quarterfinal",
     "round": "Round",
     "scoreboard": "Scoreboard",
     "matches": "Matches",

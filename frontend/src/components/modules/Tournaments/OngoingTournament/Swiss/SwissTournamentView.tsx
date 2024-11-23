@@ -30,7 +30,7 @@ const SwissTournamentView: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const initialRender = useRef(true);
-  const tabTypes = ["scoreboard", "playoff", "tournamentInfo"] as const;
+  const tabTypes = ["scoreboard", "matches", "tournamentInfo"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const setOngoingMatches = useState<Match[]>([])[1];
@@ -209,7 +209,7 @@ const SwissTournamentView: React.FC = () => {
             <MenuItem value="scoreboard" sx={{ fontSize: "13px" }}>
               {t("tournament_view_labels.scoreboard")}
             </MenuItem>
-            <MenuItem value="playoff" sx={{ fontSize: "13px" }}>
+            <MenuItem value="matches" sx={{ fontSize: "13px" }}>
               {t("tournament_view_labels.matches")}
             </MenuItem>
           </Select>
@@ -237,7 +237,7 @@ const SwissTournamentView: React.FC = () => {
               />
               <Tab
                 label={t("tournament_view_labels.matches")}
-                value="playoff"
+                value="matches"
                 sx={{ fontSize: "13px" }}
               />
             </Tabs>
@@ -253,7 +253,9 @@ const SwissTournamentView: React.FC = () => {
             <Scoreboard players={players} haveSameNames={haveSameNames} />
           </Box>
         )}
-        {currentTab === "playoff" && <PlayoffTournamentView swiss={true} />}
+        {currentTab === "matches" && (
+          <PlayoffTournamentView isChildTournament={true} />
+        )}
       </>
     );
   } catch (e) {

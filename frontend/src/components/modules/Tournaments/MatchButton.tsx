@@ -19,6 +19,7 @@ import type { ChangeCourtTimeRequest } from "types/requests";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { mapNumberToLetter } from "utils/helperFunctions";
+import { allMatchesPlayed } from "utils/TournamentUtils";
 
 interface MatchButtonProps {
   match: Match;
@@ -142,6 +143,11 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     (match.elapsedTime == null &&
       (match.winner != null || match.winnerTeamId != null));
 
+  const hasTournamentFinished =
+    allMatchesPlayed(tournamentData) ||
+    (tournamentData.endDate !== undefined &&
+      new Date(tournamentData.endDate) < new Date());
+
   const winnerBackgroundColor = "#ABE2A8";
 
   const entity1Styles = {
@@ -182,7 +188,7 @@ const MatchButton: React.FC<MatchButtonProps> = ({
             alignItems: "center"
           }}
         >
-          {!isFinished && !isForfeit && (
+          {!isFinished && !isForfeit && !hasTournamentFinished && (
             <Typography variant="body1" fontSize="13px">
               {isOngoing
                 ? `${t("tournament_view_labels.ongoing")} ${Math.floor(
@@ -199,6 +205,7 @@ const MatchButton: React.FC<MatchButtonProps> = ({
 
         {/* Edit Court and Time */}
         {isUserTheCreator &&
+          !hasTournamentFinished &&
           (!isForfeit && !isFinished ? (
             <Button
               onClick={handleOpen}
@@ -232,7 +239,7 @@ const MatchButton: React.FC<MatchButtonProps> = ({
             p: 2,
             gap: 1,
             cursor: isForfeit ? "not-allowed" : "pointer",
-            backgroundColor: isForfeit ? "#f5c6cb" : "white",
+            backgroundColor: isForfeit ? "#ffff99" : "white",
             minHeight: "80px",
             justifyContent: "space-between"
           }}
@@ -343,13 +350,17 @@ const MatchButton: React.FC<MatchButtonProps> = ({
               step: 300
             }}
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>{t("tournament_view_labels.court_number")}</InputLabel>
+          <FormControl fullWidth margin="normal" variant="outlined">
+            <InputLabel id="court-number-label">
+              {t("tournament_view_labels.court_number")}
+            </InputLabel>
             <Select
+              labelId="court-number-label"
               value={newCourtNumber}
               onChange={(e) => {
                 setNewCourtNumber(Number(e.target.value));
               }}
+              label={t("tournament_view_labels.court_number")} // Ensure the label is connected to the Select
             >
               {courtOptions.map((court) => (
                 <MenuItem key={court} value={court}>
@@ -358,6 +369,7 @@ const MatchButton: React.FC<MatchButtonProps> = ({
               ))}
             </Select>
           </FormControl>
+
           <Button onClick={handleSubmit} variant="contained" color="primary">
             {t("buttons.save_button")}
           </Button>
