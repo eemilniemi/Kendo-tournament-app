@@ -693,7 +693,7 @@ const FilterTournaments: React.FC<FilterTournamentsProps> = ({
                 handleCloseDialog();
               }}
             >
-              {t("frontpage_labels.create_tournament")}
+              {t("filtering.apply")}
             </Button>
           </Box>
         </DialogContent>

@@ -482,7 +482,8 @@
     "no_location": "None",
     "by_tournament_type": "Tournament type",
     "by_tournament_category": "Tournament category",
-    "by_point_type": "Point type"
+    "by_point_type": "Point type",
+    "apply": "apply"
   },
   "help": {
     "title": "Instructions",

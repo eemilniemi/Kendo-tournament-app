@@ -482,7 +482,8 @@
     "no_location": "Ei valintaa",
     "by_tournament_type": "Turnaustyyppi",
     "by_tournament_category": "Kategoria",
-    "by_point_type": "Pistetyyppi"
+    "by_point_type": "Pistetyyppi",
+    "apply": "hyväksy"
   },
   "help": {
     "title": "Ohjeet",
