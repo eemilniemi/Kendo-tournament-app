@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTournaments } from "context/TournamentsContext";
-import type { User, Match, TournamentType } from "types/models";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardActionArea,
-  Grid,
-  Tab,
-  Tabs
-} from "@mui/material";
+import type { Match, TournamentType } from "types/models";
+import { Box, Typography, Grid, Tab, Tabs } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import CopyToClipboardButton from "./OngoingTournament/CopyToClipboardButton";
 import {
@@ -21,14 +12,15 @@ import {
   type TournamentPlayer
 } from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
 import { checkSameNames } from "./PlayerNames";
-import { findTournamentWinner } from "utils/TournamentUtils";
+import MatchButton from "./MatchButton";
+import { useAuth } from "context/AuthContext";
+import TournamentWinner from "./Winner";
 
 type Rounds = Record<string, Match[]>; // Define the type for rounds
 
 const PastTournamentMatches: React.FC = () => {
   const { tournamentId } = useParams();
   const { past } = useTournaments();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabTypes = ["scoreboard", "matches"] as const;
@@ -36,6 +28,7 @@ const PastTournamentMatches: React.FC = () => {
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
+  const { userId } = useAuth();
 
   // Tournament types with their translations
   const tournamentTypes: Record<TournamentType, string> = {
@@ -50,6 +43,8 @@ const PastTournamentMatches: React.FC = () => {
     (tournament) => tournament.id === tournamentId
   );
 
+  const isUserTheCreator = selectedTournament?.creator.id === userId;
+
   if (selectedTournament === null || selectedTournament === undefined) {
     return <div>Tournament not found.</div>; // lisää lokalisaatuo
   }
@@ -57,16 +52,6 @@ const PastTournamentMatches: React.FC = () => {
   const showTabs =
     selectedTournament.type === "Round Robin" ||
     selectedTournament.type === "Swiss";
-
-  // Function to get player name by ID
-  const getPlayerNameById = (players: User[], playerId: string): string => {
-    const player = players.find((player) => player.id === playerId);
-    if (player != null) {
-      return `${player.firstName} ${player.lastName}`;
-    } else {
-      return "Unknown Player";
-    }
-  };
 
   useEffect(() => {
     if (selectedTournament !== undefined) {
@@ -106,10 +91,10 @@ const PastTournamentMatches: React.FC = () => {
 
   const ShowMatches: React.FC<{ rounds: Rounds }> = ({ rounds }) => (
     <div>
-      {/* Map through tournament rounds and matches and print each */}
+      {/* Map through tournament rounds and matches */}
       {Object.entries(rounds).map(([round, matches]) => (
         <div key={round}>
-          {/* Add round print only if there is more than one round */}
+          {/* Add round title only if there is more than one round */}
           {Object.keys(rounds).length > 1 && (
             <Typography variant="h6" sx={{ marginTop: 2 }}>
               {t("tournament_view_labels.round")} {round}
@@ -119,73 +104,25 @@ const PastTournamentMatches: React.FC = () => {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "20px"
+              gap: "20px",
+              padding: "20px 0px"
             }}
           >
-            {matches.map((match, matchIndex) => (
-              <Card key={matchIndex} variant="outlined" sx={{ mb: 1 }}>
-                <CardActionArea
-                  onClick={() => {
-                    if (match.players.length === 2) {
-                      navigate(
-                        `/tournaments/${selectedTournament.id}/match/${match.id}`
-                      );
-                    } else {
-                      // No match details to display for a bye
-                    }
-                  }}
-                >
-                  <CardContent>
-                    <Typography textAlign="center">
-                      {/* Print match details, including player names and scores */}
-                      {t("profile.match")} {matchIndex + 1}:
-                      <br />
-                      {match.players.length === 1 ? (
-                        // Handle matches with only one player (bye)
-                        <span>
-                          {getPlayerNameById(
-                            selectedTournament.players,
-                            match.players[0].id
-                          )}
-                          {" - "}
-                          {"BYE"}
-                        </span>
-                      ) : (
-                        <span>
-                          {getPlayerNameById(
-                            selectedTournament.players,
-                            match.players[0].id
-                          )}
-                          {"  "}
-                          {match.player1Score}
-                          {" - "}
-                          {match.player2Score}
-                          {"  "}
-                          {getPlayerNameById(
-                            selectedTournament.players,
-                            match.players[1].id
-                          )}
-                        </span>
-                      )}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
+            {matches.map((match) => (
+              <MatchButton
+                key={match.id}
+                match={match}
+                players={players}
+                haveSameNames={haveSameNames}
+                isUserTheCreator={isUserTheCreator}
+                tournamentData={selectedTournament}
+              />
             ))}
           </Box>
         </div>
       ))}
     </div>
   );
-
-  const printTournamentWinner = (): string => {
-    const winner = findTournamentWinner(selectedTournament);
-    if (winner === undefined) {
-      return t("tournament_view_labels.no_winner");
-    } else {
-      return t("tournament_view_labels.tournament_winner") + winner;
-    }
-  };
 
   return (
     <div>
@@ -200,9 +137,7 @@ const PastTournamentMatches: React.FC = () => {
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
         {t(tournamentTypes[selectedTournament.type])}
       </Typography>
-      <Typography variant="subtitle1" sx={{ marginBottom: 2 }}>
-        {printTournamentWinner()}
-      </Typography>
+      <TournamentWinner tournament={selectedTournament} />
 
       {showTabs && (
         <Tabs
@@ -228,7 +163,9 @@ const PastTournamentMatches: React.FC = () => {
       )}
 
       {showTabs && currentTab === "scoreboard" && (
-        <Scoreboard players={players} haveSameNames={haveSameNames} />
+        <Box sx={{ padding: "20px 0px" }}>
+          <Scoreboard players={players} haveSameNames={haveSameNames} />
+        </Box>
       )}
 
       {showTabs && currentTab === "matches" && <ShowMatches rounds={rounds} />}

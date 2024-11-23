@@ -29,9 +29,9 @@ import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
 import api from "api/axios";
 import useToast from "hooks/useToast";
-import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 import { useAuth } from "context/AuthContext";
 import MatchButton from "../../MatchButton";
+import TournamentWinner from "../../Winner";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
@@ -325,7 +325,6 @@ const PreliminaryPlayoffView: React.FC = () => {
               match={match}
               players={players}
               haveSameNames={haveSameNames}
-              props={{ variant: "contained" }}
               isUserTheCreator={isUserTheCreator}
               tournamentData={tournamentData}
             />
@@ -341,7 +340,6 @@ const PreliminaryPlayoffView: React.FC = () => {
               match={match}
               players={players}
               haveSameNames={haveSameNames}
-              props={{ variant: "contained" }}
               isUserTheCreator={isUserTheCreator}
               tournamentData={tournamentData}
             />
@@ -355,7 +353,6 @@ const PreliminaryPlayoffView: React.FC = () => {
               match={match}
               players={players}
               haveSameNames={haveSameNames}
-              props={{ variant: "contained" }}
               isUserTheCreator={isUserTheCreator}
               tournamentData={tournamentData}
             />
@@ -377,20 +374,12 @@ const PreliminaryPlayoffView: React.FC = () => {
       <Grid container alignItems="center" spacing={4}>
         <Grid item>
           <Typography variant="h4">{tournamentData.name}</Typography>
-          {allMatchesPlayed(tournamentData) && (
-            <Typography variant="subtitle1">
-              <span>
-                {t("frontpage_labels.winner")}
-                {": "}
-                {findTournamentWinner(tournamentData)}
-              </span>
-            </Typography>
-          )}
         </Grid>
         <Grid item>
           <CopyToClipboardButton />
         </Grid>
       </Grid>
+      <TournamentWinner tournament={tournamentData} />
 
       <Tabs
         value={currentTab}

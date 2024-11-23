@@ -149,7 +149,7 @@ const UpcomingTournamentView: React.FC<UpcomingTournamentViewProps> = ({
         </Grid>
       )}
 
-      {tournamentFull && (
+      {!ongoing && tournamentFull && (
         <Box>
           <Typography variant="h5" className="header" fontWeight="bold">
             {t("upcoming_tournament_view.tournament_full")}
@@ -186,6 +186,15 @@ const UpcomingTournamentView: React.FC<UpcomingTournamentViewProps> = ({
           {t(getTypeTranslationKey(tournament.type))}
         </Typography>
       </Box>
+
+      {tournament.type === "Swiss" && (
+        <Box>
+          <Typography variant="subtitle1">
+            <strong>{t("create_tournament_form.swiss_rounds")}:</strong>{" "}
+            {tournament.swissRounds ?? 0}
+          </Typography>
+        </Box>
+      )}
 
       <Box>
         <Typography variant="subtitle1">

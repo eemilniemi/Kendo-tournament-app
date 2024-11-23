@@ -9,8 +9,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  useMediaQuery,
-  type ButtonProps
+  useMediaQuery
 } from "@mui/material";
 import type { TournamentPlayer } from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
 import type { Match, Tournament } from "types/models";
@@ -25,7 +24,6 @@ interface MatchButtonProps {
   match: Match;
   players?: TournamentPlayer[];
   haveSameNames: boolean;
-  props: ButtonProps;
   isUserTheCreator: boolean;
   tournamentData: Tournament;
 }
@@ -34,7 +32,6 @@ const MatchButton: React.FC<MatchButtonProps> = ({
   match,
   players,
   haveSameNames,
-  props,
   isUserTheCreator,
   tournamentData
 }) => {
@@ -78,13 +75,14 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     setEditMode(false);
   };
 
+  const isForfeit = players === undefined || players.length < 2;
+
   const player1 = players?.find(
     (player) => player?.id === match.players[0]?.id
   );
-  const player2 =
-    match.players.length > 1
-      ? players?.find((player) => player?.id === match.players[1]?.id)
-      : null;
+  const player2 = players?.find(
+    (player) => player?.id === match.players[1]?.id
+  );
 
   const entity1Name =
     player1 !== undefined ? (
@@ -94,18 +92,18 @@ const MatchButton: React.FC<MatchButtonProps> = ({
         sameNames={haveSameNames}
       />
     ) : (
-      "Player Not Found"
+      ""
     );
 
   const entity2Name =
-    player2 !== undefined && player2 !== null ? (
+    player2 !== undefined ? (
       <PlayerName
         firstName={player2.firstName ?? ""}
         lastName={player2.lastName ?? ""}
         sameNames={haveSameNames}
       />
     ) : (
-      "Player Not Found"
+      ""
     );
 
   const isNullOrEmpty = (value: unknown): boolean =>
@@ -120,16 +118,16 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     ) {
       const missingRoles = [
         isNullOrEmpty(match.timeKeeper)
-          ? t("tournament_view_labels.missing_timer")
+          ? t("game_interface.time_keeper").toLowerCase()
           : null,
         isNullOrEmpty(match.pointMaker)
-          ? t("tournament_view_labels.missing_point_maker")
+          ? t("game_interface.point_maker").toLowerCase()
           : null
       ]
         .filter((info) => info !== null)
         .join(", ");
 
-      return missingRoles ?? t("tournament_view_labels.missing_both");
+      return `${t("tournament_view_labels.missing")} ${missingRoles}`;
     }
     return "";
   })();
@@ -175,45 +173,68 @@ const MatchButton: React.FC<MatchButtonProps> = ({
       key={match.id}
     >
       <Box>
-        {!isFinished && (
-          <Typography variant="body1" marginBottom="5px" fontSize="13px">
-            {isOngoing
-              ? `${t("tournament_view_labels.ongoing")} ${Math.floor(
-                  match.elapsedTime / 60000
-                )}'`
-              : match.scheduledTime !== "XX:XX"
-              ? `${t("tournament_view_labels.match_start_clock")}: ${
-                  match.scheduledTime
-                }`
-              : t("tournament_view_labels.no_scheduled_time")}
-          </Typography>
-        )}
+        {/* Scheduled Time or Ongoing Status */}
+        <Box
+          sx={{
+            height: "20px",
+            marginBottom: "5px",
+            display: "flex",
+            alignItems: "center"
+          }}
+        >
+          {!isFinished && !isForfeit && (
+            <Typography variant="body1" fontSize="13px">
+              {isOngoing
+                ? `${t("tournament_view_labels.ongoing")} ${Math.floor(
+                    match.elapsedTime / 60000
+                  )}'`
+                : match.scheduledTime !== "XX:XX"
+                ? `${t("tournament_view_labels.match_start_clock")}: ${
+                    match.scheduledTime
+                  }`
+                : t("tournament_view_labels.no_scheduled_time")}
+            </Typography>
+          )}
+        </Box>
 
-        {isUserTheCreator && !isFinished && (
-          <Button
-            onClick={() => {
-              handleOpen();
-            }}
-            style={{ fontSize: "13px", padding: "0px", marginBottom: "5px" }}
-          >
-            {t("tournament_view_labels.edit_court_time")}
-          </Button>
-        )}
+        {/* Edit Court and Time */}
+        {isUserTheCreator &&
+          (!isForfeit && !isFinished ? (
+            <Button
+              onClick={handleOpen}
+              style={{
+                fontSize: "13px",
+                padding: "0px",
+                marginBottom: "5px",
+                height: "20px"
+              }}
+            >
+              {t("tournament_view_labels.edit_court_time")}
+            </Button>
+          ) : (
+            <Box sx={{ height: "20px", marginBottom: "5px" }}></Box>
+          ))}
+
+        {/* Match Details */}
         <Box
           onClick={() => {
-            navigate(`match/${match.id}`);
+            if (!isForfeit) {
+              navigate(`/tournaments/${tournamentData.id}/match/${match.id}`);
+            }
           }}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          flexDirection="column"
-          border={1}
-          borderRadius="10px"
-          gap={1}
-          p={1}
           sx={{
-            cursor: "pointer",
-            borderColor: isOngoing ? "#28CC3B" : "black"
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            border: 1,
+            borderColor: isOngoing ? "#28CC3B" : "black",
+            borderRadius: "10px",
+            p: 2,
+            gap: 1,
+            cursor: isForfeit ? "not-allowed" : "pointer",
+            backgroundColor: isForfeit ? "#f5c6cb" : "white",
+            minHeight: "80px",
+            justifyContent: "space-between"
           }}
         >
           <Box display="flex" alignItems="center" justifyContent="center">
@@ -273,13 +294,19 @@ const MatchButton: React.FC<MatchButtonProps> = ({
             </Typography>
           </Box>
 
-          <Typography variant="body1" fontSize="15px">
-            {t("tournament_view_labels.court_number")}:{" "}
-            {mapNumberToLetter(match.courtNumber)}
-          </Typography>
+          {!isForfeit ? (
+            <Typography variant="body1" fontSize="15px">
+              {t("tournament_view_labels.court_number")}:{" "}
+              {mapNumberToLetter(match.courtNumber)}
+            </Typography>
+          ) : (
+            <Typography variant="body1" fontSize="15px" fontWeight={"bold"}>
+              BYE
+            </Typography>
+          )}
         </Box>
       </Box>
-      {officialsInfo !== null && (
+      {!isForfeit && officialsInfo !== "" && (
         <Typography variant="body2" marginTop="5px" fontSize="13px">
           {officialsInfo}
         </Typography>

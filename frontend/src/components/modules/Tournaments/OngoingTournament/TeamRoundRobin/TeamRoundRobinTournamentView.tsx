@@ -29,14 +29,12 @@ import { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 import MatchButton from "../../MatchButton";
 import UpcomingTournamentView from "../../UpcomingTournamentView";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { keyframes } from "@mui/system";
 import { format } from "date-fns";
+import TournamentWinner from "../../Winner";
 
 export interface TournamentTeam {
   id: string;
@@ -587,9 +585,6 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       match={match}
       players={players}
       haveSameNames={haveSameNames}
-      props={{
-        variant: "contained"
-      }}
       isUserTheCreator={isUserTheCreator}
       tournamentData={tournamentData}
     />
@@ -601,10 +596,6 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       match={match}
       players={players}
       haveSameNames={haveSameNames}
-      props={{
-        variant: "contained",
-        color: "info"
-      }}
       isUserTheCreator={isUserTheCreator}
       tournamentData={tournamentData}
     />
@@ -616,19 +607,10 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       match={match}
       players={players}
       haveSameNames={haveSameNames}
-      props={{
-        variant: "contained",
-        color: "secondary"
-      }}
       isUserTheCreator={isUserTheCreator}
       tournamentData={tournamentData}
     />
   ));
-
-  const flash = keyframes`
-    0% { transform: scale(1); }
-    100% { transform: scale(1.05); }
-  `;
 
   const formattedStartDate =
     tournamentData.startDate !== null
@@ -673,51 +655,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           </Box>
         ))}
       </Box>
-      {allMatchesPlayed(tournamentData) && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%"
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#db4744",
-              width: "90%",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-              color: "white",
-              marginTop: "20px",
-              animation: `${flash} 1.5s infinite alternate`
-            }}
-          >
-            <EmojiEventsIcon
-              sx={{ fontSize: "2rem", marginRight: "8px", color: "#FFD700" }}
-            />
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
-            >
-              {t("frontpage_labels.winner")}
-              {": "}
-              <span
-                style={{
-                  color: "#FFD700",
-                  fontSize: "1.5rem",
-                  fontWeight: "bold"
-                }}
-              >
-                {findTournamentWinner(tournamentData)}
-              </span>
-            </Typography>
-          </Box>
-        </Box>
-      )}
+      <TournamentWinner tournament={tournamentData} />
       <div
         style={{
           position: "absolute",
