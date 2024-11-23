@@ -39,9 +39,10 @@ export const TournamentProvider = (): ReactElement => {
         past.find((x) => x.id === id);
 
       setValue(tournament);
-      // if playoff tournament has begun and doesn't have a schedule yet, make the schedule and refresh the page
+      // If playoff or team round robin tournament has begun and doesn't have a schedule yet, make the schedule and refresh the page
       if (
-        tournament?.type === "Playoff" &&
+        (tournament?.type === "Playoff" ||
+          tournament?.type === "Team Round Robin") &&
         new Date(tournament.startDate) < new Date() &&
         tournament.matchSchedule.length === 0 &&
         tournament.players.length > 0

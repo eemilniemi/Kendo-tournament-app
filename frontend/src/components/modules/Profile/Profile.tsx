@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import ProfileInfo from "./ProfileInfo";
-import ProfileGames from "./ProfileGames";
-import ProfilePoints from "./ProfilePoints";
 import CreatedTournaments from "./CreatedTournaments";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -14,6 +12,8 @@ import type { Tournament } from "types/models";
 import { useSearchParams } from "react-router-dom";
 import Invitations from "./Invitations";
 import NewTournamentButton from "../Tournaments/NewTournamentButton";
+import UpcomingTournament from "./UpcomingTournament";
+import TournamentHistory from "./TournamentHistory";
 
 const Profile: React.FC = () => {
   const [userCreatedTournaments, setUserCreatedTournaments] = useState<
@@ -28,6 +28,9 @@ const Profile: React.FC = () => {
     "games",
     "points",
     "created_t",
+    "invitations",
+    "upcoming-tournament",
+    "history",
     "invitations"
   ] as const;
   const defaultTab = "info";
@@ -81,14 +84,17 @@ const Profile: React.FC = () => {
           }}
         >
           <MenuItem value="info">{t("profile.profile_info")}</MenuItem>
-          <MenuItem value="games">{t("profile.my_games")}</MenuItem>
-          <MenuItem value="points">{t("profile.my_points")}</MenuItem>
+          <MenuItem value="history">{t("profile.tournament_history")}</MenuItem>
+
           {userCreatedTournaments.length > 0 && (
             <MenuItem value="created_t">
               {t("profile.created_tournaments")}
             </MenuItem>
           )}
           <MenuItem value="invitations">{t("profile.invitations")}</MenuItem>
+          <MenuItem value="upcoming-tournament">
+            {t("profile.upcoming_tournaments")}
+          </MenuItem>
         </Select>
       ) : (
         <>
@@ -116,13 +122,8 @@ const Profile: React.FC = () => {
                 sx={{ fontSize: "13px" }}
               />
               <Tab
-                label={t("profile.my_games")}
-                value="games"
-                sx={{ fontSize: "13px" }}
-              />
-              <Tab
-                label={t("profile.my_points")}
-                value="points"
+                label={t("profile.tournament_history")}
+                value="history"
                 sx={{ fontSize: "13px" }}
               />
               <Tab
@@ -135,15 +136,20 @@ const Profile: React.FC = () => {
                 value="invitations"
                 sx={{ fontSize: "13px" }}
               />
+              <Tab
+                label={t("profile.upcoming_tournaments")}
+                value="upcoming-tournament"
+                sx={{ fontSize: "13px" }}
+              />
             </Tabs>
           </Box>
         </>
       )}
       {currentTab === "info" && <ProfileInfo />}
-      {currentTab === "games" && <ProfileGames />}
-      {currentTab === "points" && <ProfilePoints />}
+      {currentTab === "history" && <TournamentHistory />}
       {currentTab === "created_t" && <CreatedTournaments />}
       {currentTab === "invitations" && <Invitations />}
+      {currentTab === "upcoming-tournament" && <UpcomingTournament />}
 
       {/* Floating Create Tournament Button */}
       {currentTab === "created_t" && <NewTournamentButton />}

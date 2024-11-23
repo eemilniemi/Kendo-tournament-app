@@ -29,7 +29,7 @@ const CancelSignup: React.FC = (): ReactElement => {
           t("messages.cancel_success", { name: tournament.name }),
           "success"
         );
-        navigate(routePaths.homeRoute, {
+        navigate(`${routePaths.homeRoute}?tab=upcoming`, {
           replace: true,
           state: { refresh: true }
         });

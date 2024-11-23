@@ -38,12 +38,27 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
 
   return (
     <div>
-      <Box display="flex" gap="20px" justifyContent="center">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: { xs: "20px", sm: "100px" },
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
         <Button
           onClick={() => {
             handleOpen(1);
           }}
           variant="contained"
+          sx={{
+            borderRadius: "25px",
+            border: "2px solid black",
+            color: "black",
+            backgroundColor: "transparent",
+            width: { xs: "100%", sm: "auto" }
+          }}
           disabled={!gameStarted}
         >
           {`${t("buttons.add_point_player_1")} ${player1name}`}
@@ -52,12 +67,20 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
           onClick={() => {
             handleOpen(2);
           }}
+          sx={{
+            borderRadius: "25px",
+            border: "2px solid #db4744",
+            color: "black",
+            backgroundColor: "transparent",
+            width: { xs: "100%", sm: "auto" }
+          }}
           variant="contained"
           disabled={!gameStarted}
         >
           {`${t("buttons.add_point_player_2")} ${player2name}`}
         </Button>
       </Box>
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{t("game_interface.dialog_title")}</DialogTitle>
         <DialogContent>

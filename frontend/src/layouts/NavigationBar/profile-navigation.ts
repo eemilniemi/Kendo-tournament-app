@@ -6,19 +6,19 @@ export const ProfileNavItems: ProfileNavigationData = [
     tab: "info"
   },
   {
-    text: "profile.my_games",
-    tab: "games"
-  },
-  {
-    text: "profile.my_points",
-    tab: "points"
+    text: "profile.tournament_history",
+    tab: "history"
   },
   {
     text: "profile.created_tournaments",
     tab: "created_t"
   },
   {
-    text: "Invitations",
+    text: "profile.invitations",
     tab: "invitations"
+  },
+  {
+    text: "profile.upcoming_tournaments",
+    tab: "upcoming-tournament"
   }
 ];

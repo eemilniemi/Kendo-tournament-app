@@ -73,7 +73,7 @@ const Signup: React.FC = (): ReactElement => {
         `${t("messages.sign_up_success")}${tournament.name}`,
         "success"
       );
-      navigate(routePaths.homeRoute, {
+      navigate(`${routePaths.homeRoute}?tab=upcoming`, {
         replace: true,
         state: { refresh: true }
       });
