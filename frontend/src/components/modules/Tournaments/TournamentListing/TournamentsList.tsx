@@ -277,12 +277,7 @@ const TournamentList: React.FC = () => {
         />
       </Box>
 
-      <Grid
-        container
-        spacing={2}
-        direction={currentTab === "past" ? "column" : "row"}
-        alignItems="stretch"
-      >
+      <Grid container spacing={4} direction={"row"} alignItems="stretch">
         {tournamentsToRender().length > 0 ? (
           tournamentsToRender().map((tournament, key) => (
             <Grid item xs={12} md={6} key={tournament.id + key}>

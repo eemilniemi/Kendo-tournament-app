@@ -89,6 +89,15 @@ const PastTournamentMatches: React.FC = () => {
     }
   });
 
+  const extractMatchParticipants = (
+    players: TournamentPlayer[],
+    match: Match
+  ): TournamentPlayer[] => {
+    return players.filter((player) =>
+      match.players.some((matchPlayer) => matchPlayer.id === player.id)
+    );
+  };
+
   const ShowMatches: React.FC<{ rounds: Rounds }> = ({ rounds }) => (
     <div>
       {/* Map through tournament rounds and matches */}
@@ -96,7 +105,7 @@ const PastTournamentMatches: React.FC = () => {
         <div key={round}>
           {/* Add round title only if there is more than one round */}
           {Object.keys(rounds).length > 1 && (
-            <Typography variant="h6" sx={{ marginTop: 2 }}>
+            <Typography variant="h6" sx={{ marginTop: 2, fontSize: "17px" }}>
               {t("tournament_view_labels.round")} {round}
             </Typography>
           )}
@@ -112,7 +121,7 @@ const PastTournamentMatches: React.FC = () => {
               <MatchButton
                 key={match.id}
                 match={match}
-                players={players}
+                players={extractMatchParticipants(players, match)}
                 haveSameNames={haveSameNames}
                 isUserTheCreator={isUserTheCreator}
                 tournamentData={selectedTournament}

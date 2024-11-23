@@ -67,7 +67,13 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
       }
 
       return (
-        <TableCell key={index}>
+        <TableCell
+          key={index}
+          sx={{
+            borderRight: "1px solid #ddd",
+            borderBottom: "1px solid #ddd"
+          }}
+        >
           <Typography>{value}</Typography>
         </TableCell>
       );
@@ -91,16 +97,29 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         <TableContainer component={Paper}>
           <Table onClick={onClick}>
             <TableHead>
-              <TableRow>
+              <TableRow sx={{ backgroundColor: "#D01C1C" }}>
                 {tableHeaders.map((header, index) => (
-                  <TableCell key={index}>{header}</TableCell>
+                  <TableCell
+                    key={index}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {header}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedPlayers.map((player, index) => (
                 <TableRow key={index}>
-                  <TableCell>
+                  <TableCell
+                    sx={{
+                      borderRight: "1px solid #ddd", // Add vertical border
+                      borderBottom: "1px solid #ddd" // Add bottom border
+                    }}
+                  >
                     {/* Render PlayerName component for each player */}
                     <PlayerName
                       firstName={player.firstName}
@@ -125,7 +144,13 @@ export const Matches: React.FC<{
   ongoingMatchElements: React.ReactNode[];
   upcomingMatchElements: React.ReactNode[];
   pastMatchElements: React.ReactNode[];
-}> = ({ ongoingMatchElements, upcomingMatchElements, pastMatchElements }) => {
+  showAll?: boolean;
+}> = ({
+  ongoingMatchElements,
+  upcomingMatchElements,
+  pastMatchElements,
+  showAll = false
+}) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -231,7 +256,7 @@ export const Matches: React.FC<{
         )}
 
       {/* Past Matches */}
-      {currentTab === "completedMatches" &&
+      {(currentTab === "completedMatches" || showAll) &&
         renderSection(
           t("tournament_view_labels.past_matches"),
           showPast,

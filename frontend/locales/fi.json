@@ -171,6 +171,8 @@
   },
   "tournament_view_labels": {
     "final": "Finaali",
+    "semi_final": "Semifinaali",
+    "quarter_final": "Puolivälierä",
     "round": "Kierros",
     "scoreboard": "Tulostaulu",
     "matches": "Ottelut",
