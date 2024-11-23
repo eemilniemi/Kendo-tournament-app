@@ -176,7 +176,12 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
       ? format(new Date(tournamentData.endDate), "MMM dd, yyyy")
       : "";
 
-  const getRoundName = (roundNumber: number, totalRounds: number): string => {
+  const getRoundName = (roundNumber: number): string => {
+    if (tournament.type === "Swiss") {
+      return `Round ${roundNumber}`; // Only display round numbers for Swiss tournaments
+    }
+
+    // For other types of tournaments, use the existing logic
     if (roundNumber === totalRounds) {
       return t("tournament_view_labels.final");
     }
@@ -322,7 +327,7 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
                         fontWeight: "bold"
                       }}
                     >
-                      {getRoundName(parseInt(roundNumber, 10), totalRounds)}
+                      {getRoundName(parseInt(roundNumber, 10))}
                     </Typography>
                     <IconButton
                       onClick={() => {
