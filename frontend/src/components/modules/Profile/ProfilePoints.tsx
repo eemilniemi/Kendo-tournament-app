@@ -5,7 +5,10 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Box
+  Box,
+  Typography,
+  Paper,
+  TableContainer
 } from "@mui/material";
 import api from "api/axios";
 import { useAuth } from "context/AuthContext";
@@ -38,14 +41,12 @@ const ProfilePoints: React.FC = () => {
     void fetchTournamentsAndMatches();
   }, [userId]);
 
-  // Variables to store points for different types
   let menPoints = 0;
   let kotePoints = 0;
   let doPoints = 0;
   let tsukiPoints = 0;
   let hansokuPoints = 0;
 
-  // Calculate points for each type based on user's matches
   matches.forEach((match) => {
     match.players.forEach((player) => {
       if (player.id === userId) {
@@ -75,37 +76,61 @@ const ProfilePoints: React.FC = () => {
   });
 
   return (
-    <Box style={{ marginTop: "20px" }}>
-      <Table style={{ width: "60%", margin: "0 auto" }}>
-        <TableHead>
-          <TableRow>
-            <TableCell>{t("profile.point_type")}</TableCell>
-            <TableCell>{t("profile.points")}</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow>
-            <TableCell>Men</TableCell>
-            <TableCell>{menPoints}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Kote</TableCell>
-            <TableCell>{kotePoints}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Do</TableCell>
-            <TableCell>{doPoints}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Tsuki</TableCell>
-            <TableCell>{tsukiPoints}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Hansoku</TableCell>
-            <TableCell>{hansokuPoints}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+    <Box style={{ marginTop: "20px", width: "100%" }}>
+      <Typography variant="h6" gutterBottom>
+        {t("profile.my_points")}
+      </Typography>
+      <TableContainer
+        component={Paper}
+        style={{ width: "100%", margin: "0 auto" }}
+      >
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  color: "#fff",
+                  backgroundColor: "#DB4744"
+                }}
+              >
+                {t("profile.point_type")}
+              </TableCell>
+              <TableCell
+                style={{
+                  fontWeight: "bold",
+                  color: "#fff",
+                  backgroundColor: "#DB4744"
+                }}
+              >
+                {t("profile.points")}
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell style={{ fontWeight: "bold" }}>Men</TableCell>
+              <TableCell>{menPoints}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell style={{ fontWeight: "bold" }}>Kote</TableCell>
+              <TableCell>{kotePoints}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell style={{ fontWeight: "bold" }}>Do</TableCell>
+              <TableCell>{doPoints}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell style={{ fontWeight: "bold" }}>Tsuki</TableCell>
+              <TableCell>{tsukiPoints}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell style={{ fontWeight: "bold" }}>Hansoku</TableCell>
+              <TableCell>{hansokuPoints}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };

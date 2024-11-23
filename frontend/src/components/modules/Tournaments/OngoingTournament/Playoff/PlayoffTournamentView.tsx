@@ -1,46 +1,99 @@
 import React, { useEffect, useState } from "react";
-import Bracket from "./TournamentBracket";
-import { type User, type Match, type Tournament } from "types/models";
+import {
+  Box,
+  Typography,
+  Divider,
+  IconButton,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab
+} from "@mui/material";
 import { useTournament } from "context/TournamentContext";
-import { Typography, Box, Grid, Divider } from "@mui/material";
-import ErrorModal from "components/common/ErrorModal";
-import { useNavigate } from "react-router-dom";
-import routePaths from "routes/route-paths";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "context/AuthContext";
-import DeleteUserFromTournament from "../DeleteUserFromTournament";
-import CopyToClipboardButton from "../CopyToClipboardButton";
 import { useSocket } from "context/SocketContext";
-import { joinTournament, leaveTournament } from "sockets/emit";
 import api from "api/axios";
 import useToast from "hooks/useToast";
-import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
-import { mapNumberToLetter } from "utils/helperFunctions";
+import ErrorModal from "components/common/ErrorModal";
+import routePaths from "routes/route-paths";
+import CopyToClipboardButton from "../CopyToClipboardButton";
+import DeleteUserFromTournament from "../DeleteUserFromTournament";
+import TournamentWinner from "../../Winner";
+import { type Match, type Tournament } from "types/models";
+import { type TournamentPlayer } from "../RoundRobin/RoundRobinTournamentView";
+import MatchButton from "../../MatchButton";
+import { checkSameNames } from "../../PlayerNames";
+import { joinTournament, leaveTournament } from "sockets/emit";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import { format } from "date-fns";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import UpcomingTournamentView from "../../UpcomingTournamentView";
 
 interface Rounds extends Record<number, Match[]> {}
 
-const PlayoffTournamentView: React.FC = () => {
+interface PlayoffTournamentViewProps {
+  isChildTournament?: boolean;
+}
+
+const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
+  isChildTournament = false
+}) => {
   const initialTournamentData = useTournament();
   const tournament = useTournament();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
   const { userId } = useAuth();
   const showToast = useToast();
-  const isUserTheCreator = tournament.creator.id === userId;
-  const [hasJoined, setHasJoined] = useState(false);
+  const isUserTheCreator = tournament?.creator?.id === userId;
+  const mobile = useMediaQuery("(max-width:600px)");
 
-  const isPlayoff = tournament.type === "Playoff";
+  const [error] = useState<string | null>(null);
+  const [hasJoined, setHasJoined] = useState(false);
+  const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const defaultTab = "matches";
+  const currentTab = searchParams.get("tab") ?? defaultTab;
+  const tabTypes = isChildTournament
+    ? ["matches"]
+    : ["tournamentInfo", "matches"];
 
   const { tournamentData: socketData } = useSocket();
 
-  const [tournamentData, setTournamentData] = useState<Tournament>(
+  const [tournamentData, setTournamentData] = useState<Tournament | null>(
     initialTournamentData
   );
+  const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(
+    {}
+  );
 
-  // Listening to tournaments websocket
   useEffect(() => {
-    if (initialTournamentData.id !== undefined && !hasJoined) {
+    if (!tabTypes.includes(currentTab) && !isChildTournament) {
+      setSearchParams((params) => {
+        params.set("tab", defaultTab);
+        return params;
+      });
+    }
+  }, [currentTab, tabTypes]);
+
+  const handleTabChange = (tab: string): void => {
+    setSearchParams((params) => {
+      params.set("tab", tab);
+      return params;
+    });
+  };
+
+  useEffect(() => {
+    if (tournament !== null) {
+      const result = checkSameNames(tournament);
+      setHaveSameNames(result);
+    }
+  }, [tournament]);
+
+  useEffect(() => {
+    if ((initialTournamentData?.id).length > 0 && !hasJoined) {
       joinTournament(initialTournamentData.id);
       setHasJoined(true);
 
@@ -49,63 +102,31 @@ const PlayoffTournamentView: React.FC = () => {
         setHasJoined(false);
       };
     }
-  }, [initialTournamentData.id]);
+  }, [initialTournamentData?.id]);
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
       try {
-        if (socketData !== undefined) {
+        if (socketData != null) {
           setTournamentData(socketData);
-        } else {
+        } else if ((initialTournamentData?.id).length > 0) {
           const data: Tournament = await api.tournaments.getTournament(
             initialTournamentData.id
           );
           setTournamentData(data);
         }
       } catch (error) {
-        showToast(error, "error");
+        showToast("Failed to fetch tournament data", "error");
       }
     };
 
     void fetchData();
-  }, [socketData]);
-
-  let playoffMatches: Match[];
-  let totalRounds = 0;
-  let highestPreliminaryRound = 0;
-
-  const { type, matchSchedule, players, groups, playersToPlayoffsPerGroup } =
-    tournamentData;
-
-  if (type === "Preliminary Playoff") {
-    // Calculate initial round number for playoff matches
-    for (const match of matchSchedule) {
-      if (match.type !== "playoff") {
-        highestPreliminaryRound = Math.max(
-          highestPreliminaryRound,
-          match.tournamentRound
-        );
-      }
-    }
-
-    // Filter playoff matches from the matchSchedule
-    playoffMatches = matchSchedule.filter((match) => match.type === "playoff");
-    // Calculate the total number of rounds, assuming it's a single-elimination tournament
-    if (groups !== undefined && playersToPlayoffsPerGroup !== undefined) {
-      totalRounds = Math.ceil(
-        Math.log2(playersToPlayoffsPerGroup * groups.length)
-      );
-    }
-  } else {
-    // Is normal playoff tournament
-    playoffMatches = matchSchedule;
-    totalRounds = Math.ceil(Math.log2(players.length));
-  }
+  }, [socketData, initialTournamentData?.id]);
 
   if (error !== null) {
     return (
       <ErrorModal
-        open={true}
+        open
         onClose={() => {
           navigate(routePaths.homeRoute);
         }}
@@ -114,131 +135,270 @@ const PlayoffTournamentView: React.FC = () => {
     );
   }
 
-  try {
-    // Group matches by tournamentRound
-    const rounds: Rounds = playoffMatches.reduce<Rounds>((acc, match) => {
-      let round = 0;
-      if (type === "Preliminary Playoff") {
-        round = match.tournamentRound - highestPreliminaryRound;
-      } else {
-        round = match.tournamentRound;
-      }
+  if (tournamentData === null || tournamentData === undefined) {
+    return null; // Show nothing until tournament data is available
+  }
 
+  // Group matches by round
+  const rounds: Rounds = tournamentData.matchSchedule.reduce<Rounds>(
+    (acc, match) => {
+      const round = match.tournamentRound ?? 0;
       if (acc[round] === undefined) {
         acc[round] = [];
       }
       acc[round].push(match);
       return acc;
-    }, {});
+    },
+    {}
+  );
 
-    return (
-      <Box
-        sx={{
-          overflowX: "auto",
-          "&::-webkit-scrollbar": { display: "none" }
-        }}
-      >
-        {isPlayoff && (
-          <Grid container alignItems="center" spacing={4}>
-            <Grid item>
-              <Typography variant="h4">{tournament.name}</Typography>
-              {allMatchesPlayed(tournamentData) && (
-                <Typography variant="subtitle1">
-                  <span>
-                    {t("frontpage_labels.winner")}
-                    {": "}
-                    {findTournamentWinner(tournamentData)}
-                  </span>
-                </Typography>
-              )}
-            </Grid>
-            <Grid item>
-              <CopyToClipboardButton />
-            </Grid>
-          </Grid>
-        )}
+  const calculateTotalRounds = (numPlayers: number): number => {
+    if (numPlayers <= 1) return 0; // No rounds if there's only one or no players
+    return Math.ceil(Math.log2(numPlayers)); // Calculate the number of rounds
+  };
 
-        <Grid
-          container
-          spacing={2}
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          {Object.entries(rounds).map(([roundNumber, matches], index) => {
-            const roundNrPrint = index + 1;
-            return (
+  // Get the total number of rounds
+  const totalRounds = calculateTotalRounds(tournamentData.players.length);
+
+  const toggleRound = (roundNumber: number): void => {
+    setExpandedRounds((prev) => ({
+      ...prev,
+      [roundNumber]: !prev[roundNumber]
+    }));
+  };
+
+  const formattedStartDate =
+    tournamentData.startDate !== null
+      ? format(new Date(tournamentData.startDate), "MMM dd, yyyy")
+      : "";
+  const formattedEndDate =
+    tournamentData.endDate !== null
+      ? format(new Date(tournamentData.endDate), "MMM dd, yyyy")
+      : "";
+
+  const getRoundName = (roundNumber: number): string => {
+    if (tournament.type === "Swiss") {
+      return `${t("tournament_view_labels.round")} ${roundNumber}`; // Only display round numbers for Swiss tournaments
+    }
+
+    // For other types of tournaments, use the existing logic
+    if (roundNumber === totalRounds) {
+      return t("tournament_view_labels.final");
+    }
+    if (roundNumber === totalRounds - 1) {
+      return t("tournament_view_labels.semi_final");
+    }
+    if (roundNumber === totalRounds - 2) {
+      return t("tournament_view_labels.quarter_final");
+    }
+    return `${t("tournament_view_labels.round")} ${roundNumber}`;
+  };
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        overflowX: "auto",
+        "&::-webkit-scrollbar": { display: "none" }
+      }}
+    >
+      {!isChildTournament && (
+        <>
+          <Typography
+            variant="body1"
+            fontSize="10px"
+            sx={{ display: "flex", gap: "5px", alignItems: "center" }}
+          >
+            {formattedStartDate}
+            {formattedEndDate !== null && ` - ${formattedEndDate}`}
+          </Typography>
+          <Typography
+            variant="body1"
+            fontSize="10px"
+            sx={{ display: "flex", gap: "5px", alignItems: "center" }}
+          >
+            {tournamentData.location !== null && `${tournamentData.location}`}
+          </Typography>{" "}
+          <Typography variant="h4">{tournamentData.name}</Typography>
+          <TournamentWinner tournament={tournamentData} />
+          <div
+            style={{
+              position: "absolute",
+              right: "15px",
+              top: mobile ? "44px" : "64px",
+              transform: "translateY(50%)"
+            }}
+          >
+            <CopyToClipboardButton />
+          </div>
+          {mobile ? (
+            <Select
+              value={currentTab}
+              onChange={(event) => {
+                handleTabChange(event.target.value);
+              }}
+              style={{
+                marginBottom: "10px",
+                alignItems: "center",
+                padding: "0"
+              }}
+              sx={{
+                border: "2px solid #db4744",
+                fontSize: "13px",
+                color: "#db4744",
+                margin: "10px 0",
+                width: "100%"
+              }}
+            >
+              <MenuItem value="tournamentInfo" sx={{ fontSize: "13px" }}>
+                {t("tournament_view_labels.tournament_info")}
+              </MenuItem>
+              <MenuItem value="matches" sx={{ fontSize: "13px" }}>
+                {t("tournament_view_labels.past_matches_tab")}
+              </MenuItem>
+            </Select>
+          ) : (
+            <>
+              <Tabs
+                value={currentTab}
+                onChange={(_, newValue) => {
+                  handleTabChange(newValue);
+                }}
+                variant="scrollable"
+                scrollButtons="auto"
+                allowScrollButtonsMobile
+                sx={{ margin: "10px 0" }}
+              >
+                <Tab
+                  label={t("tournament_view_labels.tournament_info")}
+                  value="tournamentInfo"
+                  sx={{ fontSize: "13px" }}
+                />
+                <Tab
+                  label={t("tournament_view_labels.matches")}
+                  value="matches"
+                  sx={{ fontSize: "13px" }}
+                />
+              </Tabs>
+            </>
+          )}
+        </>
+      )}
+
+      {(currentTab === "matches" || isChildTournament) && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              padding: "20px 0",
+              gap: "10px 25px"
+            }}
+          >
+            {Object.entries(rounds).map(([roundNumber, matches], index) => (
               <React.Fragment key={roundNumber}>
-                {index > 0 && <Divider orientation="vertical" flexItem />}
-                <Grid item>
+                {index > 0 && <Divider orientation="horizontal" flexItem />}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    padding: "20px",
+                    borderRadius: 2,
+                    width: "100%"
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
-                      minWidth: 300
+                      justifyContent: "space-between"
                     }}
                   >
                     <Typography
                       variant="h6"
                       sx={{
                         marginBottom: 2,
-                        textAlign: "center",
-                        textDecoration: "underline"
+                        textDecoration: "underline",
+                        fontSize: "17px",
+                        fontWeight: "bold"
                       }}
                     >
-                      {parseInt(roundNumber) === totalRounds &&
-                      tournament.type === "Playoff"
-                        ? t("tournament_view_labels.final")
-                        : `${t(
-                            "tournament_view_labels.round"
-                          )} ${roundNrPrint}`}
+                      {getRoundName(parseInt(roundNumber, 10))}
                     </Typography>
-                    {matches.map((match: Match) => {
-                      const tempPlayers: User[] = match.players.map(
-                        (matchPlayer) => {
-                          const player = players.find(
-                            (p) => p.id === matchPlayer.id
-                          );
-                          if (player === null || player === undefined) {
-                            throw new Error();
-                          }
-                          return player;
-                        }
-                      );
-                      return (
-                        <Grid item key={match.id}>
-                          <Typography
-                            variant="body2"
-                            style={{ textAlign: "center" }}
-                          >
-                            {t("tournament_view_labels.court_number")}
-                            {": "}
-                            {mapNumberToLetter(match.courtNumber)}
-                          </Typography>
-                          <Bracket
-                            key={match.id}
-                            players={tempPlayers}
-                            match={match}
-                          />
-                        </Grid>
-                      );
-                    })}
+                    <IconButton
+                      onClick={() => {
+                        toggleRound(parseInt(roundNumber, 10));
+                      }}
+                    >
+                      {expandedRounds[parseInt(roundNumber, 10)] ? (
+                        <ArrowDropUpIcon />
+                      ) : (
+                        <ArrowDropDownIcon />
+                      )}
+                    </IconButton>
                   </Box>
-                </Grid>
+                  {expandedRounds[parseInt(roundNumber, 10)] && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "flex-start",
+                        gap: "40px"
+                      }}
+                    >
+                      {matches.map((match) => {
+                        const tempPlayers: TournamentPlayer[] =
+                          match.players.map((matchPlayer) => {
+                            const player = tournamentData.players.find(
+                              (p) => p.id === matchPlayer.id
+                            );
+                            if (player === null || player === undefined) {
+                              throw new Error("Player not found");
+                            }
+                            return {
+                              id: player.id,
+                              firstName: player.firstName,
+                              lastName: player.lastName,
+                              points: 0,
+                              ippons: 0,
+                              wins: 0,
+                              losses: 0,
+                              ties: 0
+                            };
+                          });
+
+                        return (
+                          <MatchButton
+                            key={match.id}
+                            match={match}
+                            players={tempPlayers}
+                            isUserTheCreator={isUserTheCreator}
+                            tournamentData={tournamentData}
+                            haveSameNames={haveSameNames}
+                          />
+                        );
+                      })}
+                    </Box>
+                  )}
+                </Box>
               </React.Fragment>
-            );
-          })}
-        </Grid>
-        {isUserTheCreator && <DeleteUserFromTournament />}
-      </Box>
-    );
-  } catch (e) {
-    if (e instanceof Error) {
-      setError(e.message);
-    } else {
-      setError(t("messages.unexpected_error_happened"));
-    }
-  }
+            ))}
+          </Box>
+          {isUserTheCreator && <DeleteUserFromTournament />}
+        </>
+      )}
+
+      {currentTab === "tournamentInfo" && (
+        <div style={{ padding: "10px 0 0 0" }}>
+          <UpcomingTournamentView ongoing />
+        </div>
+      )}
+    </Box>
+  );
 };
 
 export default PlayoffTournamentView;

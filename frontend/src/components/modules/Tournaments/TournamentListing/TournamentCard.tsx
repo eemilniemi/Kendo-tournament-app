@@ -16,18 +16,23 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Box
 } from "@mui/material";
+import TodayIcon from "@mui/icons-material/Today";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 
 interface TournamentCardProps {
   tournament: Tournament;
   type: string;
+  mobile: boolean;
 }
 
 const TournamentCard: React.FC<TournamentCardProps> = ({
   tournament,
-  type
+  type,
+  mobile
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -43,8 +48,20 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
 
   const finished = allMatchesPlayed(tournament);
 
+  let teamMismatch = false;
+  if (
+    tournament.type === "Team Round Robin" &&
+    tournament.teams !== null &&
+    tournament.teams !== undefined
+  ) {
+    const playerCounts = tournament.teams.map((team) => team.players.length);
+    teamMismatch = !playerCounts.every((count) => count === playerCounts[0]);
+  }
   // Check if the tournament has fewer than 2 players after it started
-  const cancelled = !tournamentHasNotStarted && tournament.players.length < 2;
+  const cancelled =
+    !tournamentHasNotStarted &&
+    (tournament.players.length < 2 ||
+      (tournament.type === "Team Round Robin" && teamMismatch));
 
   const handleOpenDialog = (): void => {
     setOpenDialog(true);
@@ -96,7 +113,14 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
   );
 
   return (
-    <Card component="main" sx={{ position: "relative" }}>
+    <Card
+      component="main"
+      sx={{
+        position: "relative",
+        borderRadius: 5,
+        maxWidth: 500
+      }}
+    >
       <CardActionArea
         onClick={() => {
           if (type === "past") {
@@ -105,16 +129,20 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
             navigate(tournament.id);
           }
         }}
+        sx={{ margin: 1, marginBottom: 3 }}
       >
         <CardHeader
           title={tournament.name}
           titleTypographyProps={{ fontWeight: "500" }}
+          sx={{ margin: 1, marginBottom: 0, paddingBottom: 0 }}
         />
-        <CardContent sx={{ marginBottom: "64px" }}>
+        <CardContent sx={{ margin: 1, paddingTop: 0 }}>
           {tournamentFull && type === "upcoming" && (
-            <Typography variant="subtitle1" marginBottom="32px">
-              {t("upcoming_tournament_view.tournament_full")}
-            </Typography>
+            <Typography
+              variant="subtitle1"
+              marginBottom="32px"
+              sx={{ margin: 1, paddingTop: 0 }}
+            ></Typography>
           )}
           {cancelled ? (
             <Typography color="red">
@@ -131,103 +159,135 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
             )
           )}
           {(type === "ongoing" || type === "upcoming") && (
-            <Typography color="text.secondary">
-              {t("frontpage_labels.start_date")}:{" "}
-              {new Date(tournament.startDate).toLocaleString("fi", {
-                hour: "2-digit",
-                minute: "2-digit",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-              })}
-            </Typography>
+            <Box
+              sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
+            >
+              <TodayIcon sx={{ marginRight: 1 }} />
+              <Typography color="text.secondary">
+                {tournament.location}
+              </Typography>
+            </Box>
           )}
           {(type === "ongoing" || type === "upcoming") && (
-            <Typography color="text.secondary">
-              {t("frontpage_labels.end_date")}:{" "}
-              {new Date(tournament.endDate).toLocaleString("fi", {
-                hour: "2-digit",
-                minute: "2-digit",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-              })}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <LocationOnIcon sx={{ marginRight: 1 }} />
+              <Typography color="text.secondary">
+                {new Date(tournament.startDate).toLocaleString("fi", {
+                  day: "2-digit",
+                  month: "2-digit"
+                })}{" "}
+                -{" "}
+                {new Date(tournament.endDate).toLocaleString("fi", {
+                  month: "2-digit",
+                  day: "2-digit"
+                })}
+              </Typography>
+            </Box>
           )}
           {type === "past" && (
-            <Typography color="text.secondary">
-              {`${tournament.location}, 
-              ${new Date(tournament.startDate).toLocaleString("fi", {
-                hour: "2-digit",
-                minute: "2-digit",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-              })} -
-              ${new Date(tournament.endDate).toLocaleString("fi", {
-                hour: "2-digit",
-                minute: "2-digit",
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-              })}`}
-            </Typography>
+            <>
+              <Typography color="text.secondary">
+                {tournament.location},
+              </Typography>
+              <Typography color="text.secondary">
+                {` 
+          ${new Date(tournament.startDate).toLocaleString("fi", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          })} -
+          ${new Date(tournament.endDate).toLocaleString("fi", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          })}`}
+              </Typography>
+            </>
           )}
         </CardContent>
       </CardActionArea>
       {type === "upcoming" && (
-        <>
-          <br />
-          {tournament.type !== "Team Round Robin" && (
-            <>
-              <Button
-                color="primary"
-                variant="contained"
-                disabled={userAlreadySigned || tournamentFull}
-                onClick={() => {
-                  navigate(`${tournament.id}/sign-up`);
-                }}
-                sx={{ position: "absolute", bottom: 10, right: 10 }}
-              >
-                {t("buttons.sign_up_button")}
-              </Button>
-              {userAlreadySigned && tournamentHasNotStarted && (
+        <CardContent sx={{ paddingTop: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1,
+              justifyContent: "center",
+              marginTop: 2
+            }}
+          >
+            {/* Render the cancel sign-up or sign-up button */}
+            {tournamentHasNotStarted && userId !== undefined && (
+              <>
+                {userAlreadySigned ? (
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    onClick={() => {
+                      navigate(`${tournament.id}/cancel-sign-up`);
+                    }}
+                    sx={{
+                      minWidth: "90px",
+                      padding: "5px 15px",
+                      borderRadius: "15px"
+                    }}
+                  >
+                    {t("buttons.cancel_sign_up")}
+                  </Button>
+                ) : (
+                  <Button
+                    color="success"
+                    variant="contained"
+                    disabled={tournamentFull}
+                    onClick={() => {
+                      navigate(`${tournament.id}/sign-up`);
+                    }}
+                    sx={{
+                      minWidth: "90px",
+                      padding: "5px 15px",
+                      borderRadius: "15px"
+                    }}
+                  >
+                    {t("buttons.sign_up_button")}
+                  </Button>
+                )}
+              </>
+            )}
+
+            {/* Render the creator buttons */}
+            {isUserTheCreator && tournamentHasNotStarted && (
+              <>
                 <Button
-                  color="secondary"
+                  color="error"
                   variant="contained"
-                  onClick={() => {
-                    navigate(`${tournament.id}/cancel-sign-up`);
+                  onClick={handleOpenDialog}
+                  sx={{
+                    minWidth: "90px",
+                    padding: "5px 15px",
+                    borderRadius: "15px"
                   }}
-                  sx={{ position: "absolute", bottom: 10, right: 10 }}
                 >
-                  {t("buttons.cancel_sign_up")}
+                  {t("buttons.delete")}
                 </Button>
-              )}
-            </>
-          )}
-          {isUserTheCreator && tournamentHasNotStarted && (
-            <Button
-              color="error"
-              variant="outlined"
-              onClick={handleOpenDialog}
-              sx={{ position: "absolute", bottom: 10, left: 10 }}
-            >
-              {t("buttons.delete")}
-            </Button>
-          )}
-          {isUserTheCreator && tournamentHasNotStarted && (
-            <Button
-              color="error"
-              variant="outlined"
-              onClick={() => {
-                navigate(`edit-tournament-info/${tournament.id}`);
-              }}
-              sx={{ position: "absolute", bottom: 60, right: 10 }}
-            >
-              {t("buttons.edit_button")}
-            </Button>
-          )}
-        </>
+                <Button
+                  color="error"
+                  variant="outlined"
+                  onClick={() => {
+                    navigate(`edit-tournament-info/${tournament.id}`);
+                  }}
+                  sx={{
+                    minWidth: "90px",
+                    padding: "5px 15px",
+                    borderRadius: "15px"
+                  }}
+                >
+                  {t("buttons.edit_button")}
+                </Button>
+              </>
+            )}
+          </Box>
+        </CardContent>
       )}
 
       {deleteConfirmationDialog()}
