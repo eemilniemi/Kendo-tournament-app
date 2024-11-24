@@ -28,14 +28,12 @@ import PlayerName, { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 import MatchButton from "../../MatchButton";
 import UpcomingTournamentView from "../../UpcomingTournamentView";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { keyframes } from "@mui/system";
 import { format } from "date-fns";
+import TournamentWinner from "../../Winner";
 
 export interface TournamentPlayer {
   id: string;
@@ -69,7 +67,13 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
       }
 
       return (
-        <TableCell key={index}>
+        <TableCell
+          key={index}
+          sx={{
+            borderRight: "1px solid #ddd",
+            borderBottom: "1px solid #ddd"
+          }}
+        >
           <Typography>{value}</Typography>
         </TableCell>
       );
@@ -93,16 +97,29 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         <TableContainer component={Paper}>
           <Table onClick={onClick}>
             <TableHead>
-              <TableRow>
+              <TableRow sx={{ backgroundColor: "#D01C1C" }}>
                 {tableHeaders.map((header, index) => (
-                  <TableCell key={index}>{header}</TableCell>
+                  <TableCell
+                    key={index}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {header}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedPlayers.map((player, index) => (
                 <TableRow key={index}>
-                  <TableCell>
+                  <TableCell
+                    sx={{
+                      borderRight: "1px solid #ddd", // Add vertical border
+                      borderBottom: "1px solid #ddd" // Add bottom border
+                    }}
+                  >
                     {/* Render PlayerName component for each player */}
                     <PlayerName
                       firstName={player.firstName}
@@ -127,7 +144,13 @@ export const Matches: React.FC<{
   ongoingMatchElements: React.ReactNode[];
   upcomingMatchElements: React.ReactNode[];
   pastMatchElements: React.ReactNode[];
-}> = ({ ongoingMatchElements, upcomingMatchElements, pastMatchElements }) => {
+  showAll?: boolean;
+}> = ({
+  ongoingMatchElements,
+  upcomingMatchElements,
+  pastMatchElements,
+  showAll = false
+}) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -194,8 +217,8 @@ export const Matches: React.FC<{
       {show && (
         <Box
           display="flex"
-          gap="15px"
-          justifyContent="space-between"
+          gap="40px"
+          justifyContent="flex-start"
           flexWrap="wrap"
           marginTop="10px"
           marginLeft="10px"
@@ -233,7 +256,7 @@ export const Matches: React.FC<{
         )}
 
       {/* Past Matches */}
-      {currentTab === "completedMatches" &&
+      {(currentTab === "completedMatches" || showAll) &&
         renderSection(
           t("tournament_view_labels.past_matches"),
           showPast,
@@ -551,9 +574,6 @@ const RoundRobinTournamentView: React.FC = () => {
       match={match}
       players={players}
       haveSameNames={haveSameNames}
-      props={{
-        variant: "contained"
-      }}
       isUserTheCreator={isUserTheCreator}
       tournamentData={tournamentData}
     />
@@ -565,10 +585,6 @@ const RoundRobinTournamentView: React.FC = () => {
       match={match}
       players={players}
       haveSameNames={haveSameNames}
-      props={{
-        variant: "contained",
-        color: "info"
-      }}
       isUserTheCreator={isUserTheCreator}
       tournamentData={tournamentData}
     />
@@ -580,19 +596,10 @@ const RoundRobinTournamentView: React.FC = () => {
       match={match}
       players={players}
       haveSameNames={haveSameNames}
-      props={{
-        variant: "contained",
-        color: "secondary"
-      }}
       isUserTheCreator={isUserTheCreator}
       tournamentData={tournamentData}
     />
   ));
-
-  const flash = keyframes`
-    0% { transform: scale(1); }
-    100% { transform: scale(1.05); }
-  `;
 
   const formattedStartDate =
     tournamentData.startDate !== null
@@ -621,51 +628,7 @@ const RoundRobinTournamentView: React.FC = () => {
         {tournamentData.location !== null && `${tournamentData.location}`}
       </Typography>{" "}
       <Typography variant="h4">{tournamentData.name}</Typography>
-      {allMatchesPlayed(tournamentData) && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%"
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#db4744",
-              width: "90%",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-              color: "white",
-              marginTop: "20px",
-              animation: `${flash} 1.5s infinite alternate`
-            }}
-          >
-            <EmojiEventsIcon
-              sx={{ fontSize: "2rem", marginRight: "8px", color: "#FFD700" }}
-            />
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: "bold", fontSize: "1.25rem" }}
-            >
-              {t("frontpage_labels.winner")}
-              {": "}
-              <span
-                style={{
-                  color: "#FFD700",
-                  fontSize: "1.5rem",
-                  fontWeight: "bold"
-                }}
-              >
-                {findTournamentWinner(tournamentData)}
-              </span>
-            </Typography>
-          </Box>
-        </Box>
-      )}
+      <TournamentWinner tournament={tournamentData} />
       <div
         style={{
           position: "absolute",
@@ -757,7 +720,9 @@ const RoundRobinTournamentView: React.FC = () => {
         </div>
       )}
       {currentTab === "scoreboard" && (
-        <Scoreboard players={players} haveSameNames={haveSameNames} />
+        <Box sx={{ padding: "20px 0px" }}>
+          <Scoreboard players={players} haveSameNames={haveSameNames} />
+        </Box>
       )}
       {currentTab === "ongoingUpcomingMatches" && (
         <Matches

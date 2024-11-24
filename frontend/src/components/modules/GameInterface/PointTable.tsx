@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Table, TableBody, TableRow, TableCell } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { PointType } from "types/models";
 import { type MatchData } from "./GameInterface";
+import PlayerName from "../Tournaments/PlayerNames"; // Ensure correct path for PlayerName
 
 interface TableComponentProps {
   matchInfo: MatchData;
 }
-interface Cell {
+
+interface Point {
+  color: string;
   value: string;
-  filled: boolean;
 }
 
 const PointTable: React.FC<TableComponentProps> = ({ matchInfo }) => {
-  // Initialize the table with 5 rows and 2 columns, all cells empty initially
-  const initialCells: Cell[][] = Array(5)
-    .fill(null)
-    .map(() => Array(2).fill({ value: "", filled: false }));
-
-  const [cells, setCells] = useState<Cell[][]>(initialCells);
+  const [whitePoints, setWhitePoints] = useState<Point[]>([]);
+  const [redPoints, setRedPoints] = useState<Point[]>([]);
 
   const typeToButtonMap: Record<PointType, string> = {
     men: "M",
@@ -28,74 +26,264 @@ const PointTable: React.FC<TableComponentProps> = ({ matchInfo }) => {
   };
 
   useEffect(() => {
-    const allPoints: Array<{ color: string; time: Date; value: string }> = [];
+    const white: Point[] = [];
+    const red: Point[] = [];
 
     matchInfo.players.forEach((player) => {
       player.points.forEach((point) => {
-        const color: string = player.color;
-        const time: Date = point.timestamp;
-        const value: string = typeToButtonMap[point.type];
+        const value = typeToButtonMap[point.type];
+        const pointData = { color: player.color, value };
 
-        if (!allPoints.some((existingPoint) => existingPoint.time === time)) {
-          allPoints.push({ color, time, value });
+        if (player.color === "white") {
+          white.push(pointData);
+        } else if (player.color === "red") {
+          red.push(pointData);
         }
       });
     });
 
-    allPoints.sort((a, b) => (a.time < b.time ? -1 : 1));
-
-    // Create a new state for the cells based on the sorted points
-    const newCells = initialCells.map((row) => [...row]); // Clone the initial structure
-    allPoints.forEach((point, index) => {
-      if (index < 5) {
-        // Ensure we don't exceed the table size
-        const column = point.color === "white" ? 0 : 1;
-        newCells[index][column] = { value: point.value, filled: true };
-      }
-    });
-
-    setCells(newCells);
+    setWhitePoints(white);
+    setRedPoints(red);
   }, [matchInfo]);
 
-  return (
-    <div className="tableContainer">
-      <Table>
-        <TableBody>
-          {cells.map((row, rowIndex) => (
-            <TableRow key={rowIndex} style={{ height: "75px" }}>
-              {row.map((cell, columnIndex) => (
-                <TableCell key={columnIndex}>
-                  {cell.filled ? (
-                    rowIndex === 0 ? (
-                      <CircledLetter letter={cell.value} />
-                    ) : (
-                      cell.value
-                    )
-                  ) : (
-                    ""
-                  )}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
-interface CircledLetterProps {
-  letter: string;
-}
+  const haveSameNames = matchInfo.firstNames.some((name, i) => {
+    return matchInfo.firstNames.indexOf(name) !== i;
+  });
 
-const CircledLetter: React.FC<CircledLetterProps> = ({ letter }) => {
-  const circleStyle = {
-    display: "inline-block",
-    borderRadius: "50%",
-    border: "1px solid black",
-    padding: "10px"
+  const calculateScore = (points: Point[]): number => {
+    const validPoints = points.filter((p) => p.value !== "\u0394");
+    return validPoints.length;
   };
 
-  return <span style={circleStyle}>{letter}</span>;
+  const whiteScore = calculateScore(whitePoints);
+  const redScore = calculateScore(redPoints);
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "20px"
+      }}
+    >
+      {/* Players and Points */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" }, // Stack on smaller screens
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          width: "100%",
+          maxWidth: "600px",
+          gap: { xs: "10px", sm: "0" } // Add gap for stacked layout
+        }}
+      >
+        {/* White Player */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%", // Full width for mobile
+            border: "1px solid black",
+            color: "#000"
+          }}
+        >
+          {/* Player Info */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              width: "100%",
+              gap: "20px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              borderBottom: "1px solid black",
+              padding: "10px"
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: "24px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                color: "black"
+              }}
+            >
+              {whiteScore}
+            </Typography>
+            <Box
+              sx={{
+                width: "20px",
+                height: "20px",
+                borderRadius: "4px",
+                backgroundColor: "#ffffff",
+                border: "1px solid black"
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: "24px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                color: "black"
+              }}
+            >
+              <PlayerName
+                firstName={matchInfo.firstNames[0]}
+                lastName={matchInfo.lastNames[0]}
+                sameNames={haveSameNames}
+              />
+            </Typography>
+          </Box>
+
+          {/* Player Points */}
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "flex-start", // Normal layout
+              alignItems: "center",
+              gap: "10px",
+              width: "100%",
+              padding: "10px",
+              minHeight: "60px"
+            }}
+          >
+            {whitePoints.map((point, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  border: "1px solid black",
+                  backgroundColor: "#ffffff",
+                  color: "#000"
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                  {point.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Red Player */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%", // Full width for mobile
+            border: "1px solid black",
+            color: "#fff"
+          }}
+        >
+          {/* Player Info */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start", // Normal layout
+              width: "100%",
+              gap: "20px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              borderBottom: "1px solid black",
+              padding: "10px"
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: "24px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                color: "black"
+              }}
+            >
+              {redScore}
+            </Typography>
+            <Box
+              sx={{
+                width: "20px",
+                height: "20px",
+                borderRadius: "4px",
+                backgroundColor: "#db4744",
+                border: "1px solid black"
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: "24px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                color: "black"
+              }}
+            >
+              <PlayerName
+                firstName={matchInfo.firstNames[1]}
+                lastName={matchInfo.lastNames[1]}
+                sameNames={haveSameNames}
+              />
+            </Typography>
+          </Box>
+
+          {/* Player Points */}
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: "10px",
+              width: "100%",
+              minHeight: "60px",
+              padding: "10px"
+            }}
+          >
+            {redPoints.map((point, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  border: "1px solid black",
+                  backgroundColor: "#fff",
+                  color: "black"
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                  {point.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
 };
 
 export default PointTable;

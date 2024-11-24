@@ -2,13 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Tabs,
   Tab,
+  Box,
   Button,
   Typography,
   Card,
   CardActionArea,
   CardContent,
-  Grid
+  Select,
+  MenuItem
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { type Match, type Tournament } from "types/models";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useSearchParams } from "react-router-dom";
@@ -29,9 +32,12 @@ import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
 import api from "api/axios";
 import useToast from "hooks/useToast";
-import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
 import { useAuth } from "context/AuthContext";
 import MatchButton from "../../MatchButton";
+import TournamentWinner from "../../Winner";
+import { format } from "date-fns";
+import UpcomingTournamentView from "../../UpcomingTournamentView";
+import TreeComponent from "../Playoff/TournamentTree";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {
@@ -94,11 +100,18 @@ const PreliminaryPlayoffView: React.FC = () => {
   const [previousTab, setPreviousTab] = useState(defaultTab);
   const [searchParams, setSearchParams] = useSearchParams();
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
-  const tabTypes = ["preliminary", "playoff"] as const;
+  const tabTypes = [
+    "tournamentInfo",
+    "preliminary",
+    "playoff",
+    "tree"
+  ] as const;
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const [tiebreakerToasts, setTiebreakerToasts] = useState<TiebreakerToasts>(
     {}
   );
+  const mobile = useMediaQuery("(max-width:600px)");
+
   const { userId } = useAuth();
   const isUserTheCreator = initialTournamentData.creator.id === userId;
 
@@ -170,7 +183,7 @@ const PreliminaryPlayoffView: React.FC = () => {
         // Find the player in the players array by ID
         return players.find((player) => player.id === groupId);
       })
-      .filter((player) => player !== undefined); // Filter out undefined values and assert the type
+      .filter((player) => player !== undefined) as TournamentPlayer[]; // Filter out undefined values and assert the type
   };
 
   // Handles view change when scoreboard is clicked
@@ -325,7 +338,6 @@ const PreliminaryPlayoffView: React.FC = () => {
               match={match}
               players={players}
               haveSameNames={haveSameNames}
-              props={{ variant: "contained" }}
               isUserTheCreator={isUserTheCreator}
               tournamentData={tournamentData}
             />
@@ -341,7 +353,6 @@ const PreliminaryPlayoffView: React.FC = () => {
               match={match}
               players={players}
               haveSameNames={haveSameNames}
-              props={{ variant: "contained" }}
               isUserTheCreator={isUserTheCreator}
               tournamentData={tournamentData}
             />
@@ -355,7 +366,6 @@ const PreliminaryPlayoffView: React.FC = () => {
               match={match}
               players={players}
               haveSameNames={haveSameNames}
-              props={{ variant: "contained" }}
               isUserTheCreator={isUserTheCreator}
               tournamentData={tournamentData}
             />
@@ -372,46 +382,118 @@ const PreliminaryPlayoffView: React.FC = () => {
     }
   }, [selectedGroup, ongoingMatches, upcomingMatches, pastMatches]);
 
+  const formattedStartDate =
+    tournamentData.startDate !== null
+      ? format(new Date(tournamentData.startDate), "MMM dd, yyyy")
+      : "";
+  const formattedEndDate =
+    tournamentData.endDate !== null
+      ? format(new Date(tournamentData.endDate), "MMM dd, yyyy")
+      : "";
+
   return (
     <>
-      <Grid container alignItems="center" spacing={4}>
-        <Grid item>
-          <Typography variant="h4">{tournamentData.name}</Typography>
-          {allMatchesPlayed(tournamentData) && (
-            <Typography variant="subtitle1">
-              <span>
-                {t("frontpage_labels.winner")}
-                {": "}
-                {findTournamentWinner(tournamentData)}
-              </span>
-            </Typography>
-          )}
-        </Grid>
-        <Grid item>
-          <CopyToClipboardButton />
-        </Grid>
-      </Grid>
-
-      <Tabs
-        value={currentTab}
-        onChange={(_, newValue) => {
-          handleTabChange(newValue);
-        }}
-        variant="scrollable"
-        scrollButtons="auto"
-        allowScrollButtonsMobile
+      <Typography
+        variant="body1"
+        fontSize="10px"
+        sx={{ display: "flex", gap: "5px", alignItems: "center" }}
       >
-        <Tab
-          label={t("types.preliminary")}
-          value="preliminary"
-          sx={{ fontSize: "13px" }}
-        />
-        <Tab
-          label={t("types.playoff")}
-          value="playoff"
-          sx={{ fontSize: "13px" }}
-        />
-      </Tabs>
+        {formattedStartDate}
+        {formattedEndDate !== null && ` - ${formattedEndDate}`}
+      </Typography>
+      <Typography
+        variant="body1"
+        fontSize="10px"
+        sx={{ display: "flex", gap: "5px", alignItems: "center" }}
+      >
+        {tournamentData.location !== null && `${tournamentData.location}`}
+      </Typography>{" "}
+      <Typography variant="h4">{tournamentData.name}</Typography>
+      <TournamentWinner tournament={tournamentData} />
+      <div
+        style={{
+          position: "absolute",
+          right: "15px",
+          top: mobile ? "44px" : "64px",
+          transform: "translateY(50%)"
+        }}
+      >
+        <CopyToClipboardButton />
+      </div>
+      {mobile ? (
+        <Select
+          value={currentTab}
+          onChange={(event) => {
+            handleTabChange(event.target.value);
+          }}
+          style={{ marginBottom: "10px", alignItems: "center", padding: "0" }}
+          sx={{
+            border: "2px solid #db4744",
+            fontSize: "13px",
+            color: "#db4744",
+            margin: "10px 0",
+            width: "100%"
+          }}
+        >
+          <MenuItem value="tournamentInfo" sx={{ fontSize: "13px" }}>
+            {t("tournament_view_labels.tournament_info")}
+          </MenuItem>
+          <MenuItem value="preliminary" sx={{ fontSize: "13px" }}>
+            {t("types.preliminary")}
+          </MenuItem>
+          <MenuItem value="playoff" sx={{ fontSize: "13px" }}>
+            {t("types.playoff")}
+          </MenuItem>
+          {tournamentStage === "playoff" && (
+            <>
+              <MenuItem value="tree" sx={{ fontSize: "13px" }}>
+                {t("tournament_view_labels.tournament_tree")}
+              </MenuItem>
+            </>
+          )}
+        </Select>
+      ) : (
+        <>
+          <Tabs
+            value={currentTab}
+            onChange={(_, newValue) => {
+              handleTabChange(newValue);
+            }}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            sx={{ margin: "10px 0" }}
+          >
+            <Tab
+              label={t("tournament_view_labels.tournament_info")}
+              value="tournamentInfo"
+              sx={{ fontSize: "13px" }}
+            />
+            <Tab
+              label={t("types.preliminary")}
+              value="preliminary"
+              sx={{ fontSize: "13px" }}
+            />
+            <Tab
+              label={t("types.playoff")}
+              value="playoff"
+              sx={{ fontSize: "13px" }}
+            />
+            {tournamentStage === "playoff" && (
+              <Tab
+                label={t("tournament_view_labels.tournament_tree")}
+                value="tree"
+                sx={{ fontSize: "13px" }}
+              />
+            )}
+          </Tabs>
+        </>
+      )}
+      {currentTab === "tournamentInfo" && (
+        <div style={{ padding: "10px 0 0 0" }}>
+          <UpcomingTournamentView ongoing />
+        </div>
+      )}
       {currentTab === "preliminary" && (
         <>
           {!showMatches &&
@@ -422,8 +504,20 @@ const PreliminaryPlayoffView: React.FC = () => {
                     handleScoreboardClick(index);
                   }}
                 >
-                  <CardContent>
-                    <Typography variant="h5" component="h2">
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "15px",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      component="h2"
+                      fontSize={"17px"}
+                      fontWeight={"bold"}
+                    >
                       {t("tournament_view_labels.group")} {index + 1}
                     </Typography>
                     <Scoreboard
@@ -436,10 +530,19 @@ const PreliminaryPlayoffView: React.FC = () => {
             ))}
           {showMatches && (
             <div>
-              <Button onClick={handleBackToGroupView}>
-                <ArrowBackIcon /> {t("navigation.back_to_group_view")}
+              <Button
+                onClick={handleBackToGroupView}
+                sx={{ fontSize: "13px", marginBottom: "5px" }}
+              >
+                <ArrowBackIcon sx={{ fontSize: "13px" }} />{" "}
+                {t("navigation.back_to_group_view")}
               </Button>
-              <Typography variant="h4">
+              <Typography
+                variant="h4"
+                fontSize={"17px"}
+                fontWeight={"bold"}
+                marginTop="5px"
+              >
                 {t("tournament_view_labels.group")}{" "}
                 {selectedGroup !== null ? selectedGroup + 1 : ""}
               </Typography>
@@ -447,6 +550,7 @@ const PreliminaryPlayoffView: React.FC = () => {
                 ongoingMatchElements={ongoingElements}
                 upcomingMatchElements={upcomingElements}
                 pastMatchElements={pastElements}
+                showAll
               />
             </div>
           )}
@@ -457,7 +561,25 @@ const PreliminaryPlayoffView: React.FC = () => {
       )}
       {currentTab === "playoff" && tournamentStage === "playoff" && (
         <div>
-          <PlayoffTournamentView />
+          <PlayoffTournamentView isChildTournament={true} />
+        </div>
+      )}
+      {currentTab === "tree" && tournamentStage === "playoff" && (
+        <div>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              padding: "20px 0",
+              gap: "10px 25px"
+            }}
+          >
+            <Typography variant="h6">
+              {t("tournament_view_labels.tournament_tree")}
+            </Typography>
+            <TreeComponent />
+          </Box>
         </div>
       )}
     </>

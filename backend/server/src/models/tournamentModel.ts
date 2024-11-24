@@ -22,7 +22,9 @@ export type UnsavedMatch = Pick<
   | "tournamentRound"
   | "tournamentId"
   | "matchTime"
->;
+> & {
+  winnerTeamId?: Types.ObjectId;
+};
 
 export interface Tournament {
   id: Types.ObjectId;
