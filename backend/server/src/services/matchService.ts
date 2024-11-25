@@ -1007,6 +1007,13 @@ export class MatchService {
     const player2: MatchPlayer = match.players[1] as MatchPlayer;
     const pointWinner = player1.color === pointColor ? player1 : player2;
     pointWinner.points.push(point);
+
+    if (pointColor === "white") {
+      match.sides[0].scores?.push({ mainScore: point.toString() });
+    }
+    else {
+      match.sides[1].scores?.push({ mainScore: point.toString() });
+    }
   }
 
   private async updatePlayoffSchedule(
@@ -1020,6 +1027,12 @@ export class MatchService {
         matchSchedule: Match[];
       }>({
         path: "matchSchedule",
+        model: "Match"
+      })
+      .populate<{
+        matchSchedule: Match[];
+      }>({
+        path: "matches",
         model: "Match"
       })
       .exec();
@@ -1053,61 +1066,29 @@ export class MatchService {
       return;
     }
 
-    const nextRound = currentRound + 1;
+    const nextIndex = currentMatch.roundIndex+1;
+    const nextOrder = currentMatch.order/2;
 
-    const winners = playedMatches
-      .filter(
-        (match) =>
-          match.tournamentRound === currentRound &&
-          match.winner !== null &&
-          match.type === "playoff"
-      )
-      .map((match) => match.winner)
-      .filter((winner): winner is Types.ObjectId => winner != null);
+    const nextMatchId = playedMatches.filter(
+      (match) => 
+        match.roundIndex === nextIndex &&
+        match.order === nextOrder
+    )
+    .map((match) => match.id);
 
-    // Find eligible winners who don't have a match in the next round
-    const eligibleWinners = winners.filter((winner) => {
-      if (winner === null || winner === undefined) {
-        return false;
+    let nextMatch = await MatchModel.findById(nextMatchId);
+
+    if (nextMatch) {
+      if (currentMatch.order % 2 === 0) {
+        nextMatch.players[0] = {id: winnerId, points: [], color: "white"};
+        nextMatch.sides[0] = { contestandId: winnerId.toString() };
       }
-      return !playedMatches.some(
-        (match) =>
-          match.tournamentRound === nextRound &&
-          match.players.some(
-            (player) => player.id.toString() === winner.toString()
-          )
-      );
-    });
-
-    eligibleWinners.push(winnerId);
-    // Pair current winner with eligible winners for the next round
-
-    for (let i = 0; i < eligibleWinners.length; i += 2) {
-      if (i + 1 === eligibleWinners.length) {
-        break;
+      else {
+        nextMatch.players[1] = {id: winnerId, points: [], color: "red"};
+        nextMatch.sides[1] = { contestandId: winnerId.toString() };
       }
-      // Create a new match.
-      const newMatch = {
-        players: [
-          { id: eligibleWinners[i], points: [], color: "white" },
-          { id: eligibleWinners[i + 1], points: [], color: "red" }
-        ],
-        type: "playoff",
-        elapsedTime: 0,
-        timerStartedTimestamp: null,
-        tournamentRound: nextRound,
-        matchTime: tournament.matchTime,
-        tournamentId: tournament.id
-      };
-
-      const matchDocuments = await MatchModel.create(newMatch);
-      tournament.matchSchedule.push(matchDocuments.id);
-    }
-
-    // Save the tournament if new matches were added
-    if (eligibleWinners.length > 0) {
-      await tournament.save();
-      await MatchService.divideMatchesToCourts(tournament.id);
+      
+      await nextMatch.save();
     }
   }
 

@@ -429,6 +429,7 @@ export class TournamentService {
       );
       if (newMatchIds.length !== 0) {
         tournament.matchSchedule.push(...newMatchIds);
+        tournament.matches.push(...newMatchIds);
         await tournament.save();
       }
       await tournament.populate([
@@ -596,6 +597,29 @@ export class TournamentService {
     }
 
     matches.push(...(byes as UnsavedPlayoffMatch[]));
+
+    if (matchType === "playoff") {
+      let roundSize = bracketSize/4;
+      while (roundSize >= 1) {
+        for (let j=0; j<roundSize; j++) {
+          matches.push({
+            players: [],
+            type: matchType as MatchType,
+            elapsedTime: 0,
+            timerStartedTimestamp: null,
+            tournamentRound: currentRound+1,
+            tournamentId: tournament,
+            matchTime: tournamentMatchTime,
+            roundIndex: currentRound,
+            order: j,
+            sides: [],
+          })
+        }
+        roundSize /= 2;
+        currentRound++;
+      }
+    }
+    
     return matches;
   }
 

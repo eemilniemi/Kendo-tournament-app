@@ -47,7 +47,7 @@ export interface Match {
 
   roundIndex: number;
   order: number;
-  sides?: Array<{
+  sides: Array<{
     title?: string,
     contestandId?: string,
     scores?: Array<{
