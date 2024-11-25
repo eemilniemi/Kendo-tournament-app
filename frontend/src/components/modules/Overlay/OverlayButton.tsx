@@ -1,22 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import { ContentCopy } from "@mui/icons-material";
+import { Snackbar } from "@mui/material";
 
 const OverlayButton: React.FC<{ link: string }> = ({ link }) => {
+  const [open, setOpen] = useState(false);
+
   const handleCopy = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(link);
-      alert("Overlay link copied to clipboard!");
+      setOpen(true);
     } catch (err) {
       console.error("Failed to copy the link:", err);
-      alert("Failed to copy the link.");
     }
   };
 
   return (
-    <IconButton onClick={handleCopy} style={buttonStyle}>
-      <ContentCopy />
-    </IconButton>
+    <>
+      <IconButton onClick={handleCopy} style={buttonStyle}>
+        <ContentCopy />
+      </IconButton>
+      <Snackbar
+        message="Overlay link copied to clipboard!"
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={2000}
+        onClose={() => {
+          setOpen(false);
+        }}
+        open={open}
+      />
+    </>
   );
 };
 

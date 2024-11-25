@@ -202,6 +202,8 @@ const Overlay: React.FC = () => {
     };
   }, [matchInfo.isTimerOn]);
 
+  // TODO: do I need states for this stuff? seems to work without?
+
   let p1points: MatchPoint[] = [];
   let p2points: MatchPoint[] = [];
 
