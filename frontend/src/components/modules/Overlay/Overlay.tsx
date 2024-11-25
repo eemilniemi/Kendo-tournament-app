@@ -6,14 +6,19 @@ import { useParams } from "react-router-dom";
 import type {
   Match,
   MatchPlayer,
+  MatchPoint,
   MatchTime,
   MatchType,
+  PointType,
   Tournament
 } from "../../../types/models";
 import api from "../../../api/axios";
 import OverlayTimer from "./OverlayTimer";
 import { useTournament } from "../../../context/TournamentContext";
+import OverlayButton from "./OverlayButton";
+import routePaths from "../../../routes/route-paths";
 
+// TODO: simplify
 interface OverlayData {
   timerTime: number;
   players: MatchPlayer[];
@@ -101,9 +106,17 @@ function getOverlayData(matchData: Match, tournament: Tournament): OverlayData {
   };
 }
 
+const pointMap = new Map<PointType, string>([
+  ["men", "M"],
+  ["kote", "M"],
+  ["do", "D"],
+  ["tsuki", "T"],
+  ["hansoku", "Δ"]
+]);
+
 const Overlay: React.FC = () => {
   const tournament = useTournament();
-  const { matchId } = useParams();
+  const { id, matchId } = useParams(); // TODO: remove "id"
   const { matchInfo: matchInfoFromSocket } = useSocket();
   const [hasJoined, setHasJoined] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -189,29 +202,86 @@ const Overlay: React.FC = () => {
     };
   }, [matchInfo.isTimerOn]);
 
-  let p1points = 0;
-  let p2points = 0;
+  let p1points: MatchPoint[] = [];
+  let p2points: MatchPoint[] = [];
+
+  let p1DisplayName: string = "";
+  let p2DisplayName: string = "";
+
+  // TODO: fix
+  try {
+    p1points = matchInfo.players[0].points;
+    p2points = matchInfo.players[1].points;
+  } catch (_) {}
 
   try {
-    p1points = matchInfo.players[0].points.length;
-    p2points = matchInfo.players[1].points.length;
+    const p1names = matchInfo.player1Name.split(" ");
+    p1DisplayName = p1names[0].charAt(0) + ". " + p1names[1];
+
+    const p2names = matchInfo.player2Name.split(" ");
+    p2DisplayName = p2names[0].charAt(0) + ". " + p2names[1];
   } catch (_) {}
+
+  let firstPointTimestamp: Date | undefined;
+  const points: MatchPoint[] = p1points.concat(p2points);
+
+  if (points.length > 0) {
+    firstPointTimestamp = points[0].timestamp;
+
+    for (const point of points) {
+      if (point.timestamp < firstPointTimestamp) {
+        firstPointTimestamp = point.timestamp;
+      }
+    }
+  }
+
+  const url =
+    window.location.host + routePaths.overlay + "/" + id + "/" + matchId;
 
   return (
     <div className="overlay-container">
+      <OverlayButton link={url} />
       <div className="overlay-teams">
-        <div className="team team-a">
-          <div className="team-name">{matchInfo.player1Name}</div>
-          <div className="team-score">{p1points}</div>
+        <div className="team team-white">
+          <div className="team-info">
+            <div className="team-name">{p1DisplayName}</div>
+          </div>
         </div>
+
+        <div className="team-score">
+          {p1points.map(function (point, index) {
+            const isFirst = point.timestamp === firstPointTimestamp;
+            const cl = isFirst ? "point" : "point first-point";
+            return (
+              <div key={index} className={cl}>
+                {pointMap.get(point.type)}
+              </div>
+            );
+          })}
+        </div>
+        <div className="vertical-line" />
 
         <div className="overlay-status">
           <OverlayTimer timer={timer} />
         </div>
 
-        <div className="team team-b">
-          <div className="team-name">{matchInfo.player2Name}</div>
-          <div className="team-score">{p2points}</div>
+        <div className="vertical-line" />
+        <div className="team-score">
+          {p2points.map(function (point, index) {
+            const isFirst = point.timestamp === firstPointTimestamp;
+            const cl = isFirst ? "point first-point" : "point";
+            return (
+              <div key={index} className={cl}>
+                {pointMap.get(point.type)}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="team team-red">
+          <div className="team-info">
+            <div className="team-name">{p2DisplayName}</div>
+          </div>
         </div>
       </div>
     </div>

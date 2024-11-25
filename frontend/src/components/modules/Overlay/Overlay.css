@@ -10,49 +10,102 @@
     background: transparent;
     color: black;
     font-family: Arial, sans-serif;
+
+    /* variables */
+    --middle-color: rgb(50,50,50);
+    --middle-text-color: #f7f7f7;
+    --ov-height: 4.7vw;
+    --line-width: 0.1vw;
 }
 
 .overlay-teams {
+    position: absolute;
+    bottom: 5%;
     display: flex;
     align-items: center;
-    background: #cccccc;
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    gap: 2rem;
+    border-radius: 0.5vw;
+    background: var(--middle-color);
+    height: var(--ov-height);
 }
 
 .team {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #999999;
-    border-radius: 8px;
+    height: var(--ov-height);
+}
+
+.team-red {
+    background: var(--middle-color);
+    background: linear-gradient(90deg, var(--middle-color) 0%, rgba(160,0,0,1) 40%, rgba(255,0,0,1) 100%);
+    border-radius: 0 0.5vw 0.5vw 0;
+    padding-left: 2vw;
+}
+
+.team-red .team-name {
+    text-align: right;
+}
+
+.team-white {
+    background: var(--middle-color);
+    background: linear-gradient(270deg, var(--middle-color) 0%, rgba(218,218,218,1) 40%, rgba(255,255,255,1) 100%);
+    border-radius: 0.5vw 0 0 0.5vw;
+    padding-right: 2vw;
+}
+
+.team-white .team-name {
+    text-align: left;
+}
+
+.team-info {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .team-name {
-    font-size: 2rem;
+    font-size: 1vw;
     font-weight: bold;
     text-transform: uppercase;
-    margin: 0.5rem 1rem;
+    width: 12vw;
+    align-self: flex-end;
+    margin: auto 0.6vw 0.3vw 0.6vw;
 }
 
 .team-score {
-    font-size: 3rem;
-    background: #AAAAAA;
-    width: 100%;
+    font-size: 1.5vw;
+    width: 8vw;
     text-align: center;
-    border-radius: 0 0 8px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f7f7f7;
+}
+
+.vertical-line {
+    border-left: var(--line-width) solid var(--middle-text-color);
+    height: 3.4vw;
+    margin: 0 0.3vw;
+}
+
+.team-score > div {
+    width: 1.7vw;
+    height: 1.7vw;
+}
+
+.first-point {
+    border-radius: 50%;
+    border: var(--line-width) solid var(--middle-text-color);
 }
 
 .overlay-status {
-    font-size: 1.5rem;
-    color: #000000;
-    padding: 0.8rem 1rem;
-    margin: 0.5rem 1rem;
-    background: #AAAAAA;
-    border-radius: 8px;
+    color: var(--middle-text-color);
+    margin: 0 0.3vw;
 }
 
-.status-text {
-    font-size: 2rem;
+/* timer */
+.overlay-status > h2 {
+    font-size: 1.5vw;
 }
+
