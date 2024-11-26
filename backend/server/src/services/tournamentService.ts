@@ -1008,16 +1008,6 @@ export class TournamentService {
             "Invalid tournament dates. The start date must be before the end date."
         });
       }
-
-      const now = new Date();
-
-      // Check if start date and time is before the current date and time
-      if (startDate < now) {
-        throw new BadRequestError({
-          message:
-            "Invalid tournament date. The start date and time cannot be in the past."
-        });
-      }
     }
 
     if (tournamentDetails.type === TournamentType.TeamRoundRobin) {
