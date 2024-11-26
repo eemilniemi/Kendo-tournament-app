@@ -2,7 +2,8 @@ import type {
   Tournament,
   TournamentType,
   Category,
-  PointType
+  PointType,
+  Match
 } from "types/models";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
@@ -107,7 +108,7 @@ export const filterByPointType = (
           );
           return filteredPlayers.length > 0 ? match : null;
         })
-        .filter((match) => match !== null);
+        .filter((match) => match !== null) as Match[];
 
       return {
         ...tournament,
