@@ -46,6 +46,24 @@ export interface Match {
   player2Score: number;
   matchTime: MatchTime;
   courtNumber: number;
+
+  roundIndex: number;
+  order: number;
+  sides: Array<{
+    title?: string,
+    contestandId?: string,
+    scores?: Array<{
+      mainScore: number | string,
+      subscore?: number | string,
+      isWinner?: boolean
+    }>,
+    matchStatus?: string,
+    isLive?: boolean,
+    isBronzeMatch?: string,
+  }>;
+  matchStatus?: string;
+  isLive?: boolean;
+  isBronzeMatch?: string;
 }
 
 const pointSchema = new Schema<MatchPoint>(
@@ -116,7 +134,25 @@ const matchSchema = new Schema<Match>(
     player1Score: { type: Number, required: true, default: 0 },
     player2Score: { type: Number, required: true, default: 0 },
     matchTime: { type: Number, required: true },
-    courtNumber: { type: Number, default: 1 }
+    courtNumber: { type: Number, default: 1 },
+
+    roundIndex: { type: Number },
+    order: { type: Number },
+    sides: [{
+      title: { type: String },
+      contestantId: { type: String },
+      scores: [{
+        mainScore: {type: Schema.Types.Mixed },
+        subscore: {type: Schema.Types.Mixed },
+        isWinner: { type: Boolean }
+      }],
+      currentScore: {type: Schema.Types.Mixed },
+      isServing: { type: Boolean },
+      isWinner: { type: Boolean }
+    }],
+    matchStatus: { type: String },
+    isLive: { type: Boolean },
+    isBronzeMatch: { type: Boolean }
   },
   {
     toObject: {

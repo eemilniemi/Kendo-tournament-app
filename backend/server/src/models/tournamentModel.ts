@@ -26,6 +26,20 @@ export type UnsavedMatch = Pick<
   winnerTeamId?: Types.ObjectId;
 };
 
+export type UnsavedPlayoffMatch = Pick<
+  Match,
+  | "players"
+  | "type"
+  | "elapsedTime"
+  | "timerStartedTimestamp"
+  | "tournamentRound"
+  | "tournamentId"
+  | "matchTime"
+  | "roundIndex"
+  | "order"
+  | "sides"
+>;
+
 export interface Tournament {
   id: Types.ObjectId;
   name: string;
@@ -64,6 +78,7 @@ export interface Tournament {
   matches: Array<Types.ObjectId | Match>;
   contestants: {
     [contestantId: string]: {
+      entryStatus?: string,
       players: Array<Types.ObjectId | User>;
     }
   }
@@ -119,12 +134,7 @@ const tournamentSchema = new Schema<Tournament & Document>(
 
     rounds: [{name: {type: String, default: []}}],
     matches: [{ type: Schema.Types.ObjectId, ref: "Match", default: [] }],
-    contestants: {
-      type: Map,
-      of: {
-        players: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }]
-      }
-    }
+    contestants: { type: Schema.Types.Mixed }
   },
   {
     timestamps: true,

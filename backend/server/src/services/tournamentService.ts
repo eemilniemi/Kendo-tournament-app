@@ -3,7 +3,8 @@ import {
   TournamentModel,
   type Tournament,
   type UnsavedMatch,
-  TournamentType
+  TournamentType,
+  UnsavedPlayoffMatch
 } from "../models/tournamentModel.js";
 import UserModel, { type User } from "../models/userModel.js";
 import BadRequestError from "../errors/BadRequestError.js";
@@ -41,12 +42,15 @@ export class TournamentService {
         path: "matchSchedule",
         model: "Match"
       })
+      .populate<{ matches: Match[] }>({ path: "matches", model: "Match" })
       .exec();
     if (tournament === null || tournament === undefined) {
       throw new NotFoundError({
         message: "Tournament not found"
       });
     }
+
+    console.log(tournament);
 
     return await tournament.toObject();
   }
@@ -59,6 +63,7 @@ export class TournamentService {
         path: "matchSchedule",
         model: "Match"
       })
+      .populate<{ matches: Match[] }>({ path: "matches", model: "Match" })
       // eslint-disable-next-line @typescript-eslint/array-type
       .populate<{ teams: { players: User[] }[] }>({
         path: "teams.players",
@@ -339,6 +344,8 @@ export class TournamentService {
 
     tournament.players.push(player.id);
 
+    tournament.contestants = {[player.id]: {players: [player.id]}};
+
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
     if (
@@ -416,6 +423,8 @@ export class TournamentService {
 
     const index = tournament.players.indexOf(player.id);
     tournament.players.splice(index, 1);
+
+    delete tournament.contestants[player.id];
 
     // Remove player's matches from match schedule
     const matchesToRemove: Array<Types.ObjectId | Match> = [];
@@ -621,7 +630,8 @@ export class TournamentService {
       } else if (tournament.matchSchedule.length !== 0) {
         await tournament.populate([
           { path: "matchSchedule", model: "Match" },
-          { path: "players", model: "User" }
+          { path: "players", model: "User" },
+          { path: "matches", model: "Match" }
         ]);
         return await tournament.toObject();
       }
@@ -631,11 +641,13 @@ export class TournamentService {
       );
       if (newMatchIds.length !== 0) {
         tournament.matchSchedule.push(...newMatchIds);
+        tournament.matches.push(...newMatchIds);
         await tournament.save();
       }
       await tournament.populate([
         { path: "matchSchedule", model: "Match" },
-        { path: "players", model: "User" }
+        { path: "players", model: "User" },
+        { path: "matches", model: "Match" }
       ]);
       return await tournament.toObject();
     } catch (error) {
@@ -650,7 +662,7 @@ export class TournamentService {
     tournament: Tournament,
     newPlayer: Types.ObjectId | undefined = undefined
   ): Promise<Types.ObjectId[]> {
-    let matches: Array<UnsavedMatch | Match> = [];
+    let matches: Array<UnsavedMatch | Match | UnsavedPlayoffMatch> = [];
     switch (tournament.type) {
       case TournamentType.RoundRobin:
         if (newPlayer === null) {
@@ -826,8 +838,9 @@ export class TournamentService {
     tournamentMatchTime: MatchTime,
     currentRound: number = 1,
     matchType: string = "playoff"
-  ): Promise<UnsavedMatch[]> {
-    const matches: UnsavedMatch[] = [];
+  ): Promise<UnsavedPlayoffMatch[]> {
+    const matches: UnsavedPlayoffMatch[] = [];
+
     const bracketSize = TournamentService.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
 
@@ -844,9 +857,16 @@ export class TournamentService {
         tournamentRound: currentRound,
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
-        winner: playerIds[i]
+        winner: playerIds[i],
+        roundIndex: 0,
+        order: i,
+        sides: [
+          { contestandId: playerIds[i].toString() }
+        ]
       });
     }
+
+    matches.push(...(byes as UnsavedPlayoffMatch[]));
 
     // add the rest of the matches
     for (i; i < playerIds.length - 1; i += 2) {
@@ -860,11 +880,59 @@ export class TournamentService {
         timerStartedTimestamp: null,
         tournamentRound: currentRound,
         tournamentId: tournament,
-        matchTime: tournamentMatchTime
+        matchTime: tournamentMatchTime,
+        roundIndex: 0,
+        order: (i+byes.length)/2,
+        sides: [
+          { contestandId: playerIds[i].toString() },
+          { contestandId: playerIds[i + 1].toString() }
+        ]
       });
     }
 
-    matches.push(...(byes as UnsavedMatch[]));
+    // add second round matches from byes
+    for (let j = 0; j < byesNeeded; j += 2) {
+      if (j + 1 < byesNeeded) {
+        matches.push({
+          players: [
+            { id: playerIds[j], points: [], color: "white" },
+            { id: playerIds[j + 1], points: [], color: "red" }
+          ],
+          type: matchType as MatchType,
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound: currentRound+1,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime,
+          roundIndex: 1,
+          order: j,
+          sides: [
+            { contestandId: playerIds[j].toString() },
+            { contestandId: playerIds[j + 1].toString() }
+          ]
+        });
+      }
+      else {
+        matches.push({
+          players: [
+            { id: playerIds[j], points: [], color: "white" },
+          ],
+          type: matchType as MatchType,
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound: currentRound+1,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime,
+          roundIndex: 1,
+          order: j,
+          sides: [
+            { contestandId: playerIds[j].toString() },
+            { contestandId: playerIds[j + 1].toString() }
+          ]
+        });
+      }
+    }
+    
     return matches;
   }
 
