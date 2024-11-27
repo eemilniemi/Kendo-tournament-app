@@ -52,6 +52,8 @@ export class TournamentService {
       });
     }
 
+    console.log(tournament);
+
     return await tournament.toObject();
   }
 
@@ -437,7 +439,6 @@ export class TournamentService {
         { path: "players", model: "User" },
         { path: "matches", model: "Match" }
       ]);
-      console.log(tournament);
       return await tournament.toObject();
     } catch (error) {
       console.error(
@@ -597,28 +598,6 @@ export class TournamentService {
     }
 
     matches.push(...(byes as UnsavedPlayoffMatch[]));
-
-    if (matchType === "playoff") {
-      let roundSize = bracketSize/4;
-      while (roundSize >= 1) {
-        for (let j=0; j<roundSize; j++) {
-          matches.push({
-            players: [],
-            type: matchType as MatchType,
-            elapsedTime: 0,
-            timerStartedTimestamp: null,
-            tournamentRound: currentRound+1,
-            tournamentId: tournament,
-            matchTime: tournamentMatchTime,
-            roundIndex: currentRound,
-            order: j,
-            sides: [],
-          })
-        }
-        roundSize /= 2;
-        currentRound++;
-      }
-    }
     
     return matches;
   }

@@ -18,7 +18,8 @@ import {
   type Tournament,
   TournamentModel,
   TournamentType,
-  type UnsavedMatch
+  type UnsavedMatch,
+  UnsavedPlayoffMatch
 } from "../models/tournamentModel.js";
 import { TournamentService } from "./tournamentService.js";
 import { shuffle } from "../utility/utils.js";
@@ -1008,11 +1009,13 @@ export class MatchService {
     const pointWinner = player1.color === pointColor ? player1 : player2;
     pointWinner.points.push(point);
 
-    if (pointColor === "white") {
-      match.sides[0].scores?.push({ mainScore: point.toString() });
-    }
-    else {
-      match.sides[1].scores?.push({ mainScore: point.toString() });
+    if (match.type === "playoff" || match.type === "pre playoff") {
+      if (pointColor === "white") {
+        match.sides[0].scores?.push({ mainScore: point.toString() });
+      }
+      else {
+        match.sides[1].scores?.push({ mainScore: point.toString() });
+      }
     }
   }
 
@@ -1066,29 +1069,67 @@ export class MatchService {
       return;
     }
 
-    const nextIndex = currentMatch.roundIndex+1;
-    const nextOrder = currentMatch.order/2;
+    const tournamentSize = playedMatches.filter(
+      (match) => match.roundIndex === 0
+    ).length;
 
-    const nextMatchId = playedMatches.filter(
+    if (currentMatch.roundIndex == Math.log2(tournamentSize)) {
+      return;
+    }
+
+    const nextIndex = currentMatch.roundIndex+1;
+    const nextOrder = Math.trunc(currentMatch.order/2);
+
+    const nextMatch = playedMatches.find(
       (match) => 
         match.roundIndex === nextIndex &&
         match.order === nextOrder
     )
-    .map((match) => match.id);
 
-    let nextMatch = await MatchModel.findById(nextMatchId);
+    if (!nextMatch) {
+      let newMatch: UnsavedPlayoffMatch = {
+        players: [],
+        type: "playoff",
+        elapsedTime: 0,
+        timerStartedTimestamp: null,
+        tournamentRound: currentRound+1,
+        matchTime: tournament.matchTime,
+        tournamentId: tournament.id,
+        roundIndex: nextIndex,
+        order: nextOrder,
+        sides: [],
+      }
 
-    if (nextMatch) {
       if (currentMatch.order % 2 === 0) {
-        nextMatch.players[0] = {id: winnerId, points: [], color: "white"};
-        nextMatch.sides[0] = { contestandId: winnerId.toString() };
+        newMatch.players[0] = {id: winnerId, points: [], color: "white"};
+        newMatch.sides[0] = { contestandId: winnerId.toString() };
       }
       else {
-        nextMatch.players[1] = {id: winnerId, points: [], color: "red"};
-        nextMatch.sides[1] = { contestandId: winnerId.toString() };
+        newMatch.players[1] = {id: winnerId, points: [], color: "red"};
+        newMatch.sides[1] = { contestandId: winnerId.toString() };
       }
-      
-      await nextMatch.save();
+
+      const matchDocuments = await MatchModel.create(newMatch);
+      tournament.matchSchedule.push(matchDocuments.id);
+      tournament.matches.push(matchDocuments.id);
+      await tournament.save();
+      await MatchService.divideMatchesToCourts(tournament.id);
+    }
+    else {
+      let newMatch = await MatchModel.findById(nextMatch.id).exec();
+
+      if (newMatch) {
+        if (currentMatch.order % 2 === 0) {
+          newMatch.players[0] = {id: winnerId, points: [], color: "white"};
+          newMatch.sides[0] = { contestandId: winnerId.toString() };
+        }
+        else {
+          newMatch.players[1] = {id: winnerId, points: [], color: "red"};
+          newMatch.sides[1] = { contestandId: winnerId.toString() };
+        }
+
+        await newMatch.save();
+      }
     }
   }
 
