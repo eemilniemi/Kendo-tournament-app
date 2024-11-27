@@ -57,12 +57,31 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
     if (treeRef.current !== null) {
       createBracket(
         {
-          rounds: tournament.rounds,
+          rounds: tournament.rounds?.map((n) => {
+            return {
+              name: n.name
+            }
+          }),
           matches: tournament.matches?.map((match) => {
             return {
               roundIndex: match.roundIndex,
               order: match.order,
-              sides: match.sides,
+              sides: match.sides.map((side) => {
+                return {
+                  title: side.title,
+                  contestantId: side.contestandId,
+                  scores: side.scores?.map((score) => {
+                    return {
+                      mainScore: score.mainScore,
+                      subscore: score.subscore,
+                      isWinner: score.isWinner
+                    };
+                  }),
+                  matchStatus: side.matchStatus,
+                  isLive: side.isLive,
+                  isBronzeMatch: side.isBronzeMatch
+                };
+              }),
               matchStatus: match.matchStatus,
               isLive: match.isLive,
               isBronzeMatch: match.isBronzeMatch
@@ -79,7 +98,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
         }
       );
     }
-  }, [tournament]);
+  }, [tournament.matches]);
 
   return <div ref={treeRef} />;
 };
