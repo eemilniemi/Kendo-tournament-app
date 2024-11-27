@@ -568,12 +568,14 @@ export class TournamentService {
         matchTime: tournamentMatchTime,
         winner: playerIds[i],
         roundIndex: 0,
-        order: (bracketSize/2) - byesNeeded - i,
+        order: i,
         sides: [
           { contestandId: playerIds[i].toString() }
         ]
       });
     }
+
+    matches.push(...(byes as UnsavedPlayoffMatch[]));
 
     // add the rest of the matches
     for (i; i < playerIds.length - 1; i += 2) {
@@ -589,7 +591,7 @@ export class TournamentService {
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
         roundIndex: 0,
-        order: (i-byes.length)/2,
+        order: (i+byes.length)/2,
         sides: [
           { contestandId: playerIds[i].toString() },
           { contestandId: playerIds[i + 1].toString() }
@@ -597,7 +599,48 @@ export class TournamentService {
       });
     }
 
-    matches.push(...(byes as UnsavedPlayoffMatch[]));
+    // add second round matches from byes
+    for (let j = 0; j < byesNeeded; j += 2) {
+      if (j + 1 < byesNeeded) {
+        matches.push({
+          players: [
+            { id: playerIds[j], points: [], color: "white" },
+            { id: playerIds[j + 1], points: [], color: "red" }
+          ],
+          type: matchType as MatchType,
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound: currentRound+1,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime,
+          roundIndex: 1,
+          order: j,
+          sides: [
+            { contestandId: playerIds[j].toString() },
+            { contestandId: playerIds[j + 1].toString() }
+          ]
+        });
+      }
+      else {
+        matches.push({
+          players: [
+            { id: playerIds[j], points: [], color: "white" },
+          ],
+          type: matchType as MatchType,
+          elapsedTime: 0,
+          timerStartedTimestamp: null,
+          tournamentRound: currentRound+1,
+          tournamentId: tournament,
+          matchTime: tournamentMatchTime,
+          roundIndex: 1,
+          order: j,
+          sides: [
+            { contestandId: playerIds[j].toString() },
+            { contestandId: playerIds[j + 1].toString() }
+          ]
+        });
+      }
+    }
     
     return matches;
   }
