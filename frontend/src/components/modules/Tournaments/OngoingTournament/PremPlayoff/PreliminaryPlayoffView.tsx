@@ -578,7 +578,7 @@ const PreliminaryPlayoffView: React.FC = () => {
             <Typography variant="h6">
               {t("tournament_view_labels.tournament_tree")}
             </Typography>
-            <TreeComponent />
+            <TreeComponent tournament={tournamentData} />
           </Box>
         </div>
       )}

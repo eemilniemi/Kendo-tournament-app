@@ -1,0 +1,635 @@
+          rounds: [
+            { name: "Round 1" },
+            { name: "Round 2" },
+            { name: "Quarterfinals" },
+            { name: "Semifinals" },
+            { name: "Final" }
+          ],
+          matches: [
+            // Round 1 (16 matches for 32 players)
+            {
+              roundIndex: 0,
+              order: 0,
+              sides: [
+                {
+                  contestantId: "1",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "2",
+                  scores: [{ mainScore: "3" }, { mainScore: "4" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 1,
+              sides: [
+                {
+                  contestantId: "3",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "4",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 2,
+              sides: [
+                {
+                  contestantId: "5",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "6",
+                  scores: [{ mainScore: "2" }, { mainScore: "0" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 3,
+              sides: [
+                {
+                  contestantId: "7",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "8",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 4,
+              sides: [
+                {
+                  contestantId: "9",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "10",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 5,
+              sides: [
+                {
+                  contestantId: "11",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "12",
+                  scores: [{ mainScore: "4" }, { mainScore: "2" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 6,
+              sides: [
+                {
+                  contestantId: "13",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "14",
+                  scores: [{ mainScore: "2" }, { mainScore: "0" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 7,
+              sides: [
+                {
+                  contestantId: "15",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "16",
+                  scores: [{ mainScore: "4" }, { mainScore: "2" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 8,
+              sides: [
+                {
+                  contestantId: "17",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "18",
+                  scores: [{ mainScore: "3" }, { mainScore: "4" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 9,
+              sides: [
+                {
+                  contestantId: "19",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "20",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 10,
+              sides: [
+                {
+                  contestantId: "21",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "22",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 11,
+              sides: [
+                {
+                  contestantId: "23",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "24",
+                  scores: [{ mainScore: "2" }, { mainScore: "0" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 12,
+              sides: [
+                {
+                  contestantId: "25",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "26",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 13,
+              sides: [
+                {
+                  contestantId: "27",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "28",
+                  scores: [{ mainScore: "2" }, { mainScore: "0" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 14,
+              sides: [
+                {
+                  contestantId: "29",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "30",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 0,
+              order: 15,
+              sides: [
+                {
+                  contestantId: "31",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "32",
+                  scores: [{ mainScore: "4" }, { mainScore: "2" }]
+                }
+              ]
+            },
+
+            // Round 2 (8 matches for 16 winners)
+            {
+              roundIndex: 1,
+              order: 0,
+              sides: [
+                {
+                  contestantId: "1",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "3",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 1,
+              sides: [
+                {
+                  contestantId: "5",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "7",
+                  scores: [{ mainScore: "2" }, { mainScore: "0" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 2,
+              sides: [
+                {
+                  contestantId: "9",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "11",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 3,
+              sides: [
+                {
+                  contestantId: "13",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "15",
+                  scores: [{ mainScore: "4" }, { mainScore: "2" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 4,
+              sides: [
+                {
+                  contestantId: "17",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "19",
+                  scores: [{ mainScore: "3" }, { mainScore: "4" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 5,
+              sides: [
+                {
+                  contestantId: "21",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "23",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 6,
+              sides: [
+                {
+                  contestantId: "25",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "27",
+                  scores: [{ mainScore: "2" }, { mainScore: "0" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 1,
+              order: 7,
+              sides: [
+                {
+                  contestantId: "29",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "31",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+
+            // Quarterfinals (4 matches for 8 winners)
+            {
+              roundIndex: 2,
+              order: 0,
+              sides: [
+                {
+                  contestantId: "1",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "5",
+                  scores: [{ mainScore: "3" }, { mainScore: "2" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 2,
+              order: 1,
+              sides: [
+                {
+                  contestantId: "9",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "13",
+                  scores: [{ mainScore: "5" }, { mainScore: "5" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 2,
+              order: 2,
+              sides: [
+                {
+                  contestantId: "17",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "21",
+                  scores: [{ mainScore: "3" }, { mainScore: "2" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 2,
+              order: 3,
+              sides: [
+                {
+                  contestantId: "25",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "29",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+
+            // Semifinals (2 matches for 4 winners)
+            {
+              roundIndex: 3,
+              order: 0,
+              sides: [
+                {
+                  contestantId: "1",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "9",
+                  scores: [{ mainScore: "4" }, { mainScore: "3" }]
+                }
+              ]
+            },
+            {
+              roundIndex: 3,
+              order: 1,
+              sides: [
+                {
+                  contestantId: "17",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "6", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "25",
+                  scores: [{ mainScore: "3" }, { mainScore: "2" }]
+                }
+              ]
+            },
+
+            // Final (1 match for 2 winners)
+            {
+              roundIndex: 4,
+              order: 0,
+              sides: [
+                {
+                  contestantId: "1",
+                  scores: [
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "4" },
+                    { mainScore: "7", isWinner: true }
+                  ],
+                  isWinner: true
+                },
+                {
+                  contestantId: "17",
+                  scores: [
+                    { mainScore: "3" },
+                    { mainScore: "6", isWinner: true },
+                    { mainScore: "5" }
+                  ]
+                }
+              ]
+            }
+          ],
+          contestants: {
+            "1": { players: [{ title: "Novak Djokovic", nationality: "RS" }] },
+            "2": { players: [{ title: "Daniil Medvedev", nationality: "RU" }] },
+            "3": { players: [{ title: "Carlos Alcaraz", nationality: "ES" }] },
+            "4": {
+              players: [{ title: "Stefanos Tsitsipas", nationality: "GR" }]
+            },
+            "5": { players: [{ title: "Andrey Rublev", nationality: "RU" }] },
+            "6": {
+              players: [{ title: "Matteo Berrettini", nationality: "IT" }]
+            },
+            "7": { players: [{ title: "Casper Ruud", nationality: "NO" }] },
+            "8": { players: [{ title: "Hubert Hurkacz", nationality: "PL" }] },
+            "9": {
+              players: [{ title: "Alexander Zverev", nationality: "DE" }]
+            },
+            "10": { players: [{ title: "Cameron Norrie", nationality: "GB" }] },
+            "11": { players: [{ title: "Jannik Sinner", nationality: "IT" }] },
+            "12": {
+              players: [{ title: "Karen Khachanov", nationality: "RU" }]
+            },
+            "13": { players: [{ title: "Gael Monfils", nationality: "FR" }] },
+            "14": {
+              players: [{ title: "Felix Auger-Aliassime", nationality: "CA" }]
+            },
+            "15": { players: [{ title: "Frances Tiafoe", nationality: "US" }] },
+            "16": {
+              players: [{ title: "Diego Schwartzman", nationality: "AR" }]
+            },
+            "17": { players: [{ title: "Taylor Fritz", nationality: "US" }] },
+            "18": {
+              players: [{ title: "Roberto Bautista Agut", nationality: "ES" }]
+            },
+            "19": { players: [{ title: "David Goffin", nationality: "BE" }] },
+            "20": { players: [{ title: "Marin Cilic", nationality: "HR" }] },
+            "21": { players: [{ title: "John Isner", nationality: "US" }] },
+            "22": { players: [{ title: "Aslan Karatsev", nationality: "RU" }] },
+            "23": { players: [{ title: "Reilly Opelka", nationality: "US" }] },
+            "24": {
+              players: [{ title: "Lorenzo Musetti", nationality: "IT" }]
+            },
+            "25": {
+              players: [{ title: "Grigor Dimitrov", nationality: "BG" }]
+            },
+            "26": {
+              players: [{ title: "Pablo Carreno Busta", nationality: "ES" }]
+            },
+            "27": { players: [{ title: "Borna Coric", nationality: "HR" }] },
+            "28": { players: [{ title: "Tommy Paul", nationality: "US" }] },
+            "29": { players: [{ title: "Dan Evans", nationality: "GB" }] },
+            "30": { players: [{ title: "Dominic Thiem", nationality: "AT" }] },
+            "31": { players: [{ title: "Stan Wawrinka", nationality: "CH" }] },
+            "32": { players: [{ title: "Kei Nishikori", nationality: "JP" }] }
+          }

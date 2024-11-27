@@ -206,7 +206,7 @@ const PastTournamentMatches: React.FC = () => {
             gap: "10px 25px"
           }}
         >
-          <TreeComponent />
+          <TreeComponent tournament={selectedTournament} />
         </Box>
       )}
 

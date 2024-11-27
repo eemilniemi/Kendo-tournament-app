@@ -14,6 +14,7 @@ export interface User {
   underage: boolean;
   guardiansEmail?: string;
   invitations: string[];
+  title?: string;
 }
 
 export type PlayerColor = "red" | "white";
@@ -57,6 +58,24 @@ export interface Match {
   player2Score: number;
   matchTime: MatchTime;
   courtNumber: number;
+
+  roundIndex: number;
+  order: number;
+  sides: Array<{
+    title?: string;
+    contestandId?: string;
+    scores?: Array<{
+      mainScore: number | string;
+      subscore?: number | string;
+      isWinner?: boolean;
+    }>;
+    matchStatus?: string;
+    isLive?: boolean;
+    isBronzeMatch?: string;
+  }>;
+  matchStatus?: string;
+  isLive?: boolean;
+  isBronzeMatch?: string;
 }
 
 export interface Tournament {
@@ -91,6 +110,16 @@ export interface Tournament {
     name: string;
     players: User[];
   }>;
+
+  rounds?: Array<{ name?: string }>;
+  matches?: Match[];
+  contestants?: Record<
+    string,
+    {
+      entryStatus?: string;
+      players: User[];
+    }
+  >;
 }
 
 export type TournamentType =

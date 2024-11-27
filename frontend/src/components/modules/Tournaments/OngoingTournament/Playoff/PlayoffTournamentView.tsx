@@ -535,7 +535,7 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
             <Typography variant="h6">
               {t("tournament_view_labels.tournament_tree")}
             </Typography>
-            <TreeComponent />
+            <TreeComponent tournament={tournamentData} />
           </Box>
         </>
       )}
