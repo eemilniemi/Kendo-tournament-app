@@ -218,42 +218,44 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
             }}
           >
             {/* Render the cancel sign-up or sign-up button */}
-            {tournamentHasNotStarted && userId !== undefined && (
-              <>
-                {userAlreadySigned ? (
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    onClick={() => {
-                      navigate(`${tournament.id}/cancel-sign-up`);
-                    }}
-                    sx={{
-                      minWidth: "90px",
-                      padding: "5px 15px",
-                      borderRadius: "15px"
-                    }}
-                  >
-                    {t("buttons.cancel_sign_up")}
-                  </Button>
-                ) : (
-                  <Button
-                    color="success"
-                    variant="contained"
-                    disabled={tournamentFull}
-                    onClick={() => {
-                      navigate(`${tournament.id}/sign-up`);
-                    }}
-                    sx={{
-                      minWidth: "90px",
-                      padding: "5px 15px",
-                      borderRadius: "15px"
-                    }}
-                  >
-                    {t("buttons.sign_up_button")}
-                  </Button>
-                )}
-              </>
-            )}
+            {tournamentHasNotStarted &&
+              userId !== undefined &&
+              tournament.type !== "Team Round Robin" && ( // Check if the type is not "Team Round Robin"
+                <>
+                  {userAlreadySigned ? (
+                    <Button
+                      color="secondary"
+                      variant="contained"
+                      onClick={() => {
+                        navigate(`${tournament.id}/cancel-sign-up`);
+                      }}
+                      sx={{
+                        minWidth: "90px",
+                        padding: "5px 15px",
+                        borderRadius: "15px"
+                      }}
+                    >
+                      {t("buttons.cancel_sign_up")}
+                    </Button>
+                  ) : (
+                    <Button
+                      color="success"
+                      variant="contained"
+                      disabled={tournamentFull}
+                      onClick={() => {
+                        navigate(`${tournament.id}/sign-up`);
+                      }}
+                      sx={{
+                        minWidth: "90px",
+                        padding: "5px 15px",
+                        borderRadius: "15px"
+                      }}
+                    >
+                      {t("buttons.sign_up_button")}
+                    </Button>
+                  )}
+                </>
+              )}
 
             {/* Render the creator buttons */}
             {isUserTheCreator && tournamentHasNotStarted && (
