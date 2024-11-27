@@ -43,5 +43,6 @@ frontend/server/build
 # log directories (files)
 **logs*
 
-# Jetbrains IDE files
-.idea
+# Folder created by Visual Studio Code to save custom settings
+.vscode/
+

@@ -8,7 +8,8 @@ export type MatchType =
   | "playoff"
   | "preliminary"
   | "pre playoff"
-  | "swiss";
+  | "swiss"
+  | "team";
 export type MatchTime = 180000 | 240000 | 300000;
 
 export interface MatchPoint {
@@ -32,6 +33,7 @@ export interface Match {
   type: MatchType;
   players: Array<Types.ObjectId | MatchPlayer>;
   winner?: Types.ObjectId;
+  winnerTeamId?: Types.ObjectId;
   comment?: string;
   tournamentId: Types.ObjectId | Tournament;
   officials: Types.ObjectId[];
@@ -100,7 +102,8 @@ const matchSchema = new Schema<Match>(
     elapsedTime: { type: Number, required: true, default: 0 },
     endTimestamp: { type: Date, required: false },
     type: { type: String, required: true },
-    winner: { type: Schema.Types.ObjectId, required: false },
+    winner: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    winnerTeamId: { type: Schema.Types.ObjectId, ref: "Team", required: false },
     scheduledTime: {
       type: String,
       required: true,

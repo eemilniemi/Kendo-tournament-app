@@ -9,7 +9,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  type ButtonProps
+  useMediaQuery
 } from "@mui/material";
 import type { TournamentPlayer } from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
 import type { Match, Tournament } from "types/models";
@@ -19,12 +19,12 @@ import type { ChangeCourtTimeRequest } from "types/requests";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { mapNumberToLetter } from "utils/helperFunctions";
+import { allMatchesPlayed } from "utils/TournamentUtils";
 
 interface MatchButtonProps {
   match: Match;
-  players: TournamentPlayer[];
+  players?: TournamentPlayer[];
   haveSameNames: boolean;
-  props: ButtonProps;
   isUserTheCreator: boolean;
   tournamentData: Tournament;
 }
@@ -33,11 +33,9 @@ const MatchButton: React.FC<MatchButtonProps> = ({
   match,
   players,
   haveSameNames,
-  props,
   isUserTheCreator,
   tournamentData
 }) => {
-  // State to track form input and modal open state
   const [editMode, setEditMode] = useState(false);
   const [newCourtNumber, setNewCourtNumber] = useState<number>(
     match.courtNumber
@@ -47,8 +45,8 @@ const MatchButton: React.FC<MatchButtonProps> = ({
   );
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:600px)");
 
-  // Function to handle modal open/close
   const handleOpen = (): void => {
     setEditMode(true);
   };
@@ -57,135 +55,269 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     setEditMode(false);
   };
 
-  // Function to handle change court time form submit
   const handleSubmit = async (): Promise<void> => {
     const updates: Partial<ChangeCourtTimeRequest> = {};
 
-    // Check if the court number has changed
-    if (Number(newCourtNumber) !== match.courtNumber) {
-      updates.courtNumber = Number(newCourtNumber);
+    if (newCourtNumber !== match.courtNumber) {
+      updates.courtNumber = newCourtNumber;
     }
-
-    // Check if the scheduled time has changed
     if (newTime !== match.scheduledTime) {
       updates.scheduledTime = newTime;
     }
 
-    // If there are updates, send the request
     if (Object.keys(updates).length > 0) {
       try {
         await api.match.changeCourtAndTime(match.id, updates);
-        console.log("Court and time updated successfully");
       } catch (error) {
-        console.error("Error updating court and time:", error);
+        alert(t("error.updating_match"));
+        console.error(error);
       }
-    } else {
-      console.log("No changes detected, no update needed");
     }
-
-    setEditMode(false); // Close modal after submit
+    setEditMode(false);
   };
 
-  // Find the players in the players array using their IDs
-  const player1 = players.find(
-    (player) => player.id === match.players[0].id
-  ) as TournamentPlayer;
-  const player2 = players.find(
-    (player) => player.id === match.players[1]?.id
-  ) as TournamentPlayer;
+  const isForfeit = players === undefined || players.length < 2;
 
-  // Get the names of the players
-  const player1Name =
+  const player1 = players?.find(
+    (player) => player?.id === match.players[0]?.id
+  );
+  const player2 = players?.find(
+    (player) => player?.id === match.players[1]?.id
+  );
+
+  const entity1Name =
     player1 !== undefined ? (
       <PlayerName
-        firstName={player1.firstName}
-        lastName={player1.lastName}
+        firstName={player1.firstName ?? ""}
+        lastName={player1.lastName ?? ""}
         sameNames={haveSameNames}
       />
     ) : (
-      <PlayerName firstName="NotFound" lastName="" sameNames={false} />
+      ""
     );
 
-  const player2Name =
+  const entity2Name =
     player2 !== undefined ? (
       <PlayerName
-        firstName={player2.firstName}
-        lastName={player2.lastName}
+        firstName={player2.firstName ?? ""}
+        lastName={player2.lastName ?? ""}
         sameNames={haveSameNames}
       />
     ) : (
-      <PlayerName firstName="NotFound2" lastName="" sameNames={false} />
+      ""
     );
 
-  let officialsInfo = "";
+  const isNullOrEmpty = (value: unknown): boolean =>
+    value === null || value === undefined || value === "";
 
-  if (match.elapsedTime <= 0 && match.winner === undefined) {
-    // Match is upcoming
-    const timerPerson = match.timeKeeper ?? undefined;
-    const pointMaker = match.pointMaker ?? undefined;
+  const officialsInfo = (() => {
+    if (
+      match.elapsedTime != null &&
+      match.elapsedTime <= 0 &&
+      match.winner == null &&
+      match.winnerTeamId == null
+    ) {
+      const missingRoles = [
+        isNullOrEmpty(match.timeKeeper)
+          ? t("game_interface.time_keeper").toLowerCase()
+          : null,
+        isNullOrEmpty(match.pointMaker)
+          ? t("game_interface.point_maker").toLowerCase()
+          : null
+      ]
+        .filter((info) => info !== null)
+        .join(", ");
 
-    // depending on which roles are missing for the match, print them under button
-    if (timerPerson === undefined && pointMaker === undefined) {
-      officialsInfo = t("tournament_view_labels.missing_both");
-    } else {
-      if (timerPerson === undefined) {
-        officialsInfo += t("tournament_view_labels.missing_timer");
-      }
-      if (pointMaker === undefined) {
-        officialsInfo += t("tournament_view_labels.missing_point_maker");
-      }
+      return `${t("tournament_view_labels.missing")} ${missingRoles}`;
     }
-  }
+    return "";
+  })();
 
-  // Generate court number options based on the numberOfCourts in tournamentData
+  const isOngoing =
+    match.elapsedTime != null &&
+    match.elapsedTime > 0 &&
+    match.endTimestamp == null;
+
+  const isFinished =
+    match.endTimestamp != null ||
+    (match.elapsedTime == null &&
+      (match.winner != null || match.winnerTeamId != null));
+
+  const hasTournamentFinished =
+    allMatchesPlayed(tournamentData) ||
+    (tournamentData.endDate !== undefined &&
+      new Date(tournamentData.endDate) < new Date());
+
+  const winnerBackgroundColor = "#ABE2A8";
+
+  const entity1Styles = {
+    bgcolor:
+      isFinished && match.winner === match.players[0]?.id
+        ? winnerBackgroundColor
+        : "transparent"
+  };
+  const entity2Styles = {
+    bgcolor:
+      isFinished && match.winner === match.players[1]?.id
+        ? winnerBackgroundColor
+        : "transparent"
+  };
+
   const courtOptions = Array.from(
     { length: tournamentData.numberOfCourts },
     (_, i) => i + 1
   );
 
   return (
-    <div style={{ marginBottom: "10px", marginTop: "10px" }} key={match.id}>
-      <Box display="flex" alignItems="center" marginBottom={"10px"}>
-        <Button
+    <div
+      style={{
+        marginBottom: "10px",
+        display: "inline-block",
+        minWidth: "260px",
+        width: isMobile ? "100%" : "auto"
+      }}
+      key={match.id}
+    >
+      <Box>
+        {/* Scheduled Time or Ongoing Status */}
+        <Box
+          sx={{
+            height: "20px",
+            marginBottom: "5px",
+            display: "flex",
+            alignItems: "center"
+          }}
+        >
+          {!isFinished && !isForfeit && !hasTournamentFinished && (
+            <Typography variant="body1" fontSize="13px">
+              {isOngoing
+                ? `${t("tournament_view_labels.ongoing")} ${Math.floor(
+                    match.elapsedTime / 60000
+                  )}'`
+                : match.scheduledTime !== "XX:XX"
+                ? `${t("tournament_view_labels.match_start_clock")}: ${
+                    match.scheduledTime
+                  }`
+                : t("tournament_view_labels.no_scheduled_time")}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Edit Court and Time */}
+        {isUserTheCreator &&
+          !hasTournamentFinished &&
+          (!isForfeit && !isFinished ? (
+            <Button
+              onClick={handleOpen}
+              style={{
+                fontSize: "13px",
+                padding: "0px",
+                marginBottom: "5px",
+                height: "20px"
+              }}
+            >
+              {t("tournament_view_labels.edit_court_time")}
+            </Button>
+          ) : (
+            <Box sx={{ height: "20px", marginBottom: "5px" }}></Box>
+          ))}
+
+        {/* Match Details */}
+        <Box
           onClick={() => {
-            if (match.players.length === 2) {
-              navigate(`match/${match.id}`);
-            } else {
-              // No match details to display for a bye
+            if (!isForfeit) {
+              navigate(`/tournaments/${tournamentData.id}/match/${match.id}`);
             }
           }}
-          {...props}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            border: 1,
+            borderColor: isOngoing ? "#28CC3B" : "black",
+            borderRadius: "10px",
+            p: 2,
+            gap: 1,
+            cursor: isForfeit ? "not-allowed" : "pointer",
+            backgroundColor: isForfeit ? "#ffff99" : "white",
+            minHeight: "80px",
+            justifyContent: "space-between"
+          }}
         >
-          {player1Name}
-          {" - "}
-          {player2Name}
-        </Button>
+          <Box display="flex" alignItems="center" justifyContent="center">
+            {/* Player 1 */}
+            <Typography
+              variant="body1"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "4px 8px",
+                borderRadius: "5px",
+                ...entity1Styles
+              }}
+            >
+              <span>{entity1Name}</span>
+              {(isOngoing || isFinished) && (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: "bold"
+                  }}
+                >
+                  {match.player1Score ?? 0}
+                </Typography>
+              )}
+            </Typography>
+
+            {/* Separator */}
+            <Typography variant="body1" sx={{ margin: "0 12px" }}>
+              {" - "}
+            </Typography>
+
+            {/* Player 2 */}
+            <Typography
+              variant="body1"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "4px 8px",
+                borderRadius: "5px",
+                ...entity2Styles
+              }}
+            >
+              {(isOngoing || isFinished) && (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: "bold"
+                  }}
+                >
+                  {match.player2Score ?? 0}
+                </Typography>
+              )}
+              <span>{entity2Name}</span>
+            </Typography>
+          </Box>
+
+          {!isForfeit ? (
+            <Typography variant="body1" fontSize="15px">
+              {t("tournament_view_labels.court_number")}:{" "}
+              {mapNumberToLetter(match.courtNumber)}
+            </Typography>
+          ) : (
+            <Typography variant="body1" fontSize="15px" fontWeight={"bold"}>
+              BYE
+            </Typography>
+          )}
+        </Box>
       </Box>
-      {match.scheduledTime !== "XX:XX" ? (
-        <Typography variant="body1" marginBottom={"10px"}>
-          {t("tournament_view_labels.match_start_clock")}
-          {": "}
-          {match.scheduledTime}
-        </Typography>
-      ) : (
-        <Typography variant="body1" marginBottom={"10px"}>
-          {t("tournament_view_labels.no_scheduled_time")}
+      {!isForfeit && officialsInfo !== "" && (
+        <Typography variant="body2" marginTop="5px" fontSize="13px">
+          {officialsInfo}
         </Typography>
       )}
-      <Typography variant="body1" marginBottom={"10px"}>
-        {t("tournament_view_labels.court_number")}
-        {": "}
-        {mapNumberToLetter(match.courtNumber)}
-      </Typography>
-      {isUserTheCreator && (
-        <Button onClick={handleOpen}>
-          {t("tournament_view_labels.edit_court_time")}
-        </Button>
-      )}
-      {officialsInfo !== undefined && match.winner === undefined && (
-        <Typography variant="body2">{officialsInfo}</Typography>
-      )}
-      {/* Modal for editing court and time */}
       <Modal open={editMode} onClose={handleClose}>
         <Box
           sx={{
@@ -202,7 +334,6 @@ const MatchButton: React.FC<MatchButtonProps> = ({
           <Typography variant="h6">
             {t("tournament_view_labels.edit_court_time")}
           </Typography>
-          {/* Time input for scheduling */}
           <TextField
             label={t("tournament_view_labels.scheduled_time")}
             type="time"
@@ -216,19 +347,20 @@ const MatchButton: React.FC<MatchButtonProps> = ({
               shrink: true
             }}
             inputProps={{
-              step: 300 // 5 minutes
+              step: 300
             }}
           />
-          {/* Select component for choosing court number */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel>{t("tournament_view_labels.court_number")}</InputLabel>
+          <FormControl fullWidth margin="normal" variant="outlined">
+            <InputLabel id="court-number-label">
+              {t("tournament_view_labels.court_number")}
+            </InputLabel>
             <Select
-              label={t("tournament_view_labels.court_number")}
+              labelId="court-number-label"
               value={newCourtNumber}
               onChange={(e) => {
                 setNewCourtNumber(Number(e.target.value));
               }}
-              type="number"
+              label={t("tournament_view_labels.court_number")} // Ensure the label is connected to the Select
             >
               {courtOptions.map((court) => (
                 <MenuItem key={court} value={court}>
@@ -237,6 +369,7 @@ const MatchButton: React.FC<MatchButtonProps> = ({
               ))}
             </Select>
           </FormControl>
+
           <Button onClick={handleSubmit} variant="contained" color="primary">
             {t("buttons.save_button")}
           </Button>

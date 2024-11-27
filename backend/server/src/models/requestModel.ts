@@ -129,6 +129,8 @@ export type CreateTournamentRequest = Pick<
   | "swissRounds"
   | "numberOfTeams"
   | "playersPerTeam"
+  | "passwordEnabled"
+  | "password"
 > & {
   differentOrganizer: boolean;
   paid: boolean;
@@ -136,6 +138,7 @@ export type CreateTournamentRequest = Pick<
 
 export interface SignupForTournamentRequest {
   playerId: ObjectIdString;
+  password?: string;
 }
 
 /* Note that we get the data validations from the registerRequest interface also */
@@ -150,4 +153,9 @@ export type EditTournamentRequest = Partial<CreateTournamentRequest>;
 export interface ChangeCourtTimeRequest {
   courtNumber?: number;
   scheduledTime?: string;
+}
+
+export interface InvitePlayersByClubRequest {
+  clubs: string[];
+  tournamentId: string;
 }

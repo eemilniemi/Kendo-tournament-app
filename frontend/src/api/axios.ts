@@ -9,7 +9,8 @@ import type {
   EditUserRequest,
   ResetPasswordRequest,
   EditTournamentRequest,
-  ChangeCourtTimeRequest
+  ChangeCourtTimeRequest,
+  InvitePlayersByClubRequest
 } from "types/requests";
 
 export const API_BASE_URL =
@@ -84,7 +85,19 @@ const user = {
   update: async (id: string, body: EditUserRequest) =>
     await request.put<User>(`${USER_API}/${id}`, body),
 
-  delete: async (id: string) => await request.delete(`${USER_API}/${id}`)
+  delete: async (id: string) => await request.delete(`${USER_API}/${id}`),
+
+  getClubs: async () => {
+    return await request.get<string[]>(`${USER_API}/clubs`);
+  },
+
+  getPlayerInvitations: async (userId: string) => {
+    return await request.get<string[]>(`${USER_API}/${userId}/invitations`);
+  },
+
+  invitePlayersByClub: async (body: InvitePlayersByClubRequest) => {
+    await request.post(`${USER_API}/invite-by-club`, body);
+  }
 };
 
 const auth = {
@@ -120,6 +133,45 @@ const tournaments = {
 
   getTournament: async (tournamentId: string) => {
     return await request.get<Tournament>(`${TOURNAMENTS_API}/${tournamentId}`);
+  },
+
+  addTeamToTournament: async (tournamentId: string, teamName: string) => {
+    return await request.post<Tournament>(
+      `${TOURNAMENTS_API}/${tournamentId}/add-team`,
+      { name: teamName }
+    );
+  },
+
+  removeTeamFromTournament: async (tournamentId: string, teamId: string) => {
+    return await request.delete<Tournament>(
+      `${TOURNAMENTS_API}/${tournamentId}/remove-team`,
+      { data: { teamId } }
+    );
+  },
+
+  joinTeam: async (tournamentId: string, teamId: string, userId: string) => {
+    return await request.post<Tournament>(
+      `${TOURNAMENTS_API}/${tournamentId}/teams/${teamId}/join`,
+      { userId }
+    );
+  },
+
+  leaveTeam: async (tournamentId: string, teamId: string, userId: string) => {
+    return await request.delete(
+      `${TOURNAMENTS_API}/${tournamentId}/teams/${teamId}/leave`,
+      { data: { userId } }
+    );
+  },
+
+  kickPlayerFromTeam: async (
+    tournamentId: string,
+    teamId: string,
+    userId: string
+  ) => {
+    return await request.delete(
+      `${TOURNAMENTS_API}/${tournamentId}/teams/${teamId}/kickPlayer`,
+      { data: { userId } }
+    );
   },
 
   createNew: async (body: CreateTournamentRequest) => {

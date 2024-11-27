@@ -11,7 +11,16 @@ import { EditUserRequest, RegisterRequest } from "../../src/models/requestModel.
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
+
 describe('UserService', () => {
+
+    // Dummy test to see if the test environment works and finds the tests
+    describe('dummy', () => {
+        it('should always pass', () => {
+            expect(true).to.equal(true);
+        });
+    });
+
     let userService: UserService;
     let getUserDocumentByIdStub: SinonStub;
     let testUser: any;
@@ -33,9 +42,7 @@ describe('UserService', () => {
 
         it('should return user object by ID', async () => {
             getUserDocumentByIdStub.resolves(testUser);
-
-            const res = await userService.getUserById(testUser.id);
-            // await expect(userService.getUserById(user.id)).to.eventually.include({email: 'test-user@gmail.com'});
+            const res = await userService.getUserById(testUser);
             expect(res).to.include({email: 'test-user@gmail.com'});
             expect(res).to.include({firstName: 'Test'});
             expect(res).to.include({underage: false});
@@ -157,4 +164,7 @@ describe('UserService', () => {
             expect(res.email).to.include('deleted_user_');
         });
     });
+
 });
+
+

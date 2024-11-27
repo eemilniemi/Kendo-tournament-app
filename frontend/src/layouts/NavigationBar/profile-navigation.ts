@@ -1,0 +1,24 @@
+import type { ProfileNavigationData } from "./navigation-bar";
+
+export const ProfileNavItems: ProfileNavigationData = [
+  {
+    text: "profile.profile_info",
+    tab: "info"
+  },
+  {
+    text: "profile.tournament_history",
+    tab: "history"
+  },
+  {
+    text: "profile.created_tournaments",
+    tab: "created_t"
+  },
+  {
+    text: "profile.invitations",
+    tab: "invitations"
+  },
+  {
+    text: "profile.upcoming_tournaments",
+    tab: "upcoming-tournament"
+  }
+];
