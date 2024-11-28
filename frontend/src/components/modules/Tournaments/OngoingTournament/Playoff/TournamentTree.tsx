@@ -19,6 +19,9 @@ interface Contestant {
 function createContestants(tournament: Tournament): Record<string, Contestant> {
   const contestantsObject: Record<string, Contestant> = {};
   const contestantIds = Object.keys(tournament.contestants ?? {});
+  console.log(
+    "Starting to process the following ids: " + contestantIds.join(";")
+  );
 
   for (const contestantId of contestantIds) {
     if (
@@ -27,6 +30,9 @@ function createContestants(tournament: Tournament): Record<string, Contestant> {
     ) {
       const contestant = tournament.players.find(
         (player) => player.id === contestantId
+      );
+      console.log(
+        `Processing contestant: ${contestant?.firstName} ${contestant?.lastName}`
       );
 
       const playersArray: Player[] = [];
@@ -43,6 +49,10 @@ function createContestants(tournament: Tournament): Record<string, Contestant> {
 
       // Add this contestant to contestantsObject
       contestantsObject[contestantId] = newContestant;
+      console.log(
+        `Added contestant: ${contestantsObject[contestantId].players.at(0)
+          ?.title}`
+      );
     } else {
       return contestantsObject;
     }
@@ -60,7 +70,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           rounds: tournament.rounds?.map((n) => {
             return {
               name: n.name
-            }
+            };
           }),
           matches: tournament.matches?.map((match) => {
             return {

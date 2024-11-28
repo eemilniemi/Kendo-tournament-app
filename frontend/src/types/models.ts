@@ -117,7 +117,7 @@ export interface Tournament {
     string,
     {
       entryStatus?: string;
-      players: User[];
+      players: Record<string, unknown>;
     }
   >;
 }
