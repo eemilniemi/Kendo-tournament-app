@@ -133,9 +133,9 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
                       isWinner: score.isWinner
                     };
                   }),
-                  matchStatus: side.matchStatus,
-                  isLive: side.isLive,
-                  isBronzeMatch: side.isBronzeMatch
+                  currentServing: side.currentScore,
+                  isServing: side.isServing,
+                  isWinner: side.isWinner
                 };
               }),
               matchStatus: match.matchStatus,
