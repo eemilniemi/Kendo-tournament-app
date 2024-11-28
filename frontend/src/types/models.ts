@@ -63,7 +63,7 @@ export interface Match {
   order: number;
   sides: Array<{
     title?: string;
-    contestandId?: string;
+    contestantId?: string;
     scores?: Array<{
       mainScore: number | string;
       subscore?: number | string;

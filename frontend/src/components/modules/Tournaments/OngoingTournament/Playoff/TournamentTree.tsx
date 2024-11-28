@@ -94,7 +94,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
   function createRounds(maxRound: number): unknown[] {
     const roundNames: unknown[] = [];
 
-    for (let i = maxRound; i === 0; --i) {
+    for (let i = 1; i <= maxRound; ++i) {
       if (i === maxRound) {
         roundNames.push({ name: t("tournament_view_labels.final") });
       } else if (i === maxRound - 1) {
@@ -125,7 +125,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
               sides: match.sides.map((side) => {
                 return {
                   title: side.title,
-                  contestantId: side.contestandId,
+                  contestantId: side.contestantId,
                   scores: side.scores?.map((score) => {
                     return {
                       mainScore: score.mainScore,

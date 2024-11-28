@@ -1168,11 +1168,11 @@ export class MatchService {
 
       if (currentMatch.order % 2 === 0) {
         newMatch.players[0] = {id: winnerId, points: [], color: "white"};
-        newMatch.sides[0] = { contestandId: winnerId.toString() };
+        newMatch.sides[0] = { contestantId: winnerId.toString() };
       }
       else {
         newMatch.players[1] = {id: winnerId, points: [], color: "red"};
-        newMatch.sides[1] = { contestandId: winnerId.toString() };
+        newMatch.sides[1] = { contestantId: winnerId.toString() };
       }
 
       const matchDocuments = await MatchModel.create(newMatch);
@@ -1187,11 +1187,11 @@ export class MatchService {
       if (newMatch) {
         if (currentMatch.order % 2 === 0) {
           newMatch.players[0] = {id: winnerId, points: [], color: "white"};
-          newMatch.sides[0] = { contestandId: winnerId.toString() };
+          newMatch.sides[0] = { contestantId: winnerId.toString() };
         }
         else {
           newMatch.players[1] = {id: winnerId, points: [], color: "red"};
-          newMatch.sides[1] = { contestandId: winnerId.toString() };
+          newMatch.sides[1] = { contestantId: winnerId.toString() };
         }
 
         await newMatch.save();

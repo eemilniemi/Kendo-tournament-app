@@ -864,7 +864,7 @@ export class TournamentService {
         roundIndex: 0,
         order: i,
         sides: [
-          { contestandId: playerIds[i].toString() }
+          { contestantId: playerIds[i].toString() }
         ]
       });
     }
@@ -887,8 +887,8 @@ export class TournamentService {
         roundIndex: 0,
         order: (i+byes.length)/2,
         sides: [
-          { contestandId: playerIds[i].toString() },
-          { contestandId: playerIds[i + 1].toString() }
+          { contestantId: playerIds[i].toString() },
+          { contestantId: playerIds[i + 1].toString() }
         ]
       });
     }
@@ -910,8 +910,8 @@ export class TournamentService {
           roundIndex: 1,
           order: j,
           sides: [
-            { contestandId: playerIds[j].toString() },
-            { contestandId: playerIds[j + 1].toString() }
+            { contestantId: playerIds[j].toString() },
+            { contestantId: playerIds[j + 1].toString() }
           ]
         });
       }
@@ -929,8 +929,8 @@ export class TournamentService {
           roundIndex: 1,
           order: j,
           sides: [
-            { contestandId: playerIds[j].toString() },
-            { contestandId: playerIds[j + 1].toString() }
+            { contestantId: playerIds[j].toString() },
+            { contestantId: playerIds[j + 1].toString() }
           ]
         });
       }
