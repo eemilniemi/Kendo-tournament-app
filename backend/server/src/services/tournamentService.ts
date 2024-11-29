@@ -612,6 +612,14 @@ export class TournamentService {
             const id = opponent.id as Types.ObjectId;
             match.winner = id;
             match.endTimestamp = currentTime;
+            if (match.type === "playoff") {
+              for (let i=0; i<2; i++) {
+                if (match.sides[i].contestantId === match.winner.toString()) {
+                  match.sides[i].isWinner = true;
+                }
+              }
+              await MatchService.updatePlayoffSchedule(match.id, match.winner);
+            }
             await match.save();
           }
         }
@@ -862,7 +870,7 @@ export class TournamentService {
         roundIndex: 0,
         order: i,
         sides: [
-          { contestantId: playerIds[i].toString() }
+          { contestantId: playerIds[i].toString(), isWinner: true }
         ]
       });
     }
@@ -928,7 +936,6 @@ export class TournamentService {
           order: j,
           sides: [
             { contestantId: playerIds[j].toString() },
-            { contestantId: playerIds[j + 1].toString() }
           ]
         });
       }

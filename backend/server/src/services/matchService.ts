@@ -630,7 +630,12 @@ export class MatchService {
         }
 
         if (match.type === "playoff") {
-          await this.updatePlayoffSchedule(match.id, match.winner);
+          for (let i=0; i<2; i++) {
+            if (match.sides[i].contestantId === winnerPlayerId.toString()) {
+              match.sides[i].isWinner = true;
+            }
+          }
+          await MatchService.updatePlayoffSchedule(match.id, match.winner);
         }
       } else {
         // If the points are the same, it's a tie (for round robin and team round robin)
@@ -1030,7 +1035,12 @@ export class MatchService {
 
       if (match.type === "playoff") {
         // If playoff, add match to next round schedule
-        await this.updatePlayoffSchedule(match.id, match.winner);
+        for (let i=0; i<2; i++) {
+          if (match.sides[i].contestantId === winnerPlayerId.toString()) {
+            match.sides[i].isWinner = true;
+          }
+        }
+        await MatchService.updatePlayoffSchedule(match.id, match.winner);
       }
     }
 
@@ -1091,7 +1101,7 @@ export class MatchService {
     }
   }
 
-  private async updatePlayoffSchedule(
+  public static async updatePlayoffSchedule(
     matchId: Types.ObjectId,
     winnerId: Types.ObjectId
   ): Promise<void> {
