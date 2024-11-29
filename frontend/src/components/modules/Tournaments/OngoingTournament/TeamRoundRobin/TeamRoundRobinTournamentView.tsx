@@ -30,11 +30,11 @@ import api from "api/axios";
 import useToast from "hooks/useToast";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import MatchButton from "../../MatchButton";
-import UpcomingTournamentView from "../../UpcomingTournamentView";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import { format } from "date-fns";
 import TournamentWinner from "../../Winner";
+import TeamRoundRobinUpcomingView from "./TeamRoundRobinUpcomingView";
 
 export interface TournamentTeam {
   id: string;
@@ -350,15 +350,21 @@ const TeamRoundRobinTournamentView: React.FC = () => {
 
   // Listening to tournaments websocket
   useEffect(() => {
-    if (initialTournamentData.id !== undefined && !hasJoined) {
+    if (
+      initialTournamentData.id !== undefined &&
+      initialTournamentData.id !== "" &&
+      !hasJoined
+    ) {
       joinTournament(initialTournamentData.id);
       setHasJoined(true);
+    }
 
-      return () => {
+    return () => {
+      if (hasJoined) {
         leaveTournament(initialTournamentData.id);
         setHasJoined(false);
-      };
-    }
+      }
+    };
   }, [initialTournamentData.id, hasJoined]);
 
   useEffect(() => {
@@ -377,8 +383,10 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       }
     };
 
-    void fetchData();
-  }, [socketData, initialTournamentData.id, showToast]);
+    if (socketData !== undefined || initialTournamentData.id !== undefined) {
+      void fetchData();
+    }
+  }, [socketData, initialTournamentData.id]);
 
   useEffect(() => {
     if (currentTab === null || !tabTypes.includes(currentTab as any)) {
@@ -543,7 +551,6 @@ const TeamRoundRobinTournamentView: React.FC = () => {
 
   // Unified useEffect for adding teams and calculating stats
   useEffect(() => {
-    // Step 1: Add any new teams from tournamentData to the current teams state
     setTeams((prevTeams) => {
       const updatedTeams = [...prevTeams];
       const teamsFromData = tournamentData.teams ?? [];
@@ -566,14 +573,12 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       return updatedTeams;
     });
 
-    // Step 2: Sort matches and update match states
+    // Sort matches and calculate stats
     const sortedMatches = sortMatches(tournamentData.matchSchedule);
     setOngoingMatches(sortedMatches.ongoingMatches);
     setUpcomingMatches(sortedMatches.upcomingMatches);
     setPastMatches(sortedMatches.pastMatches);
 
-    // Step 3: After teams are updated, calculate and set their statistics
-    // Use a callback to ensure teams have been updated before calculating stats
     setTeams((prevTeams) =>
       calculateTeamStats(prevTeams, tournamentData.matchSchedule)
     );
@@ -641,7 +646,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       <Typography variant="h4">{tournamentData.name}</Typography>
       {/* Display Teams */}
       <Typography variant="h6" sx={{ marginTop: "10px" }}>
-        {t("tournament_view_labels.teams")}
+        {t("tournament_view_labels.team_name")}
       </Typography>
       <Box sx={{ marginBottom: "20px" }}>
         {teams.map((team) => (
@@ -743,7 +748,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       )}
       {currentTab === "tournamentInfo" && (
         <div style={{ padding: "10px 0 0 0" }}>
-          <UpcomingTournamentView ongoing />
+          <TeamRoundRobinUpcomingView ongoing />
         </div>
       )}
       {currentTab === "scoreboard" && <TeamScoreboard teams={teams} />}
