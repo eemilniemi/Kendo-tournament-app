@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { createBracket } from "bracketry";
 import { type Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
+import { countries } from "../../../Registeration/CountrySelect/CountrySelect";
 
 interface TournamentTreeProps {
   tournament: Tournament;
@@ -152,7 +153,10 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           // visibleRoundsCount: 2
           displayWholeRounds: true,
           getNationalityHTML: (entryStatus: any) => {
-            if (entryStatus.nationality === "no nationality stated") {
+            const countryCode = countries.find((country) => {
+              return country.label === entryStatus.nationality;
+            });
+            if (countryCode === undefined) {
               return `<span 
                             title="no nationality stated"
                             style="display: inline-block;
@@ -164,7 +168,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
                       </span>`;
             } else {
               return `<img 
-              src="https://flagcdn.com/w20/${entryStatus.nationality.toLowerCase()}.png" 
+              src="https://flagcdn.com/w20/${countryCode.code.toLowerCase()}.png" 
               alt="${entryStatus.nationality}" 
               title="${entryStatus.nationality}" 
               style="width: 20px; height: auto;" 

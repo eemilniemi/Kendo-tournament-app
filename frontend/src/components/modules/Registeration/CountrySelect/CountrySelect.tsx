@@ -495,3 +495,5 @@ const countries: readonly CountryType[] = [
   { code: "ZM", label: "Zambia", phone: "260" },
   { code: "ZW", label: "Zimbabwe", phone: "263" }
 ];
+
+export { countries };
