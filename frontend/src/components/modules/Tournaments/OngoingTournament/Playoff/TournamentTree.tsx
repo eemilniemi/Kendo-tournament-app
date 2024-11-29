@@ -153,7 +153,15 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           displayWholeRounds: true,
           getNationalityHTML: (entryStatus: any) => {
             if (entryStatus.nationality === "no nationality stated") {
-              return `<span style="display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px;">❓</span>`;
+              return `<span 
+                            title="no nationality stated"
+                            style="display: inline-block;
+                            width: 20px; 
+                            height: 20px;
+                            text-align: center;
+                            line-height: 20px;">
+                            ❓
+                      </span>`;
             } else {
               return `<img 
               src="https://flagcdn.com/w20/${entryStatus.nationality.toLowerCase()}.png" 
