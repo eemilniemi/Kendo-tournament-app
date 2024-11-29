@@ -1077,10 +1077,16 @@ export class MatchService {
 
     if (match.type === "playoff" || match.type === "pre playoff") {
       if (pointColor === "white") {
-        match.sides[0].scores?.push({ mainScore: point.toString() });
+        if (match.sides[0].scores === undefined) {
+          match.sides[0].scores = [];
+        }
+        match.sides[0].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
       }
       else {
-        match.sides[1].scores?.push({ mainScore: point.toString() });
+        if (match.sides[1].scores === undefined) {
+          match.sides[1].scores = [];
+        }
+        match.sides[1].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
       }
     }
   }
