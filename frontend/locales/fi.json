@@ -205,7 +205,8 @@
     "duration": "Kesto",
     "official_missing": "Toimitsijat puuttuvat",
     "select_officials": "Valitse toimitsijat, jotta matsi voi alkaa",
-    "team_name": "Joukkueen nimet"
+    "team_name": "Joukkueen nimet",
+    "match_page": "Ottelusivu"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",

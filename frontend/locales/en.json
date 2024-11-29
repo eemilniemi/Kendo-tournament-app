@@ -205,7 +205,8 @@
     "duration": "Duration",
     "official_missing": "Officials missing",
     "select_officials": "Select officials before match can start",
-    "team_name": "Team names"
+    "team_name": "Team names",
+    "match_page": "Match page"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",

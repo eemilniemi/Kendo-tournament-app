@@ -151,7 +151,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           navButtonsPosition: "overTitles",
           // visibleRoundsCount: 2
           displayWholeRounds: true,
-          getNationalityHTML: (entryStatus: Player) => {
+          getNationalityHTML: (entryStatus: any) => {
             if (entryStatus.nationality === "no nationality stated") {
               return `<span style="display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px;">❓</span>`;
             } else {
@@ -162,11 +162,30 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
               style="width: 20px; height: auto;" 
             />`;
             }
+          },
+          getMatchTopHTML: (match: any) => {
+            if (match.sides.length === 2) {
+              const currentMatch = tournament.matches?.find(
+                (m) =>
+                  m.players[0].id === match.sides[0].contestantId &&
+                  m.players[1].id === match.sides[1].contestantId
+              );
+              if (currentMatch !== undefined) {
+                return `
+                <a href="/tournaments/${currentMatch.tournamentId}/match/${
+                  currentMatch.id
+                }">
+                  ${t("tournament_view_labels.match_page")}
+                </a>
+              `;
+              }
+            }
+            return "";
           }
         }
       );
     }
-  }, [tournament.matches]);
+  }, [tournament.matches, t]);
 
   return <div ref={treeRef} />;
 };
