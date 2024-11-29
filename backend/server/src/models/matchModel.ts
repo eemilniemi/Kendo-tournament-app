@@ -141,11 +141,14 @@ const matchSchema = new Schema<Match>(
     sides: [{
       title: { type: String },
       contestantId: { type: String },
-      scores: [{
-        mainScore: {type: Schema.Types.Mixed },
-        subscore: {type: Schema.Types.Mixed },
-        isWinner: { type: Boolean }
-      }],
+      scores: {
+        type: [{
+          mainScore: {type: Schema.Types.Mixed },
+          subscore: {type: Schema.Types.Mixed },
+          isWinner: { type: Boolean }
+        }],
+        default: undefined
+      },
       currentScore: {type: Schema.Types.Mixed },
       isServing: { type: Boolean },
       isWinner: { type: Boolean }
