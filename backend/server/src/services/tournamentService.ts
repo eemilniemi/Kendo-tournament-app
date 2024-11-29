@@ -914,7 +914,7 @@ export class TournamentService {
           tournamentId: tournament,
           matchTime: tournamentMatchTime,
           roundIndex: 1,
-          order: j,
+          order: j/2,
           sides: [
             { contestantId: playerIds[j].toString() },
             { contestantId: playerIds[j + 1].toString() }
@@ -933,7 +933,7 @@ export class TournamentService {
           tournamentId: tournament,
           matchTime: tournamentMatchTime,
           roundIndex: 1,
-          order: j,
+          order: j/2,
           sides: [
             { contestantId: playerIds[j].toString() },
           ]
