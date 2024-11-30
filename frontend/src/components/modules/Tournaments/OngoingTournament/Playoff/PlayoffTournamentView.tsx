@@ -308,7 +308,9 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
                     justifyContent: "center",
                     padding: "20px",
                     borderRadius: 2,
-                    width: "100%"
+                    width: "99%",
+                    outline: "1px lightgray solid",
+                    margin: "10px auto"
                   }}
                 >
                   <Box
@@ -321,10 +323,14 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
                     <Typography
                       variant="h6"
                       sx={{
-                        marginBottom: 2,
+                        marginBottom: 0,
                         textDecoration: "underline",
                         fontSize: "17px",
-                        fontWeight: "bold"
+                        fontWeight: "bold",
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        toggleRound(parseInt(roundNumber, 10));
                       }}
                     >
                       {getRoundName(parseInt(roundNumber, 10))}
