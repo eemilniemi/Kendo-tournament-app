@@ -37,7 +37,7 @@
 
 .team-red {
     background: var(--middle-color);
-    background: linear-gradient(90deg, var(--middle-color) 0%, rgba(160,0,0,1) 40%, rgba(255,0,0,1) 100%);
+    background: linear-gradient(90deg, var(--middle-color) 0%, rgba(145,60,60,1) 40%, rgba(245,65,65,1) 100%);
     border-radius: 0 0.5vw 0.5vw 0;
     padding-left: 2vw;
 }

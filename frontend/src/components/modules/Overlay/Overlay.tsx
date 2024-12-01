@@ -240,6 +240,7 @@ const Overlay: React.FC = () => {
   const url =
     window.location.host + routePaths.overlay + "/" + id + "/" + matchId;
 
+  // TODO: ensure players get the right colors
   return (
     <div className="overlay-container">
       <OverlayButton link={url} />
@@ -253,7 +254,9 @@ const Overlay: React.FC = () => {
         <div className="team-score">
           {p1points.map(function (point, index) {
             const isFirst = point.timestamp === firstPointTimestamp;
-            const cl = isFirst ? "point" : "point first-point";
+            console.log("p1: " + point.timestamp.toString());
+            console.log(isFirst);
+            const cl = isFirst ? "point first-point" : "point";
             return (
               <div key={index} className={cl}>
                 {pointMap.get(point.type)}
@@ -271,6 +274,8 @@ const Overlay: React.FC = () => {
         <div className="team-score">
           {p2points.map(function (point, index) {
             const isFirst = point.timestamp === firstPointTimestamp;
+            console.log("p2: " + point.timestamp.toString());
+            console.log(isFirst);
             const cl = isFirst ? "point first-point" : "point";
             return (
               <div key={index} className={cl}>
