@@ -325,9 +325,6 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      position: "sticky",
-                      top: 0,
-                      backgroundColor: "white",
                       zIndex: 1,
                       cursor: "pointer"
                     }}
