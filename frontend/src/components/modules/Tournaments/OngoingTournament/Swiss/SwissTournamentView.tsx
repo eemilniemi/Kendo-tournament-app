@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Tabs, Tab, Typography, Grid } from "@mui/material";
+import { Tabs, Tab, Typography, Box, MenuItem, Select } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { useTournament } from "context/TournamentContext";
 import { useTranslation } from "react-i18next";
@@ -13,13 +13,15 @@ import {
 } from "../RoundRobin/RoundRobinTournamentView";
 import PlayoffTournamentView from "../Playoff/PlayoffTournamentView";
 import { type Match, type Tournament } from "../../../../../types/models";
-
 import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
 import { checkSameNames } from "../../PlayerNames";
 import api from "api/axios";
 import useToast from "hooks/useToast";
-import { allMatchesPlayed, findTournamentWinner } from "utils/TournamentUtils";
+import TournamentWinner from "../../Winner";
+import { format } from "date-fns";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import UpcomingTournamentView from "../../UpcomingTournamentView";
 
 const SwissTournamentView: React.FC = () => {
   const setError = useState<string | null>(null)[1];
@@ -28,7 +30,7 @@ const SwissTournamentView: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const initialRender = useRef(true);
-  const tabTypes = ["scoreboard", "playoff"] as const;
+  const tabTypes = ["scoreboard", "matches", "tournamentInfo"] as const;
   const defaultTab = "scoreboard";
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const setOngoingMatches = useState<Match[]>([])[1];
@@ -37,6 +39,7 @@ const SwissTournamentView: React.FC = () => {
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const [hasJoined, setHasJoined] = useState(false);
   const showToast = useToast();
+  const mobile = useMediaQuery("(max-width:600px)");
 
   try {
     useEffect(() => {
@@ -147,44 +150,112 @@ const SwissTournamentView: React.FC = () => {
       }
     }, [players, tournamentData]);
 
+    const formattedStartDate =
+      tournamentData.startDate !== null
+        ? format(new Date(tournamentData.startDate), "MMM dd, yyyy")
+        : "";
+    const formattedEndDate =
+      tournamentData.endDate !== null
+        ? format(new Date(tournamentData.endDate), "MMM dd, yyyy")
+        : "";
+
     return (
       <>
-        <Grid container alignItems="center" spacing={4}>
-          <Grid item>
-            <Typography variant="h4">{tournament.name}</Typography>
-            {allMatchesPlayed(tournamentData) && (
-              <Typography variant="subtitle1">
-                <span>
-                  {t("frontpage_labels.winner")}
-                  {": "}
-                  {findTournamentWinner(tournamentData)}
-                </span>
-              </Typography>
-            )}
-          </Grid>
-          <Grid item>
-            <CopyToClipboardButton />
-          </Grid>
-        </Grid>
-
-        <Tabs
-          value={currentTab}
-          onChange={(_, newValue) => {
-            handleTabChange(newValue);
+        <Typography
+          variant="body1"
+          fontSize="10px"
+          sx={{ display: "flex", gap: "5px", alignItems: "center" }}
+        >
+          {formattedStartDate}
+          {formattedEndDate !== null && ` - ${formattedEndDate}`}
+        </Typography>
+        <Typography
+          variant="body1"
+          fontSize="10px"
+          sx={{ display: "flex", gap: "5px", alignItems: "center" }}
+        >
+          {tournamentData.location !== null && `${tournamentData.location}`}
+        </Typography>{" "}
+        <Typography variant="h4">{tournamentData.name}</Typography>
+        <TournamentWinner tournament={tournamentData} />
+        <div
+          style={{
+            position: "absolute",
+            right: "15px",
+            top: mobile ? "44px" : "64px",
+            transform: "translateY(50%)"
           }}
         >
-          <Tab
-            label={t("tournament_view_labels.scoreboard")}
-            value="scoreboard"
-          />
-          <Tab label={t("tournament_view_labels.matches")} value="playoff" />
-        </Tabs>
-
-        {currentTab === "scoreboard" && (
-          <Scoreboard players={players} haveSameNames={haveSameNames} />
+          <CopyToClipboardButton />
+        </div>
+        {mobile ? (
+          <Select
+            value={currentTab}
+            onChange={(event) => {
+              handleTabChange(event.target.value);
+            }}
+            style={{ marginBottom: "10px", alignItems: "center", padding: "0" }}
+            sx={{
+              border: "2px solid #db4744",
+              fontSize: "13px",
+              color: "#db4744",
+              margin: "10px 0",
+              width: "100%"
+            }}
+          >
+            <MenuItem value="tournamentInfo" sx={{ fontSize: "13px" }}>
+              {t("tournament_view_labels.tournament_info")}
+            </MenuItem>
+            <MenuItem value="scoreboard" sx={{ fontSize: "13px" }}>
+              {t("tournament_view_labels.scoreboard")}
+            </MenuItem>
+            <MenuItem value="matches" sx={{ fontSize: "13px" }}>
+              {t("tournament_view_labels.matches")}
+            </MenuItem>
+          </Select>
+        ) : (
+          <>
+            <Tabs
+              value={currentTab}
+              onChange={(_, newValue) => {
+                handleTabChange(newValue);
+              }}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+              sx={{ margin: "10px 0" }}
+            >
+              <Tab
+                label={t("tournament_view_labels.tournament_info")}
+                value="tournamentInfo"
+                sx={{ fontSize: "13px" }}
+              />
+              <Tab
+                label={t("tournament_view_labels.scoreboard")}
+                value="scoreboard"
+                sx={{ fontSize: "13px" }}
+              />
+              <Tab
+                label={t("tournament_view_labels.matches")}
+                value="matches"
+                sx={{ fontSize: "13px" }}
+              />
+            </Tabs>
+          </>
         )}
-
-        {currentTab === "playoff" && <PlayoffTournamentView />}
+        {currentTab === "tournamentInfo" && (
+          <div style={{ padding: "10px 0 0 0" }}>
+            <UpcomingTournamentView ongoing />
+          </div>
+        )}
+        {currentTab === "scoreboard" && (
+          <Box sx={{ padding: "20px 0px" }}>
+            <Scoreboard players={players} haveSameNames={haveSameNames} />
+          </Box>
+        )}
+        {currentTab === "matches" && (
+          <PlayoffTournamentView isChildTournament={true} />
+        )}
       </>
     );
   } catch (e) {

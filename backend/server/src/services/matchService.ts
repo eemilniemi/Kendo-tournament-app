@@ -600,28 +600,44 @@ export class MatchService {
       const { player1CalculatedScore, player2CalculatedScore } =
         this.calculateScore(player1.points, player2.points);
 
-      // When time ends, the player with more points wins
-      // (rounded down because one hansoku doesn't count)
+      // Determine the winner based on points
       if (
         Math.floor(player1CalculatedScore) >
           Math.floor(player2CalculatedScore) ||
         Math.floor(player2CalculatedScore) > Math.floor(player1CalculatedScore)
       ) {
-        match.winner =
+        const winnerPlayerId =
           player1CalculatedScore > player2CalculatedScore
             ? player1.id
             : player2.id;
+
+        match.winner = winnerPlayerId;
         match.endTimestamp = new Date();
+
+        // Determine the winner team in a team round robin
+        if (match.type === "team") {
+          const winnerTeam = await this.findTeamByPlayerId(
+            winnerPlayerId,
+            match.tournamentId as Types.ObjectId
+          );
+
+          if (winnerTeam !== null && winnerTeam !== undefined) {
+            match.winnerTeamId = winnerTeam.id;
+          } else {
+            match.winnerTeamId = undefined;
+          }
+        }
+
         if (match.type === "playoff") {
           await this.updatePlayoffSchedule(match.id, match.winner);
         }
       } else {
-        // If the points are the same, it's a tie (in round robin)
-        if (match.type === "group") {
+        // If the points are the same, it's a tie (for round robin and team round robin)
+        if (match.type === "group" || match.type === "team") {
           match.endTimestamp = new Date();
           await match.save();
         }
-        // If it's a playoff, an overtime will start
+        // If it's a playoff, an overtime will start if it's a tie
         else if (
           match.type === "playoff" &&
           player1CalculatedScore === player2CalculatedScore
@@ -636,12 +652,14 @@ export class MatchService {
 
       await match.save();
     }
+
     const tournamentService = new TournamentService();
     const tournamentId = match.tournamentId as Types.ObjectId;
 
     if (tournamentId !== undefined) {
       await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
+
     return await match.toObject();
   }
 
@@ -942,6 +960,38 @@ export class MatchService {
     };
   }
 
+  private async findTeamByPlayerId(
+    playerId: Types.ObjectId,
+    tournamentId: Types.ObjectId
+  ): Promise<{
+    id: Types.ObjectId;
+    name: string;
+    players: Types.ObjectId[];
+  } | null> {
+    const tournament = await TournamentModel.findById(tournamentId).exec();
+
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+    if (tournament == null || tournament.teams == null) {
+      return null;
+    }
+
+    for (const team of tournament.teams) {
+      const playerIds = team.players.map((p) =>
+        p instanceof Types.ObjectId ? p : p.id
+      );
+
+      if (playerIds.some((id) => id.equals(playerId))) {
+        return {
+          id: team.id,
+          name: team.name,
+          players: playerIds
+        };
+      }
+    }
+
+    return null;
+  }
+
   private async checkMatchOutcome(match: Match): Promise<void> {
     const MAXIMUM_POINTS = 2;
     const player1: MatchPlayer = match.players[0] as MatchPlayer;
@@ -955,11 +1005,27 @@ export class MatchService {
       player2CalculatedScore >= MAXIMUM_POINTS
     ) {
       // Determine the winner based on points
-      match.winner =
+      const winnerPlayerId =
         player1CalculatedScore > player2CalculatedScore
           ? player1.id
           : player2.id;
+
+      match.winner = winnerPlayerId;
       match.endTimestamp = new Date();
+
+      // Determine the winner team
+      if (match.type === "team") {
+        const winnerTeam = await this.findTeamByPlayerId(
+          winnerPlayerId,
+          match.tournamentId as Types.ObjectId
+        );
+
+        if (winnerTeam != null) {
+          match.winnerTeamId = winnerTeam.id;
+        } else {
+          match.winnerTeamId = undefined;
+        }
+      }
 
       if (match.type === "playoff") {
         // If playoff, add match to next round schedule

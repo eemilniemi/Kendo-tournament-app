@@ -19,13 +19,13 @@ import {
 } from "../models/requestModel.js";
 import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
+import bcrypt from "bcrypt";
 
 export class TournamentService {
-  // This is to use matchService's functions here
-  private readonly matchService: MatchService; // Add MatchService as a member variable
+  private readonly matchService: MatchService;
 
   constructor() {
-    this.matchService = new MatchService(); // Initialize MatchService
+    this.matchService = new MatchService();
   }
 
   public async emitTournamentUpdate(tournamentId: string): Promise<void> {
@@ -37,9 +37,7 @@ export class TournamentService {
     const tournament = await TournamentModel.findById(id)
       .populate<{ creator: User }>({ path: "creator", model: "User" })
       .populate<{ players: User[] }>({ path: "players", model: "User" })
-      .populate<{
-        matchSchedule: Match[];
-      }>({
+      .populate<{ matchSchedule: Match[] }>({
         path: "matchSchedule",
         model: "Match"
       })
@@ -57,11 +55,14 @@ export class TournamentService {
     const tournaments = await TournamentModel.find()
       .populate<{ creator: User }>({ path: "creator", model: "User" })
       .populate<{ players: User[] }>({ path: "players", model: "User" })
-      .populate<{
-        matchSchedule: Match[];
-      }>({
+      .populate<{ matchSchedule: Match[] }>({
         path: "matchSchedule",
         model: "Match"
+      })
+      // eslint-disable-next-line @typescript-eslint/array-type
+      .populate<{ teams: { players: User[] }[] }>({
+        path: "teams.players",
+        model: "User"
       })
       .exec();
 
@@ -88,11 +89,194 @@ export class TournamentService {
     return await newTournament.toObject();
   }
 
+  public async addTeamToTournament(
+    tournamentId: string,
+    teamName: string,
+    creatorId: string
+  ): Promise<Tournament> {
+    const tournament = await TournamentModel.findById(tournamentId);
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "No tournaments found"
+      });
+    }
+
+    const teamExists = (tournament.teams ?? []).some(
+      (team) => team.name === teamName
+    );
+    if (teamExists) {
+      throw new BadRequestError({
+        message: "A team with this name already exists in the tournament"
+      });
+    }
+
+    if (tournament.teams != null) {
+      tournament.teams.push({
+        id: new Types.ObjectId(),
+        name: teamName,
+        players: []
+      });
+    } else {
+      tournament.teams = [
+        {
+          id: new Types.ObjectId(),
+          name: teamName,
+          players: []
+        }
+      ];
+    }
+
+    await tournament.save();
+    await this.emitTournamentUpdate(tournamentId);
+
+    return tournament;
+  }
+
+  public async removeTeamFromTournament(
+    tournamentId: string,
+    teamId: string
+  ): Promise<Tournament> {
+    const tournament = await TournamentModel.findById(tournamentId);
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+
+    const teamExists =
+      tournament.teams?.some((team) => team.id.toString() === teamId) ?? false;
+
+    if (!teamExists) {
+      throw new NotFoundError({
+        message: "Team not found in the tournament"
+      });
+    }
+
+    tournament.teams = tournament.teams?.filter(
+      (team) => team.id.toString() !== teamId
+    );
+
+    await tournament.save();
+    await this.emitTournamentUpdate(tournamentId);
+
+    return tournament;
+  }
+
+  public async joinTeam(
+    tournamentId: string,
+    teamId: string,
+    userId: string
+  ): Promise<void> {
+    const tournament = await TournamentModel.findById(tournamentId);
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({
+        message: "Tournament not found"
+      });
+    }
+
+    const team = tournament.teams?.find(
+      (team) => team.id.toString() === teamId
+    );
+    if (team === null || team === undefined) {
+      throw new NotFoundError({
+        message: "Team not found in the tournament"
+      });
+    }
+
+    if (team.players.some((player) => player.id.toString() === userId)) {
+      throw new BadRequestError({
+        message: "User is already a member of this team"
+      });
+    }
+
+    team.players.push(new Types.ObjectId(userId));
+    await tournament.save();
+    await this.addPlayerToTournament(tournamentId, userId);
+  }
+
+  public async leaveTeam(
+    tournamentId: string,
+    teamId: string,
+    userId: string
+  ): Promise<void> {
+    const tournament = await TournamentModel.findById(tournamentId);
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({ message: "Tournament not found" });
+    }
+
+    const team = tournament.teams?.find(
+      (team) => team.id.toString() === teamId
+    );
+    if (team === null || team === undefined) {
+      throw new NotFoundError({
+        message: "Team not found in the tournament"
+      });
+    }
+
+    team.players = team.players.filter((playerId) => {
+      if (playerId instanceof Types.ObjectId) {
+        return !playerId.equals(new Types.ObjectId(userId));
+      } else if (typeof playerId === "object" && "id" in playerId) {
+        return playerId.id.toString() !== userId;
+      }
+      return true;
+    });
+
+    await tournament.save();
+    await this.removePlayerFromTournament(tournamentId, userId);
+  }
+
+  public async kickPlayerFromTeam(
+    tournamentId: string,
+    teamId: string,
+    userId: string
+  ): Promise<void> {
+    const tournament = await TournamentModel.findById(tournamentId)
+      .select("+password")
+      .exec();
+
+    if (tournament === null || tournament === undefined) {
+      throw new NotFoundError({ message: "Tournament not found" });
+    }
+
+    const team = tournament.teams?.find(
+      (team) => team.id.toString() === teamId
+    );
+    if (team === null || team === undefined) {
+      throw new NotFoundError({
+        message: "Team not found in the tournament"
+      });
+    }
+
+    const playerIndex = team.players.findIndex((playerId) => {
+      if (playerId instanceof Types.ObjectId) {
+        return playerId.equals(new Types.ObjectId(userId));
+      } else if (typeof playerId === "object" && "id" in playerId) {
+        return playerId.id.toString() === userId;
+      }
+      return false;
+    });
+
+    if (playerIndex === -1) {
+      throw new NotFoundError({ message: "Player not found in the team" });
+    }
+
+    team.players.splice(playerIndex, 1);
+
+    await tournament.save();
+    await this.removePlayerFromTournament(tournamentId, userId);
+  }
+
   public async addPlayerToTournament(
     tournamentId: string,
-    playerId: string
+    playerId: string,
+    password?: string
   ): Promise<void> {
-    const tournament = await TournamentModel.findById(tournamentId).exec();
+    const tournament = await TournamentModel.findById(tournamentId)
+      .select("+password")
+      .exec();
 
     if (tournament === null || tournament === undefined) {
       throw new NotFoundError({
@@ -107,7 +291,6 @@ export class TournamentService {
       });
     }
 
-    // Check if the player is already in the tournament
     if (tournament.players.includes(player.id)) {
       throw new BadRequestError({
         message: "Player already registered in the tournament"
@@ -126,6 +309,32 @@ export class TournamentService {
       throw new BadRequestError({
         message: "Tournament has reached its maximum number of players"
       });
+    }
+
+    // Verify the password if the tournament is password-protected
+    if (
+      tournament.passwordEnabled &&
+      (player.invitations === null ||
+        player.invitations === undefined ||
+        !player.invitations.includes(tournament.id))
+    ) {
+      if (password === null || password === undefined || password === "") {
+        throw new BadRequestError({
+          message: "Password is required to join this tournament"
+        });
+      }
+
+      // Compare the provided password with the hashed password in the database
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        tournament.password ?? ""
+      );
+
+      if (!isPasswordCorrect) {
+        throw new BadRequestError({
+          message: "Incorrect password"
+        });
+      }
     }
 
     tournament.players.push(player.id);
@@ -155,7 +364,8 @@ export class TournamentService {
     // Playoff matches are calculated separately when the tournament has started
     if (
       tournament.players.length > 1 &&
-      tournament.type !== TournamentType.Playoff
+      tournament.type !== TournamentType.Playoff &&
+      tournament.type !== TournamentType.TeamRoundRobin
     ) {
       const newMatchIds = await this.generateTournamentSchedule(
         tournament,
@@ -489,8 +699,38 @@ export class TournamentService {
           tournament.id,
           tournament.matchTime
         );
-
         break;
+      case TournamentType.TeamRoundRobin: {
+        if (
+          tournament.teams === null ||
+          tournament.teams === undefined ||
+          tournament.teams.length < 2
+        ) {
+          throw new TypeError(
+            "A minimum of two teams is required for a Team Round Robin tournament."
+          );
+        }
+
+        // Extract and validate players as ObjectIds
+        const formattedTeams = tournament.teams.map((team) => {
+          if (team.players.length === 0) {
+            throw new Error(
+              `Team  has no players. Schedule generation failed.`
+            );
+          }
+          return {
+            id: team.id,
+            players: team.players as Types.ObjectId[]
+          };
+        });
+
+        matches = TournamentService.generateTeamRoundRobinSchedule(
+          formattedTeams,
+          tournament.id,
+          tournament.matchTime
+        );
+        break;
+      }
     }
 
     if (matches.length === 0) {
@@ -499,6 +739,57 @@ export class TournamentService {
     const matchDocuments = await MatchModel.insertMany(matches);
     await MatchService.divideMatchesToCourts(tournament.id);
     return matchDocuments.map((doc) => doc._id);
+  }
+
+  public static generateTeamRoundRobinSchedule(
+    teams: Array<{ id: Types.ObjectId; players: Types.ObjectId[] }>,
+    tournament: Types.ObjectId,
+    tournamentMatchTime: MatchTime,
+    tournamentType: MatchType = "team",
+    tournamentRound: number = 1
+  ): UnsavedMatch[] {
+    const matches: UnsavedMatch[] = [];
+    const teamPairTracker = new Set<string>();
+
+    const sortedTeams = teams
+      .slice()
+      .sort((a, b) => a.id.toString().localeCompare(b.id.toString()));
+
+    for (let i = 0; i < sortedTeams.length - 1; i++) {
+      for (let j = i + 1; j < sortedTeams.length; j++) {
+        const team1 = sortedTeams[i];
+        const team2 = sortedTeams[j];
+
+        const teamIds = [team1.id.toString(), team2.id.toString()].sort();
+        const teamPairKey = `${teamIds[0]}-${teamIds[1]}`;
+
+        if (!teamPairTracker.has(teamPairKey)) {
+          teamPairTracker.add(teamPairKey);
+
+          if (team1.players.length === team2.players.length) {
+            for (let k = 0; k < team1.players.length; k++) {
+              const player1 = team1.players[k];
+              const player2 = team2.players[k];
+
+              matches.push({
+                players: [
+                  { id: player1, points: [], color: "white" },
+                  { id: player2, points: [], color: "red" }
+                ],
+                type: tournamentType,
+                elapsedTime: 0,
+                timerStartedTimestamp: null,
+                tournamentRound,
+                tournamentId: tournament,
+                matchTime: tournamentMatchTime
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return matches;
   }
 
   public static generateRoundRobinSchedule(
@@ -537,7 +828,6 @@ export class TournamentService {
     matchType: string = "playoff"
   ): Promise<UnsavedMatch[]> {
     const matches: UnsavedMatch[] = [];
-
     const bracketSize = TournamentService.nextPowerOfTwo(playerIds.length);
     const byesNeeded = bracketSize - playerIds.length;
 
@@ -716,16 +1006,6 @@ export class TournamentService {
         throw new BadRequestError({
           message:
             "Invalid tournament dates. The start date must be before the end date."
-        });
-      }
-
-      const now = new Date();
-
-      // Check if start date and time is before the current date and time
-      if (startDate < now) {
-        throw new BadRequestError({
-          message:
-            "Invalid tournament date. The start date and time cannot be in the past."
         });
       }
     }
