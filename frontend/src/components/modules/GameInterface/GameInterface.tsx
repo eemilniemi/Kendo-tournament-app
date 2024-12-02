@@ -158,18 +158,6 @@ const GameInterface: React.FC = () => {
         let court: number = 1;
         let scheduledTime: string = "XX:XX";
 
-        // Get players' names
-        /*
-        const findPlayerName = (playerId: string, index: number): void => {
-          const player = tournament.players.find((p) => p.id === playerId);
-          if (player !== undefined) {
-            playersFirstNames[index] = player.firstName;
-            playersLastNames[index] = player.lastName;
-          }
-        };
-
-         */
-
         // Try to get match info from the websocket
         if (matchInfoFromSocket !== undefined) {
           matchTime = matchInfoFromSocket.matchTime;
@@ -177,13 +165,11 @@ const GameInterface: React.FC = () => {
           // Get players' names in this match
           matchPlayers = matchInfoFromSocket.players;
 
-          const p1name = findPlayerName(matchPlayers[0].id, tournament);
-          const p2name = findPlayerName(matchPlayers[1].id, tournament);
-
-          playersFirstNames[0] = p1name.firstName;
-          playersLastNames[0] = p1name.lastName;
-          playersFirstNames[1] = p2name.firstName;
-          playersLastNames[2] = p2name.lastName;
+          for (let i = 0; i < matchPlayers.length; i++) {
+            const p = findPlayerName(matchPlayers[i].id, tournament);
+            playersFirstNames[i] = p.firstName;
+            playersLastNames[i] = p.lastName;
+          }
 
           // If there is a winner, save them
           if (matchInfoFromSocket.winner !== undefined) {
@@ -247,13 +233,11 @@ const GameInterface: React.FC = () => {
 
             matchPlayers = matchFromApi.players;
 
-            const p1name = findPlayerName(matchPlayers[0].id, tournament);
-            const p2name = findPlayerName(matchPlayers[1].id, tournament);
-
-            playersFirstNames[0] = p1name.firstName;
-            playersLastNames[0] = p1name.lastName;
-            playersFirstNames[1] = p2name.firstName;
-            playersLastNames[2] = p2name.lastName;
+            for (let i = 0; i < matchPlayers.length; i++) {
+              const p = findPlayerName(matchPlayers[i].id, tournament);
+              playersFirstNames[i] = p.firstName;
+              playersLastNames[i] = p.lastName;
+            }
 
             // If there is a winner, save them
             if (matchFromApi.winner !== undefined) {

@@ -111,6 +111,7 @@ const templatePlayer: OverlayPlayer = {
   danRank: null
 };
 
+// TODO: improve visual design
 const Overlay: React.FC = () => {
   const tournament = useTournament();
   const { matchId } = useParams();
