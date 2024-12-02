@@ -3,6 +3,7 @@ import { createBracket } from "bracketry";
 import { type Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
 import { countries } from "../../../Registeration/CountrySelect/CountrySelect";
+import { useNavigate } from "react-router-dom";
 
 interface TournamentTreeProps {
   tournament: Tournament;
@@ -90,6 +91,7 @@ function createContestants(tournament: Tournament): Record<string, Contestant> {
 const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
   const treeRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   // Names for each round
   function createRounds(maxRound: number): unknown[] {
@@ -175,24 +177,20 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             />`;
             }
           },
-          getMatchTopHTML: (match: any) => {
+          onMatchClick: (match: any) => {
             if (match.sides.length === 2) {
               const currentMatch = tournament.matches?.find(
                 (m) =>
                   m.players[0].id === match.sides[0].contestantId &&
                   m.players[1].id === match.sides[1].contestantId
               );
-              if (currentMatch !== undefined) {
-                return `
-                <a href="/tournaments/${currentMatch.tournamentId}/match/${
-                  currentMatch.id
-                }">
-                  ${t("tournament_view_labels.match_page")}
-                </a>
-              `;
-              }
+              navigate(
+                "/tournaments/" +
+                  currentMatch?.tournamentId +
+                  "/match/" +
+                  currentMatch?.id
+              );
             }
-            return "";
           }
         }
       );
