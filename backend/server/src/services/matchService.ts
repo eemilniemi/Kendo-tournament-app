@@ -1183,11 +1183,11 @@ export class MatchService {
       }
 
       if (currentMatch.order % 2 === 0) {
-        newMatch.players[0] = {id: winnerId, points: [], color: "white"};
+        newMatch.players[0] = {id: winnerId, points: [], color: "red"};
         newMatch.sides[0] = { contestantId: winnerId.toString() };
       }
       else {
-        newMatch.players[1] = {id: winnerId, points: [], color: "red"};
+        newMatch.players[1] = {id: winnerId, points: [], color: "white"};
         newMatch.sides[1] = { contestantId: winnerId.toString() };
       }
 
@@ -1202,11 +1202,11 @@ export class MatchService {
 
       if (newMatch) {
         if (currentMatch.order % 2 === 0) {
-          newMatch.players[0] = {id: winnerId, points: [], color: "white"};
+          newMatch.players[0] = {id: winnerId, points: [], color: "red"};
           newMatch.sides[0] = { contestantId: winnerId.toString() };
         }
         else {
-          newMatch.players[1] = {id: winnerId, points: [], color: "red"};
+          newMatch.players[1] = {id: winnerId, points: [], color: "white"};
           newMatch.sides[1] = { contestantId: winnerId.toString() };
         }
 
