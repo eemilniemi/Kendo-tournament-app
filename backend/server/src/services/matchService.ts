@@ -897,6 +897,9 @@ export class MatchService {
       players.forEach((player) => {
         player.points = [];
       });
+      match.sides.forEach((side) => {
+        side.scores = [];
+      });
     }
 
     await match.save();
@@ -1170,7 +1173,7 @@ export class MatchService {
 
     if (!nextMatch) {
       let newMatch: UnsavedPlayoffMatch = {
-        players: [],
+        players: new Array(2),
         type: "playoff",
         elapsedTime: 0,
         timerStartedTimestamp: null,
@@ -1179,15 +1182,15 @@ export class MatchService {
         tournamentId: tournament.id,
         roundIndex: nextIndex,
         order: nextOrder,
-        sides: [],
+        sides: new Array(2),
       }
 
       if (currentMatch.order % 2 === 0) {
-        newMatch.players[0] = {id: winnerId, points: [], color: "red"};
+        newMatch.players[0] = {id: winnerId, points: [], color: "white"};
         newMatch.sides[0] = { contestantId: winnerId.toString() };
       }
       else {
-        newMatch.players[1] = {id: winnerId, points: [], color: "white"};
+        newMatch.players[1] = {id: winnerId, points: [], color: "red"};
         newMatch.sides[1] = { contestantId: winnerId.toString() };
       }
 
@@ -1202,11 +1205,11 @@ export class MatchService {
 
       if (newMatch) {
         if (currentMatch.order % 2 === 0) {
-          newMatch.players[0] = {id: winnerId, points: [], color: "red"};
+          newMatch.players[0] = {id: winnerId, points: [], color: "white"};
           newMatch.sides[0] = { contestantId: winnerId.toString() };
         }
         else {
-          newMatch.players[1] = {id: winnerId, points: [], color: "white"};
+          newMatch.players[1] = {id: winnerId, points: [], color: "red"};
           newMatch.sides[1] = { contestantId: winnerId.toString() };
         }
 

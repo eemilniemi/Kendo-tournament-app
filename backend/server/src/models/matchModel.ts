@@ -57,9 +57,9 @@ export interface Match {
       subscore?: number | string,
       isWinner?: boolean
     }>,
-    currentScore?: string,
+    currentScore?: number | string,
     isServing?: boolean,
-    isWinner?: string,
+    isWinner?: boolean,
   }>;
   matchStatus?: string;
   isLive?: boolean;

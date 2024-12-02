@@ -50,6 +50,8 @@ export class TournamentService {
       });
     }
 
+    console.log(tournament.matches);
+
     return await tournament.toObject();
   }
 
@@ -881,8 +883,8 @@ export class TournamentService {
     for (i; i < playerIds.length - 1; i += 2) {
       matches.push({
         players: [
-          { id: playerIds[i], points: [], color: "red" },
-          { id: playerIds[i + 1], points: [], color: "white" }
+          { id: playerIds[i], points: [], color: "white" },
+          { id: playerIds[i + 1], points: [], color: "red" }
         ],
         type: matchType as MatchType,
         elapsedTime: 0,
@@ -904,8 +906,8 @@ export class TournamentService {
       if (j + 1 < byesNeeded) {
         matches.push({
           players: [
-            { id: playerIds[j], points: [], color: "red" },
-            { id: playerIds[j + 1], points: [], color: "white" }
+            { id: playerIds[j], points: [], color: "white" },
+            { id: playerIds[j + 1], points: [], color: "red" }
           ],
           type: matchType as MatchType,
           elapsedTime: 0,
