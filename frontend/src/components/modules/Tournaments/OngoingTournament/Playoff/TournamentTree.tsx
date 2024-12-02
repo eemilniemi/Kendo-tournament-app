@@ -189,10 +189,20 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             }
           },
           getMatchTopHTML: (match: any) => {
+            console.log(match);
+            // In case of BYE match don't show court number
+            if (match.sides.length === 1 && match.sides[0].isWinner === true) {
+              return "";
+            }
+
             const courtLetter = mapNumberToLetter(match.courtNumber);
             return `<div 
               class="court-letter"
-              title="Court: ${courtLetter}">
+              title="Court: ${courtLetter}"
+              style="
+                font-size: 13px;
+                color: DimGray;">
+              
               ${t("tournament_view_labels.court_number")}: ${courtLetter}
             </div>`;
           }
