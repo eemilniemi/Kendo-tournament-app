@@ -2,7 +2,6 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -32,16 +31,8 @@ const NavigationDrawer: React.FC<Props> = (props) => {
   const drawer = (
     <Box
       onClick={toggleDrawer}
-      sx={{ textAlign: "center", bgcolor: "#DB4744", height: "100%" }}
+      sx={{ textAlign: "center", bgcolor: "white", height: "100%" }}
     >
-      {/* Drawer Title */}
-      <Typography
-        variant="h6"
-        sx={{ color: "#fff", padding: "16px", fontWeight: "bold" }}
-      >
-        {drawerTitle}
-      </Typography>
-      <Divider sx={{ bgcolor: "#FF6B6B" }} /> {/* Slightly lighter divider */}
       {/* Navigation List */}
       <List>
         {navigationItems.map((item: NavigationItem) => (
@@ -50,24 +41,44 @@ const NavigationDrawer: React.FC<Props> = (props) => {
               component={NavLink}
               to={item.link}
               sx={{
-                textAlign: "center",
-                color: "#fff",
+                textAlign: "left",
+                color: "black",
                 "&.active": {
-                  bgcolor: "#B83B39" // Darker shade for active
+                  color: "#B83B39" // Darker shade for active
                 },
                 "&:hover": {
-                  bgcolor: "#C84B4A" // Slightly darker for hover effect
-                }
+                  bgcolor: "#d5d3d2" // Slightly darker for hover effect
+                },
+                minHeight: 60
               }}
             >
               <ListItemText
                 primary={item.text}
-                primaryTypographyProps={{ fontSize: "1rem", color: "#fff" }}
+                primaryTypographyProps={{
+                  fontSize: "1.5rem", // Increased font size
+                  color: "inherit"
+                }}
               />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
+      {/* Drawer Title */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 20,
+          width: "100%",
+          textAlign: "center"
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{ color: "#B83B39", padding: "16px", fontWeight: "bold" }}
+        >
+          {drawerTitle}
+        </Typography>
+      </Box>
     </Box>
   );
 
