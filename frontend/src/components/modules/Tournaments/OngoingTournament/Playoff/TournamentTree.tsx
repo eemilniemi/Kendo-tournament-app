@@ -4,6 +4,7 @@ import { type Match, type Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
 import { countries } from "../../../Registeration/CountrySelect/CountrySelect";
 import { useNavigate } from "react-router-dom";
+import { mapNumberToLetter } from "utils/helperFunctions";
 
 interface TournamentTreeProps {
   tournament: Tournament;
@@ -125,6 +126,7 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             return {
               matchId: match.id,
               tournamentId: match.tournamentId,
+              courtNumber: match.courtNumber,
               roundIndex: match.roundIndex,
               order: match.order,
               sides: match.sides.map((side) => {
@@ -185,6 +187,14 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
                 "/tournaments/" + match.tournamentId + "/match/" + match.matchId
               );
             }
+          },
+          getMatchTopHTML: (match: any) => {
+            const courtLetter = mapNumberToLetter(match.courtNumber);
+            return `<div 
+              class="court-letter"
+              title="Court: ${courtLetter}">
+              ${t("tournament_view_labels.court_number")}: ${courtLetter}
+            </div>`;
           }
         }
       );
