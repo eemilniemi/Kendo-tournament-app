@@ -39,6 +39,8 @@ import { useTranslation } from "react-i18next";
 import ModifyDeletePoints from "./ModifyDeletePoints";
 import PlayerName, { checkSameNames } from "../Tournaments/PlayerNames";
 import { mapNumberToLetter } from "utils/helperFunctions";
+import OverlayButton from "../Overlay/OverlayButton";
+import routePaths from "../../../routes/route-paths";
 
 export interface MatchData {
   timerTime: number;
@@ -97,7 +99,7 @@ const GameInterface: React.FC = () => {
   const [mostRecentPointType, setMostRecentPointType] =
     useState<PointType | null>(null);
 
-  const { matchId } = useParams();
+  const { id, matchId } = useParams();
   const { userId } = useAuth();
   const { matchInfo: matchInfoFromSocket } = useSocket();
   const showToast = useToast();
@@ -641,6 +643,9 @@ const GameInterface: React.FC = () => {
   const isOfficialsSelected =
     matchInfo?.pointMaker != null && matchInfo?.timeKeeper != null;
 
+  const OverlayUrl =
+    window.location.host + routePaths.overlay + "/" + id + "/" + matchId;
+
   return (
     <main className="main-content">
       {isLoading && <Loader />}
@@ -682,6 +687,9 @@ const GameInterface: React.FC = () => {
                   )}
                 </React.Fragment>
               ))}
+              <div className="overlay-button-container">
+                <OverlayButton link={OverlayUrl} />
+              </div>
             </Box>
             <Box
               sx={{

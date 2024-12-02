@@ -5,7 +5,6 @@ import { joinMatch, leaveMatch } from "../../../sockets/emit";
 import { useParams } from "react-router-dom";
 import type {
   Match,
-  MatchPlayer,
   MatchPoint,
   MatchTime,
   MatchType,
@@ -15,15 +14,18 @@ import type {
 import api from "../../../api/axios";
 import OverlayTimer from "./OverlayTimer";
 import { useTournament } from "../../../context/TournamentContext";
-import OverlayButton from "./OverlayButton";
-import routePaths from "../../../routes/route-paths";
 
-// TODO: simplify
+interface OverlayPlayer {
+  name: string;
+  points: MatchPoint[];
+  nationality: string | null;
+  danRank: string | null;
+}
+
 interface OverlayData {
   timerTime: number;
-  players: MatchPlayer[];
-  player1Name: string;
-  player2Name: string;
+  redPlayer: OverlayPlayer;
+  whitePlayer: OverlayPlayer;
   winner: string | undefined;
   endTimeStamp: Date | undefined;
   startTimestamp: Date | undefined;
@@ -86,18 +88,42 @@ function getOverlayData(matchData: Match, tournament: Tournament): OverlayData {
 
   const timerTime = Math.floor(matchElapsedTime / 1000);
 
-  const player1Name = findPlayerName(matchData.players[0].id, tournament);
-  const player2Name = findPlayerName(matchData.players[1].id, tournament);
+  const redMatchPlayer = matchData.players.find((p) => p.color === "red");
+  const whiteMatchPlayer = matchData.players.find((p) => p.color === "white");
+
+  if (redMatchPlayer === undefined) {
+    throw new Error("Red player not defined");
+  }
+
+  if (whiteMatchPlayer === undefined) {
+    throw new Error("White player not defined");
+  }
+
+  const redPlayerName = findPlayerName(redMatchPlayer.id, tournament);
+  const whitePlayerName = findPlayerName(whiteMatchPlayer.id, tournament);
+
+  const redPlayer: OverlayPlayer = {
+    name: redPlayerName,
+    points: redMatchPlayer.points,
+    nationality: null, // TODO: implement
+    danRank: null
+  };
+
+  const whitePlayer: OverlayPlayer = {
+    name: whitePlayerName,
+    points: whiteMatchPlayer.points,
+    nationality: null,
+    danRank: null
+  };
 
   return {
+    redPlayer,
+    whitePlayer,
     courtNumber: matchData.courtNumber,
     elapsedTime: matchElapsedTime,
     endTimeStamp: undefined,
     isOvertime: matchData.isOvertime,
     isTimerOn: matchData.isTimerOn,
-    player1Name,
-    player2Name,
-    players: matchData.players,
     startTimestamp: startTime,
     time: matchData.matchTime,
     timerTime,
@@ -114,18 +140,24 @@ const pointMap = new Map<PointType, string>([
   ["hansoku", "Δ"]
 ]);
 
+const templatePlayer: OverlayPlayer = {
+  name: "",
+  points: [],
+  nationality: null,
+  danRank: null
+};
+
 const Overlay: React.FC = () => {
   const tournament = useTournament();
-  const { id, matchId } = useParams(); // TODO: remove "id"
+  const { matchId } = useParams();
   const { matchInfo: matchInfoFromSocket } = useSocket();
   const [hasJoined, setHasJoined] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [matchInfo, setMatchInfo] = useState<OverlayData>({
     timerTime: 0,
-    players: [],
-    player1Name: "",
-    player2Name: "",
+    redPlayer: templatePlayer,
+    whitePlayer: templatePlayer,
     winner: undefined,
     endTimeStamp: undefined,
     startTimestamp: undefined,
@@ -202,30 +234,23 @@ const Overlay: React.FC = () => {
     };
   }, [matchInfo.isTimerOn]);
 
-  // TODO: do I need states for this stuff? seems to work without?
-
-  let p1points: MatchPoint[] = [];
-  let p2points: MatchPoint[] = [];
-
-  let p1DisplayName: string = "";
-  let p2DisplayName: string = "";
-
-  // TODO: fix
-  try {
-    p1points = matchInfo.players[0].points;
-    p2points = matchInfo.players[1].points;
-  } catch (_) {}
+  let redDisplayName: string = "";
+  let whiteDisplayName: string = "";
 
   try {
-    const p1names = matchInfo.player1Name.split(" ");
-    p1DisplayName = p1names[0].charAt(0) + ". " + p1names[1];
+    const redNames = matchInfo.redPlayer.name.split(" ");
+    redDisplayName =
+      redNames[0].charAt(0) + ". " + redNames[redNames.length - 1];
 
-    const p2names = matchInfo.player2Name.split(" ");
-    p2DisplayName = p2names[0].charAt(0) + ". " + p2names[1];
+    const whiteNames = matchInfo.whitePlayer.name.split(" ");
+    whiteDisplayName =
+      whiteNames[0].charAt(0) + ". " + whiteNames[whiteNames.length - 1];
   } catch (_) {}
 
   let firstPointTimestamp: Date | undefined;
-  const points: MatchPoint[] = p1points.concat(p2points);
+  const points: MatchPoint[] = matchInfo.redPlayer.points.concat(
+    matchInfo.whitePlayer.points
+  );
 
   if (points.length > 0) {
     firstPointTimestamp = points[0].timestamp;
@@ -237,25 +262,18 @@ const Overlay: React.FC = () => {
     }
   }
 
-  const url =
-    window.location.host + routePaths.overlay + "/" + id + "/" + matchId;
-
-  // TODO: ensure players get the right colors
   return (
     <div className="overlay-container">
-      <OverlayButton link={url} />
       <div className="overlay-teams">
         <div className="team team-white">
           <div className="team-info">
-            <div className="team-name">{p1DisplayName}</div>
+            <div className="team-name">{whiteDisplayName}</div>
           </div>
         </div>
 
         <div className="team-score">
-          {p1points.map(function (point, index) {
+          {matchInfo.whitePlayer.points.map(function (point, index) {
             const isFirst = point.timestamp === firstPointTimestamp;
-            console.log("p1: " + point.timestamp.toString());
-            console.log(isFirst);
             const cl = isFirst ? "point first-point" : "point";
             return (
               <div key={index} className={cl}>
@@ -272,10 +290,8 @@ const Overlay: React.FC = () => {
 
         <div className="vertical-line" />
         <div className="team-score">
-          {p2points.map(function (point, index) {
+          {matchInfo.redPlayer.points.map(function (point, index) {
             const isFirst = point.timestamp === firstPointTimestamp;
-            console.log("p2: " + point.timestamp.toString());
-            console.log(isFirst);
             const cl = isFirst ? "point first-point" : "point";
             return (
               <div key={index} className={cl}>
@@ -287,7 +303,7 @@ const Overlay: React.FC = () => {
 
         <div className="team team-red">
           <div className="team-info">
-            <div className="team-name">{p2DisplayName}</div>
+            <div className="team-name">{redDisplayName}</div>
           </div>
         </div>
       </div>
