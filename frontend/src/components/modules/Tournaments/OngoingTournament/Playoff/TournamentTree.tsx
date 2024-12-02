@@ -124,6 +124,19 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           rounds,
           matches: tournament.matches?.map((match: Match) => {
             return {
+              firstScorer: match.players
+                .map((player) => {
+                  return player.points.map((point) => ({
+                    playerId: player.id,
+                    timestamp: point.timestamp
+                  }));
+                })
+                .flat()
+                .sort(
+                  (a, b) =>
+                    new Date(a.timestamp).getTime() -
+                    new Date(b.timestamp).getTime()
+                )[0],
               matchId: match.id,
               tournamentId: match.tournamentId,
               courtNumber: match.courtNumber,
@@ -189,7 +202,6 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             }
           },
           getMatchTopHTML: (match: any) => {
-            console.log(match);
             // In case of BYE match don't show court number
             if (match.sides.length === 1 && match.sides[0].isWinner === true) {
               return "";
@@ -205,6 +217,37 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
               
               ${t("tournament_view_labels.court_number")}: ${courtLetter}
             </div>`;
+          },
+          getScoresHTML: (side: any, match: any) => {
+            // If side has no scores
+            if (side.scores === undefined) {
+              return `<div style="width: 100px;"></div>`;
+            }
+
+            // If side has the first scorer
+            if (match.firstScorer.playerId === side.contestantId) {
+              const pointsAsSpan = side.scores.map(
+                (score: any, index: number) => {
+                  if (index === 0) {
+                    return `<span style=
+                    "width: 2em; height: 2em; box-sizing: content-box; background: #fff; border: 0.1em solid #666; text-align: center; border-radius: 50%; line-height: 2em;">
+                    ${score.mainScore}
+                    </span>`;
+                  }
+                  return `<span>${score.mainScore}</span>`;
+                }
+              );
+              return `<div style="width: 100px; text-align: right;">${pointsAsSpan.join(
+                "&nbsp;&nbsp;&nbsp;"
+              )}</div>`;
+            }
+
+            // If side has scores but not the first scorer
+            return `<div style="width: 100px; text-align: right;">${side.scores
+              .map((score: any) => {
+                return `<span>${score.mainScore}</span>`;
+              })
+              .join("&nbsp;&nbsp;&nbsp;")}</div>`;
           }
         }
       );
