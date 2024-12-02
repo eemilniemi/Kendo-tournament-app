@@ -8,15 +8,22 @@ import type {
   MatchPoint,
   MatchTime,
   MatchType,
-  PointType,
   Tournament
 } from "../../../types/models";
 import api from "../../../api/axios";
 import OverlayTimer from "./OverlayTimer";
 import { useTournament } from "../../../context/TournamentContext";
+import {
+  calculateElapsedTime,
+  findPlayerDanRank,
+  findPlayerName,
+  findPlayerNationality
+} from "../../../utils/matchUtils";
+import OverlayPointDisplay from "./OverlayPointDisplay";
 
 interface OverlayPlayer {
-  name: string;
+  firstName: string;
+  lastName: string;
   points: MatchPoint[];
   nationality: string | null;
   danRank: string | null;
@@ -26,48 +33,15 @@ interface OverlayData {
   timerTime: number;
   redPlayer: OverlayPlayer;
   whitePlayer: OverlayPlayer;
-  winner: string | undefined;
+  winner: string | undefined; // not used currently
   endTimeStamp: Date | undefined;
   startTimestamp: Date | undefined;
   isTimerOn: boolean;
   elapsedTime: number;
   isOvertime: boolean;
-  type: MatchType;
+  type: MatchType; // not used currently
   time: MatchTime;
-  courtNumber: number;
 }
-
-const calculateElapsedTime = (
-  elapsedTime: number,
-  timerStart: Date | null,
-  matchTime: number,
-  isOvertime: boolean
-): number => {
-  if (timerStart !== null) {
-    const currentTime = new Date();
-    const startTimestamp = new Date(timerStart);
-
-    const elapsedMilliseconds =
-      currentTime.getTime() - startTimestamp.getTime();
-    elapsedTime += elapsedMilliseconds;
-
-    if (elapsedTime > matchTime && !isOvertime) {
-      elapsedTime = matchTime;
-    }
-    return elapsedTime;
-  } else {
-    return elapsedTime;
-  }
-};
-
-// Get players' names
-const findPlayerName = (playerId: string, tournament: Tournament): string => {
-  const player = tournament.players.find((p) => p.id === playerId);
-  if (player !== undefined) {
-    return player.firstName + " " + player.lastName;
-  }
-  return "";
-};
 
 function getOverlayData(matchData: Match, tournament: Tournament): OverlayData {
   let startTime: Date | undefined;
@@ -99,27 +73,23 @@ function getOverlayData(matchData: Match, tournament: Tournament): OverlayData {
     throw new Error("White player not defined");
   }
 
-  const redPlayerName = findPlayerName(redMatchPlayer.id, tournament);
-  const whitePlayerName = findPlayerName(whiteMatchPlayer.id, tournament);
-
   const redPlayer: OverlayPlayer = {
-    name: redPlayerName,
+    ...findPlayerName(redMatchPlayer.id, tournament),
     points: redMatchPlayer.points,
-    nationality: null, // TODO: implement
-    danRank: null
+    nationality: findPlayerNationality(redMatchPlayer.id, tournament),
+    danRank: findPlayerDanRank(redMatchPlayer.id, tournament)
   };
 
   const whitePlayer: OverlayPlayer = {
-    name: whitePlayerName,
+    ...findPlayerName(whiteMatchPlayer.id, tournament),
     points: whiteMatchPlayer.points,
-    nationality: null,
-    danRank: null
+    nationality: findPlayerNationality(whiteMatchPlayer.id, tournament),
+    danRank: findPlayerDanRank(whiteMatchPlayer.id, tournament)
   };
 
   return {
     redPlayer,
     whitePlayer,
-    courtNumber: matchData.courtNumber,
     elapsedTime: matchElapsedTime,
     endTimeStamp: undefined,
     isOvertime: matchData.isOvertime,
@@ -132,16 +102,9 @@ function getOverlayData(matchData: Match, tournament: Tournament): OverlayData {
   };
 }
 
-const pointMap = new Map<PointType, string>([
-  ["men", "M"],
-  ["kote", "M"],
-  ["do", "D"],
-  ["tsuki", "T"],
-  ["hansoku", "Δ"]
-]);
-
 const templatePlayer: OverlayPlayer = {
-  name: "",
+  firstName: "",
+  lastName: "",
   points: [],
   nationality: null,
   danRank: null
@@ -165,8 +128,7 @@ const Overlay: React.FC = () => {
     elapsedTime: 0,
     isOvertime: false,
     type: "group",
-    time: 300000,
-    courtNumber: 1
+    time: 300000
   });
 
   const [timer, setTimer] = useState<number>(matchInfo.timerTime);
@@ -207,7 +169,6 @@ const Overlay: React.FC = () => {
       }
     };
     void getMatchData();
-    // console.log(matchInfo.players[1].points);
   }, [isLoading, matchInfoFromSocket]);
 
   useEffect(() => {
@@ -234,18 +195,15 @@ const Overlay: React.FC = () => {
     };
   }, [matchInfo.isTimerOn]);
 
-  let redDisplayName: string = "";
-  let whiteDisplayName: string = "";
+  const redDisplayName =
+    matchInfo.redPlayer.firstName.charAt(0) +
+    ". " +
+    matchInfo.redPlayer.lastName;
 
-  try {
-    const redNames = matchInfo.redPlayer.name.split(" ");
-    redDisplayName =
-      redNames[0].charAt(0) + ". " + redNames[redNames.length - 1];
-
-    const whiteNames = matchInfo.whitePlayer.name.split(" ");
-    whiteDisplayName =
-      whiteNames[0].charAt(0) + ". " + whiteNames[whiteNames.length - 1];
-  } catch (_) {}
+  const whiteDisplayName =
+    matchInfo.whitePlayer.firstName.charAt(0) +
+    ". " +
+    matchInfo.whitePlayer.lastName;
 
   let firstPointTimestamp: Date | undefined;
   const points: MatchPoint[] = matchInfo.redPlayer.points.concat(
@@ -271,17 +229,10 @@ const Overlay: React.FC = () => {
           </div>
         </div>
 
-        <div className="team-score">
-          {matchInfo.whitePlayer.points.map(function (point, index) {
-            const isFirst = point.timestamp === firstPointTimestamp;
-            const cl = isFirst ? "point first-point" : "point";
-            return (
-              <div key={index} className={cl}>
-                {pointMap.get(point.type)}
-              </div>
-            );
-          })}
-        </div>
+        <OverlayPointDisplay
+          points={matchInfo.whitePlayer.points}
+          firstPointTimestamp={firstPointTimestamp}
+        />
         <div className="vertical-line" />
 
         <div className="overlay-status">
@@ -289,17 +240,10 @@ const Overlay: React.FC = () => {
         </div>
 
         <div className="vertical-line" />
-        <div className="team-score">
-          {matchInfo.redPlayer.points.map(function (point, index) {
-            const isFirst = point.timestamp === firstPointTimestamp;
-            const cl = isFirst ? "point first-point" : "point";
-            return (
-              <div key={index} className={cl}>
-                {pointMap.get(point.type)}
-              </div>
-            );
-          })}
-        </div>
+        <OverlayPointDisplay
+          points={matchInfo.redPlayer.points}
+          firstPointTimestamp={firstPointTimestamp}
+        />
 
         <div className="team team-red">
           <div className="team-info">

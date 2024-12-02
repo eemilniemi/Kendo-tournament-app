@@ -41,6 +41,10 @@ import PlayerName, { checkSameNames } from "../Tournaments/PlayerNames";
 import { mapNumberToLetter } from "utils/helperFunctions";
 import OverlayButton from "../Overlay/OverlayButton";
 import routePaths from "../../../routes/route-paths";
+import {
+  calculateElapsedTime,
+  findPlayerName
+} from "../../../utils/matchUtils";
 
 export interface MatchData {
   timerTime: number;
@@ -155,6 +159,7 @@ const GameInterface: React.FC = () => {
         let scheduledTime: string = "XX:XX";
 
         // Get players' names
+        /*
         const findPlayerName = (playerId: string, index: number): void => {
           const player = tournament.players.find((p) => p.id === playerId);
           if (player !== undefined) {
@@ -163,14 +168,22 @@ const GameInterface: React.FC = () => {
           }
         };
 
+         */
+
         // Try to get match info from the websocket
         if (matchInfoFromSocket !== undefined) {
           matchTime = matchInfoFromSocket.matchTime;
 
           // Get players' names in this match
           matchPlayers = matchInfoFromSocket.players;
-          findPlayerName(matchPlayers[0].id, 0);
-          findPlayerName(matchPlayers[1].id, 1);
+
+          const p1name = findPlayerName(matchPlayers[0].id, tournament);
+          const p2name = findPlayerName(matchPlayers[1].id, tournament);
+
+          playersFirstNames[0] = p1name.firstName;
+          playersLastNames[0] = p1name.lastName;
+          playersFirstNames[1] = p2name.firstName;
+          playersLastNames[2] = p2name.lastName;
 
           // If there is a winner, save them
           if (matchInfoFromSocket.winner !== undefined) {
@@ -233,8 +246,14 @@ const GameInterface: React.FC = () => {
             matchTime = matchFromApi.matchTime;
 
             matchPlayers = matchFromApi.players;
-            findPlayerName(matchPlayers[0].id, 0);
-            findPlayerName(matchPlayers[1].id, 1);
+
+            const p1name = findPlayerName(matchPlayers[0].id, tournament);
+            const p2name = findPlayerName(matchPlayers[1].id, tournament);
+
+            playersFirstNames[0] = p1name.firstName;
+            playersLastNames[0] = p1name.lastName;
+            playersFirstNames[1] = p2name.firstName;
+            playersLastNames[2] = p2name.lastName;
 
             // If there is a winner, save them
             if (matchFromApi.winner !== undefined) {
@@ -611,30 +630,6 @@ const GameInterface: React.FC = () => {
       } catch (error) {
         showToast(error, "error");
       }
-    }
-  };
-
-  // function to calculate elapsed match time
-  const calculateElapsedTime = (
-    elapsedTime: number,
-    timerStart: Date | null,
-    matchTime: number,
-    isOvertime: boolean
-  ): number => {
-    if (timerStart !== null) {
-      const currentTime = new Date();
-      const startTimestamp = new Date(timerStart);
-
-      const elapsedMilliseconds =
-        currentTime.getTime() - startTimestamp.getTime();
-      elapsedTime += elapsedMilliseconds;
-
-      if (elapsedTime > matchTime && !isOvertime) {
-        elapsedTime = matchTime;
-      }
-      return elapsedTime;
-    } else {
-      return elapsedTime;
     }
   };
 
