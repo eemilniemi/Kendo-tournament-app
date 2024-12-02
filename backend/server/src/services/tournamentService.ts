@@ -50,8 +50,6 @@ export class TournamentService {
       });
     }
 
-    console.log(tournament.matches);
-
     return await tournament.toObject();
   }
 
