@@ -228,6 +228,9 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             if (match.firstScorer.playerId === side.contestantId) {
               const pointsAsSpan = side.scores.map(
                 (score: any, index: number) => {
+                  if (score.mainScore === "H") {
+                    score.mainScore = "Δ";
+                  }
                   if (index === 0) {
                     return `<span style=
                     "width: 2em; height: 2em; box-sizing: content-box; background: #fff; border: 0.1em solid #666; text-align: center; border-radius: 50%; line-height: 2em;">
@@ -245,6 +248,9 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             // If side has scores but not the first scorer
             return `<div style="width: 100px; text-align: right;">${side.scores
               .map((score: any) => {
+                if (score.mainScore === "H") {
+                  score.mainScore = "Δ";
+                }
                 return `<span>${score.mainScore}</span>`;
               })
               .join("&nbsp;&nbsp;&nbsp;")}</div>`;
