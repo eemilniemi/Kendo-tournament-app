@@ -1090,16 +1090,16 @@ export class MatchService {
 
     if (match.type === "playoff" || match.type === "pre playoff") {
       if (pointColor === "white") {
-        if (match.sides[0].scores === undefined) {
-          match.sides[0].scores = [];
-        }
-        match.sides[0].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
-      }
-      else {
         if (match.sides[1].scores === undefined) {
           match.sides[1].scores = [];
         }
         match.sides[1].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
+      }
+      else {
+        if (match.sides[0].scores === undefined) {
+          match.sides[0].scores = [];
+        }
+        match.sides[0].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
       }
     }
   }
@@ -1176,7 +1176,7 @@ export class MatchService {
         players: [{
           id: winnerId,
           points: [],
-          color: currentMatch.order % 2 === 0 ? "white" : "red"
+          color: currentMatch.order % 2 === 0 ? "red" : "white"
         }],
         type: "playoff",
         elapsedTime: 0,
@@ -1200,11 +1200,11 @@ export class MatchService {
 
       if (newMatch) {
         if (currentMatch.order % 2 === 0) {
-          newMatch.players.unshift({id: winnerId, points: [], color: "white"});
+          newMatch.players.push({id: winnerId, points: [], color: "red"});
           newMatch.sides.unshift({ contestantId: winnerId.toString() });
         }
         else {
-          newMatch.players.push({id: winnerId, points: [], color: "red"});
+          newMatch.players.unshift({id: winnerId, points: [], color: "white"});
           newMatch.sides.push({ contestantId: winnerId.toString() });
         }
 
