@@ -102,6 +102,7 @@ function getOverlayData(matchData: Match, tournament: Tournament): OverlayData {
   };
 }
 
+// used as a default value
 const templatePlayer: OverlayPlayer = {
   firstName: "",
   lastName: "",
@@ -233,6 +234,7 @@ const Overlay: React.FC = () => {
           points={matchInfo.whitePlayer.points}
           firstPointTimestamp={firstPointTimestamp}
         />
+
         <div className="vertical-line" />
 
         <div className="overlay-status">
@@ -240,6 +242,7 @@ const Overlay: React.FC = () => {
         </div>
 
         <div className="vertical-line" />
+
         <OverlayPointDisplay
           points={matchInfo.redPlayer.points}
           firstPointTimestamp={firstPointTimestamp}
