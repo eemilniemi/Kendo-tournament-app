@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { createBracket } from "bracketry";
-import { type Tournament } from "types/models";
+import { type Match, type Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
 import { countries } from "../../../Registeration/CountrySelect/CountrySelect";
 import { useNavigate } from "react-router-dom";
@@ -121,8 +121,10 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
       createBracket(
         {
           rounds,
-          matches: tournament.matches?.map((match) => {
+          matches: tournament.matches?.map((match: Match) => {
             return {
+              matchId: match.id,
+              tournamentId: match.tournamentId,
               roundIndex: match.roundIndex,
               order: match.order,
               sides: match.sides.map((side) => {
@@ -179,16 +181,8 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           },
           onMatchClick: (match: any) => {
             if (match.sides.length === 2) {
-              const currentMatch = tournament.matches?.find(
-                (m) =>
-                  m.players[0].id === match.sides[0].contestantId &&
-                  m.players[1].id === match.sides[1].contestantId
-              );
               navigate(
-                "/tournaments/" +
-                  currentMatch?.tournamentId +
-                  "/match/" +
-                  currentMatch?.id
+                "/tournaments/" + match.tournamentId + "/match/" + match.matchId
               );
             }
           }
