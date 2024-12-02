@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -35,6 +35,19 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
   player2name
 }) => {
   const { t } = useTranslation();
+  const [isSubmitting, setIsSubmitting] = useState(false); // State to handle button disable
+
+  const handleSubmit = async (): Promise<void> => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await handlePointShowing();
+    } finally {
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 300);
+    }
+  };
 
   return (
     <div>
@@ -69,7 +82,7 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
           }}
           sx={{
             borderRadius: "25px",
-            border: "2px solid #db4744",
+            border: "2px solid #D01C1C",
             color: "black",
             backgroundColor: "transparent",
             width: { xs: "100%", sm: "auto" }
@@ -97,10 +110,8 @@ const OfficialButtons: React.FC<AddPointDialogProps> = ({
             <FormControlLabel value="Δ" control={<Radio />} label="Δ" />
           </RadioGroup>
           <Button
-            onClick={async () => {
-              await handlePointShowing();
-            }}
-            disabled={selectedButton === ""}
+            onClick={handleSubmit}
+            disabled={selectedButton === "" || isSubmitting} // Disable if no selection or already submitting
           >
             {t("buttons.ok_button")}
           </Button>

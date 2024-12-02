@@ -679,9 +679,9 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           }}
           style={{ marginBottom: "10px", alignItems: "center", padding: "0" }}
           sx={{
-            border: "2px solid #db4744",
+            border: "2px solid #D01C1C",
             fontSize: "13px",
-            color: "#db4744",
+            color: "#D01C1C",
             margin: "10px 0",
             width: "100%"
           }}

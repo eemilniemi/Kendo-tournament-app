@@ -120,7 +120,7 @@ const CreatedTournaments: React.FC = () => {
             sx={{
               fontSize: "14px",
               color: "white",
-              backgroundColor: "#db4744",
+              backgroundColor: "#D01C1C",
               borderRadius: "20px",
               width: "200px",
               height: "40px",

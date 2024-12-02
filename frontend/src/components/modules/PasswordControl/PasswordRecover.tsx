@@ -41,6 +41,8 @@ const PasswordRecoveryForm: React.FC = () => {
     }
   };
 
+  console.log("password recover");
+
   return (
     <Grid container display="flex" justifyContent="center">
       <Box

@@ -44,7 +44,8 @@ const NavigationDrawer: React.FC<Props> = (props) => {
                 textAlign: "left",
                 color: "black",
                 "&.active": {
-                  color: "#B83B39" // Darker shade for active
+                  color: "#B83B39", // Darker shade for active
+                  fontWeight: "bold"
                 },
                 "&:hover": {
                   bgcolor: "#d5d3d2" // Slightly darker for hover effect
@@ -55,8 +56,9 @@ const NavigationDrawer: React.FC<Props> = (props) => {
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
-                  fontSize: "1.5rem", // Increased font size
-                  color: "inherit"
+                  fontSize: "15px", // Increased font size
+                  color: "inherit",
+                  fontWeight: "inherit"
                 }}
               />
             </ListItemButton>
@@ -97,7 +99,7 @@ const NavigationDrawer: React.FC<Props> = (props) => {
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: 280,
-            bgcolor: "#DB4744", // Main drawer background color
+            bgcolor: "#D01C1C", // Main drawer background color
             color: "#fff",
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)"
           }
