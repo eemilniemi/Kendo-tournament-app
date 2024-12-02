@@ -1,7 +1,7 @@
 import mongoose, { Schema, type Document, type Types } from "mongoose";
 import type { Match, MatchTime } from "./matchModel";
 import { type User } from "./userModel";
-import bcrypt from "bcrypt";
+/* import bcrypt from "bcrypt"; */
 
 export enum TournamentType {
   RoundRobin = "Round Robin",
@@ -61,7 +61,8 @@ export interface Tournament {
   playersPerTeam?: number;
 }
 
-const SALT_ROUNDS = 10;
+/* const SALT_ROUNDS = 10;
+ */
 
 const tournamentSchema = new Schema<Tournament & Document>(
   {
