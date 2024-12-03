@@ -21,6 +21,7 @@ This document provides instructions for setting up the app, our development work
     - [Users](#users)
     - [Tournaments](#tournaments)
     - [Matches](#matches)
+    - [Overlay](#overlay)
 
 
 ## How to Start the App
