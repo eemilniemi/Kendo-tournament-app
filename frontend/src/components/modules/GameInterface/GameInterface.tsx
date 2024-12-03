@@ -550,37 +550,41 @@ const GameInterface: React.FC = () => {
 
   // Function to fetch time keeper information
   const findTimekeeper = async (): Promise<void> => {
-    try {
-      if (matchInfo.timeKeeper === undefined) {
-        setTimeKeeperInfo(null);
-        return;
-      }
+    if (userId !== null && userId !== undefined) {
+      try {
+        if (matchInfo.timeKeeper === undefined) {
+          setTimeKeeperInfo(null);
+          return;
+        }
 
-      const timeKeeper = await api.user.details(matchInfo.timeKeeper);
-      if (timeKeeper === undefined) {
-        throw new Error("Time keeper not found");
+        const timeKeeper = await api.user.details(matchInfo.timeKeeper);
+        if (timeKeeper === undefined) {
+          throw new Error("Time keeper not found");
+        }
+        setTimeKeeperInfo(timeKeeper);
+      } catch (error) {
+        showToast(error, "error");
       }
-      setTimeKeeperInfo(timeKeeper);
-    } catch (error) {
-      showToast(error, "error");
     }
   };
 
   // Function to fetch point maker information
   const findPointmaker = async (): Promise<void> => {
-    try {
-      if (matchInfo.pointMaker === undefined) {
-        setPointMakerInfo(null);
-        return;
-      }
+    if (userId !== null && userId !== undefined) {
+      try {
+        if (matchInfo.pointMaker === undefined) {
+          setPointMakerInfo(null);
+          return;
+        }
 
-      const pointMaker = await api.user.details(matchInfo.pointMaker);
-      if (pointMaker === undefined) {
-        throw new Error("Point maker not found");
+        const pointMaker = await api.user.details(matchInfo.pointMaker);
+        if (pointMaker === undefined) {
+          throw new Error("Point maker not found");
+        }
+        setPointMakerInfo(pointMaker);
+      } catch (error) {
+        showToast(error, "error");
       }
-      setPointMakerInfo(pointMaker);
-    } catch (error) {
-      showToast(error, "error");
     }
   };
 
