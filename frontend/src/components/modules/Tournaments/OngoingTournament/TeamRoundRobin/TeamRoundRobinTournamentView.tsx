@@ -62,6 +62,10 @@ interface TeamScoreboardProps {
   onClick?: () => void;
 }
 
+interface MatchUpOverviewProps {
+  teams: TournamentTeam[];
+}
+
 export const TeamScoreboard: React.FC<TeamScoreboardProps> = ({
   teams,
   onClick
@@ -284,6 +288,87 @@ export const Matches: React.FC<{
   );
 };
 
+export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
+  const { t } = useTranslation();
+
+  const sortedTeams = [...teams].sort((a, b) => a.name.localeCompare(b.name));
+
+  const teamsTable = (): JSX.Element => {
+    return (
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#D01C1C" }}>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold"
+                }}
+              >
+                {t("tournament_view_labels.team_name")}
+              </TableCell>
+              {Math.max(...teams.map((team) => team.players.length)) > 0 &&
+                Array.from(
+                  {
+                    length: Math.max(
+                      ...teams.map((team) => team.players.length)
+                    )
+                  },
+                  (_, index) => (
+                    <TableCell
+                      key={`player-${index + 1}`}
+                      sx={{
+                        color: "white",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      {t("tournament_view_labels.member")} {index + 1}
+                    </TableCell>
+                  )
+                )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedTeams.map((team, index) => (
+              <TableRow key={team.id}>
+                <TableCell
+                  sx={{
+                    borderRight: "1px solid #ddd",
+                    borderBottom: "1px solid #ddd"
+                  }}
+                >
+                  {team.name}
+                </TableCell>
+                {team.players.map((player, playerIndex) => (
+                  <TableCell
+                    key={`player-${index}-${playerIndex}`}
+                    sx={{
+                      borderRight: "1px solid #ddd",
+                      borderBottom: "1px solid #ddd"
+                    }}
+                  >
+                    {player.firstName}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  };
+
+  return (
+    <>
+      <Typography sx={{ margin: 2 }}>
+        {t("tournament_view_labels.participating_teams")}
+      </Typography>
+      {teamsTable()}
+      <Typography sx={{ margin: 2 }}>Team matchup overview</Typography>
+    </>
+  );
+};
+
 export const sortMatches = (
   matches: Match[]
 ): {
@@ -345,6 +430,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
   const [showOnlyUserMatches, setShowOnlyUserMatches] = useState(false);
   const tabTypes = [
     "tournamentInfo",
+    "overview",
     "scoreboard",
     "ongoingUpcomingMatches",
     "completedMatches"
@@ -754,6 +840,11 @@ const TeamRoundRobinTournamentView: React.FC = () => {
               sx={{ fontSize: "13px" }}
             />
             <Tab
+              label={t("tournament_view_labels.overview")}
+              value="overview"
+              sx={{ fontSize: "13px" }}
+            />
+            <Tab
               label={t("tournament_view_labels.scoreboard")}
               value="scoreboard"
               sx={{ fontSize: "13px" }}
@@ -786,6 +877,11 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       {currentTab === "tournamentInfo" && (
         <div style={{ padding: "10px 0 0 0" }}>
           <TeamRoundRobinUpcomingView ongoing />
+        </div>
+      )}
+      {currentTab === "overview" && (
+        <div style={{ padding: "10px 0 0 0" }}>
+          <MatchUpOverview teams={teams} />
         </div>
       )}
       {currentTab === "scoreboard" && <TeamScoreboard teams={teams} />}
