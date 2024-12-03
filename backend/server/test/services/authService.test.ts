@@ -9,6 +9,7 @@ import BadRequestError from "../../src/errors/BadRequestError";
 import {generateAccessToken, generateRefreshToken, verifyRefreshToken} from "../../src/utility/jwtHelper";
 import * as jwtHelper from "../../src/utility/jwtHelper";
 import {UnauthorizedError} from "express-jwt";
+import NotFoundError from "../../src/errors/NotFoundError";
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -20,7 +21,9 @@ describe("AuthService", () => {
 
 
     let testPlayer1email: string;
-    let testPlayer1password: string;
+
+    // Passwords are hashed, so we need to use the actual password here
+    let testPlayer1password = "FooBar123";
 
     let testPlayer2email: string;
 
@@ -30,7 +33,7 @@ describe("AuthService", () => {
         let testPlayer2 = await UserModel.findOne({userName: 'testUser2'}).exec();
 
         testPlayer1email = testPlayer.email;
-        testPlayer1password = testPlayer.password;
+        //testPlayer1password = testPlayer.password;
 
         testPlayer2email = testPlayer2.email;
     });
@@ -50,28 +53,30 @@ describe("AuthService", () => {
 
             const testUser = await UserModel.findOne({ userName: 'testUser' }).exec();
             console.log("Test User:", testUser);
-            
+            // console.log("testPlayer1email: ", testPlayer1email);
+            // console.log("testPlayer1password: ", testPlayer1password);
+            const loginRequest = {email: testPlayer1email, password: testPlayer1password};
+            const res = await authService.loginUser(loginRequest);
 
-            console.log("testPlayer1email: ", testPlayer1email);
-            console.log("testPlayer1password: ", testPlayer1password);
-            const loginRequest = { email: testPlayer1email, password: "FooBar123" };
-            const response = await authService.loginUser(loginRequest);
-
-            console.log(response);
-            expect(response).to.have.property('accessToken');
-            expect(response).to.have.property('refreshToken');
-            expect(response.user).to.have.property('email', testUser.email);
-            expect(response.user).to.have.property('userName', testUser.userName);
+            console.log(res);
+            expect(res).to.have.property('accessToken');
+            expect(res).to.have.property('refreshToken');
+            expect(res.user).to.have.property('email', testUser.email);
+            expect(res.user).to.have.property('userName', testUser.userName);
         });
-
-
 
         it("should throw an error if user is not found", async () => {
 
-
+            const loginRequest = {email: "NotExisting123@gmail.com", password: "NotExistingUserPassword"};
+            await expect(authService.loginUser(loginRequest)).to.be.rejectedWith(
+                BadRequestError, "No user found with the given email");
         });
 
         it("should throw an error if password is incorrect", async () => {
+
+            const loginRequest = {email: testPlayer1email, password: "wrongPassword"};
+            await expect(authService.loginUser(loginRequest)).to.be.rejectedWith(
+                BadRequestError, "Invalid password");
 
         });
 
