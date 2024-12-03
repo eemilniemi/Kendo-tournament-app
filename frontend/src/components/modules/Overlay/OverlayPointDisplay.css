@@ -1,0 +1,19 @@
+.team-score {
+    font-size: 1.5vw;
+    width: 8vw;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f7f7f7;
+}
+
+.team-score > div {
+    width: 1.7vw;
+    height: 1.7vw;
+}
+
+.first-point {
+    border-radius: 50%;
+    border: var(--line-width) solid var(--middle-text-color);
+}

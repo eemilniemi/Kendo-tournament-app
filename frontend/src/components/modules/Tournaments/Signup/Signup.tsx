@@ -61,7 +61,7 @@ const Signup: React.FC = (): ReactElement => {
       };
 
       // Include the password only if passwordEnabled is true
-      if (tournament.passwordEnabled && !userInvited) {
+      if (Boolean(tournament.passwordEnabled) && !userInvited) {
         signupData.password = password;
       }
 
