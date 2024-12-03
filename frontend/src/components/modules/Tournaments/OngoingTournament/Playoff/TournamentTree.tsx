@@ -126,10 +126,12 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             return {
               firstScorer: match.players
                 .map((player) => {
-                  return player.points.map((point) => ({
-                    playerId: player.id,
-                    timestamp: point.timestamp
-                  }));
+                  return player.points
+                    .filter((point) => point.type.toString() !== "hansoku")
+                    .map((point) => ({
+                      playerId: player.id,
+                      timestamp: point.timestamp
+                    }));
                 })
                 .flat()
                 .sort(
@@ -221,32 +223,32 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           getScoresHTML: (side: any, match: any) => {
             // If side has no scores
             if (side.scores === undefined) {
-              return `<div style="width: 100px;"></div>`;
+              return `<div style="width: 80px;"></div>`;
             }
 
             // If side has the first scorer
             if (match.firstScorer.playerId === side.contestantId) {
-              const pointsAsSpan = side.scores.map(
-                (score: any, index: number) => {
-                  if (score.mainScore === "H") {
-                    score.mainScore = "Δ";
-                  }
-                  if (index === 0) {
-                    return `<span style=
-                    "width: 2em; height: 2em; box-sizing: content-box; background: #fff; border: 0.1em solid #666; text-align: center; border-radius: 50%; line-height: 2em;">
-                    ${score.mainScore}
-                    </span>`;
-                  }
-                  return `<span>${score.mainScore}</span>`;
+              let firstNonHFound = false;
+              const pointsAsSpan = side.scores.map((score: any) => {
+                if (score.mainScore === "H") {
+                  score.mainScore = "Δ";
                 }
-              );
-              return `<div style="width: 100px; text-align: right;">${pointsAsSpan.join(
+                if (!firstNonHFound && score.mainScore !== "Δ") {
+                  firstNonHFound = true;
+                  return `<span style=
+                  "width: 2em; height: 2em; box-sizing: content-box; background: #fff; border: 0.1em solid #666; text-align: center; border-radius: 50%; line-height: 2em;">
+                  ${score.mainScore}
+                  </span>`;
+                }
+                return `<span>${score.mainScore}</span>`;
+              });
+              return `<div style="width: 80px;></div><div style="width: 80px; text-align: left;">${pointsAsSpan.join(
                 "&nbsp;&nbsp;&nbsp;"
               )}</div>`;
             }
 
             // If side has scores but not the first scorer
-            return `<div style="width: 100px; text-align: right;">${side.scores
+            return `<div style="width: 80px; text-align: left;">${side.scores
               .map((score: any) => {
                 if (score.mainScore === "H") {
                   score.mainScore = "Δ";
