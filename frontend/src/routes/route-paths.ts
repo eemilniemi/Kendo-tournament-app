@@ -10,7 +10,8 @@ const routePaths = {
   passwordReset: "/password-reset",
   github: "https://github.com/Kendoers/Kendo-tournament-app",
   termsAndConditions: "/terms-and-conditions",
-  help: "/help"
+  help: "/help",
+  overlay: "/overlay"
 } as const;
 
 export default routePaths;
