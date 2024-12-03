@@ -70,16 +70,40 @@ export const TeamScoreboard: React.FC<TeamScoreboardProps> = ({
 
   const generateTableCells = (team: TournamentTeam): React.ReactNode[] => {
     return [
-      <TableCell key="points">
+      <TableCell
+        key="points"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.points}</Typography>
       </TableCell>,
-      <TableCell key="wins">
+      <TableCell
+        key="wins"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.wins}</Typography>
       </TableCell>,
-      <TableCell key="losses">
+      <TableCell
+        key="losses"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.losses}</Typography>
       </TableCell>,
-      <TableCell key="ties">
+      <TableCell
+        key="ties"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.ties}</Typography>
       </TableCell>
     ];
@@ -101,16 +125,29 @@ export const TeamScoreboard: React.FC<TeamScoreboardProps> = ({
         <TableContainer component={Paper}>
           <Table onClick={onClick}>
             <TableHead>
-              <TableRow>
+              <TableRow sx={{ backgroundColor: "#D01C1C" }}>
                 {tableHeaders.map((header, index) => (
-                  <TableCell key={index}>{header}</TableCell>
+                  <TableCell
+                    key={index}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {header}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedTeams.map((team) => (
                 <TableRow key={team.id}>
-                  <TableCell>
+                  <TableCell
+                    sx={{
+                      borderRight: "1px solid #ddd", // Add vertical border
+                      borderBottom: "1px solid #ddd" // Add bottom border
+                    }}
+                  >
                     <Typography>{team.name}</Typography>
                   </TableCell>
                   {generateTableCells(team)}
