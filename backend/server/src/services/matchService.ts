@@ -343,6 +343,13 @@ export class MatchService {
           const matchDocs = await MatchModel.insertMany(matches);
           for (const match of matchDocs) {
             tournament.matchSchedule.push(match.id);
+            tournament.matches.push(match.id);
+          }
+          for (let player of playerIds) {
+            tournament.contestants = {
+              ...tournament.contestants,
+              [player.toString()]: {players: [player]}
+            }
           }
         }
 

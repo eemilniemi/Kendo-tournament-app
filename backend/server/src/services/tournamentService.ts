@@ -50,6 +50,8 @@ export class TournamentService {
       });
     }
 
+    console.log(tournament.matches);
+
     return await tournament.toObject();
   }
 
@@ -341,11 +343,12 @@ export class TournamentService {
     }
 
     tournament.players.push(player.id);
-
-    tournament.contestants = {
-      ...tournament.contestants,
-      [player.id]: {players: [player.id]}
-    };
+    if (tournament.type === TournamentType.Playoff) {
+      tournament.contestants = {
+        ...tournament.contestants,
+        [player.id]: {players: [player.id]}
+      }
+    }
 
     // Adding new player to preliminary requires redoing all groups and matches,
     // perhaps a better way would be possible?
