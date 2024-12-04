@@ -400,11 +400,48 @@ export const Matches: React.FC<{
 export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
   const { t } = useTranslation();
 
-  const sortedTeams = [...teams].sort((a, b) => a.name.localeCompare(b.name));
+  // Group matches by round
+  const groupMatchesByRound = (matches: Match[]): Record<number, Match[]> => {
+    return matches.reduce<Record<number, Match[]>>((acc, match) => {
+      const round = match.tournamentRound ?? 0;
+      if (acc[round] === undefined) {
+        acc[round] = [];
+      }
+      acc[round].push(match);
+      return acc;
+    }, {});
+  };
 
-  const teamsTable = (): JSX.Element => {
-    return (
-      <TableContainer component={Paper}>
+  // Helper function to get team name by player ID
+  const getTeamNameForPlayer = (
+    playerId: string,
+    teams: TournamentTeam[]
+  ): string | undefined => {
+    const team = teams.find((team) =>
+      team.players.some((player) => player.id === playerId)
+    );
+    return team?.name;
+  };
+
+  const tournament = useTournament();
+  const rounds = groupMatchesByRound(tournament.matchSchedule ?? []);
+
+  // Prepare the table data
+  const roundKeys = Object.keys(rounds)
+    .map((key) => parseInt(key, 10))
+    .sort((a, b) => a - b); // Sort numerically
+
+  const maxMatchupsInRound = Math.max(
+    ...roundKeys.map((round) => rounds[round].length)
+  );
+
+  return (
+    <Box>
+      {/* Participating Teams Table */}
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        {t("tournament_view_labels.participating_teams")}
+      </Typography>
+      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#D01C1C" }}>
@@ -416,29 +453,26 @@ export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
               >
                 {t("tournament_view_labels.team_name")}
               </TableCell>
-              {Math.max(...teams.map((team) => team.players.length)) > 0 &&
-                Array.from(
-                  {
-                    length: Math.max(
-                      ...teams.map((team) => team.players.length)
-                    )
-                  },
-                  (_, index) => (
-                    <TableCell
-                      key={`player-${index + 1}`}
-                      sx={{
-                        color: "white",
-                        fontWeight: "bold"
-                      }}
-                    >
-                      {t("tournament_view_labels.member")} {index + 1}
-                    </TableCell>
-                  )
-                )}
+              {Array.from(
+                {
+                  length: Math.max(...teams.map((team) => team.players.length))
+                },
+                (_, index) => (
+                  <TableCell
+                    key={`member-${index}`}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {t("tournament_view_labels.member")} {index + 1}
+                  </TableCell>
+                )
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedTeams.map((team, index) => (
+            {teams.map((team) => (
               <TableRow key={team.id}>
                 <TableCell
                   sx={{
@@ -448,15 +482,15 @@ export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
                 >
                   {team.name}
                 </TableCell>
-                {team.players.map((player, playerIndex) => (
+                {team.players.map((player) => (
                   <TableCell
-                    key={`player-${index}-${playerIndex}`}
+                    key={player.id}
                     sx={{
                       borderRight: "1px solid #ddd",
                       borderBottom: "1px solid #ddd"
                     }}
                   >
-                    {player.firstName}
+                    {player.firstName} {player.lastName}
                   </TableCell>
                 ))}
               </TableRow>
@@ -464,17 +498,61 @@ export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
           </TableBody>
         </Table>
       </TableContainer>
-    );
-  };
 
-  return (
-    <>
-      <Typography sx={{ margin: 2 }}>
-        {t("tournament_view_labels.participating_teams")}
+      {/* Matchup Overview Table */}
+      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+        {t("tournament_view_labels.matchups_overview")}
       </Typography>
-      {teamsTable()}
-      <Typography sx={{ margin: 2 }}>Team matchup overview</Typography>
-    </>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#D01C1C" }}>
+              {roundKeys.map((round) => (
+                <TableCell
+                  key={round}
+                  sx={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    color: "white"
+                  }}
+                >
+                  {t("tournament_view_labels.round")} {round}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Array.from({ length: maxMatchupsInRound }).map(
+              (_, matchupIndex) => (
+                <TableRow key={matchupIndex}>
+                  {roundKeys.map((round) => {
+                    const match = rounds[round][matchupIndex];
+                    if (match === undefined || match === null) {
+                      return <TableCell key={round}></TableCell>; // Empty cell for missing matchups
+                    }
+
+                    const teamAName = getTeamNameForPlayer(
+                      match.players[0]?.id,
+                      teams
+                    );
+                    const teamBName = getTeamNameForPlayer(
+                      match.players[1]?.id,
+                      teams
+                    );
+
+                    return (
+                      <TableCell key={round} sx={{ textAlign: "center" }}>
+                        {teamAName} vs {teamBName}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              )
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

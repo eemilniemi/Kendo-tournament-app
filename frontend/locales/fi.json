@@ -206,8 +206,9 @@
     "select_officials": "Valitse toimitsijat, jotta matsi voi alkaa",
     "team_name": "Joukkueen nimet",
     "member": "Jäsen",
-    "participating_teams": "Osallistuvat joukkueet",
-    "overview": "Yleiskatsaus"
+    "participating_teams": "OSALLISTUVAT JOUKKUEET",
+    "overview": "Yleiskatsaus",
+    "matchups_overview": "JOUKKUEIDEN OTTELUKATSAUS"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",

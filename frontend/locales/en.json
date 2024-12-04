@@ -206,8 +206,9 @@
     "select_officials": "Select officials before match can start",
     "team_name": "Team names",
     "member": "Member",
-    "participating_teams": "Participating teams",
-    "overview": "Overview"
+    "participating_teams": "PARTICIPATING TEAMS",
+    "overview": "Overview",
+    "matchups_overview": "TEAM MATCHUP OVERVIEW"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",
