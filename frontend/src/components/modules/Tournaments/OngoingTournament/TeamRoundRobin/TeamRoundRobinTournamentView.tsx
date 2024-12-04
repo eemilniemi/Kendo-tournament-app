@@ -438,7 +438,7 @@ export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
   return (
     <Box>
       {/* Participating Teams Table */}
-      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+      <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
         {t("tournament_view_labels.participating_teams")}
       </Typography>
       <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
@@ -500,7 +500,7 @@ export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
       </TableContainer>
 
       {/* Matchup Overview Table */}
-      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+      <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
         {t("tournament_view_labels.matchups_overview")}
       </Typography>
       <TableContainer component={Paper}>
@@ -998,6 +998,9 @@ const TeamRoundRobinTournamentView: React.FC = () => {
         >
           <MenuItem value="tournamentInfo" sx={{ fontSize: "13px" }}>
             {t("tournament_view_labels.tournament_info")}
+          </MenuItem>
+          <MenuItem value="overview" sx={{ fontSize: "13px" }}>
+            {t("tournament_view_labels.overview")}
           </MenuItem>
           <MenuItem value="scoreboard" sx={{ fontSize: "13px" }}>
             {t("tournament_view_labels.scoreboard")}
