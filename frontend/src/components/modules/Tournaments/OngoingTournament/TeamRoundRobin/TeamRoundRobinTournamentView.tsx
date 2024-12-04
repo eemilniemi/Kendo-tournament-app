@@ -14,7 +14,9 @@ import {
   Select,
   MenuItem,
   Button,
-  Box
+  Box,
+  Divider,
+  IconButton
 } from "@mui/material";
 import { type Match, type Tournament, type User } from "types/models";
 import { useSearchParams } from "react-router-dom";
@@ -45,6 +47,8 @@ export interface TournamentTeam {
   ties: number;
   players: User[];
 }
+
+interface Rounds extends Record<number, Match[]> {}
 
 export interface TournamentPlayer {
   id: string;
@@ -171,7 +175,13 @@ export const Matches: React.FC<{
   ongoingMatchElements: React.ReactNode[];
   upcomingMatchElements: React.ReactNode[];
   pastMatchElements: React.ReactNode[];
-}> = ({ ongoingMatchElements, upcomingMatchElements, pastMatchElements }) => {
+  tournamentData: Tournament;
+}> = ({
+  ongoingMatchElements,
+  upcomingMatchElements,
+  pastMatchElements,
+  tournamentData
+}) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -189,6 +199,40 @@ export const Matches: React.FC<{
       setShowPast(true);
     }
   }, [isMobile]);
+
+  // Group matches by round
+  const rounds: Rounds = tournamentData.matchSchedule.reduce<Rounds>(
+    (acc, match) => {
+      const round = match.tournamentRound ?? 0;
+      if (acc[round] === undefined) {
+        acc[round] = [];
+      }
+      acc[round].push(match);
+      return acc;
+    },
+    {}
+  );
+
+  const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(
+    () => {
+      const initialExpandedRounds: Record<number, boolean> = {};
+      Object.keys(rounds).forEach((roundNumber) => {
+        initialExpandedRounds[parseInt(roundNumber, 10)] = true;
+      });
+      return initialExpandedRounds;
+    }
+  );
+
+  const toggleRound = (roundNumber: number): void => {
+    setExpandedRounds((prev) => ({
+      ...prev,
+      [roundNumber]: !prev[roundNumber]
+    }));
+  };
+
+  const getRoundName = (roundNumber: number): string => {
+    return `${t("tournament_view_labels.round")} ${roundNumber}`;
+  };
 
   const renderSection = (
     title: string,
@@ -237,20 +281,85 @@ export const Matches: React.FC<{
       </Box>
       {show && (
         <Box
-          display="flex"
-          gap="15px"
-          justifyContent="space-between"
-          flexWrap="wrap"
-          marginTop="10px"
-          marginLeft="10px"
-          component="div"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            padding: "20px 0",
+            gap: "10px 25px"
+          }}
         >
-          {elements.length > 0 ? (
-            elements
-          ) : (
+          {elements.length === 0 ? (
             <Typography variant="body2" color="textSecondary" fontSize={"13px"}>
               {t("tournament_view_labels.no_matches")}
             </Typography>
+          ) : (
+            Object.entries(rounds).map(([roundNumber, matches], index) => (
+              <React.Fragment key={roundNumber}>
+                {index > 0 && <Divider orientation="horizontal" flexItem />}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    padding: "20px",
+                    borderRadius: 2,
+                    width: "99%",
+                    outline: "1px lightgray solid",
+                    margin: "10px auto"
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      zIndex: 1,
+                      cursor: "pointer"
+                    }}
+                    onClick={() => {
+                      toggleRound(parseInt(roundNumber, 10));
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        marginBottom: 0,
+                        marginLeft: "10px",
+                        textDecoration: "underline",
+                        fontSize: "17px",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      {getRoundName(parseInt(roundNumber, 10))}
+                    </Typography>
+                    <IconButton>
+                      {expandedRounds[parseInt(roundNumber, 10)] ? (
+                        <ArrowDropUpIcon />
+                      ) : (
+                        <ArrowDropDownIcon />
+                      )}
+                    </IconButton>
+                  </Box>
+                  {expandedRounds[parseInt(roundNumber, 10)] && (
+                    <>
+                      <Divider sx={{ margin: "15px 0" }} />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          justifyContent: "flex-start",
+                          gap: "40px",
+                          margin: "10px"
+                        }}
+                      >
+                        {elements}
+                      </Box>
+                    </>
+                  )}
+                </Box>
+              </React.Fragment>
+            ))
           )}
         </Box>
       )}
@@ -890,6 +999,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           ongoingMatchElements={ongoingElements}
           upcomingMatchElements={upcomingElements}
           pastMatchElements={[]}
+          tournamentData={tournamentData}
         />
       )}
       {currentTab === "completedMatches" && (
@@ -897,6 +1007,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           ongoingMatchElements={[]}
           upcomingMatchElements={[]}
           pastMatchElements={pastElements}
+          tournamentData={tournamentData}
         />
       )}
       {isUserTheCreator && currentTab === "ongoingUpcomingMatches" && (
