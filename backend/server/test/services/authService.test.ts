@@ -16,31 +16,26 @@ const expect = chai.expect;
 
 describe("AuthService", () => {
     let authService: AuthService;
-    let generateAccessTokenStub: SinonStub;
-    let generateRefreshTokenStub: SinonStub;
+    // let generateAccessTokenStub: SinonStub;
+    // let generateRefreshTokenStub: SinonStub;
 
-
-    let testPlayer1email: string;
+    let testUser1email: string;
+    let testUser1Username: string;
 
     // Passwords are hashed, so we need to use the actual password here
-    let testPlayer1password = "FooBar123";
+    let testUser1password = "FooBar123";
 
-    let testPlayer2email: string;
 
 
     before (async () => {
-        let testPlayer = await UserModel.findOne({userName: 'testUser'}).exec();
-        let testPlayer2 = await UserModel.findOne({userName: 'testUser2'}).exec();
+        let testUser = await UserModel.findOne({userName: 'testUser'}).exec();
+        testUser1email = testUser.email;
+        testUser1Username = testUser.userName;
 
-        testPlayer1email = testPlayer.email;
-        //testPlayer1password = testPlayer.password;
-
-        testPlayer2email = testPlayer2.email;
     });
 
     beforeEach(() => {
         authService = new AuthService();
-        sinon.restore();
 
     });
 
@@ -49,65 +44,79 @@ describe("AuthService", () => {
     });
 
     describe("loginUser", () => {
-        it("should return tokens and user details for valid credentials", async () => {
 
-            const testUser = await UserModel.findOne({ userName: 'testUser' }).exec();
-            console.log("Test User:", testUser);
+        it("should return tokens and user details for valid credentials", async () => {
+            // const testUser = await UserModel.findOne({ userName: 'testUser' }).exec();
+            // console.log("Test User:", testUser);
             // console.log("testPlayer1email: ", testPlayer1email);
             // console.log("testPlayer1password: ", testPlayer1password);
-            const loginRequest = {email: testPlayer1email, password: testPlayer1password};
+            const loginRequest = {email: testUser1email, password: testUser1password};
             const res = await authService.loginUser(loginRequest);
 
-            console.log(res);
+            //console.log(res);
             expect(res).to.have.property('accessToken');
             expect(res).to.have.property('refreshToken');
-            expect(res.user).to.have.property('email', testUser.email);
-            expect(res.user).to.have.property('userName', testUser.userName);
+            expect(res.user).to.have.property('email', testUser1email);
+            expect(res.user).to.have.property('userName', testUser1Username);
         });
 
         it("should throw an error if user is not found", async () => {
-
             const loginRequest = {email: "NotExisting123@gmail.com", password: "NotExistingUserPassword"};
             await expect(authService.loginUser(loginRequest)).to.be.rejectedWith(
                 BadRequestError, "No user found with the given email");
         });
 
         it("should throw an error if password is incorrect", async () => {
-
-            const loginRequest = {email: testPlayer1email, password: "wrongPassword"};
+            const loginRequest = {email: testUser1email, password: "wrongPassword"};
             await expect(authService.loginUser(loginRequest)).to.be.rejectedWith(
                 BadRequestError, "Invalid password");
-
         });
-
-
-
     });
-
-
 
     describe("refreshAccessToken", () => {
 
         it("should throw an error if refresh token is not provided", async () => {
-
             const refreshToken = undefined;
-
             await expect(authService.refreshAccessToken(refreshToken)).to.be.rejectedWith(
-                BadRequestError,
-                "Refresh token not found"
-            );
+                BadRequestError, "Refresh token not found");
         });
 
         it("should throw an error if the refresh token is invalid", async () => {
-
+            const invalidRefreshToken = "invalidRefreshToken";
+            await expect(authService.refreshAccessToken(invalidRefreshToken)).to.be.rejectedWith(
+                "jwt malformed");
         });
 
         it("should return a new access token and the existing refresh token", async () => {
 
+            //console.log("Test User:", testUser);
+            // console.log("testPlayer1email: ", testPlayer1email);
+            // console.log("testPlayer1password: ", testPlayer1password);
+            const loginRequest = {email: testUser1email, password: testUser1password};
+            const res = await authService.loginUser(loginRequest);
+
+            const accessToken = res.accessToken;
+            const refreshToken = res.refreshToken;
+
+
+            console.log("Access Token:", accessToken);
+            console.log("Refresh Token:", refreshToken);
+
+
+            // console.log("Test User:", testUser);
+            // const decoded = await jwtHelper.verifyRefreshToken(refreshToken);
+            // const user = await UserModel.findById(decoded.id).exec();
+            // user.refreshToken = refreshToken;
+            // await user.save();
+
+            const tokens = await authService.refreshAccessToken(refreshToken);
+            console.log(tokens);
+
+            expect(tokens).to.be.an("array").that.has.lengthOf(2);
+            expect(tokens[0]).to.be.a("string").and.equal(accessToken); // Should old and new access tokens be the same?
+            expect(tokens[1]).to.be.a("string").and.equal(refreshToken);
+            expect(tokens[0]).not.equal(tokens[1]); // Access and refresh tokens  should be different
         });
-
-
-
 
     });
 
@@ -121,40 +130,70 @@ describe("AuthService", () => {
 
         it("should throw an error if the user is not found", async () => {
 
+            const nonExistentEmail = "nonexistentuser@example.com"; // Simulate a non-existent user
+
+            // Mock the behavior of UserModel.findOne to return null for the given email
+            const testUser = await UserModel.findOne({ userName: 'testUser99' }).exec();
+
+            // Assert that the function throws a BadRequestError with the appropriate message
+            await expect(authService.sendPasswordRecoveryMail(nonExistentEmail))
+                .to.be.rejectedWith(undefined);
+
+            // Restore the original UserModel.findOne method
+            sinon.restore();
+
+
         });
 
-
-
-
-
     });
-
-
-
 
 
     describe("resetPassword", () => {
 
         it("should reset the password for a user", async () => {
-            const mockToken = "validToken";
-            const mockPassword = "newPassword123";
-            const mockUser = {
-                resetPasswordToken: mockToken,
-                isPasswordResetTokenExpired: sinon.stub().returns(false),
-                save: sinon.stub().resolves(),
-                password: "",
-                resetPasswordExpires: undefined,
-            };
+            // const mockToken = "validToken";
+            // const mockPassword = "newPassword123";
+            // const mockUser = {
+            //     resetPasswordToken: mockToken,
+            //     isPasswordResetTokenExpired: sinon.stub().returns(false),
+            //     save: sinon.stub().resolves(),
+            //     password: "",
+            //     resetPasswordExpires: undefined,
+            // };
+            //
+            // sinon.stub(UserModel, "findOne").returns({
+            //     exec: sinon.stub().resolves(mockUser),
+            // } as any);
+            //
+            // const requestBody = { token: mockToken, password: mockPassword };
+            // await authService.resetPassword(requestBody);
+            //
+            // expect(mockUser.isPasswordResetTokenExpired.calledOnce).to.be.true;
+            // expect(mockUser.password).to.equal(mockPassword);
+            // expect(mockUser.resetPasswordToken).to.be.undefined;
+            // expect(mockUser.resetPasswordExpires).to.be.undefined;
+            // expect(mockUser.save.calledOnce).to.be.true;
 
-            sinon.stub(UserModel, "findOne").returns({
-                exec: sinon.stub().resolves(mockUser),
-            } as any);
+            const testUser = await UserModel.findOne({ userName: 'testUser' }).exec();
+            console.log("Test User:", testUser);
 
-            const requestBody = { token: mockToken, password: mockPassword };
+             const mockToken = "validToken";
+            // const mockPassword = "newPassword123";
+            // const mockUser = {
+            //     resetPasswordToken: mockToken,
+            //     isPasswordResetTokenExpired: sinon.stub().returns(false),
+            //     save: sinon.stub().resolves(),
+            //     password: "",
+            //     resetPasswordExpires: undefined,
+            // };
+
+            //sinon.stub(UserModel, "findOne").returns({exec: sinon.stub().resolves(testUser),} as any);
+
+            const requestBody = { token: mockToken, password: testUser1password };
             await authService.resetPassword(requestBody);
 
-            expect(mockUser.isPasswordResetTokenExpired.calledOnce).to.be.true;
-            expect(mockUser.password).to.equal(mockPassword);
+            expect(testUser.isPasswordResetTokenExpired.call(testUser)).to.be.true;
+            expect(testUser1password).to.equal(mockPassword);
             expect(mockUser.resetPasswordToken).to.be.undefined;
             expect(mockUser.resetPasswordExpires).to.be.undefined;
             expect(mockUser.save.calledOnce).to.be.true;
