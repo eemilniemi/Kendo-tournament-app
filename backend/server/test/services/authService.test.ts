@@ -6,7 +6,6 @@ import UserModel from "../../src/models/userModel";
 import BadRequestError from "../../src/errors/BadRequestError";
 import nodemailer from "nodemailer";
 
-
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -18,8 +17,7 @@ describe("AuthService", () => {
 
     // Passwords are hashed, so we need to use the actual password here
     let testUser1password = "FooBar123";
-
-
+    
     before (async () => {
         let testUser = await UserModel.findOne({userName: 'testUser'}).exec();
         testUser1email = testUser.email;
