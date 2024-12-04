@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { createBracket } from "bracketry";
-import { type Match, type Tournament } from "types/models";
+import { type MatchPlayer, type Match, type Tournament } from "types/models";
 import { useTranslation } from "react-i18next";
 import { countries } from "../../../Registeration/CountrySelect/CountrySelect";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { mapNumberToLetter } from "utils/helperFunctions";
 
 interface TournamentTreeProps {
   tournament: Tournament;
+  roundCountMax: number;
 }
 
 interface Player {
@@ -22,35 +23,84 @@ interface Contestant {
 }
 
 // Counts total rounds based on the number of single players in the playoffs.
-const roundsTotal = (tournament: Tournament): number => {
-  function countRounds(numPlayers: number): number {
-    let n: number = 2;
-    let pow: number = 1;
+// const roundsTotal = (tournament: Tournament): number => {
 
-    while (numPlayers > n) {
-      n *= 2;
-      ++pow;
-    }
+// function countRounds(numPlayers: number): number {
+//   let n: number = 2;
+//   let pow: number = 1;
+//   while (numPlayers > n) {
+//     n *= 2;
+//     ++pow;
+//   }
+//   return pow;
+// }
 
-    return pow;
-  }
+//   if (tournament.contestants !== null && tournament.contestants !== undefined) {
 
-  if (tournament.contestants !== null && tournament.contestants !== undefined) {
-    const contestants: number = Object.keys(tournament.contestants).length;
-    const count = countRounds(contestants);
+//     // If playoffs only, then get the number of players from contestants array
+//     // else...
+//     const contestants = (tournament: Tournament): number => {
 
-    return count;
-  }
+//       if (tournament.type === "Playoff") {
+//         return Object.keys(tournament.contestants ?? {}).length;
 
-  return 0;
-};
+//       } else {
+//         return 0;
+
+//       }
+
+//     }
+
+//     const count = countRounds(contestants);
+
+//     return count;
+//   }
+
+//   return 0;
+// };
 
 function createContestants(tournament: Tournament): Record<string, Contestant> {
   const contestantsObject: Record<string, Contestant> = {};
-  const contestantIds = Object.keys(tournament.contestants ?? {});
+  const contestantIdsOriginal = Object.keys(tournament.contestants ?? {});
+  // Count how many players
+  const playersInPlayoffsOnly: MatchPlayer[] = [];
+
   console.log(
-    "Starting to process the following ids: " + contestantIds.join(";")
+    "Starting to process the following ids: " + contestantIdsOriginal.join(";")
   );
+
+  const a = tournament.matchSchedule?.filter(
+    (match) => match.type === "playoff"
+  );
+  console.log("Length of a " + a?.length);
+
+  const b = a?.at(0)?.tournamentRound;
+  console.log("tournament round " + b);
+  const c = a?.filter((match) => match.tournamentRound === b);
+
+  console.log("Length of c " + c?.length);
+
+  c?.forEach((match) => {
+    match.players.forEach((player) => {
+      playersInPlayoffsOnly.push(player);
+    });
+  });
+
+  console.log("PlayersInPlayoffsOnly: " + playersInPlayoffsOnly);
+
+  const contestantIds = contestantIdsOriginal.filter((contestantId) => {
+    const player = playersInPlayoffsOnly.find(
+      (player) => player.id === contestantId
+    );
+    return player?.id === contestantId;
+  });
+
+  console.log("Filtered contestand ids: " + contestantIds);
+
+  // if (tournament.type !== "Playoff") {
+  //   // Filter out contestants who are not in the playoff stage.
+
+  // }
 
   for (const contestantId of contestantIds) {
     if (
@@ -89,7 +139,10 @@ function createContestants(tournament: Tournament): Record<string, Contestant> {
   return contestantsObject;
 }
 
-const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
+const TreeComponent: React.FC<TournamentTreeProps> = ({
+  tournament,
+  roundCountMax
+}) => {
   const treeRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -114,8 +167,10 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
   }
 
   const contestants = createContestants(tournament);
-  const maxRound = roundsTotal(tournament);
+  const maxRound = roundCountMax; // roundsTotal(tournament);
   const rounds = createRounds(maxRound);
+
+  console.log(tournament.matches?.length);
 
   useEffect(() => {
     if (treeRef.current !== null) {
@@ -126,12 +181,10 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
             return {
               firstScorer: match.players
                 .map((player) => {
-                  return player.points
-                    .filter((point) => point.type.toString() !== "hansoku")
-                    .map((point) => ({
-                      playerId: player.id,
-                      timestamp: point.timestamp
-                    }));
+                  return player.points.map((point) => ({
+                    playerId: player.id,
+                    timestamp: point.timestamp
+                  }));
                 })
                 .flat()
                 .sort(
@@ -223,32 +276,32 @@ const TreeComponent: React.FC<TournamentTreeProps> = ({ tournament }) => {
           getScoresHTML: (side: any, match: any) => {
             // If side has no scores
             if (side.scores === undefined) {
-              return `<div style="width: 80px;"></div>`;
+              return `<div style="width: 100px;"></div>`;
             }
 
             // If side has the first scorer
             if (match.firstScorer.playerId === side.contestantId) {
-              let firstNonHFound = false;
-              const pointsAsSpan = side.scores.map((score: any) => {
-                if (score.mainScore === "H") {
-                  score.mainScore = "Δ";
+              const pointsAsSpan = side.scores.map(
+                (score: any, index: number) => {
+                  if (score.mainScore === "H") {
+                    score.mainScore = "Δ";
+                  }
+                  if (index === 0) {
+                    return `<span style=
+                    "width: 2em; height: 2em; box-sizing: content-box; background: #fff; border: 0.1em solid #666; text-align: center; border-radius: 50%; line-height: 2em;">
+                    ${score.mainScore}
+                    </span>`;
+                  }
+                  return `<span>${score.mainScore}</span>`;
                 }
-                if (!firstNonHFound && score.mainScore !== "Δ") {
-                  firstNonHFound = true;
-                  return `<span style=
-                  "width: 2em; height: 2em; box-sizing: content-box; background: #fff; border: 0.1em solid #666; text-align: center; border-radius: 50%; line-height: 2em;">
-                  ${score.mainScore}
-                  </span>`;
-                }
-                return `<span>${score.mainScore}</span>`;
-              });
-              return `<div style="width: 80px;></div><div style="width: 80px; text-align: left;">${pointsAsSpan.join(
+              );
+              return `<div style="width: 100px; text-align: right;">${pointsAsSpan.join(
                 "&nbsp;&nbsp;&nbsp;"
               )}</div>`;
             }
 
             // If side has scores but not the first scorer
-            return `<div style="width: 80px; text-align: left;">${side.scores
+            return `<div style="width: 100px; text-align: right;">${side.scores
               .map((score: any) => {
                 if (score.mainScore === "H") {
                   score.mainScore = "Δ";

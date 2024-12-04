@@ -561,25 +561,19 @@ const PreliminaryPlayoffView: React.FC = () => {
       )}
       {currentTab === "playoff" && tournamentStage === "playoff" && (
         <div>
-          <PlayoffTournamentView isChildTournament={true} />
+          <PlayoffTournamentView
+            isChildTournament={true}
+            tournamentDataProp={tournamentData}
+          />
         </div>
       )}
       {currentTab === "tree" && tournamentStage === "playoff" && (
         <div>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              padding: "20px 0",
-              gap: "10px 25px"
-            }}
-          >
-            <Typography variant="h6">
-              {t("tournament_view_labels.tournament_tree")}
-            </Typography>
-            <TreeComponent tournament={tournamentData} />
-          </Box>
+          <PlayoffTournamentView
+            isChildTournament={true}
+            hasPlayoffTree={true}
+            tournamentDataProp={tournamentData}
+          />
         </div>
       )}
     </>

@@ -37,10 +37,14 @@ interface Rounds extends Record<number, Match[]> {}
 
 interface PlayoffTournamentViewProps {
   isChildTournament?: boolean;
+  hasPlayoffTree?: boolean;
+  tournamentDataProp?: Tournament;
 }
 
 const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
-  isChildTournament = false
+  isChildTournament = false,
+  hasPlayoffTree = false,
+  tournamentDataProp
 }) => {
   const initialTournamentData = useTournament();
   const tournament = useTournament();
@@ -312,7 +316,9 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
         </>
       )}
 
-      {(currentTab === "matches" || isChildTournament) && (
+      {(currentTab === "matches" ||
+        ((isChildTournament || hasPlayoffTree) &&
+          !(isChildTournament && hasPlayoffTree))) && (
         <>
           <Box
             sx={{
@@ -521,7 +527,7 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
         </div>
       )}
 
-      {currentTab === "tree" && (
+      {currentTab === "tree" && hasPlayoffTree && isChildTournament && (
         <>
           <Box
             sx={{
@@ -535,7 +541,33 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
             <Typography variant="h6">
               {t("tournament_view_labels.tournament_tree")}
             </Typography>
-            <TreeComponent tournament={tournamentData} />
+            {tournamentDataProp !== undefined && (
+              <TreeComponent
+                tournament={tournamentDataProp}
+                roundCountMax={totalRounds()}
+              />
+            )}
+          </Box>
+        </>
+      )}
+      {currentTab === "tree" && !isChildTournament && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              padding: "20px 0",
+              gap: "10px 25px"
+            }}
+          >
+            <Typography variant="h6">
+              {t("tournament_view_labels.tournament_tree")}
+            </Typography>
+            <TreeComponent
+              tournament={tournamentData}
+              roundCountMax={totalRounds()}
+            />
           </Box>
         </>
       )}
