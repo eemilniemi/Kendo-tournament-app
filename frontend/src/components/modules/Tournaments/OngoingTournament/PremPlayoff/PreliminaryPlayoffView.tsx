@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Tabs,
   Tab,
-  Box,
   Button,
   Typography,
   Card,
@@ -37,7 +36,6 @@ import MatchButton from "../../MatchButton";
 import TournamentWinner from "../../Winner";
 import { format } from "date-fns";
 import UpcomingTournamentView from "../../UpcomingTournamentView";
-import TreeComponent from "../Playoff/TournamentTree";
 
 // Sorts the matches of the tournament by groups
 const sortMatchesByGroup = (tournament: Tournament): Map<number, Match[]> => {

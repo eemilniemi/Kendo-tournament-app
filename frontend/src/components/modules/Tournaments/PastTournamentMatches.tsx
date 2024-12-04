@@ -35,9 +35,9 @@ const PastTournamentMatches: React.FC = () => {
   const tournamentTypes: Record<TournamentType, string> = {
     "Round Robin": "types.round_robin",
     "Team Round Robin": "types.team_round_robin",
-    "Playoff": "types.playoff",
+    Playoff: "types.playoff",
     "Preliminary Playoff": "types.preliminary_playoff",
-    "Swiss": "types.swiss"
+    Swiss: "types.swiss"
   };
 
   const selectedTournament = past.find(
@@ -98,24 +98,24 @@ const PastTournamentMatches: React.FC = () => {
   });
 
   // Needed for TournamentTree so it shows the correct number of playoff rounds.
-  const playoffRoundsCounter = ():number => {
-
-    const playoffFirstRound = Object.values(rounds).flat().find( match => match.type === "playoff")?.roundIndex ?? 0;
+  const playoffRoundsCounter = (): number => {
+    const playoffFirstRound =
+      Object.values(rounds)
+        .flat()
+        .find((match) => match.type === "playoff")?.roundIndex ?? 0;
     let playoffRoundsCount: number = playoffFirstRound;
 
     Object.values(rounds)
       .flat()
-      .filter(match => match.type === "playoff")
-      .forEach( match => {
-        if (match.roundIndex > playoffRoundsCount){
+      .filter((match) => match.type === "playoff")
+      .forEach((match) => {
+        if (match.roundIndex > playoffRoundsCount) {
           playoffRoundsCount = match.roundIndex;
         }
       });
 
     return playoffRoundsCount + 1;
-
-  }
-  
+  };
 
   const extractMatchParticipants = (
     players: TournamentPlayer[],
@@ -196,12 +196,13 @@ const PastTournamentMatches: React.FC = () => {
             value="matches"
             sx={{ fontSize: "13px" }}
           />
-          {(selectedTournament.type === "Playoff" || selectedTournament.type === "Preliminary Playoff") && (
+          {(selectedTournament.type === "Playoff" ||
+            selectedTournament.type === "Preliminary Playoff") && (
             <Tab
               label={t("tournament_view_labels.tournament_tree")}
               value="tree"
               sx={{ fontSize: "13px" }}
-            />   
+            />
           )}
         </Tabs>
       )}
@@ -216,15 +217,18 @@ const PastTournamentMatches: React.FC = () => {
 
       {showTabs && currentTab === "tree" && (
         <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          padding: "20px 0",
-          gap: "10px 25px"
-        }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            padding: "20px 0",
+            gap: "10px 25px"
+          }}
         >
-          <TreeComponent tournament={selectedTournament} roundCountMax={playoffRoundsCounter()}/>
+          <TreeComponent
+            tournament={selectedTournament}
+            roundCountMax={playoffRoundsCounter()}
+          />
         </Box>
       )}
 

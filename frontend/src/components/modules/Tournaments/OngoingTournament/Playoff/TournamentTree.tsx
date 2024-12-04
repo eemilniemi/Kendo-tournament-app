@@ -22,85 +22,29 @@ interface Contestant {
   players: Player[];
 }
 
-// Counts total rounds based on the number of single players in the playoffs.
-// const roundsTotal = (tournament: Tournament): number => {
-
-// function countRounds(numPlayers: number): number {
-//   let n: number = 2;
-//   let pow: number = 1;
-//   while (numPlayers > n) {
-//     n *= 2;
-//     ++pow;
-//   }
-//   return pow;
-// }
-
-//   if (tournament.contestants !== null && tournament.contestants !== undefined) {
-
-//     // If playoffs only, then get the number of players from contestants array
-//     // else...
-//     const contestants = (tournament: Tournament): number => {
-
-//       if (tournament.type === "Playoff") {
-//         return Object.keys(tournament.contestants ?? {}).length;
-
-//       } else {
-//         return 0;
-
-//       }
-
-//     }
-
-//     const count = countRounds(contestants);
-
-//     return count;
-//   }
-
-//   return 0;
-// };
-
 function createContestants(tournament: Tournament): Record<string, Contestant> {
   const contestantsObject: Record<string, Contestant> = {};
   const contestantIdsOriginal = Object.keys(tournament.contestants ?? {});
-  // Count how many players
-  const playersInPlayoffsOnly: MatchPlayer[] = [];
 
-  console.log(
-    "Starting to process the following ids: " + contestantIdsOriginal.join(";")
-  );
+  // Count how many players: filter the matchSchedule first
+  const playersInPlayoffsOnly: MatchPlayer[] = [];
 
   const a = tournament.matchSchedule?.filter(
     (match) => match.type === "playoff"
   );
-  console.log("Length of a " + a?.length);
-
   const b = a?.at(0)?.tournamentRound;
-  console.log("tournament round " + b);
   const c = a?.filter((match) => match.tournamentRound === b);
-
-  console.log("Length of c " + c?.length);
-
   c?.forEach((match) => {
     match.players.forEach((player) => {
       playersInPlayoffsOnly.push(player);
     });
   });
-
-  console.log("PlayersInPlayoffsOnly: " + playersInPlayoffsOnly);
-
   const contestantIds = contestantIdsOriginal.filter((contestantId) => {
     const player = playersInPlayoffsOnly.find(
       (player) => player.id === contestantId
     );
     return player?.id === contestantId;
   });
-
-  console.log("Filtered contestand ids: " + contestantIds);
-
-  // if (tournament.type !== "Playoff") {
-  //   // Filter out contestants who are not in the playoff stage.
-
-  // }
 
   for (const contestantId of contestantIds) {
     if (
