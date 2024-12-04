@@ -84,7 +84,6 @@ describe("AuthService", () => {
         });
 
         it("should return a new access token and the existing refresh token", async () => {
-
             const loginRequest = {email: testUser1email, password: testUser1password};
             const res = await authService.loginUser(loginRequest);
 
@@ -96,7 +95,7 @@ describe("AuthService", () => {
             expect(tokens).to.be.an("array").that.has.lengthOf(2);
             expect(tokens[0]).to.be.a("string").and.equal(accessToken); // TODO: Should old and new access tokens be the same?
             expect(tokens[1]).to.be.a("string").and.equal(refreshToken);
-            expect(tokens[0]).not.equal(tokens[1]); // Access and refresh tokens  should be different
+            expect(tokens[0]).not.equal(tokens[1]); // Access and refresh tokens should be different
         });
     });
 
@@ -152,7 +151,6 @@ describe("AuthService", () => {
         });
     });
 
-
     describe("resetPassword", () => {
 
         it("should reset the password for a user", async () => {
@@ -180,7 +178,6 @@ describe("AuthService", () => {
         });
 
         it("should throw an error if the token is invalid", async () => {
-
             const mockToken = "expiredToken";
             sinon.stub(UserModel, "findOne").returns({
                 exec: sinon.stub().resolves(null),
@@ -195,7 +192,6 @@ describe("AuthService", () => {
         });
 
         it("should throw an error if the token is valid but expired", async () => {
-
             const mockToken = "validExpiredToken";
             const mockUser = {
                 resetPasswordToken: mockToken,
@@ -214,7 +210,6 @@ describe("AuthService", () => {
             );
 
             expect(mockUser.isPasswordResetTokenExpired.calledOnce).to.be.true;
-
         });
     });
 });
