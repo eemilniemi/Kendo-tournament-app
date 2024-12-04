@@ -54,7 +54,8 @@ async function createTournament(page, tournamentData) {
 
 async function editTournament(page, tournamentData){
     await page.getByRole('button', { name: 'Edit' }).click();
-    await page.getByLabel('Start date time *').fill(tournamentData.startDate);
+    await page.getByLabel('Start date time *').fill('');
+    await page.getByLabel('Start date time *').type(tournamentData.startDate);
 
     await page.keyboard.press('PageDown');
 
