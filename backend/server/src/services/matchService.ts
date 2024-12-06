@@ -19,7 +19,7 @@ import {
   TournamentModel,
   TournamentType,
   type UnsavedMatch,
-  UnsavedPlayoffMatch
+  type UnsavedPlayoffMatch
 } from "../models/tournamentModel.js";
 import { TournamentService } from "./tournamentService.js";
 import { shuffle } from "../utility/utils.js";
@@ -342,14 +342,17 @@ export class MatchService {
           );
           const matchDocs = await MatchModel.insertMany(matches);
           for (const match of matchDocs) {
+            // current frontend implementation has two redundant copies of matches,
+            // one for playoff bracket and one for everything else
             tournament.matchSchedule.push(match.id);
             tournament.matches.push(match.id);
           }
-          for (let player of playerIds) {
+          // entering playoff stage so a new format for players is needed
+          for (const player of playerIds) {
             tournament.contestants = {
               ...tournament.contestants,
-              [player.toString()]: {players: [player]}
-            }
+              [player.toString()]: { players: [player] }
+            };
           }
         }
 
@@ -637,7 +640,7 @@ export class MatchService {
         }
 
         if (match.type === "playoff") {
-          for (let i=0; i<2; i++) {
+          for (let i = 0; i < 2; i++) {
             if (match.sides[i].contestantId === winnerPlayerId.toString()) {
               match.sides[i].isWinner = true;
             }
@@ -1045,7 +1048,7 @@ export class MatchService {
 
       if (match.type === "playoff") {
         // If playoff, add match to next round schedule
-        for (let i=0; i<2; i++) {
+        for (let i = 0; i < 2; i++) {
           if (match.sides[i].contestantId === winnerPlayerId.toString()) {
             match.sides[i].isWinner = true;
           }
@@ -1095,18 +1098,22 @@ export class MatchService {
     const pointWinner = player1.color === pointColor ? player1 : player2;
     pointWinner.points.push(point);
 
+    // frontend needs points in specific format for playoff tournament tree
     if (match.type === "playoff" || match.type === "pre playoff") {
       if (pointColor === "white") {
         if (match.sides[1].scores === undefined) {
           match.sides[1].scores = [];
         }
-        match.sides[1].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
-      }
-      else {
+        match.sides[1].scores?.push({
+          mainScore: Array.from(point.type)[0].toUpperCase()
+        });
+      } else {
         if (match.sides[0].scores === undefined) {
           match.sides[0].scores = [];
         }
-        match.sides[0].scores?.push({ mainScore: Array.from(point.type)[0].toUpperCase() });
+        match.sides[0].scores?.push({
+          mainScore: Array.from(point.type)[0].toUpperCase()
+        });
       }
     }
   }
@@ -1165,53 +1172,59 @@ export class MatchService {
       (match) => match.roundIndex === 0
     ).length;
 
-    if (currentMatch.roundIndex == Math.log2(tournamentSize)) {
+    // if current match was final, don't add new matches
+    if (currentMatch.roundIndex === Math.log2(tournamentSize)) {
       return;
     }
 
-    const nextIndex = currentMatch.roundIndex+1;
-    const nextOrder = Math.trunc(currentMatch.order/2);
+    const nextIndex = currentMatch.roundIndex + 1;
+    const nextOrder = Math.trunc(currentMatch.order / 2);
 
     const nextMatch = playedMatches.find(
-      (match) => 
-        match.roundIndex === nextIndex &&
-        match.order === nextOrder
-    )
+      (match) => match.roundIndex === nextIndex && match.order === nextOrder
+    );
 
-    if (!nextMatch) {
-      let newMatch: UnsavedPlayoffMatch = {
-        players: [{
-          id: winnerId,
-          points: [],
-          color: currentMatch.order % 2 === 0 ? "red" : "white"
-        }],
+    if (nextMatch === null || nextMatch === undefined) {
+      const newMatch: UnsavedPlayoffMatch = {
+        players: [
+          {
+            id: winnerId,
+            points: [],
+            color: currentMatch.order % 2 === 0 ? "red" : "white"
+          }
+        ],
         type: "playoff",
         elapsedTime: 0,
         timerStartedTimestamp: null,
-        tournamentRound: currentRound+1,
+        tournamentRound: currentRound + 1,
         matchTime: tournament.matchTime,
         tournamentId: tournament.id,
         roundIndex: nextIndex,
         order: nextOrder,
-        sides: [{ contestantId: winnerId.toString() }],
-      }
+        sides: [{ contestantId: winnerId.toString() }]
+      };
 
       const matchDocuments = await MatchModel.create(newMatch);
+      // current frontend implementation has two redundant copies of matches,
+      // one for playoff bracket and one for everything else
       tournament.matchSchedule.push(matchDocuments.id);
       tournament.matches.push(matchDocuments.id);
       await tournament.save();
       await MatchService.divideMatchesToCourts(tournament.id);
-    }
-    else {
-      let newMatch = await MatchModel.findById(nextMatch.id).exec();
+    } else {
+      const newMatch = await MatchModel.findById(nextMatch.id).exec();
 
-      if (newMatch) {
+      if (newMatch != null) {
+        // position in match depends on which side of the bracket player is coming from
         if (currentMatch.order % 2 === 0) {
-          newMatch.players.push({id: winnerId, points: [], color: "red"});
+          newMatch.players.push({ id: winnerId, points: [], color: "red" });
           newMatch.sides.unshift({ contestantId: winnerId.toString() });
-        }
-        else {
-          newMatch.players.unshift({id: winnerId, points: [], color: "white"});
+        } else {
+          newMatch.players.unshift({
+            id: winnerId,
+            points: [],
+            color: "white"
+          });
           newMatch.sides.push({ contestantId: winnerId.toString() });
         }
 

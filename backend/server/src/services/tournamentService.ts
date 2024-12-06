@@ -4,7 +4,7 @@ import {
   type Tournament,
   type UnsavedMatch,
   TournamentType,
-  UnsavedPlayoffMatch
+  type UnsavedPlayoffMatch
 } from "../models/tournamentModel.js";
 import UserModel, { type User } from "../models/userModel.js";
 import BadRequestError from "../errors/BadRequestError.js";
@@ -343,11 +343,12 @@ export class TournamentService {
     }
 
     tournament.players.push(player.id);
+    // bracketry used by frontend needs players in different format
     if (tournament.type === TournamentType.Playoff) {
       tournament.contestants = {
         ...tournament.contestants,
-        [player.id]: {players: [player.id]}
-      }
+        [player.id]: { players: [player.id] }
+      };
     }
 
     // Adding new player to preliminary requires redoing all groups and matches,
@@ -616,7 +617,7 @@ export class TournamentService {
             match.winner = id;
             match.endTimestamp = currentTime;
             if (match.type === "playoff") {
-              for (let i=0; i<2; i++) {
+              for (let i = 0; i < 2; i++) {
                 if (match.sides[i].contestantId === match.winner.toString()) {
                   match.sides[i].isWinner = true;
                 }
@@ -652,6 +653,8 @@ export class TournamentService {
         tournament as Tournament
       );
       if (newMatchIds.length !== 0) {
+        // current frontend implementation has two redundant copies of matches,
+        // one for playoff bracket and one for everything else
         tournament.matchSchedule.push(...newMatchIds);
         tournament.matches.push(...newMatchIds);
         await tournament.save();
@@ -872,9 +875,7 @@ export class TournamentService {
         winner: playerIds[i],
         roundIndex: 0,
         order: i,
-        sides: [
-          { contestantId: playerIds[i].toString(), isWinner: true }
-        ]
+        sides: [{ contestantId: playerIds[i].toString(), isWinner: true }]
       });
     }
 
@@ -894,7 +895,7 @@ export class TournamentService {
         tournamentId: tournament,
         matchTime: tournamentMatchTime,
         roundIndex: 0,
-        order: (i+byes.length)/2,
+        order: (i + byes.length) / 2,
         sides: [
           { contestantId: playerIds[i].toString() },
           { contestantId: playerIds[i + 1].toString() }
@@ -904,6 +905,9 @@ export class TournamentService {
 
     // add second round matches from byes
     for (let j = 0; j < byesNeeded; j += 2) {
+      // When enough players, add matches with two players.
+      // All byes will be next to each other on the top of the bracket,
+      // so there will be a maximum of one match from byes with only one player
       if (j + 1 < byesNeeded) {
         matches.push({
           players: [
@@ -913,37 +917,32 @@ export class TournamentService {
           type: matchType as MatchType,
           elapsedTime: 0,
           timerStartedTimestamp: null,
-          tournamentRound: currentRound+1,
+          tournamentRound: currentRound + 1,
           tournamentId: tournament,
           matchTime: tournamentMatchTime,
           roundIndex: 1,
-          order: j/2,
+          order: j / 2,
           sides: [
             { contestantId: playerIds[j].toString() },
             { contestantId: playerIds[j + 1].toString() }
           ]
         });
-      }
-      else {
+      } else {
         matches.push({
-          players: [
-            { id: playerIds[j], points: [], color: "red" },
-          ],
+          players: [{ id: playerIds[j], points: [], color: "red" }],
           type: matchType as MatchType,
           elapsedTime: 0,
           timerStartedTimestamp: null,
-          tournamentRound: currentRound+1,
+          tournamentRound: currentRound + 1,
           tournamentId: tournament,
           matchTime: tournamentMatchTime,
           roundIndex: 1,
-          order: j/2,
-          sides: [
-            { contestantId: playerIds[j].toString() },
-          ]
+          order: j / 2,
+          sides: [{ contestantId: playerIds[j].toString() }]
         });
       }
     }
-    
+
     return matches;
   }
 

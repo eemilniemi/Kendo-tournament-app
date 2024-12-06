@@ -26,6 +26,7 @@ export type UnsavedMatch = Pick<
   winnerTeamId?: Types.ObjectId;
 };
 
+// for bracketry
 export type UnsavedPlayoffMatch = Pick<
   Match,
   | "players"
@@ -74,14 +75,16 @@ export interface Tournament {
   }>;
   playersPerTeam?: number;
 
-  rounds: Array<{name?: string}>;
+  // for bracketry
+  rounds: Array<{ name?: string }>;
   matches: Array<Types.ObjectId | Match>;
-  contestants: {
-    [contestantId: string]: {
-      entryStatus?: string,
+  contestants: Record<
+    string,
+    {
+      entryStatus?: string;
       players: Array<Types.ObjectId | User>;
     }
-  }
+  >;
 }
 
 const SALT_ROUNDS = 10;
@@ -132,7 +135,8 @@ const tournamentSchema = new Schema<Tournament & Document>(
     playersPerTeam: { type: Number, required: false },
     numberOfTeams: { type: Number, required: false },
 
-    rounds: [{name: {type: String, default: []}}],
+    // for bracketry
+    rounds: [{ name: { type: String, default: [] } }],
     matches: [{ type: Schema.Types.ObjectId, ref: "Match", default: [] }],
     contestants: { type: Schema.Types.Mixed }
   },
