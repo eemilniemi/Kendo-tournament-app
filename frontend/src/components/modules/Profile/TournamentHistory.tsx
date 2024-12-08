@@ -299,22 +299,22 @@ const TournamentHistory: React.FC = () => {
                   style={{
                     fontWeight: "bold",
                     color: "#fff",
-                    backgroundColor: "#DB4744"
+                    backgroundColor: "#D01C1C"
                   }}
                 >
                   <TableRow sx={{ borderBottom: "2px solid black" }}>
                     {[
-                      t("profile.name"),
-                      t("profile.startDate"),
-                      t("profile.placement"),
-                      t("profile.matches"),
-                      t("profile.wins"),
-                      t("profile.losses"),
-                      t("profile.draws"),
-                      t("profile.points")
-                    ].map((column) => (
+                      { key: "name", label: t("profile.name") },
+                      { key: "startDate", label: t("profile.startDate") },
+                      { key: "placement", label: t("profile.placement") },
+                      { key: "matches", label: t("profile.matches") },
+                      { key: "wins", label: t("profile.wins") },
+                      { key: "losses", label: t("profile.losses") },
+                      { key: "ties", label: t("profile.draws") },
+                      { key: "points", label: t("profile.points") }
+                    ].map(({ key, label }) => (
                       <TableCell
-                        key={column}
+                        key={key}
                         sx={{
                           fontWeight: "bold",
                           borderBottom: "2px solid black",
@@ -322,13 +322,13 @@ const TournamentHistory: React.FC = () => {
                         }}
                       >
                         <TableSortLabel
-                          active={orderBy === column}
-                          direction={orderBy === column ? order : "asc"}
+                          active={orderBy === key}
+                          direction={orderBy === key ? order : "asc"}
                           onClick={() => {
-                            handleRequestSort(column);
+                            handleRequestSort(key);
                           }}
                         >
-                          {t(column.charAt(0).toUpperCase() + column.slice(1))}
+                          {label}
                         </TableSortLabel>
                       </TableCell>
                     ))}

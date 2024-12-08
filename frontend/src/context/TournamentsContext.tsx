@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type ReactElement, useRef } from "react";
+import React, { useState, type ReactElement, useRef } from "react";
 import { type Tournament } from "types/models";
 import useToast from "hooks/useToast";
 import api from "api/axios";
@@ -14,7 +14,7 @@ interface ITournamentsContext {
   past: Tournament[];
   ongoing: Tournament[];
   upcoming: Tournament[];
-  doRefresh: () => void;
+  doRefresh: boolean;
 }
 
 const initialContextValue: ITournamentsContext = {
@@ -23,7 +23,7 @@ const initialContextValue: ITournamentsContext = {
   past: [],
   ongoing: [],
   upcoming: [],
-  doRefresh: () => {}
+  doRefresh: false
 };
 
 interface SortedTournaments {
@@ -84,52 +84,50 @@ export const TournamentsProvider = (): ReactElement => {
   const { t } = useTranslation();
   const [value, setValue] = useState<ITournamentsContext>(initialContextValue);
   const location = useLocation() as LocationState;
-  const [shouldRefresh, setShouldRefresh] = useState(
-    location.state?.refresh ?? false
-  );
-
   const isInitialRender = useRef(true);
 
-  const doRefresh = (): void => {
-    setShouldRefresh(true); // Use state setter to trigger re-fetching
+  // Meant to return the opposite value of what is in 'value.doRefresh' (see above). When this value is passed in setValue,
+  // it causes a re-render of the page.
+  const doRefresh = (): boolean => {
+    if (value.doRefresh) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
-  useEffect(() => {
-    const getAllTournaments = async (): Promise<void> => {
-      try {
-        const { past, ongoing, upcoming } = await getSortedTournaments();
-        setValue((prevValue) => ({
-          ...prevValue,
-          isLoading: false,
-          past,
-          ongoing,
-          upcoming,
-          doRefresh // This function can be passed to children to trigger refresh
-        }));
-        setShouldRefresh(false); // Reset shouldRefresh after fetching
-      } catch (error) {
-        showToast(t("messages.could_not_fetch_tournaments"), "error");
-        setValue((prevValue) => ({
-          ...prevValue,
-          isLoading: false,
-          isError: true,
-          doRefresh
-        }));
-        setShouldRefresh(false);
-      }
-    };
+  const getAllTournaments = async (): Promise<void> => {
+    const triggerValue = doRefresh();
 
-    // Fetch tournaments on initial render or when shouldRefresh is true
-    if (isInitialRender.current || shouldRefresh) {
-      void getAllTournaments();
-      isInitialRender.current = false;
+    try {
+      const { past, ongoing, upcoming } = await getSortedTournaments();
+      setValue((prevValue) => ({
+        ...prevValue,
+        isLoading: false,
+        past,
+        ongoing,
+        upcoming,
+        doRefresh: triggerValue
+      }));
+    } catch (error) {
+      showToast(t("messages.could_not_fetch_tournaments"), "error");
+      setValue((prevValue) => ({
+        ...prevValue,
+        isLoading: false,
+        isError: true,
+        doRefresh: triggerValue
+      }));
     }
+  };
 
-    // Clean up location state without mutating it directly
+  // Fetch tournaments on initial render or when location.state.refresh is true
+  if (isInitialRender.current || location.state?.refresh) {
+    void getAllTournaments();
+    isInitialRender.current = false;
     if (location.state?.refresh) {
-      setShouldRefresh(true);
+      location.state.refresh = false;
     }
-  }, [shouldRefresh, location.state]);
+  }
 
   if (value.isLoading) {
     return <Loader />;
