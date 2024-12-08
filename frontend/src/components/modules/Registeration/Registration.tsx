@@ -215,21 +215,21 @@ const RegisterForm: React.FC = () => {
           />
 
           <TextFieldElement
-            name="rank"
+            name="danRank"
             label={t("user_info_labels.dan_rank")}
             fullWidth
             margin="normal"
           />
 
           <TextFieldElement
-            name="club"
+            name="clubName"
             label={t("user_info_labels.club")}
             fullWidth
             margin="normal"
           />
 
           <TextFieldElement
-            name="suomisport"
+            name="suomisportId"
             label={t("user_info_labels.suomisport_id")}
             fullWidth
             margin="normal"

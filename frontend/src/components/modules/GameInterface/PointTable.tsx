@@ -224,7 +224,7 @@ const PointTable: React.FC<TableComponentProps> = ({ matchInfo }) => {
                 width: "20px",
                 height: "20px",
                 borderRadius: "4px",
-                backgroundColor: "#db4744",
+                backgroundColor: "#D01C1C",
                 border: "1px solid black"
               }}
             />

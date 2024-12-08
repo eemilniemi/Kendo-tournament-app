@@ -124,7 +124,10 @@ export class MatchService {
       });
     }
 
-    if (match.winner !== undefined || match.elapsedTime === match.matchTime) {
+    if (
+      match.winner !== undefined ||
+      (match.elapsedTime >= match.matchTime && !match.isOvertime)
+    ) {
       throw new BadRequestError({
         message: "Finished matches cannot be edited"
       });
@@ -146,13 +149,7 @@ export class MatchService {
     match.isTimerOn = true;
 
     await match.save();
-
-    const tournamentService = new TournamentService();
-    const tournamentId = match.tournamentId as Types.ObjectId;
-
-    if (tournamentId !== undefined) {
-      await tournamentService.emitTournamentUpdate(tournamentId.toString());
-    }
+    void this.saveMatchToTournament(match);
 
     return await match.toObject();
   }
@@ -188,17 +185,15 @@ export class MatchService {
       currentTime.getTime() - match.timerStartedTimestamp.getTime();
 
     match.elapsedTime += elapsedMilliseconds;
+
     // Reset the timer timestamp
     match.timerStartedTimestamp = null;
     // Mark the timer to be off
     match.isTimerOn = false;
-    await match.save();
-    const tournamentService = new TournamentService();
-    const tournamentId = match.tournamentId as Types.ObjectId;
 
-    if (tournamentId !== undefined) {
-      await tournamentService.emitTournamentUpdate(tournamentId.toString());
-    }
+    await match.save();
+    void this.saveMatchToTournament(match);
+
     return await match.toObject();
   }
 
@@ -1623,6 +1618,15 @@ export class MatchService {
         tournamentId,
         round: currentRound + 1
       });
+    }
+  }
+
+  private async saveMatchToTournament(match: Match): Promise<void> {
+    const tournamentService = new TournamentService();
+    const tournamentId = match.tournamentId as Types.ObjectId;
+
+    if (tournamentId !== undefined) {
+      await tournamentService.emitTournamentUpdate(tournamentId.toString());
     }
   }
 }

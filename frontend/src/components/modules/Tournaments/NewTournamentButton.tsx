@@ -23,7 +23,7 @@ const NewTournamentButton: React.FC = () => {
         bottom: "30px",
         right: "20px",
         color: "white",
-        backgroundColor: "#db4744",
+        backgroundColor: "#D01C1C",
         borderRadius: "20px",
         padding: "8px 16px",
         display: "flex",

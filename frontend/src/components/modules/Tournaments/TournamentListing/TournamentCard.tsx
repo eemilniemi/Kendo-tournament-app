@@ -162,7 +162,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
             <Box
               sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
             >
-              <TodayIcon sx={{ marginRight: 1 }} />
+              <LocationOnIcon sx={{ marginRight: 1 }} />
               <Typography color="text.secondary">
                 {tournament.location}
               </Typography>
@@ -170,7 +170,7 @@ const TournamentCard: React.FC<TournamentCardProps> = ({
           )}
           {(type === "ongoing" || type === "upcoming") && (
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <LocationOnIcon sx={{ marginRight: 1 }} />
+              <TodayIcon sx={{ marginRight: 1 }} />
               <Typography color="text.secondary">
                 {new Date(tournament.startDate).toLocaleString("fi", {
                   day: "2-digit",
