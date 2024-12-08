@@ -1,5 +1,6 @@
 import { afterEach, before, beforeEach, describe } from "mocha";
 import * as chai from "chai";
+// @ts-ignore
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
 import {
@@ -497,14 +498,21 @@ describe("TournamentService", () => {
       ]);
       tournament = tournament.toObject();
       let matches = tournament.matchSchedule.filter( (match) => {
-        // TODO: figure out why the IDE complains
-        return match.players.some(
-          (player) => player.id.toString() === testPlayerId
-        );
+        if ("players" in match) {
+          return match.players.some(
+            (player) => player.id.toString() === testPlayerId
+          );
+        } else {
+          throw new Error("Match was not properly populated.");
+        }
       });
 
       matches.forEach((match) => {
-        expect(match.winner).to.not.be.undefined;
+        if ("winner" in match) {
+          expect(match.winner).to.not.be.undefined;
+        } else {
+          throw new Error("Match was not properly populated.");
+        }
       });
     });
   });

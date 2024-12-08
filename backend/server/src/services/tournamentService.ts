@@ -1,21 +1,21 @@
 import NotFoundError from "../errors/NotFoundError.js";
 import {
-  TournamentModel,
   type Tournament,
-  type UnsavedMatch,
-  TournamentType
+  TournamentModel,
+  TournamentType,
+  type UnsavedMatch
 } from "../models/tournamentModel.js";
 import UserModel, { type User } from "../models/userModel.js";
 import BadRequestError from "../errors/BadRequestError.js";
 import { type HydratedDocument, Types } from "mongoose";
 import MatchModel, {
-  type MatchType,
   type Match,
-  type MatchTime
+  type MatchTime,
+  type MatchType
 } from "../models/matchModel.js";
 import {
-  type EditTournamentRequest,
-  type CreateTournamentRequest
+  type CreateTournamentRequest,
+  type EditTournamentRequest
 } from "../models/requestModel.js";
 import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
@@ -1021,10 +1021,7 @@ export class TournamentService {
         });
       }
 
-      const totalPlayers =
-        tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
-
-      tournamentDetails.maxPlayers = totalPlayers;
+      tournamentDetails.maxPlayers = tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
     }
 
     // If tournament is type preliminary playoff, validate related fields
