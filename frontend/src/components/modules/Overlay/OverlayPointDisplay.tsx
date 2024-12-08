@@ -4,7 +4,7 @@ import "./OverlayPointDisplay.css";
 
 const pointMap = new Map<PointType, string>([
   ["men", "M"],
-  ["kote", "M"],
+  ["kote", "K"],
   ["do", "D"],
   ["tsuki", "T"],
   ["hansoku", "Δ"]

@@ -21,6 +21,7 @@ This document provides instructions for setting up the app, our development work
     - [Users](#users)
     - [Tournaments](#tournaments)
     - [Matches](#matches)
+    - [Overlay](#overlay)
 
 
 ## How to Start the App
@@ -122,3 +123,7 @@ In round robin, preliminary group stage and swiss, the points are accumulated so
 The matches for each tournament are generated automatically. You can navigate to the match view by clicking the match-up buttons (round robin and preliminary groups) or the match-up cards (playoff, preliminary playoff stage and swiss). Each match needs a point maker and a timekeeper before it's possible to start the match. To sign up for these roles, click the "Select role as an official" button. The timekeeper handles the timer and they are the only person who can see the "Start" button to start the timer. The point maker is the only one who can add points by clicking the "Add point for player x" button. They can also modify or delete the recent point they have assigned, were any mistakes to happen. If a match was started accidentally, the tournament creator can reset the match so that the timer and points are both reset to zero.
 
 The match ends after any of the players gets two points. If the timer meets the set length of the match (three, four or five minutes), the player with more points wins. If the points are even at this point, the match ends in a tie (round robin, preliminary groups, swiss) or an overtime starts (playoff, preliminary playoff stage). Overtime is played as long as one player makes a point and wins.
+
+### Overlay
+
+The app provides a real-time overlay for video streams or recordings that tracks the status of a match. Link to the overlay can be copied by pressing a button on the top right corner of the match page. The link can then be pasted into any video recording/streaming software that supports web pages as a source (OBS for example). 
