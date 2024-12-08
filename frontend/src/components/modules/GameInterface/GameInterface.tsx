@@ -45,6 +45,7 @@ import {
   calculateElapsedTime,
   findPlayerName
 } from "../../../utils/matchUtils";
+import OverlayInfoButton from "../Overlay/OverlayInfoButton";
 
 export interface MatchData {
   timerTime: number;
@@ -668,6 +669,7 @@ const GameInterface: React.FC = () => {
               ))}
               <div className="overlay-button-container">
                 <OverlayButton link={OverlayUrl} />
+                <OverlayInfoButton />
               </div>
             </Box>
             <Box

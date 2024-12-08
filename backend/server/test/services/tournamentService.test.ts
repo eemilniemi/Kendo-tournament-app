@@ -16,7 +16,7 @@ import { TournamentService } from "../../src/services/tournamentService";
 import { Types } from "mongoose";
 import * as Helper from "../testHelpers";
 import UserModel from "../../src/models/userModel";
-import MatchModel from "../../src/models/matchModel";
+import MatchModel, { MatchPlayer } from "../../src/models/matchModel";
 
 
 chai.use(chaiAsPromised);
@@ -41,7 +41,8 @@ let request_template: CreateTournamentRequest = {
   category: "championship",
   numberOfCourts: 2,
   differentOrganizer: true,
-  paid: false
+  paid: false,
+  passwordEnabled: false
 };
 
 let request_template2: CreateTournamentRequest = {
@@ -59,7 +60,8 @@ let request_template2: CreateTournamentRequest = {
   category: "championship",
   numberOfCourts: 2,
   differentOrganizer: true,
-  paid: false
+  paid: false,
+  passwordEnabled: false
 };
 
 describe("TournamentService", () => {
@@ -105,8 +107,6 @@ describe("TournamentService", () => {
 
   // TODO: validation tests for different tournament types
   describe("createTournament", () => {
-
-    // TODO: tournament with diff organizer false
 
     it("should add the tournament to the database", async () => {
       let request: CreateTournamentRequest = {...request_template};
@@ -215,9 +215,6 @@ describe("TournamentService", () => {
 
       expect(tournament.players.length).to.equal(2);
     });
-
-    // TODO: markUserMatchesLost()
-    // TODO: getTournamentAndCreateSchedule()
   });
 
   // TODO: paremeterize with different requests
@@ -273,7 +270,7 @@ describe("TournamentService", () => {
       let tournament = await TournamentModel.findById(testTournamentId).exec();
 
       await expect(tournamentService.removePlayerFromTournament(testTournamentId, testPlayerId))
-        .to.be.rejected; // TODO: message not defined
+        .to.be.rejected;
 
       let tournament_new = await TournamentModel.findById(testTournamentId).exec();
 
@@ -310,11 +307,8 @@ describe("TournamentService", () => {
     });
   });
 
-  // TODO: how is this even supposed to be used?
-  // There is a mention of manual tournament schedule,
-  // how is that done?
-  // is it possible to delete the matches of the automatically created schedule?
-  // new tournament type? (does not currently exist)
+  // this seems to be a functionality that has not been properly implemented yet
+  // -> skip for now
   describe.skip("addMatchToTournament", () => {
     let testTournamentId: string;
     let match: UnsavedMatch;
@@ -328,8 +322,20 @@ describe("TournamentService", () => {
       });
       testTournamentId = tournament.id;
 
+      const player1: MatchPlayer = {
+        id: new Types.ObjectId(testPlayerId),
+        points: [],
+        color: "white"
+      }
+
+      const player2: MatchPlayer = {
+        id: new Types.ObjectId(testPlayer2Id),
+        points: [],
+        color: "red"
+      }
+
       match = {
-        players: [new  Types.ObjectId(testPlayerId), new  Types.ObjectId(testPlayer2Id)],
+        players: [player1, player2],
         type: "group",
         elapsedTime: 0,
         matchTime: 300000,
@@ -340,12 +346,6 @@ describe("TournamentService", () => {
     });
 
     it("should add the match", async () => {
-      // TODO:
-      // Fails with error: Path 'color' is required.
-      // Investigate why it fails with this but not when autogenerating
-      // schedule during addPlayerToTournament().
-      //
-      // TODO: create MatchPlayers instead of users
 
       await tournamentService.addPlayerToTournament(testTournamentId, testPlayerId);
       await tournamentService.addPlayerToTournament(testTournamentId, testPlayer2Id);
@@ -404,8 +404,6 @@ describe("TournamentService", () => {
     });
   });
 
-  // TODO: the issues here stem from the fact that the validator only looks
-  // at the values in the update request, not the whole tournament
   describe("updateTournamentById", () => {
     let request: EditTournamentRequest = {
       name: "updated"

@@ -24,6 +24,7 @@ export const calculateElapsedTime = (
   }
 };
 
+// finds player name from tournament (since MatchPlayer does not include names)
 export const findPlayerName = (
   playerId: string,
   tournament: Tournament
