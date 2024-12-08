@@ -19,7 +19,7 @@ These instructions will help you set up the project locally for development and 
     npm install
     ```
 
-3. Copy `.env.example` and set up the `.env` as required.
+3. Copy `.env.example` and set up the `.env` as required (instructions included in the file).
 
     ```bash
     cp `.env.example` `.env`
@@ -36,6 +36,9 @@ These instructions will help you set up the project locally for development and 
     ```bash
     npm run dev
     ```
+<br>
+<br>
+(The Docker installation process is currently not functional, instructions included for posterity)
 
 if you have `docker` installed, then
 

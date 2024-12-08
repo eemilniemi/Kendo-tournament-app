@@ -13,10 +13,9 @@ so it is ideal for development.
 
 ### Prerequisites
 
-- Docker. E.g. Docker Desktop
+- Docker. E.g. Docker Desktop (note: desktop app needs to be running when executing terminal commands)
 
 ### Usage
-
 - docker build --rm -f Dockerfile -t database:latest .
 - docker run --rm -d -p 27017:27017 --name database database:latest
 - Access at 127.0.0.1:27017
