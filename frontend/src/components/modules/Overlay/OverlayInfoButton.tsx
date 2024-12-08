@@ -3,9 +3,11 @@ import { Popover, Typography, Link } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { Help } from "@mui/icons-material";
 import theme from "../../../themes/theme";
+import { useTranslation } from "react-i18next";
 
 const OverlayInfoButton: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const { t } = useTranslation();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
@@ -42,16 +44,14 @@ const OverlayInfoButton: React.FC = () => {
         }}
       >
         <Typography>
-          The overlay enables embedding real-time match information to video.
-          Click the button to copy the link, and use it as a browser source in
-          OBS or some other capture software of your choice.{" "}
+          {t("overlay.explanation")}
           <Link
             href="https://obsproject.com/kb/browser-source"
             target="_blank"
             rel="noopener"
             sx={{ whiteSpace: "nowrap" }}
           >
-            Learn more
+            {t("overlay.more_info_link")}
           </Link>
         </Typography>
       </Popover>

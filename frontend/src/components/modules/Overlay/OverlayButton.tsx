@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Snackbar } from "@mui/material";
 import Button from "@mui/material/Button";
+import { useTranslation } from "react-i18next";
 
 // A button for copying the overlay link
 const OverlayButton: React.FC<{ link: string }> = ({ link }) => {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleCopy = async (): Promise<void> => {
     try {
@@ -21,7 +23,7 @@ const OverlayButton: React.FC<{ link: string }> = ({ link }) => {
         Overlay
       </Button>
       <Snackbar
-        message="Overlay link copied to clipboard!"
+        message={t("overlay.link_copied")}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         autoHideDuration={2000}
         onClose={() => {

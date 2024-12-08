@@ -518,5 +518,10 @@
     "no_invitations": "No invitations",
     "players": "Players",
     "accepted": "Accepted"
+  },
+  "overlay": {
+    "explanation": "The overlay enables embedding real-time match information to video. Click the button to copy the link, and use it as a browser source in OBS or some other capture software of your choice. ",
+    "more_info_link": "Learn more",
+    "link_copied": "Overlay link copied to clipboard!"
   }
 }

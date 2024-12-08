@@ -518,5 +518,10 @@
     "no_invitations": "Ei kutsuja",
     "players": "Pelaajat",
     "accepted": "Hyväksytty"
+  },
+  "overlay": {
+    "explanation": "Overlay-ominaisuus mahdollistaa reaaliaikasten ottelutietojen näyttämisen videolla. Kopioi overlay-linkki leikepäydälle klikkaamalla overlay-nappia ja liitä se selain-lähteeksi OBS:ssä tai muussa vastaavassa videonkaappausohjelmassa. ",
+    "more_info_link": "Lisätietoja",
+    "link_copied": "Overlay-linkki kopioitu leikepöydälle!"
   }
 }
