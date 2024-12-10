@@ -81,6 +81,22 @@ export class TournamentService {
   ): Promise<Tournament> {
     await this.validateTournamentDetails(tournamentData, creator);
 
+    if (tournamentData.type === "Team Round Robin") {
+      if (
+        tournamentData.numberOfTeams == null ||
+        tournamentData.playersPerTeam == null
+      ) {
+        throw new Error(
+          "Invalid tournament data: 'numberOfTeams' and 'playersPerTeam' must be provided for Team Round Robin tournaments."
+        );
+      }
+
+      const totalPlayers =
+        tournamentData.numberOfTeams * tournamentData.playersPerTeam;
+
+      tournamentData.maxPlayers = totalPlayers;
+    }
+
     const newTournament = await TournamentModel.create({
       ...tournamentData,
       creator
@@ -406,29 +422,34 @@ export class TournamentService {
       });
     }
 
+    if (!tournament.players.includes(player.id)) {
+      throw new BadRequestError({
+        message: "Player not in tournament"
+      });
+    }
+
     // Remove player from tournament
-    if (tournament.players.includes(player.id)) {
-      const index = tournament.players.indexOf(player.id);
-      tournament.players.splice(index, 1);
 
-      // Remove player's matches from match schedule
-      const matchesToRemove: Array<Types.ObjectId | Match> = [];
+    const index = tournament.players.indexOf(player.id);
+    tournament.players.splice(index, 1);
 
-      for (const matchId of tournament.matchSchedule) {
-        const match = await MatchModel.findById(matchId).exec();
-        if (match === undefined || match === null) {
-          continue; // Skip if match doesn't exist
-        }
-        // Check if a match involves the removed player
-        const matchPlayerIds = match.players.map((player) =>
-          player.id.toString()
-        );
-        if (matchPlayerIds.includes(playerId)) {
-          matchesToRemove.push(matchId);
-          // Delete the match
-          const matchIdString = String(matchId);
-          await this.matchService.deleteMatchById(matchIdString);
-        }
+    // Remove player's matches from match schedule
+    const matchesToRemove: Array<Types.ObjectId | Match> = [];
+
+    for (const matchId of tournament.matchSchedule) {
+      const match = await MatchModel.findById(matchId).exec();
+      if (match === undefined || match === null) {
+        continue; // Skip if match doesn't exist
+      }
+      // Check if a match involves the removed player
+      const matchPlayerIds = match.players.map((player) =>
+        player.id.toString()
+      );
+      if (matchPlayerIds.includes(playerId)) {
+        matchesToRemove.push(matchId);
+        // Delete the match
+        const matchIdString = String(matchId);
+        await this.matchService.deleteMatchById(matchIdString);
       }
 
       // Remove match IDs involving the removed player from match schedule
@@ -965,12 +986,18 @@ export class TournamentService {
   }
 
   private async validateTournamentDetails(
-    tournamentDetails: CreateTournamentRequest | EditTournamentRequest,
+    request: CreateTournamentRequest | EditTournamentRequest,
     creatorOrUpdaterId: string,
     isUpdate: boolean = false,
     existingTournamentDoc?: HydratedDocument<Tournament>
   ): Promise<void> {
     const MINIMUM_GROUP_SIZE = 3;
+
+    const tournamentDetails = {
+      ...existingTournamentDoc?.toObject(),
+      ...request
+    };
+
     if (
       tournamentDetails.type === TournamentType.RoundRobin &&
       tournamentDetails.maxPlayers !== undefined
@@ -984,6 +1011,13 @@ export class TournamentService {
     ) {
       const startDate = new Date(tournamentDetails.startDate);
       const endDate = new Date(tournamentDetails.endDate);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new BadRequestError({
+          message: "Invalid tournament dates."
+        });
+      }
+
       if (startDate >= endDate) {
         throw new BadRequestError({
           message:
@@ -1012,11 +1046,6 @@ export class TournamentService {
             "Number of teams and players per team are required for Team Round Robin tournaments."
         });
       }
-
-      const totalPlayers =
-        tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
-
-      tournamentDetails.maxPlayers = totalPlayers;
     }
 
     // If tournament is type preliminary playoff, validate related fields
@@ -1054,6 +1083,7 @@ export class TournamentService {
       tournamentDetails.organizerPhone = organizer.phoneNumber;
     }
 
+    // TODO: might be unnecessary with the new validator
     // Additional checks for updates can be added here, e.g., ensuring the tournament hasn't started
     if (isUpdate && existingTournamentDoc !== undefined) {
       const currentDate = new Date();
