@@ -81,6 +81,22 @@ export class TournamentService {
   ): Promise<Tournament> {
     await this.validateTournamentDetails(tournamentData, creator);
 
+    if (tournamentData.type === "Team Round Robin") {
+      if (
+        tournamentData.numberOfTeams == null ||
+        tournamentData.playersPerTeam == null
+      ) {
+        throw new Error(
+          "Invalid tournament data: 'numberOfTeams' and 'playersPerTeam' must be provided for Team Round Robin tournaments."
+        );
+      }
+
+      const totalPlayers =
+        tournamentData.numberOfTeams * tournamentData.playersPerTeam;
+
+      tournamentData.maxPlayers = totalPlayers;
+    }
+
     const newTournament = await TournamentModel.create({
       ...tournamentData,
       creator

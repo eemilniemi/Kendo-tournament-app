@@ -204,7 +204,11 @@
     "duration": "Kesto",
     "official_missing": "Toimitsijat puuttuvat",
     "select_officials": "Valitse toimitsijat, jotta matsi voi alkaa",
-    "team_name": "Joukkueen nimet"
+    "team_name": "Joukkueen nimet",
+    "member": "Jäsen",
+    "participating_teams": "OSALLISTUVAT JOUKKUEET",
+    "overview": "Yleiskatsaus",
+    "matchups_overview": "JOUKKUEIDEN OTTELUKATSAUS"
   },
   "signup_labels": {
     "sign_up_for": "Ilmoittaudu: ",

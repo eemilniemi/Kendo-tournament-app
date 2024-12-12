@@ -199,11 +199,16 @@ const TournamentList: React.FC = () => {
             onChange={(event) => {
               handleTabChange(event.target.value);
             }}
-            style={{ marginBottom: "10px", alignItems: "center", padding: "0" }}
+            style={{
+              marginBottom: "10px",
+              alignItems: "center",
+              padding: "0",
+              width: "100%"
+            }}
             sx={{
-              border: "2px solid #db4744",
+              border: "2px solid #D01C1C",
               fontSize: "13px",
-              color: "#db4744"
+              color: "#D01C1C"
             }}
           >
             <MenuItem value="ongoing">

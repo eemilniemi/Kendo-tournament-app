@@ -91,7 +91,7 @@ const ProfilePoints: React.FC = () => {
                 style={{
                   fontWeight: "bold",
                   color: "#fff",
-                  backgroundColor: "#DB4744"
+                  backgroundColor: "#D01C1C"
                 }}
               >
                 {t("profile.point_type")}
@@ -100,7 +100,7 @@ const ProfilePoints: React.FC = () => {
                 style={{
                   fontWeight: "bold",
                   color: "#fff",
-                  backgroundColor: "#DB4744"
+                  backgroundColor: "#D01C1C"
                 }}
               >
                 {t("profile.points")}
