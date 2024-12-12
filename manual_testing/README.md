@@ -7,6 +7,17 @@ This module contains tournament creation scripts for manual testing purposes.
 - **Node.js** (v18.x or higher)
 - The database and backend need to be running
 
+### Set up
+
+- Install dependencies:
+  ```bash
+  npm install
+  ```
+- Create a `.env` with your backend API url. You can do this by copying `.env.example` and changing the URL (if necessary):
+  ```bash
+  cp `.env.example` `.env`
+  ```
+
 ### Using the scripts
 
 - The scripts are located in the example_scripts directory
@@ -23,7 +34,8 @@ This module contains tournament creation scripts for manual testing purposes.
   - round robin: player count
   - team round robin: player count, number of teams, players per team
   - swiss: player count
-  - For example, to create a team round robin tournament with 16 players, 4 teams and 4 players per team, run:
-    ```bash
-    Node example_scripts/team_round_robin.js 16 4 4
-    ```
+
+For example, to create a team round robin tournament with 16 players, 4 teams and 4 players per team, run:
+```bash
+Node example_scripts/team_round_robin.js 16 4 4
+```
