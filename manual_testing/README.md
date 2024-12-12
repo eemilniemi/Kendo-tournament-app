@@ -1,0 +1,29 @@
+# Kendo Tournament App Manual Testing Scripts
+
+This module contains tournament creation scripts for manual testing purposes.
+
+### Prerequisites
+
+- **Node.js** (v18.x or higher)
+- The database and backend need to be running
+
+### Using the scripts
+
+- The scripts are located in the example_scripts directory
+  - One script included for each currently available tournament type
+  - The scripts set the tournament to begin in 10 seconds
+- You can create your own scripts inside the local_scripts directory
+- You can run a script in your terminal with
+    ```bash
+    Node <filepath>
+    ```
+- The example scripts accept command line arguments to modify some key values:
+  - playoff: player count
+  - preliminary playoff: player count, group size, players to playoffs per group
+  - round robin: player count
+  - team round robin: player count, number of teams, players per team
+  - swiss: player count
+  - For example, to create a team round robin tournament with 16 players, 4 teams and 4 players per team, run:
+    ```bash
+    Node example_scripts/team_round_robin.js 16 4 4
+    ```
