@@ -1037,7 +1037,8 @@ export class TournamentService {
         });
       }
 
-      tournamentDetails.maxPlayers = tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
+      tournamentDetails.maxPlayers =
+        tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
     }
 
     // If tournament is type preliminary playoff, validate related fields
