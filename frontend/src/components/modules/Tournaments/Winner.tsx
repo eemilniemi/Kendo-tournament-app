@@ -37,7 +37,7 @@ const TournamentWinner: React.FC<TournamentWinnerProps> = ({ tournament }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#db4744",
+          backgroundColor: "#D01C1C",
           width: "90%",
           padding: "10px 20px",
           borderRadius: "10px",

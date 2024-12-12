@@ -171,7 +171,6 @@ const MatchButton: React.FC<MatchButtonProps> = ({
   return (
     <div
       style={{
-        marginBottom: "10px",
         display: "inline-block",
         minWidth: "260px",
         width: isMobile ? "100%" : "auto"
@@ -180,15 +179,15 @@ const MatchButton: React.FC<MatchButtonProps> = ({
     >
       <Box>
         {/* Scheduled Time or Ongoing Status */}
-        <Box
-          sx={{
-            height: "20px",
-            marginBottom: "5px",
-            display: "flex",
-            alignItems: "center"
-          }}
-        >
-          {!isFinished && !isForfeit && !hasTournamentFinished && (
+        {!isFinished && !isForfeit && !hasTournamentFinished && (
+          <Box
+            sx={{
+              height: "20px",
+              marginBottom: "5px",
+              display: "flex",
+              alignItems: "center"
+            }}
+          >
             <Typography variant="body1" fontSize="13px">
               {isOngoing
                 ? `${t("tournament_view_labels.ongoing")} ${Math.floor(
@@ -200,8 +199,8 @@ const MatchButton: React.FC<MatchButtonProps> = ({
                   }`
                 : t("tournament_view_labels.no_scheduled_time")}
             </Typography>
-          )}
-        </Box>
+          </Box>
+        )}
 
         {/* Edit Court and Time */}
         {isUserTheCreator &&
@@ -219,7 +218,7 @@ const MatchButton: React.FC<MatchButtonProps> = ({
               {t("tournament_view_labels.edit_court_time")}
             </Button>
           ) : (
-            <Box sx={{ height: "20px", marginBottom: "5px" }}></Box>
+            <Box sx={{ marginBottom: "5px" }}></Box>
           ))}
 
         {/* Match Details */}
