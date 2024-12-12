@@ -1,6 +1,10 @@
 import {
-  registerUsers, login, createTournament, signUpToTournament
-} from "../util/tournamentCreationUtils.js"
+  registerUsers,
+  login,
+  createTournament,
+  createTeams,
+  signUpToTeams
+} from "../util/tournamentCreationUtils.js";
 
 const now = new Date();
 const tenSecondsFromNow = new Date(now.getTime() + 10 * 1000);
@@ -52,7 +56,8 @@ async function run() {
   let credentials = await registerUsers(playerCount);
   let sessions = await login(credentials);
   let tournamentId = await createTournament(sessions[0].cookies, tournament);
-  await signUpToTournament(tournamentId, sessions);
+  let teamIds = await createTeams(sessions[0].cookies, tournamentId, numberOfTeams);
+  await signUpToTeams(tournamentId, sessions, teamIds);
 }
 
 run();

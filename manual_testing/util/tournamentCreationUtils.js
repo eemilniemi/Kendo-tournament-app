@@ -1,9 +1,13 @@
 import axios from "axios";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: "../.env" });
 
-const baseUrl = process.env.API_BASEURL;
+let baseUrl = process.env.API_BASEURL;
+
+if (baseUrl === undefined) {
+  baseUrl = "http://localhost:8080/api";
+}
 
 export async function registerUsers(numberOfUsers) {
 
@@ -65,6 +69,7 @@ export async function login(credentials) {
 
     } catch (error) {
       console.error(`An error occurred logging in with ${creds.email}`);
+      console.error(error);
     }
   }
 
@@ -91,6 +96,29 @@ export async function createTournament(cookies, tournament) {
   return tournamentId;
 }
 
+export async function createTeams(cookies, tournamentId, numberOfTeams) {
+  let teams;
+  for (let i = 0; i < numberOfTeams; i++) {
+    try {
+      const teamResponse = await axios.post(`${baseUrl}/tournaments/${tournamentId}/add-team`, {
+        "name": `team${i}`
+      }, {
+        withCredentials: true,
+        headers: {
+          Cookie: cookies
+        }
+      });
+
+      teams = teamResponse.data["teams"];
+      console.log(`team${i}:`, teamResponse.status, teamResponse.statusText);
+    } catch (error) {
+      console.error(`An error occurred while creating team ${i}`);
+    }
+  }
+
+  return teams.map(team => team["_id"]);
+}
+
 export async function signUpToTournament(tournamentId, sessions) {
   for (let i in sessions) {
     const cookies = sessions[i].cookies;
@@ -111,5 +139,28 @@ export async function signUpToTournament(tournamentId, sessions) {
       console.error(`An error occurred signing up with user ${i}`);
     }
   }
+}
 
+export async function signUpToTeams(tournamentId, sessions, teams) {
+  for (let i in sessions) {
+    const cookies = sessions[i].cookies;
+    const userId = sessions[i].userId;
+
+    const teamId = teams[i % teams.length];
+
+    try {
+      const registerResponse = await axios.post(`${baseUrl}/tournaments/${tournamentId}/teams/${teamId}/join`, {
+        "userId": userId
+      }, {
+        withCredentials: true,
+        headers: {
+          Cookie: cookies
+        }
+      });
+
+      console.log(`Signing up user ${i} to team ${i % teams.length}:`, registerResponse.status, registerResponse.statusText);
+    } catch (error) {
+      console.error(`An error occurred signing up with user ${i}`, error);
+    }
+  }
 }
