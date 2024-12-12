@@ -20,10 +20,10 @@ This module contains tournament creation scripts for manual testing purposes.
 
 ### Using the scripts
 
-- The scripts are located in the example_scripts directory
+- The scripts are located in the `example_scripts` directory
   - One script included for each currently available tournament type
   - The scripts set the tournament to begin in 10 seconds
-- You can create your own scripts inside the local_scripts directory
+- You can create your own scripts inside the `local_scripts` directory if you don't want to bloat the remote repository with them
 - You can run a script in your terminal with
     ```bash
     Node <filepath>
@@ -35,7 +35,7 @@ This module contains tournament creation scripts for manual testing purposes.
   - team round robin: player count, number of teams, players per team
   - swiss: player count
 
-For example, to create a team round robin tournament with 16 players, 4 teams and 4 players per team, run:
+For example, to create a team round robin tournament with 16 players, 2 teams, and 8 players per team, run:
 ```bash
-Node example_scripts/team_round_robin.js 16 4 4
+Node example_scripts/team_round_robin.js 16 2 8
 ```
