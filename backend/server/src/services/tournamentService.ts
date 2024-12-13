@@ -445,7 +445,8 @@ export class TournamentService {
 
     // remove player from tournament.contestants
     if (tournament.contestants !== undefined) {
-      const { [player.id]: _, ...remainingContestants } = tournament.contestants;
+      const { [player.id]: _, ...remainingContestants } =
+        tournament.contestants;
       tournament.contestants = remainingContestants;
     }
 
