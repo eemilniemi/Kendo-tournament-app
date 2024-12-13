@@ -14,7 +14,9 @@ import {
   Select,
   MenuItem,
   Button,
-  Box
+  Box,
+  Divider,
+  IconButton
 } from "@mui/material";
 import { type Match, type Tournament, type User } from "types/models";
 import { useSearchParams } from "react-router-dom";
@@ -30,11 +32,11 @@ import api from "api/axios";
 import useToast from "hooks/useToast";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import MatchButton from "../../MatchButton";
-import UpcomingTournamentView from "../../UpcomingTournamentView";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import { format } from "date-fns";
 import TournamentWinner from "../../Winner";
+import TeamRoundRobinUpcomingView from "./TeamRoundRobinUpcomingView";
 
 export interface TournamentTeam {
   id: string;
@@ -45,6 +47,8 @@ export interface TournamentTeam {
   ties: number;
   players: User[];
 }
+
+interface Rounds extends Record<number, Match[]> {}
 
 export interface TournamentPlayer {
   id: string;
@@ -62,6 +66,10 @@ interface TeamScoreboardProps {
   onClick?: () => void;
 }
 
+interface MatchUpOverviewProps {
+  teams: TournamentTeam[];
+}
+
 export const TeamScoreboard: React.FC<TeamScoreboardProps> = ({
   teams,
   onClick
@@ -70,16 +78,40 @@ export const TeamScoreboard: React.FC<TeamScoreboardProps> = ({
 
   const generateTableCells = (team: TournamentTeam): React.ReactNode[] => {
     return [
-      <TableCell key="points">
+      <TableCell
+        key="points"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.points}</Typography>
       </TableCell>,
-      <TableCell key="wins">
+      <TableCell
+        key="wins"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.wins}</Typography>
       </TableCell>,
-      <TableCell key="losses">
+      <TableCell
+        key="losses"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.losses}</Typography>
       </TableCell>,
-      <TableCell key="ties">
+      <TableCell
+        key="ties"
+        sx={{
+          borderRight: "1px solid #ddd",
+          borderBottom: "1px solid #ddd"
+        }}
+      >
         <Typography>{team.ties}</Typography>
       </TableCell>
     ];
@@ -101,16 +133,29 @@ export const TeamScoreboard: React.FC<TeamScoreboardProps> = ({
         <TableContainer component={Paper}>
           <Table onClick={onClick}>
             <TableHead>
-              <TableRow>
+              <TableRow sx={{ backgroundColor: "#D01C1C" }}>
                 {tableHeaders.map((header, index) => (
-                  <TableCell key={index}>{header}</TableCell>
+                  <TableCell
+                    key={index}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {header}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedTeams.map((team) => (
                 <TableRow key={team.id}>
-                  <TableCell>
+                  <TableCell
+                    sx={{
+                      borderRight: "1px solid #ddd", // Add vertical border
+                      borderBottom: "1px solid #ddd" // Add bottom border
+                    }}
+                  >
                     <Typography>{team.name}</Typography>
                   </TableCell>
                   {generateTableCells(team)}
@@ -130,7 +175,13 @@ export const Matches: React.FC<{
   ongoingMatchElements: React.ReactNode[];
   upcomingMatchElements: React.ReactNode[];
   pastMatchElements: React.ReactNode[];
-}> = ({ ongoingMatchElements, upcomingMatchElements, pastMatchElements }) => {
+  tournamentData: Tournament;
+}> = ({
+  ongoingMatchElements,
+  upcomingMatchElements,
+  pastMatchElements,
+  tournamentData
+}) => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -148,6 +199,40 @@ export const Matches: React.FC<{
       setShowPast(true);
     }
   }, [isMobile]);
+
+  // Group matches by round
+  const rounds: Rounds = tournamentData.matchSchedule.reduce<Rounds>(
+    (acc, match) => {
+      const round = match.tournamentRound ?? 0;
+      if (acc[round] === undefined) {
+        acc[round] = [];
+      }
+      acc[round].push(match);
+      return acc;
+    },
+    {}
+  );
+
+  const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(
+    () => {
+      const initialExpandedRounds: Record<number, boolean> = {};
+      Object.keys(rounds).forEach((roundNumber) => {
+        initialExpandedRounds[parseInt(roundNumber, 10)] = true;
+      });
+      return initialExpandedRounds;
+    }
+  );
+
+  const toggleRound = (roundNumber: number): void => {
+    setExpandedRounds((prev) => ({
+      ...prev,
+      [roundNumber]: !prev[roundNumber]
+    }));
+  };
+
+  const getRoundName = (roundNumber: number): string => {
+    return `${t("tournament_view_labels.round")} ${roundNumber}`;
+  };
 
   const renderSection = (
     title: string,
@@ -196,20 +281,85 @@ export const Matches: React.FC<{
       </Box>
       {show && (
         <Box
-          display="flex"
-          gap="15px"
-          justifyContent="space-between"
-          flexWrap="wrap"
-          marginTop="10px"
-          marginLeft="10px"
-          component="div"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            padding: "20px 0",
+            gap: "10px 25px"
+          }}
         >
-          {elements.length > 0 ? (
-            elements
-          ) : (
+          {elements.length === 0 ? (
             <Typography variant="body2" color="textSecondary" fontSize={"13px"}>
               {t("tournament_view_labels.no_matches")}
             </Typography>
+          ) : (
+            Object.entries(rounds).map(([roundNumber, matches], index) => (
+              <React.Fragment key={roundNumber}>
+                {index > 0 && <Divider orientation="horizontal" flexItem />}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    padding: "20px",
+                    borderRadius: 2,
+                    width: "99%",
+                    outline: "1px lightgray solid",
+                    margin: "10px auto"
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      zIndex: 1,
+                      cursor: "pointer"
+                    }}
+                    onClick={() => {
+                      toggleRound(parseInt(roundNumber, 10));
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        marginBottom: 0,
+                        marginLeft: "10px",
+                        textDecoration: "underline",
+                        fontSize: "17px",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      {getRoundName(parseInt(roundNumber, 10))}
+                    </Typography>
+                    <IconButton>
+                      {expandedRounds[parseInt(roundNumber, 10)] ? (
+                        <ArrowDropUpIcon />
+                      ) : (
+                        <ArrowDropDownIcon />
+                      )}
+                    </IconButton>
+                  </Box>
+                  {expandedRounds[parseInt(roundNumber, 10)] && (
+                    <>
+                      <Divider sx={{ margin: "15px 0" }} />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          justifyContent: "flex-start",
+                          gap: "40px",
+                          margin: "10px"
+                        }}
+                      >
+                        {elements}
+                      </Box>
+                    </>
+                  )}
+                </Box>
+              </React.Fragment>
+            ))
           )}
         </Box>
       )}
@@ -243,6 +393,165 @@ export const Matches: React.FC<{
           setShowPast,
           pastMatchElements
         )}
+    </Box>
+  );
+};
+
+export const MatchUpOverview: React.FC<MatchUpOverviewProps> = ({ teams }) => {
+  const { t } = useTranslation();
+
+  // Group matches by round
+  const groupMatchesByRound = (matches: Match[]): Record<number, Match[]> => {
+    return matches.reduce<Record<number, Match[]>>((acc, match) => {
+      const round = match.tournamentRound ?? 0;
+      if (acc[round] === undefined) {
+        acc[round] = [];
+      }
+      acc[round].push(match);
+      return acc;
+    }, {});
+  };
+
+  // Helper function to get team name by player ID
+  const getTeamNameForPlayer = (
+    playerId: string,
+    teams: TournamentTeam[]
+  ): string | undefined => {
+    const team = teams.find((team) =>
+      team.players.some((player) => player.id === playerId)
+    );
+    return team?.name;
+  };
+
+  const tournament = useTournament();
+  const rounds = groupMatchesByRound(tournament.matchSchedule ?? []);
+
+  // Prepare the table data
+  const roundKeys = Object.keys(rounds)
+    .map((key) => parseInt(key, 10))
+    .sort((a, b) => a - b); // Sort numerically
+
+  const maxMatchupsInRound = Math.max(
+    ...roundKeys.map((round) => rounds[round].length)
+  );
+
+  return (
+    <Box>
+      {/* Participating Teams Table */}
+      <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
+        {t("tournament_view_labels.participating_teams")}
+      </Typography>
+      <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#D01C1C" }}>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold"
+                }}
+              >
+                {t("tournament_view_labels.team_name")}
+              </TableCell>
+              {Array.from(
+                {
+                  length: Math.max(...teams.map((team) => team.players.length))
+                },
+                (_, index) => (
+                  <TableCell
+                    key={`member-${index}`}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {t("tournament_view_labels.member")} {index + 1}
+                  </TableCell>
+                )
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {teams.map((team) => (
+              <TableRow key={team.id}>
+                <TableCell
+                  sx={{
+                    borderRight: "1px solid #ddd",
+                    borderBottom: "1px solid #ddd"
+                  }}
+                >
+                  {team.name}
+                </TableCell>
+                {team.players.map((player) => (
+                  <TableCell
+                    key={player.id}
+                    sx={{
+                      borderRight: "1px solid #ddd",
+                      borderBottom: "1px solid #ddd"
+                    }}
+                  >
+                    {player.firstName} {player.lastName}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Matchup Overview Table */}
+      <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: "bold" }}>
+        {t("tournament_view_labels.matchups_overview")}
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "#D01C1C" }}>
+              {roundKeys.map((round) => (
+                <TableCell
+                  key={round}
+                  sx={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    color: "white"
+                  }}
+                >
+                  {t("tournament_view_labels.round")} {round}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Array.from({ length: maxMatchupsInRound }).map(
+              (_, matchupIndex) => (
+                <TableRow key={matchupIndex}>
+                  {roundKeys.map((round) => {
+                    const match = rounds[round][matchupIndex];
+                    if (match === undefined || match === null) {
+                      return <TableCell key={round}></TableCell>; // Empty cell for missing matchups
+                    }
+
+                    const teamAName = getTeamNameForPlayer(
+                      match.players[0]?.id,
+                      teams
+                    );
+                    const teamBName = getTeamNameForPlayer(
+                      match.players[1]?.id,
+                      teams
+                    );
+
+                    return (
+                      <TableCell key={round} sx={{ textAlign: "center" }}>
+                        {teamAName} vs {teamBName}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              )
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };
@@ -308,6 +617,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
   const [showOnlyUserMatches, setShowOnlyUserMatches] = useState(false);
   const tabTypes = [
     "tournamentInfo",
+    "overview",
     "scoreboard",
     "ongoingUpcomingMatches",
     "completedMatches"
@@ -350,15 +660,21 @@ const TeamRoundRobinTournamentView: React.FC = () => {
 
   // Listening to tournaments websocket
   useEffect(() => {
-    if (initialTournamentData.id !== undefined && !hasJoined) {
+    if (
+      initialTournamentData.id !== undefined &&
+      initialTournamentData.id !== "" &&
+      !hasJoined
+    ) {
       joinTournament(initialTournamentData.id);
       setHasJoined(true);
+    }
 
-      return () => {
+    return () => {
+      if (hasJoined) {
         leaveTournament(initialTournamentData.id);
         setHasJoined(false);
-      };
-    }
+      }
+    };
   }, [initialTournamentData.id, hasJoined]);
 
   useEffect(() => {
@@ -377,8 +693,10 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       }
     };
 
-    void fetchData();
-  }, [socketData, initialTournamentData.id, showToast]);
+    if (socketData !== undefined || initialTournamentData.id !== undefined) {
+      void fetchData();
+    }
+  }, [socketData, initialTournamentData.id]);
 
   useEffect(() => {
     if (currentTab === null || !tabTypes.includes(currentTab as any)) {
@@ -543,7 +861,6 @@ const TeamRoundRobinTournamentView: React.FC = () => {
 
   // Unified useEffect for adding teams and calculating stats
   useEffect(() => {
-    // Step 1: Add any new teams from tournamentData to the current teams state
     setTeams((prevTeams) => {
       const updatedTeams = [...prevTeams];
       const teamsFromData = tournamentData.teams ?? [];
@@ -566,14 +883,12 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       return updatedTeams;
     });
 
-    // Step 2: Sort matches and update match states
+    // Sort matches and calculate stats
     const sortedMatches = sortMatches(tournamentData.matchSchedule);
     setOngoingMatches(sortedMatches.ongoingMatches);
     setUpcomingMatches(sortedMatches.upcomingMatches);
     setPastMatches(sortedMatches.pastMatches);
 
-    // Step 3: After teams are updated, calculate and set their statistics
-    // Use a callback to ensure teams have been updated before calculating stats
     setTeams((prevTeams) =>
       calculateTeamStats(prevTeams, tournamentData.matchSchedule)
     );
@@ -641,7 +956,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       <Typography variant="h4">{tournamentData.name}</Typography>
       {/* Display Teams */}
       <Typography variant="h6" sx={{ marginTop: "10px" }}>
-        {t("tournament_view_labels.teams")}
+        {t("tournament_view_labels.team_name")}
       </Typography>
       <Box sx={{ marginBottom: "20px" }}>
         {teams.map((team) => (
@@ -674,15 +989,18 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           }}
           style={{ marginBottom: "10px", alignItems: "center", padding: "0" }}
           sx={{
-            border: "2px solid #db4744",
+            border: "2px solid #D01C1C",
             fontSize: "13px",
-            color: "#db4744",
+            color: "#D01C1C",
             margin: "10px 0",
             width: "100%"
           }}
         >
           <MenuItem value="tournamentInfo" sx={{ fontSize: "13px" }}>
             {t("tournament_view_labels.tournament_info")}
+          </MenuItem>
+          <MenuItem value="overview" sx={{ fontSize: "13px" }}>
+            {t("tournament_view_labels.overview")}
           </MenuItem>
           <MenuItem value="scoreboard" sx={{ fontSize: "13px" }}>
             {t("tournament_view_labels.scoreboard")}
@@ -709,6 +1027,11 @@ const TeamRoundRobinTournamentView: React.FC = () => {
             <Tab
               label={t("tournament_view_labels.tournament_info")}
               value="tournamentInfo"
+              sx={{ fontSize: "13px" }}
+            />
+            <Tab
+              label={t("tournament_view_labels.overview")}
+              value="overview"
               sx={{ fontSize: "13px" }}
             />
             <Tab
@@ -743,7 +1066,12 @@ const TeamRoundRobinTournamentView: React.FC = () => {
       )}
       {currentTab === "tournamentInfo" && (
         <div style={{ padding: "10px 0 0 0" }}>
-          <UpcomingTournamentView ongoing />
+          <TeamRoundRobinUpcomingView ongoing />
+        </div>
+      )}
+      {currentTab === "overview" && (
+        <div style={{ padding: "10px 0 0 0" }}>
+          <MatchUpOverview teams={teams} />
         </div>
       )}
       {currentTab === "scoreboard" && <TeamScoreboard teams={teams} />}
@@ -752,6 +1080,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           ongoingMatchElements={ongoingElements}
           upcomingMatchElements={upcomingElements}
           pastMatchElements={[]}
+          tournamentData={tournamentData}
         />
       )}
       {currentTab === "completedMatches" && (
@@ -759,6 +1088,7 @@ const TeamRoundRobinTournamentView: React.FC = () => {
           ongoingMatchElements={[]}
           upcomingMatchElements={[]}
           pastMatchElements={pastElements}
+          tournamentData={tournamentData}
         />
       )}
       {isUserTheCreator && currentTab === "ongoingUpcomingMatches" && (
