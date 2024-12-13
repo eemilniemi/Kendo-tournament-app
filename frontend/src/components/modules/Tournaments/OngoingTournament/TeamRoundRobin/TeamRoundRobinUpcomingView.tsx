@@ -19,7 +19,13 @@ import CopyToClipboardButton from "../../OngoingTournament/CopyToClipboardButton
 import api from "api/axios";
 import useToast from "hooks/useToast";
 
-const TeamRoundRobinUpcomingView: React.FC = () => {
+interface TeamRoundRobinUpcomingViewProps {
+  ongoing?: boolean;
+}
+
+const TeamRoundRobinUpcomingView: React.FC<TeamRoundRobinUpcomingViewProps> = ({
+  ongoing = false
+}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { userId } = useAuth();
@@ -137,7 +143,7 @@ const TeamRoundRobinUpcomingView: React.FC = () => {
                         <Typography>
                           {player.firstName} {player.lastName}
                         </Typography>
-                        {isUserTheCreator && (
+                        {!ongoing && isUserTheCreator && (
                           <Button
                             variant="outlined"
                             color="secondary"
@@ -154,33 +160,34 @@ const TeamRoundRobinUpcomingView: React.FC = () => {
                     ))}
                   </TableCell>
                   <TableCell>
-                    {userTeam?.id === team.id ? (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={async () => {
-                          await handleLeaveTeam(team.id);
-                        }}
-                      >
-                        {t("buttons.leave_team_button")}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={async () => {
-                          await handleJoinTeam(team.id);
-                        }}
-                        disabled={
-                          (userTeam !== null && userTeam !== undefined) ||
-                          tournamentFull ||
-                          maxPlayersReached
-                        }
-                      >
-                        {t("buttons.join_team_button")}
-                      </Button>
-                    )}
-                    {isUserTheCreator && (
+                    {!ongoing &&
+                      (userTeam?.id === team.id ? (
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={async () => {
+                            await handleLeaveTeam(team.id);
+                          }}
+                        >
+                          {t("buttons.leave_team_button")}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={async () => {
+                            await handleJoinTeam(team.id);
+                          }}
+                          disabled={
+                            (userTeam !== null && userTeam !== undefined) ||
+                            tournamentFull ||
+                            maxPlayersReached
+                          }
+                        >
+                          {t("buttons.join_team_button")}
+                        </Button>
+                      ))}
+                    {!ongoing && isUserTheCreator && (
                       <Button
                         variant="outlined"
                         color="error"
@@ -233,7 +240,7 @@ const TeamRoundRobinUpcomingView: React.FC = () => {
         </Grid>
       </Grid>
 
-      {isUserTheCreator && (
+      {!ongoing && isUserTheCreator && (
         <>
           <Button
             variant="contained"

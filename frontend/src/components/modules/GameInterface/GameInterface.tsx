@@ -45,6 +45,7 @@ import {
   calculateElapsedTime,
   findPlayerName
 } from "../../../utils/matchUtils";
+import OverlayInfoButton from "../Overlay/OverlayInfoButton";
 
 export interface MatchData {
   timerTime: number;
@@ -474,25 +475,25 @@ const GameInterface: React.FC = () => {
     matchId: string,
     userId: string
   ): Promise<void> => {
-    try {
-      if (matchId !== undefined) {
-        // if checkbox is checked and no time keeper is set yet
-        if (timeKeeper && matchInfo.timeKeeper === undefined) {
-          await api.match.addTimekeeper(matchId, userId);
-        }
-        // if checkbox is not chcekd and time keeper is set
-        else if (!timeKeeper && matchInfo.timeKeeper !== undefined) {
-          await api.match.removeTimekeeper(matchId, userId);
-        }
+    if (userId === undefined || matchId === undefined) return;
 
-        // if checkbox is checked and no point maker is set yet
-        if (pointMaker && matchInfo.pointMaker === undefined) {
-          await api.match.addPointmaker(matchId, userId);
-        }
-        // if checkbox is not checked and point maker is set
-        else if (!pointMaker && matchInfo.pointMaker !== undefined) {
-          await api.match.removePointmaker(matchId, userId);
-        }
+    try {
+      // if checkbox is checked and no time keeper is set yet
+      if (timeKeeper && matchInfo.timeKeeper === undefined) {
+        await api.match.addTimekeeper(matchId, userId);
+      }
+      // if checkbox is not chcekd and time keeper is set
+      else if (!timeKeeper && matchInfo.timeKeeper !== undefined) {
+        await api.match.removeTimekeeper(matchId, userId);
+      }
+
+      // if checkbox is checked and no point maker is set yet
+      if (pointMaker && matchInfo.pointMaker === undefined) {
+        await api.match.addPointmaker(matchId, userId);
+      }
+      // if checkbox is not checked and point maker is set
+      else if (!pointMaker && matchInfo.pointMaker !== undefined) {
+        await api.match.removePointmaker(matchId, userId);
       }
     } catch (error) {
       showToast(error, "error");
@@ -672,6 +673,7 @@ const GameInterface: React.FC = () => {
               ))}
               <div className="overlay-button-container">
                 <OverlayButton link={OverlayUrl} />
+                <OverlayInfoButton />
               </div>
             </Box>
             <Box

@@ -1,22 +1,22 @@
 import NotFoundError from "../errors/NotFoundError.js";
 import {
-  TournamentModel,
   type Tournament,
   type UnsavedMatch,
   TournamentType,
-  type UnsavedPlayoffMatch
+  type UnsavedPlayoffMatch,
+  TournamentModel
 } from "../models/tournamentModel.js";
 import UserModel, { type User } from "../models/userModel.js";
 import BadRequestError from "../errors/BadRequestError.js";
 import { type HydratedDocument, Types } from "mongoose";
 import MatchModel, {
-  type MatchType,
   type Match,
-  type MatchTime
+  type MatchTime,
+  type MatchType
 } from "../models/matchModel.js";
 import {
-  type EditTournamentRequest,
-  type CreateTournamentRequest
+  type CreateTournamentRequest,
+  type EditTournamentRequest
 } from "../models/requestModel.js";
 import { io } from "../socket.js";
 import { MatchService } from "./matchService.js";
@@ -85,6 +85,22 @@ export class TournamentService {
     creator: string
   ): Promise<Tournament> {
     await this.validateTournamentDetails(tournamentData, creator);
+
+    if (tournamentData.type === "Team Round Robin") {
+      if (
+        tournamentData.numberOfTeams == null ||
+        tournamentData.playersPerTeam == null
+      ) {
+        throw new Error(
+          "Invalid tournament data: 'numberOfTeams' and 'playersPerTeam' must be provided for Team Round Robin tournaments."
+        );
+      }
+
+      const totalPlayers =
+        tournamentData.numberOfTeams * tournamentData.playersPerTeam;
+
+      tournamentData.maxPlayers = totalPlayers;
+    }
 
     const newTournament = await TournamentModel.create({
       ...tournamentData,
@@ -1099,10 +1115,8 @@ export class TournamentService {
         });
       }
 
-      const totalPlayers =
+      tournamentDetails.maxPlayers =
         tournamentDetails.numberOfTeams * tournamentDetails.playersPerTeam;
-
-      tournamentDetails.maxPlayers = totalPlayers;
     }
 
     // If tournament is type preliminary playoff, validate related fields

@@ -206,6 +206,10 @@
     "official_missing": "Toimitsijat puuttuvat",
     "select_officials": "Valitse toimitsijat, jotta matsi voi alkaa",
     "team_name": "Joukkueen nimet",
+    "member": "Jäsen",
+    "participating_teams": "OSALLISTUVAT JOUKKUEET",
+    "overview": "Yleiskatsaus",
+    "matchups_overview": "JOUKKUEIDEN OTTELUKATSAUS",
     "match_page": "Ottelusivu"
   },
   "signup_labels": {
@@ -520,5 +524,10 @@
     "no_invitations": "Ei kutsuja",
     "players": "Pelaajat",
     "accepted": "Hyväksytty"
+  },
+  "overlay": {
+    "explanation": "Overlay-ominaisuus mahdollistaa reaaliaikasten ottelutietojen näyttämisen videolla. Kopioi overlay-linkki leikepäydälle klikkaamalla overlay-nappia ja liitä se selain-lähteeksi OBS:ssä tai muussa vastaavassa videonkaappausohjelmassa. Näkymän leveys ja korkeus on suositeltavaa asettaa vastaamaan varsinaisen videon resoluutiota. ",
+    "more_info_link": "Lisätietoja",
+    "link_copied": "Overlay-linkki kopioitu leikepöydälle!"
   }
 }

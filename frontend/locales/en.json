@@ -206,6 +206,10 @@
     "official_missing": "Officials missing",
     "select_officials": "Select officials before match can start",
     "team_name": "Team names",
+    "member": "Member",
+    "participating_teams": "PARTICIPATING TEAMS",
+    "overview": "Overview",
+    "matchups_overview": "TEAM MATCHUP OVERVIEW",
     "match_page": "Match page"
   },
   "signup_labels": {
@@ -520,5 +524,10 @@
     "no_invitations": "No invitations",
     "players": "Players",
     "accepted": "Accepted"
+  },
+  "overlay": {
+    "explanation": "The overlay enables embedding real-time match information to video. Click the button to copy the link, and use it as a browser source in OBS or some other capture software of your choice. The viewport width and height are recommended to be set to match the resolution of the actual video. ",
+    "more_info_link": "Learn more",
+    "link_copied": "Overlay link copied to clipboard!"
   }
 }

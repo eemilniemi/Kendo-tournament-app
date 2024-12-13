@@ -70,9 +70,6 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
   const [tournamentData, setTournamentData] = useState<Tournament | null>(
     initialTournamentData
   );
-  const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(
-    {}
-  );
 
   useEffect(() => {
     if (!tabTypes.includes(currentTab) && !isChildTournament) {
@@ -155,6 +152,16 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
       acc[round].push(match);
       return acc;
     }, {});
+
+  const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(
+    () => {
+      const initialExpandedRounds: Record<number, boolean> = {};
+      Object.keys(rounds).forEach((roundNumber) => {
+        initialExpandedRounds[parseInt(roundNumber, 10)] = true;
+      });
+      return initialExpandedRounds;
+    }
+  );
 
   const calculateTotalRounds = (numPlayers: number): number => {
     if (numPlayers <= 1) return 0; // No rounds if there's only one or no players
@@ -266,9 +273,9 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
                 padding: "0"
               }}
               sx={{
-                border: "2px solid #db4744",
+                border: "2px solid #D01C1C",
                 fontSize: "13px",
-                color: "#db4744",
+                color: "#D01C1C",
                 margin: "10px 0",
                 width: "100%"
               }}

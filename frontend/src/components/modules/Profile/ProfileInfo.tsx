@@ -205,7 +205,7 @@ const ProfileInfo: React.FC = () => {
           />
 
           <TextFieldElement
-            name="rank"
+            name="danRank"
             label={t("user_info_labels.dan_rank")}
             fullWidth
             margin="normal"
@@ -221,7 +221,7 @@ const ProfileInfo: React.FC = () => {
           />
 
           <TextFieldElement
-            name="suomisport"
+            name="suomisportId"
             label={t("user_info_labels.suomisport_id")}
             fullWidth
             margin="normal"

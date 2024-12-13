@@ -83,6 +83,7 @@ const UpcomingTournamentView: React.FC<UpcomingTournamentViewProps> = ({
   const maxPlayers = tournament.maxPlayers;
   const signedPlayers = tournament.players.length;
   const tournamentFull = maxPlayers <= signedPlayers;
+  const isUserTheCreator = tournament.creator.id === userId;
 
   const getTypeTranslationKey = (type: TournamentType): string => {
     switch (type) {
@@ -218,6 +219,15 @@ const UpcomingTournamentView: React.FC<UpcomingTournamentViewProps> = ({
           {tournament.maxPlayers}
         </Typography>
       </Box>
+
+      {isUserTheCreator && (
+        <Box>
+          <Typography variant="subtitle1">
+            <strong>{t("signup_labels.private_tournament_password")}:</strong>{" "}
+            {tournament.password}
+          </Typography>
+        </Box>
+      )}
 
       {tournament.linkToSite !== undefined &&
         tournament.linkToSite.trim() !== "" && (
