@@ -39,6 +39,12 @@ import { useTranslation } from "react-i18next";
 import ModifyDeletePoints from "./ModifyDeletePoints";
 import PlayerName, { checkSameNames } from "../Tournaments/PlayerNames";
 import { mapNumberToLetter } from "utils/helperFunctions";
+import OverlayButton from "../Overlay/OverlayButton";
+import routePaths from "../../../routes/route-paths";
+import {
+  calculateElapsedTime,
+  findPlayerName
+} from "../../../utils/matchUtils";
 
 export interface MatchData {
   timerTime: number;
@@ -97,7 +103,7 @@ const GameInterface: React.FC = () => {
   const [mostRecentPointType, setMostRecentPointType] =
     useState<PointType | null>(null);
 
-  const { matchId } = useParams();
+  const { id, matchId } = useParams();
   const { userId } = useAuth();
   const { matchInfo: matchInfoFromSocket } = useSocket();
   const showToast = useToast();
@@ -152,23 +158,18 @@ const GameInterface: React.FC = () => {
         let court: number = 1;
         let scheduledTime: string = "XX:XX";
 
-        // Get players' names
-        const findPlayerName = (playerId: string, index: number): void => {
-          const player = tournament.players.find((p) => p.id === playerId);
-          if (player !== undefined) {
-            playersFirstNames[index] = player.firstName;
-            playersLastNames[index] = player.lastName;
-          }
-        };
-
         // Try to get match info from the websocket
         if (matchInfoFromSocket !== undefined) {
           matchTime = matchInfoFromSocket.matchTime;
 
           // Get players' names in this match
           matchPlayers = matchInfoFromSocket.players;
-          findPlayerName(matchPlayers[0].id, 0);
-          findPlayerName(matchPlayers[1].id, 1);
+
+          for (let i = 0; i < matchPlayers.length; i++) {
+            const p = findPlayerName(matchPlayers[i].id, tournament);
+            playersFirstNames[i] = p.firstName;
+            playersLastNames[i] = p.lastName;
+          }
 
           // If there is a winner, save them
           if (matchInfoFromSocket.winner !== undefined) {
@@ -231,8 +232,12 @@ const GameInterface: React.FC = () => {
             matchTime = matchFromApi.matchTime;
 
             matchPlayers = matchFromApi.players;
-            findPlayerName(matchPlayers[0].id, 0);
-            findPlayerName(matchPlayers[1].id, 1);
+
+            for (let i = 0; i < matchPlayers.length; i++) {
+              const p = findPlayerName(matchPlayers[i].id, tournament);
+              playersFirstNames[i] = p.firstName;
+              playersLastNames[i] = p.lastName;
+            }
 
             // If there is a winner, save them
             if (matchFromApi.winner !== undefined) {
@@ -550,37 +555,41 @@ const GameInterface: React.FC = () => {
 
   // Function to fetch time keeper information
   const findTimekeeper = async (): Promise<void> => {
-    try {
-      if (matchInfo.timeKeeper === undefined) {
-        setTimeKeeperInfo(null);
-        return;
-      }
+    if (userId !== null && userId !== undefined) {
+      try {
+        if (matchInfo.timeKeeper === undefined) {
+          setTimeKeeperInfo(null);
+          return;
+        }
 
-      const timeKeeper = await api.user.details(matchInfo.timeKeeper);
-      if (timeKeeper === undefined) {
-        throw new Error("Time keeper not found");
+        const timeKeeper = await api.user.details(matchInfo.timeKeeper);
+        if (timeKeeper === undefined) {
+          throw new Error("Time keeper not found");
+        }
+        setTimeKeeperInfo(timeKeeper);
+      } catch (error) {
+        showToast(error, "error");
       }
-      setTimeKeeperInfo(timeKeeper);
-    } catch (error) {
-      showToast(error, "error");
     }
   };
 
   // Function to fetch point maker information
   const findPointmaker = async (): Promise<void> => {
-    try {
-      if (matchInfo.pointMaker === undefined) {
-        setPointMakerInfo(null);
-        return;
-      }
+    if (userId !== null && userId !== undefined) {
+      try {
+        if (matchInfo.pointMaker === undefined) {
+          setPointMakerInfo(null);
+          return;
+        }
 
-      const pointMaker = await api.user.details(matchInfo.pointMaker);
-      if (pointMaker === undefined) {
-        throw new Error("Point maker not found");
+        const pointMaker = await api.user.details(matchInfo.pointMaker);
+        if (pointMaker === undefined) {
+          throw new Error("Point maker not found");
+        }
+        setPointMakerInfo(pointMaker);
+      } catch (error) {
+        showToast(error, "error");
       }
-      setPointMakerInfo(pointMaker);
-    } catch (error) {
-      showToast(error, "error");
     }
   };
 
@@ -612,34 +621,13 @@ const GameInterface: React.FC = () => {
     }
   };
 
-  // function to calculate elapsed match time
-  const calculateElapsedTime = (
-    elapsedTime: number,
-    timerStart: Date | null,
-    matchTime: number,
-    isOvertime: boolean
-  ): number => {
-    if (timerStart !== null) {
-      const currentTime = new Date();
-      const startTimestamp = new Date(timerStart);
-
-      const elapsedMilliseconds =
-        currentTime.getTime() - startTimestamp.getTime();
-      elapsedTime += elapsedMilliseconds;
-
-      if (elapsedTime > matchTime && !isOvertime) {
-        elapsedTime = matchTime;
-      }
-      return elapsedTime;
-    } else {
-      return elapsedTime;
-    }
-  };
-
   const isUserTheCreator = tournament.creator.id === userId;
 
   const isOfficialsSelected =
     matchInfo?.pointMaker != null && matchInfo?.timeKeeper != null;
+
+  const OverlayUrl =
+    window.location.host + routePaths.overlay + "/" + id + "/" + matchId;
 
   return (
     <main className="main-content">
@@ -682,6 +670,9 @@ const GameInterface: React.FC = () => {
                   )}
                 </React.Fragment>
               ))}
+              <div className="overlay-button-container">
+                <OverlayButton link={OverlayUrl} />
+              </div>
             </Box>
             <Box
               sx={{

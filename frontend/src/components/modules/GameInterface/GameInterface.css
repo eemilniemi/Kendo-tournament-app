@@ -14,3 +14,10 @@
   height: 40px;
   border: 1px solid black;
 }
+
+.overlay-button-container {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: right;
+}

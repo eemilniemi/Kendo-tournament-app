@@ -133,11 +133,6 @@ function initializeTestDb() {
 
     try {
 
-      /*if (mongoose.connection.readyState !== 0) {
-        console.log('Test DB is already initialized.');
-        await closeTestDb();
-      }*/
-
       mongo = await MongoMemoryServer.create();
       const mongoUri = mongo.getUri();
 
