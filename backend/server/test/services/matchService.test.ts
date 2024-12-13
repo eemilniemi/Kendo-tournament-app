@@ -1,5 +1,6 @@
 import { describe, beforeEach, afterEach } from "mocha";
 import * as chai from "chai";
+// @ts-ignore
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
 import MatchModel, { MatchPlayer } from "../../src/models/matchModel";

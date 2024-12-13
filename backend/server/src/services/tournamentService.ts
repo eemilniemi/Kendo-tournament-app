@@ -445,7 +445,11 @@ export class TournamentService {
     const index = tournament.players.indexOf(player.id);
     tournament.players.splice(index, 1);
 
-    delete tournament.contestants[player.id];
+    // remove player from tournament.contestants
+    if (tournament.contestants !== undefined) {
+      const { [player.id]: _, ...remainingContestants } = tournament.contestants;
+      tournament.contestants = remainingContestants;
+    }
 
     // Remove player's matches from match schedule
     const matchesToRemove: Array<Types.ObjectId | Match> = [];
