@@ -21,6 +21,8 @@ import {
 } from "../../../utils/matchUtils";
 import OverlayPointDisplay from "./OverlayPointDisplay";
 
+// more convenient player interface
+// consider including more info in MatchPlayer instead?
 interface OverlayPlayer {
   firstName: string;
   lastName: string;
