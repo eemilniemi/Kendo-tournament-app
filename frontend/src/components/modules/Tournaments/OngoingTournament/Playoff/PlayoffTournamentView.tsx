@@ -142,6 +142,19 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
   }
 
   // Group matches by round
+  const rounds: Rounds = tournamentData.matchSchedule.reduce<Rounds>(
+    (acc, match) => {
+      const round = match.tournamentRound ?? 0;
+      if (acc[round] === undefined) {
+        acc[round] = [];
+      }
+      acc[round].push(match);
+      return acc;
+    },
+    {}
+  );
+
+  // Group matches by round
   const roundsForPlayoffsOnly: Rounds = tournamentData.matchSchedule
     .filter((match) => match.type === "playoff")
     .reduce<Rounds>((acc, match) => {

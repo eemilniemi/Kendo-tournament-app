@@ -639,7 +639,9 @@ export class MatchService {
           }
         }
 
-        if (match.type === "playoff") {
+        // TODO: should match.sides always be defined ?
+        // TODO: check was added to fix a failing test case
+        if (match.type === "playoff" && match.sides !== undefined) {
           for (let i = 0; i < 2; i++) {
             if (match.sides[i].contestantId === winnerPlayerId.toString()) {
               match.sides[i].isWinner = true;
@@ -907,9 +909,14 @@ export class MatchService {
       players.forEach((player) => {
         player.points = [];
       });
-      match.sides.forEach((side) => {
-        side.scores = [];
-      });
+
+      // TODO: should match.sides always be defined ?
+      // TODO: check was added to fix a failing test case
+      if (match.sides !== undefined) {
+        match.sides.forEach((side) => {
+          side.scores = [];
+        });
+      }
     }
 
     await match.save();
