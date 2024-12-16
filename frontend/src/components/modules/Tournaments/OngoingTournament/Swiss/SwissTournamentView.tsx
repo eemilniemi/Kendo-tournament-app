@@ -11,7 +11,6 @@ import {
   type TournamentPlayer,
   updatePlayerStats
 } from "../RoundRobin/RoundRobinTournamentView";
-import PlayoffTournamentView from "../Playoff/PlayoffTournamentView";
 import { type Match, type Tournament } from "../../../../../types/models";
 import { useSocket } from "context/SocketContext";
 import { joinTournament, leaveTournament } from "sockets/emit";
@@ -22,6 +21,7 @@ import TournamentWinner from "../../Winner";
 import { format } from "date-fns";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import UpcomingTournamentView from "../../UpcomingTournamentView";
+import SwissTournamentMatchView from "./SwissTournamentMatchView";
 
 const SwissTournamentView: React.FC = () => {
   const setError = useState<string | null>(null)[1];
@@ -253,9 +253,7 @@ const SwissTournamentView: React.FC = () => {
             <Scoreboard players={players} haveSameNames={haveSameNames} />
           </Box>
         )}
-        {currentTab === "matches" && (
-          <PlayoffTournamentView isChildTournament={true} />
-        )}
+        {currentTab === "matches" && <SwissTournamentMatchView />}
       </>
     );
   } catch (e) {
