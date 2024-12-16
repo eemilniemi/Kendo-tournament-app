@@ -18,7 +18,7 @@ const UserInfoTable = ({ user }: Props): React.ReactElement => {
   const rows = {
     name: {
       label: `${t("user_info_labels.name")}:`,
-      value: `${user?.firstName} ${user?.lastName}` ?? "-"
+      value: `${user?.firstName} ${user?.lastName}`
     },
     email: {
       label: `${t("user_info_labels.email_address")}:`,

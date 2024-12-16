@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import TreeComponent from "./TournamentTree";
 import {
   Box,
   Typography,
@@ -36,10 +37,14 @@ interface Rounds extends Record<number, Match[]> {}
 
 interface PlayoffTournamentViewProps {
   isChildTournament?: boolean;
+  hasPlayoffTree?: boolean;
+  tournamentDataProp?: Tournament;
 }
 
 const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
-  isChildTournament = false
+  isChildTournament = false,
+  hasPlayoffTree = false,
+  tournamentDataProp
 }) => {
   const initialTournamentData = useTournament();
   const tournament = useTournament();
@@ -54,11 +59,11 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
   const [hasJoined, setHasJoined] = useState(false);
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const defaultTab = "matches";
+  const defaultTab = "tree";
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const tabTypes = isChildTournament
-    ? ["matches"]
-    : ["tournamentInfo", "matches"];
+    ? ["matches", "tree"]
+    : ["tournamentInfo", "matches", "tree"];
 
   const { tournamentData: socketData } = useSocket();
 
@@ -149,6 +154,18 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
     {}
   );
 
+  // Group matches by round
+  const roundsForPlayoffsOnly: Rounds = tournamentData.matchSchedule
+    .filter((match) => match.type === "playoff")
+    .reduce<Rounds>((acc, match) => {
+      const round = match.tournamentRound ?? 0;
+      if (acc[round] === undefined) {
+        acc[round] = [];
+      }
+      acc[round].push(match);
+      return acc;
+    }, {});
+
   const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(
     () => {
       const initialExpandedRounds: Record<number, boolean> = {};
@@ -165,7 +182,24 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
   };
 
   // Get the total number of rounds
-  const totalRounds = calculateTotalRounds(tournamentData.players.length);
+  const totalRounds = (): number => {
+    if (!isChildTournament) {
+      return calculateTotalRounds(tournamentData.players.length);
+    } else {
+      if (
+        tournamentData.groups !== null &&
+        tournamentData.groups !== undefined &&
+        tournamentData.playersToPlayoffsPerGroup !== undefined
+      ) {
+        const playoffPlayers =
+          tournamentData.groups.length *
+          tournamentData.playersToPlayoffsPerGroup;
+        return calculateTotalRounds(playoffPlayers);
+      } else {
+        return 0;
+      }
+    }
+  };
 
   const toggleRound = (roundNumber: number): void => {
     setExpandedRounds((prev) => ({
@@ -189,13 +223,13 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
     }
 
     // For other types of tournaments, use the existing logic
-    if (roundNumber === totalRounds) {
+    if (roundNumber === totalRounds()) {
       return t("tournament_view_labels.final");
     }
-    if (roundNumber === totalRounds - 1) {
+    if (roundNumber === totalRounds() - 1) {
       return t("tournament_view_labels.semi_final");
     }
-    if (roundNumber === totalRounds - 2) {
+    if (roundNumber === totalRounds() - 2) {
       return t("tournament_view_labels.quarter_final");
     }
     return `${t("tournament_view_labels.round")} ${roundNumber}`;
@@ -265,6 +299,9 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
               <MenuItem value="matches" sx={{ fontSize: "13px" }}>
                 {t("tournament_view_labels.past_matches_tab")}
               </MenuItem>
+              <MenuItem value="tree" sx={{ fontSize: "13px" }}>
+                {t("tournament_view_labels.tournament_tree")}
+              </MenuItem>
             </Select>
           ) : (
             <>
@@ -279,13 +316,18 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
                 sx={{ margin: "10px 0" }}
               >
                 <Tab
-                  label={t("tournament_view_labels.tournament_info")}
-                  value="tournamentInfo"
+                  label={t("tournament_view_labels.tournament_tree")}
+                  value="tree"
                   sx={{ fontSize: "13px" }}
                 />
                 <Tab
                   label={t("tournament_view_labels.matches")}
                   value="matches"
+                  sx={{ fontSize: "13px" }}
+                />
+                <Tab
+                  label={t("tournament_view_labels.tournament_info")}
+                  value="tournamentInfo"
                   sx={{ fontSize: "13px" }}
                 />
               </Tabs>
@@ -294,7 +336,9 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
         </>
       )}
 
-      {(currentTab === "matches" || isChildTournament) && (
+      {(currentTab === "matches" ||
+        ((isChildTournament || hasPlayoffTree) &&
+          !(isChildTournament && hasPlayoffTree))) && (
         <>
           <Box
             sx={{
@@ -305,103 +349,193 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
               gap: "10px 25px"
             }}
           >
-            {Object.entries(rounds).map(([roundNumber, matches], index) => (
-              <React.Fragment key={roundNumber}>
-                {index > 0 && <Divider orientation="horizontal" flexItem />}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    padding: "20px",
-                    borderRadius: 2,
-                    width: "99%",
-                    outline: "1px lightgray solid",
-                    margin: "10px auto"
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      zIndex: 1,
-                      cursor: "pointer"
-                    }}
-                    onClick={() => {
-                      toggleRound(parseInt(roundNumber, 10));
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        marginBottom: 0,
-                        marginLeft: "10px",
-                        textDecoration: "underline",
-                        fontSize: "17px",
-                        fontWeight: "bold"
-                      }}
-                    >
-                      {getRoundName(parseInt(roundNumber, 10))}
-                    </Typography>
-                    <IconButton>
-                      {expandedRounds[parseInt(roundNumber, 10)] ? (
-                        <ArrowDropUpIcon />
-                      ) : (
-                        <ArrowDropDownIcon />
+            {isChildTournament
+              ? Object.entries(roundsForPlayoffsOnly).map(
+                  ([roundNumber, matches], index) => (
+                    <React.Fragment key={roundNumber}>
+                      {index > 0 && (
+                        <Divider orientation="horizontal" flexItem />
                       )}
-                    </IconButton>
-                  </Box>
-                  {expandedRounds[parseInt(roundNumber, 10)] && (
-                    <>
-                      <Divider sx={{ margin: "15px 0" }} />
                       <Box
                         sx={{
                           display: "flex",
-                          flexWrap: "wrap",
-                          justifyContent: "flex-start",
-                          gap: "40px",
-                          margin: "10px"
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          padding: "20px",
+                          borderRadius: 2,
+                          width: "100%"
                         }}
                       >
-                        {matches.map((match) => {
-                          const tempPlayers: TournamentPlayer[] =
-                            match.players.map((matchPlayer) => {
-                              const player = tournamentData.players.find(
-                                (p) => p.id === matchPlayer.id
-                              );
-                              if (player === null || player === undefined) {
-                                throw new Error("Player not found");
-                              }
-                              return {
-                                id: player.id,
-                                firstName: player.firstName,
-                                lastName: player.lastName,
-                                points: 0,
-                                ippons: 0,
-                                wins: 0,
-                                losses: 0,
-                                ties: 0
-                              };
-                            });
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between"
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              marginBottom: 2,
+                              textDecoration: "underline",
+                              fontSize: "17px",
+                              fontWeight: "bold"
+                            }}
+                          >
+                            {getRoundName(index + 1)}
+                          </Typography>
+                          <IconButton
+                            onClick={() => {
+                              toggleRound(parseInt(roundNumber, 10));
+                            }}
+                          >
+                            {expandedRounds[parseInt(roundNumber, 10)] ? (
+                              <ArrowDropUpIcon />
+                            ) : (
+                              <ArrowDropDownIcon />
+                            )}
+                          </IconButton>
+                        </Box>
+                        {expandedRounds[parseInt(roundNumber, 10)] && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              justifyContent: "flex-start",
+                              gap: "40px"
+                            }}
+                          >
+                            {matches.map((match) => {
+                              const tempPlayers: TournamentPlayer[] =
+                                match.players.map((matchPlayer) => {
+                                  const player = tournamentData.players.find(
+                                    (p) => p.id === matchPlayer.id
+                                  );
+                                  if (player === null || player === undefined) {
+                                    throw new Error("Player not found");
+                                  }
+                                  return {
+                                    id: player.id,
+                                    firstName: player.firstName,
+                                    lastName: player.lastName,
+                                    points: 0,
+                                    ippons: 0,
+                                    wins: 0,
+                                    losses: 0,
+                                    ties: 0
+                                  };
+                                });
 
-                          return (
-                            <MatchButton
-                              key={match.id}
-                              match={match}
-                              players={tempPlayers}
-                              isUserTheCreator={isUserTheCreator}
-                              tournamentData={tournamentData}
-                              haveSameNames={haveSameNames}
-                            />
-                          );
-                        })}
+                              return (
+                                <MatchButton
+                                  key={match.id}
+                                  match={match}
+                                  players={tempPlayers}
+                                  isUserTheCreator={isUserTheCreator}
+                                  tournamentData={tournamentData}
+                                  haveSameNames={haveSameNames}
+                                />
+                              );
+                            })}
+                          </Box>
+                        )}
                       </Box>
-                    </>
-                  )}
-                </Box>
-              </React.Fragment>
-            ))}
+                    </React.Fragment>
+                  )
+                )
+              : Object.entries(roundsForPlayoffsOnly).map(
+                  ([roundNumber, matches], index) => (
+                    <React.Fragment key={roundNumber}>
+                      {index > 0 && (
+                        <Divider orientation="horizontal" flexItem />
+                      )}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          padding: "20px",
+                          borderRadius: 2,
+                          width: "100%"
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between"
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              marginBottom: 2,
+                              textDecoration: "underline",
+                              fontSize: "17px",
+                              fontWeight: "bold"
+                            }}
+                          >
+                            {getRoundName(parseInt(roundNumber, 10))}
+                          </Typography>
+                          <IconButton
+                            onClick={() => {
+                              toggleRound(parseInt(roundNumber, 10));
+                            }}
+                          >
+                            {expandedRounds[parseInt(roundNumber, 10)] ? (
+                              <ArrowDropUpIcon />
+                            ) : (
+                              <ArrowDropDownIcon />
+                            )}
+                          </IconButton>
+                        </Box>
+                        {expandedRounds[parseInt(roundNumber, 10)] && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              justifyContent: "flex-start",
+                              gap: "40px"
+                            }}
+                          >
+                            {matches.map((match) => {
+                              const tempPlayers: TournamentPlayer[] =
+                                match.players.map((matchPlayer) => {
+                                  const player = tournamentData.players.find(
+                                    (p) => p.id === matchPlayer.id
+                                  );
+                                  if (player === null || player === undefined) {
+                                    throw new Error("Player not found");
+                                  }
+                                  return {
+                                    id: player.id,
+                                    firstName: player.firstName,
+                                    lastName: player.lastName,
+                                    points: 0,
+                                    ippons: 0,
+                                    wins: 0,
+                                    losses: 0,
+                                    ties: 0
+                                  };
+                                });
+
+                              return (
+                                <MatchButton
+                                  key={match.id}
+                                  match={match}
+                                  players={tempPlayers}
+                                  isUserTheCreator={isUserTheCreator}
+                                  tournamentData={tournamentData}
+                                  haveSameNames={haveSameNames}
+                                />
+                              );
+                            })}
+                          </Box>
+                        )}
+                      </Box>
+                    </React.Fragment>
+                  )
+                )}
           </Box>
           {isUserTheCreator && <DeleteUserFromTournament />}
         </>
@@ -411,6 +545,51 @@ const PlayoffTournamentView: React.FC<PlayoffTournamentViewProps> = ({
         <div style={{ padding: "10px 0 0 0" }}>
           <UpcomingTournamentView ongoing />
         </div>
+      )}
+
+      {currentTab === "tree" && hasPlayoffTree && isChildTournament && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              padding: "20px 0",
+              gap: "10px 25px"
+            }}
+          >
+            <Typography variant="h6">
+              {t("tournament_view_labels.tournament_tree")}
+            </Typography>
+            {tournamentDataProp !== undefined && (
+              <TreeComponent
+                tournament={tournamentDataProp}
+                roundCountMax={totalRounds()}
+              />
+            )}
+          </Box>
+        </>
+      )}
+      {currentTab === "tree" && !isChildTournament && (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              padding: "20px 0",
+              gap: "10px 25px"
+            }}
+          >
+            <Typography variant="h6">
+              {t("tournament_view_labels.tournament_tree")}
+            </Typography>
+            <TreeComponent
+              tournament={tournamentData}
+              roundCountMax={totalRounds()}
+            />
+          </Box>
+        </>
       )}
     </Box>
   );

@@ -33,7 +33,7 @@ This module contains tournament creation scripts for manual testing purposes.
   - preliminary playoff: player count, group size, players to playoffs per group
   - round robin: player count
   - team round robin: player count, number of teams, players per team
-  - swiss: player count
+  - swiss: player count, number of rounds
 
 For example, to create a team round robin tournament with 16 players, 2 teams, and 8 players per team, run:
 ```bash

@@ -65,6 +65,7 @@ let request_template2: CreateTournamentRequest = {
   passwordEnabled: false
 };
 
+// TODO: create proper tests for tournament schedule
 describe("TournamentService", () => {
 
   let tournamentService: TournamentService;
@@ -468,7 +469,6 @@ describe("TournamentService", () => {
     });
   });
 
-  // TODO: better tests
   describe("markUserMatchesLost", () => {
 
     let testTournamentId: string;

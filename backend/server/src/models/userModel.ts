@@ -17,6 +17,8 @@ export interface User {
   guardiansEmail?: string;
   invitations?: string[];
 
+  title: string;
+
   /* Internal properties */
   password: string;
   refreshToken?: string;
@@ -59,6 +61,8 @@ const schema = new Schema<User, UserMethods>(
     underage: { type: Boolean, default: false },
     guardiansEmail: { type: String, set: omitEmptyString },
     invitations: { type: [String], default: [] },
+
+    title: { type: String },
 
     /* Internal properties */
     password: { type: String, required: true, select: false },

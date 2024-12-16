@@ -175,8 +175,9 @@
     "quarter_final": "Quarterfinal",
     "round": "Round",
     "scoreboard": "Scoreboard",
+    "tournament_tree": "Tournament Tree",
     "matches": "Matches",
-    "tournament_info": "Tournament Info",
+    "tournament_info": "Tournament details",
     "ongoing_upcoming_matches_tab": "Ongoing and upcoming matches",
     "past_matches_tab": "Completed matches",
     "ongoing_matches": "ONGOING MATCHES",
@@ -208,7 +209,8 @@
     "member": "Member",
     "participating_teams": "PARTICIPATING TEAMS",
     "overview": "Overview",
-    "matchups_overview": "TEAM MATCHUP OVERVIEW"
+    "matchups_overview": "TEAM MATCHUP OVERVIEW",
+    "match_page": "Match page"
   },
   "signup_labels": {
     "sign_up_for": "Sign Up for",

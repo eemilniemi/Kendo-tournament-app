@@ -1,15 +1,16 @@
 import { describe, beforeEach, afterEach } from "mocha";
 import * as chai from "chai";
+// @ts-ignore
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
-import MatchModel, { MatchPlayer } from "../../src/models/matchModel.ts";
-import { MatchService } from "../../src/services/matchService.ts";
-import NotFoundError from "../../src/errors/NotFoundError.ts";
-import BadRequestError from "../../src/errors/BadRequestError.ts";
+import MatchModel, { MatchPlayer } from "../../src/models/matchModel";
+import { MatchService } from "../../src/services/matchService";
+import NotFoundError from "../../src/errors/NotFoundError";
+import BadRequestError from "../../src/errors/BadRequestError";
 import { Types } from "mongoose";
-import { CreateMatchRequest, AddPointRequest } from "../../src/models/requestModel.ts";
-import { TournamentModel } from "../../src/models/tournamentModel.ts";
-import { TournamentService } from "../../src/services/tournamentService.ts";
+import { CreateMatchRequest, AddPointRequest } from "../../src/models/requestModel";
+import { TournamentModel } from "../../src/models/tournamentModel";
+import { TournamentService } from "../../src/services/tournamentService";
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

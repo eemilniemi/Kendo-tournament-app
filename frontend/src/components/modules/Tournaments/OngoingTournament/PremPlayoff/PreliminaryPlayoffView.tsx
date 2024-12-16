@@ -98,7 +98,12 @@ const PreliminaryPlayoffView: React.FC = () => {
   const [previousTab, setPreviousTab] = useState(defaultTab);
   const [searchParams, setSearchParams] = useSearchParams();
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
-  const tabTypes = ["tournamentInfo", "preliminary", "playoff"] as const;
+  const tabTypes = [
+    "tournamentInfo",
+    "preliminary",
+    "playoff",
+    "tree"
+  ] as const;
   const currentTab = searchParams.get("tab") ?? defaultTab;
   const [tiebreakerToasts, setTiebreakerToasts] = useState<TiebreakerToasts>(
     {}
@@ -437,6 +442,13 @@ const PreliminaryPlayoffView: React.FC = () => {
           <MenuItem value="playoff" sx={{ fontSize: "13px" }}>
             {t("types.playoff")}
           </MenuItem>
+          {tournamentStage === "playoff" && (
+            <>
+              <MenuItem value="tree" sx={{ fontSize: "13px" }}>
+                {t("tournament_view_labels.tournament_tree")}
+              </MenuItem>
+            </>
+          )}
         </Select>
       ) : (
         <>
@@ -465,6 +477,13 @@ const PreliminaryPlayoffView: React.FC = () => {
               value="playoff"
               sx={{ fontSize: "13px" }}
             />
+            {tournamentStage === "playoff" && (
+              <Tab
+                label={t("tournament_view_labels.tournament_tree")}
+                value="tree"
+                sx={{ fontSize: "13px" }}
+              />
+            )}
           </Tabs>
         </>
       )}
@@ -540,7 +559,19 @@ const PreliminaryPlayoffView: React.FC = () => {
       )}
       {currentTab === "playoff" && tournamentStage === "playoff" && (
         <div>
-          <PlayoffTournamentView isChildTournament={true} />
+          <PlayoffTournamentView
+            isChildTournament={true}
+            tournamentDataProp={tournamentData}
+          />
+        </div>
+      )}
+      {currentTab === "tree" && tournamentStage === "playoff" && (
+        <div>
+          <PlayoffTournamentView
+            isChildTournament={true}
+            hasPlayoffTree={true}
+            tournamentDataProp={tournamentData}
+          />
         </div>
       )}
     </>

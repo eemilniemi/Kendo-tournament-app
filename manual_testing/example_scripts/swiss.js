@@ -9,11 +9,16 @@ const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 const timestamp = now.toLocaleTimeString();
 
 let playerCount = 8;
+let swissRounds = 3;
 
 const args = process.argv.slice(2);
 
 if (args[0] !== undefined) {
   playerCount = parseInt(args[0]);
+}
+
+if (args[1] !== undefined) {
+  swissRounds = parseInt(args[1]);
 }
 
 const tournament = {
@@ -34,7 +39,8 @@ const tournament = {
   "passwordEnabled": false,
   "playersPerTeam": 0,
   "startDate": tenSecondsFromNow.toUTCString(),
-  "type": "Swiss"
+  "type": "Swiss",
+  "swissRounds": swissRounds
 };
 
 async function run() {

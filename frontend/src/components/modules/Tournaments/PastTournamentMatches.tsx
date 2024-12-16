@@ -11,6 +11,7 @@ import {
   updatePlayerStats,
   type TournamentPlayer
 } from "./OngoingTournament/RoundRobin/RoundRobinTournamentView";
+import TreeComponent from "./OngoingTournament/Playoff/TournamentTree";
 import { checkSameNames } from "./PlayerNames";
 import MatchButton from "./MatchButton";
 import { useAuth } from "context/AuthContext";
@@ -23,9 +24,9 @@ const PastTournamentMatches: React.FC = () => {
   const { past } = useTournaments();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tabTypes = ["scoreboard", "matches"] as const;
-  const defaultTab = "scoreboard";
-  const currentTab = searchParams.get("tab") ?? defaultTab;
+  const tabTypes = ["scoreboard", "matches", "tree"] as const;
+  // const defaultTab = "scoreboard";
+  // const currentTab = searchParams.get("tab") ?? defaultTab;
   const [players, setPlayers] = useState<TournamentPlayer[]>([]);
   const [haveSameNames, setHaveSameNames] = useState<boolean>(false);
   const { userId } = useAuth();
@@ -43,6 +44,11 @@ const PastTournamentMatches: React.FC = () => {
     (tournament) => tournament.id === tournamentId
   );
 
+  const defaultTab: string =
+    selectedTournament?.type === "Playoff" ? "tree" : "scoreboard";
+
+  const currentTab = searchParams.get("tab") ?? defaultTab;
+
   const isUserTheCreator = selectedTournament?.creator.id === userId;
 
   if (selectedTournament === null || selectedTournament === undefined) {
@@ -51,7 +57,9 @@ const PastTournamentMatches: React.FC = () => {
 
   const showTabs =
     selectedTournament.type === "Round Robin" ||
-    selectedTournament.type === "Swiss";
+    selectedTournament.type === "Swiss" ||
+    selectedTournament.type === "Playoff" ||
+    selectedTournament.type === "Preliminary Playoff";
 
   useEffect(() => {
     if (selectedTournament !== undefined) {
@@ -88,6 +96,26 @@ const PastTournamentMatches: React.FC = () => {
       rounds[round].push(match);
     }
   });
+
+  // Needed for TournamentTree so it shows the correct number of playoff rounds.
+  const playoffRoundsCounter = (): number => {
+    const playoffFirstRound =
+      Object.values(rounds)
+        .flat()
+        .find((match) => match.type === "playoff")?.roundIndex ?? 0;
+    let playoffRoundsCount: number = playoffFirstRound;
+
+    Object.values(rounds)
+      .flat()
+      .filter((match) => match.type === "playoff")
+      .forEach((match) => {
+        if (match.roundIndex > playoffRoundsCount) {
+          playoffRoundsCount = match.roundIndex;
+        }
+      });
+
+    return playoffRoundsCount + 1;
+  };
 
   const extractMatchParticipants = (
     players: TournamentPlayer[],
@@ -168,6 +196,14 @@ const PastTournamentMatches: React.FC = () => {
             value="matches"
             sx={{ fontSize: "13px" }}
           />
+          {(selectedTournament.type === "Playoff" ||
+            selectedTournament.type === "Preliminary Playoff") && (
+            <Tab
+              label={t("tournament_view_labels.tournament_tree")}
+              value="tree"
+              sx={{ fontSize: "13px" }}
+            />
+          )}
         </Tabs>
       )}
 
@@ -178,6 +214,23 @@ const PastTournamentMatches: React.FC = () => {
       )}
 
       {showTabs && currentTab === "matches" && <ShowMatches rounds={rounds} />}
+
+      {showTabs && currentTab === "tree" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            padding: "20px 0",
+            gap: "10px 25px"
+          }}
+        >
+          <TreeComponent
+            tournament={selectedTournament}
+            roundCountMax={playoffRoundsCounter()}
+          />
+        </Box>
+      )}
 
       {!showTabs && <ShowMatches rounds={rounds} />}
     </div>
